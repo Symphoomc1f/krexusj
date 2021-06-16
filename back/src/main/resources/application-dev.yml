@@ -1,0 +1,57 @@
+#tomcat config
+server :
+  port : 6666
+  ##项目名字配置
+  #servlet : 
+  #  context-path : /demo
+  tomcat :
+    max-threads : 128
+    min-spare-threads : 5
+    uri-encoding : UTF-8
+    #shiro 报错修改的地方
+    max-connections: 200000
+    max-http-post-size: 9000000
+spring :
+  servlet:
+    multipart:
+      #设置总上传的数据大小
+      max-request-size: 100MB
+      #单个文件大小
+      maxFileSize : 30MB
+      #shiro 报错修改的地方
+    max-connections: 200000
+    max-http-post-size: 9000000
+    # 服务模块
+  devtools:
+    restart:
+      # 热部署开关
+      enabled: true
+  mvc:   #静态文件
+    static-path-pattern : /static/**
+
+  datasource:
+    username: root
+    password: 1234
+    url: jdbc:mysql://localhost:3306/springboot?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC
+    driver-class-name: com.mysql.jdbc.Driver
+
+
+  #模板引擎
+  thymeleaf:
+    model: HTML5
+    prefix: classpath:/pages/
+    suffix: .html
+    #指定编码
+    encoding: utf-8
+    #禁用缓存 默认false
+    cache: false
+
+mybatis:
+  mapper-locations: classpath:mapping/*Mapper.xml
+  type-aliases-package: com.java110.entity
+
+logging:
+  level:
+    com:
+      example:
+        mapper: debug
