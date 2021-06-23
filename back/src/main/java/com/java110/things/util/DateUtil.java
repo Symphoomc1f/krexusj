@@ -396,4 +396,8 @@ public class DateUtil {
         int maxDate = a.get(Calendar.DATE);
         return maxDate;
     }
+
+    public static long getTime(){
+        return new Date().getTime();
+    }
 }

@@ -30,6 +30,7 @@ public class HttpFactory {
 
     public static HttpHeaders getHeader() {
         HttpHeaders header = new HttpHeaders();
+        header.add("Content-Type", "application/json");
         header.add(SystemConstant.HTTP_APP_ID.toLowerCase(), SystemConstant.APP_ID);
         header.add(SystemConstant.HTTP_USER_ID.toLowerCase(), SystemConstant.ORDER_DEFAULT_USER_ID);
         header.add(SystemConstant.HTTP_TRANSACTION_ID.toLowerCase(), UUID.randomUUID().toString());

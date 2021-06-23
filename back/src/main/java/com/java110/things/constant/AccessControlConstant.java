@@ -19,4 +19,14 @@ public class AccessControlConstant {
     //查询当前小区门禁
 
     public final static String LIST_MACHINES = "/api/machine.listMachines";
+
+
+    //增加/更新人脸
+    public final static int CMD_ADD_UPDATE_FACE = 101;
+
+    //删除人脸
+    public final static int CMD_DELETE_FACE = 102;
+
+    //清空人脸
+    public final static int CMD_CLEAR_ALL_FACE = 103;
 }
