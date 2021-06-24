@@ -20,6 +20,8 @@ public class AccessControlConstant {
 
     public final static String LIST_MACHINES = "/api/machine.listMachines";
 
+    //查询用户信息
+    public final static String MACHINE_QUERY_USER_INFO="/api/machineTranslate.machineQueryUserInfo";
 
     //增加/更新人脸
     public final static int CMD_ADD_UPDATE_FACE = 101;

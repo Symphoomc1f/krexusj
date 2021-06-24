@@ -106,6 +106,17 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>${apache.common.lang3.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.sun.jna</groupId>
+                <artifactId>jna</artifactId>
+                <version>3.0.9</version>
+            </dependency>
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna-platform</artifactId>
+                <version>4.0.0</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
