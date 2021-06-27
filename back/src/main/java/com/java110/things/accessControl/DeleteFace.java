@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
  * 添加更新人脸
  */
 @Component
-public class DeleteFace {
+public class DeleteFace extends BaseAccessControl{
 
     /**
      * 添加 更新人脸 方法
@@ -16,6 +16,6 @@ public class DeleteFace {
      * @param heartbeatTaskDto 心跳下发任务指令
      */
     void deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
-
+        getAssessControlProcessImpl().deleteFace(machineDto,heartbeatTaskDto);
     }
 }

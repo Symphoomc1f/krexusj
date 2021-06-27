@@ -1,15 +1,10 @@
 package com.java110.things.service.yld04;
 
-import com.sun.jna.ptr.IntByReference;
-
-import java.awt.*;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.util.Scanner;
 
 public class Main {
 
- public static function fun=new function();
+ public static Function fun=new Function();
    public static boolean   cameraconntect =false;
     public static void main(String[] args)
     {
@@ -42,25 +37,25 @@ public class Main {
       //  libFaceRecognition.INSTANCE.lib_clsClear();
         System.out.println(chooice);
 
-        switch(chooice){
-            case 0 :  getcameraip();break;
-            case 1 :  fun.DisConnectCamera();break;
-            case 2 :  fun.StartStream();break;
-            case 3:  fun.AddFace();break;
-            case 4 :  fun.  degregmng();break;
-            case 5 :  fun.searchcerme();break;
-            case 6 :  fun.SettingWG();break;
-            case 7 :  fun.SettingLight();break;
-            case 8:  fun. Repetition ();break;
-            case 9 :  fun.SimilaritySetting();break;
-            case 10 :  fun.TagSetting();break;
-            case 11 :  fun.TimeSetting();break;
-            case 12 :  fun.upgrade();break;
-            case 13 :  fun.GorgelineSetting();break;
-            case 14 :  fun.webSetting();break;
-            default : return false;
-                //语句
-        }
+//        switch(chooice){
+//            case 0 :  getcameraip();break;
+//            case 1 :  fun.DisConnectCamera();break;
+//            case 2 :  fun.StartStream();break;
+//            case 3:  fun.AddFace();break;
+//            case 4 :  fun.degregmng();break;
+//            case 5 :  fun.searchcerme();break;
+//            case 6 :  fun.SettingWG();break;
+//            case 7 :  fun.SettingLight();break;
+//            case 8:  fun. Repetition ();break;
+//            case 9 :  fun.SimilaritySetting();break;
+//            case 10 :  fun.TagSetting();break;
+//            case 11 :  fun.TimeSetting();break;
+//            case 12 :  fun.upgrade();break;
+//            case 13 :  fun.GorgelineSetting();break;
+//            case 14 :  fun.webSetting();break;
+//            default : return false;
+//                //语句
+//        }
         return  true;
     }
 

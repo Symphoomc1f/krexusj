@@ -100,14 +100,10 @@ public class AddUpdateFace extends BaseAccessControl {
 
         //调用新增人脸接口
         if(StringUtil.isEmpty(faceId)){
-            getAssessControlProcessImpl().addFee(machineDto,userFaceDto);
+            getAssessControlProcessImpl().addFace(machineDto,userFaceDto);
         }else{ //调用更新人脸接口
-            getAssessControlProcessImpl().updateFee(machineDto,userFaceDto);
+            getAssessControlProcessImpl().updateFace(machineDto,userFaceDto);
         }
-
-
-
-
     }
 
 }

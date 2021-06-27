@@ -35,7 +35,7 @@ public interface IAssessControlProcess {
      * @param machineDto 硬件信息
      * @param userFaceDto 用户人脸信息
      */
-    void addFee(MachineDto machineDto,UserFaceDto userFaceDto);
+    void addFace(MachineDto machineDto,UserFaceDto userFaceDto);
 
 
     /**
@@ -43,9 +43,22 @@ public interface IAssessControlProcess {
      * @param machineDto 硬件信息
      * @param userFaceDto 用户人脸信息
      */
-    void updateFee(MachineDto machineDto,UserFaceDto userFaceDto);
+    void updateFace(MachineDto machineDto,UserFaceDto userFaceDto);
 
 
+    /**
+     * 删除人脸
+     * @param machineDto 硬件信息
+     * @param heartbeatTaskDto 任务ID
+     */
+    void deleteFace(MachineDto machineDto,HeartbeatTaskDto heartbeatTaskDto);
+
+
+    /**
+     * 清空人脸
+     * @param machineDto 硬件信息
+     */
+    void clearFace(MachineDto machineDto);
 
 
 

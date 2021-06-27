@@ -644,7 +644,7 @@ public interface libFaceRecognition extends StdCallLibrary {
     /* 连接事件回调函数 */
 // event 1为已连接 2为连接中断
     public interface ZBX_ConnectEventCb_t extends StdCallCallback {
-        public  void Status(IntByReference cam, String ip,
+        public  void Status(String machineIp,IntByReference cam, String ip,
                             short port, int event,
                             int usrParam);
     }
