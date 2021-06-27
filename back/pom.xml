@@ -2,11 +2,6 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <parent>
-    <groupId>com.java110</groupId>
-    <artifactId>MicroCommunityThings</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-  </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.java110</groupId>
   <artifactId>back</artifactId>
@@ -16,35 +11,95 @@
   <!-- FIXME change it to the project's website -->
   <url>http://www.example.com</url>
 
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.0.1.RELEASE</version>
+    <relativePath/> <!-- lookup parent from repository -->
+  </parent>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <java.version>1.8</java.version>
+    <mysql.version>5.1.39</mysql.version>
+    <httpclient.verion>3.1</httpclient.verion>
+    <commons-codec.version>1.6</commons-codec.version>
+    <commons-fileupload.version>1.3.3</commons-fileupload.version>
+    <commons-pool2.version>2.2</commons-pool2.version>
+    <apache.common.lang3.version>3.4</apache.common.lang3.version>
+  </properties>
+
   <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-devtools</artifactId>
+      <optional>true</optional>
+      <scope>true</scope>
+    </dependency>
+
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-thymeleaf</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.mybatis.spring.boot</groupId>
       <artifactId>mybatis-spring-boot-starter</artifactId>
+      <version>1.3.2</version>
     </dependency>
+
     <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
+      <version>${mysql.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.alibaba</groupId>
+      <artifactId>druid-spring-boot-starter</artifactId>
+      <version>1.1.9</version>
+    </dependency>
+    <dependency>
+      <groupId>com.alibaba</groupId>
+      <artifactId>druid</artifactId>
+      <version>1.0.20</version>
     </dependency>
     <dependency>
       <groupId>com.alibaba</groupId>
       <artifactId>fastjson</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
+      <version>1.2.28</version>
     </dependency>
 
     <dependency>
       <groupId>commons-validator</groupId>
       <artifactId>commons-validator</artifactId>
+      <version>1.3.1</version>
     </dependency>
 
     <dependency>
       <groupId>commons-beanutils</groupId>
       <artifactId>commons-beanutils</artifactId>
+      <version>1.9.3</version>
     </dependency>
 
 
@@ -56,6 +111,7 @@
     <dependency>
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
+      <version>${commons-fileupload.version}</version>
     </dependency>
 
     <dependency>
@@ -67,28 +123,34 @@
     <dependency>
       <groupId>commons-net</groupId>
       <artifactId>commons-net</artifactId>
+      <version>3.3</version>
     </dependency>
 
     <dependency>
       <groupId>commons-httpclient</groupId>
       <artifactId>commons-httpclient</artifactId>
+      <version>${httpclient.verion}</version>
     </dependency>
+    <!-- apache commons 包 主要使用一些工具类 -->
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
+      <version>${apache.common.lang3.version}</version>
     </dependency>
     <dependency>
       <groupId>com.sun.jna</groupId>
       <artifactId>jna</artifactId>
+      <version>3.0.9</version>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna-platform</artifactId>
+      <version>4.0.0</version>
     </dependency>
   </dependencies>
 
   <build>
-    <finalName>Api</finalName>
+    <finalName>Things</finalName>
       <plugins>
         <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
         <plugin>
@@ -115,6 +177,25 @@
               </tag>
             </tags>
           </configuration>
+        </plugin>
+        <plugin>
+
+          <artifactId>maven-compiler-plugin</artifactId>
+
+          <configuration>
+
+            <encoding>UTF-8</encoding>
+
+            <compilerArguments>
+
+              <verbose />
+
+              <bootclasspath>${java.home}\lib\rt.jar${path.separator}${java.home}\lib\jce.jar${path.separator}</bootclasspath>
+
+            </compilerArguments>
+
+          </configuration>
+
         </plugin>
       </plugins>
   </build>
