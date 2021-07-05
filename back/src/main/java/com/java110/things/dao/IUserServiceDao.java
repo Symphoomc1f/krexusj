@@ -1,5 +1,6 @@
 package com.java110.things.dao;
 
+import com.java110.things.entity.user.UserDto;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.Map;
@@ -16,4 +17,6 @@ import java.util.Map;
 public interface IUserServiceDao {
 
     Map get(String userId);
+
+    UserDto getUser(UserDto userDto);
 }

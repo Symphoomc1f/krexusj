@@ -1,7 +1,5 @@
 package com.java110.things.factory;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.JWTVerifier;
@@ -9,16 +7,9 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.java110.core.context.ApiDataFlow;
-import com.java110.core.context.DataFlow;
 import com.java110.things.exception.NoAuthorityException;
 import com.java110.things.exception.Result;
-import com.java110.utils.cache.JWTCache;
-import com.java110.utils.cache.MappingCache;
-import com.java110.utils.constant.CommonConstant;
-import com.java110.utils.constant.MappingConstant;
-import com.java110.utils.constant.ResponseConstant;
-import com.java110.utils.util.StringUtil;
+import com.java110.things.util.StringUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import javax.crypto.Cipher;
@@ -265,21 +256,25 @@ public class AuthenticationFactory {
      */
     public static String createAndSaveToken(Map<String, String> info) throws Exception {
 
-        if (!info.containsKey("userId")) {
-            throw new InvalidParameterException("参数中没有包含：userId");
+        if (!info.containsKey(LOGIN_USER_ID)) {
+            throw new InvalidParameterException("参数中没有包含：" + LOGIN_USER_ID);
         }
 
+        String jdi = UUID.randomUUID().toString().replace("-", "");
         String jwtSecret = DEFAULT_JWT_SECRET;
         Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
         JWTCreator.Builder jwt = JWT.create();
         for (String key : info.keySet()) {
+            if (LOGIN_USER_ID.equals(key)) {
+                continue;
+            }
             jwt.withClaim(key, info.get(key));
         }
         String expireTime = DEFAULT_JWT_EXPIRE_TIME;
+        //保存token Id
+        JWTFactory.setValue(jdi, info.get(LOGIN_USER_ID), Integer.parseInt(expireTime));
         jwt.withIssuer("java110");
-        jwt.withJWTId(info.get(LOGIN_USER_ID));
-        jwt.withIssuedAt(new Date());
-
+        jwt.withJWTId(jdi);
         return jwt.sign(algorithm);
     }
 
@@ -292,15 +287,16 @@ public class AuthenticationFactory {
      */
     public static void deleteToken(String token) throws Exception {
         String jwtSecret = DEFAULT_JWT_SECRET;
+
         Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
         JWTVerifier verifier = JWT.require(algorithm).withIssuer("java110").build();
         DecodedJWT jwt = verifier.verify(token);
         String jdi = jwt.getId();
         //保存token Id
-//        String userId = JWTCache.getValue(jdi);
-//        if (!StringUtil.isNullOrNone(userId)) { //说明redis中jdi 已经失效
-//            JWTCache.removeValue(jdi);
-//        }
+        String userId = JWTFactory.getValue(jdi);
+        if (!StringUtil.isNullOrNone(userId)) { //说明redis中jdi 已经失效
+            JWTFactory.removeValue(jdi);
+        }
     }
 
     /**
@@ -312,23 +308,27 @@ public class AuthenticationFactory {
      */
     public static Map<String, String> verifyToken(String token) throws Exception {
         String jwtSecret = DEFAULT_JWT_SECRET;
-
         Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
         JWTVerifier verifier = JWT.require(algorithm).withIssuer("java110").build();
         DecodedJWT jwt = verifier.verify(token);
         String jdi = jwt.getId();
         //保存token Id
+        String userId = JWTFactory.getValue(jdi);
+        if (StringUtil.isNullOrNone(userId)) {
+            throw new JWTVerificationException("用户还未登录");
+        }
         String expireTime = DEFAULT_JWT_EXPIRE_TIME;
         //刷新过时时间
+        JWTFactory.resetExpireTime(jdi, Integer.parseInt(expireTime));
         Map<String, Claim> claims = jwt.getClaims();
         // Add the claim to request header
         Map<String, String> paramOut = new HashMap<String, String>();
         for (String key : claims.keySet()) {
             paramOut.put(key, claims.get(key).asString());
         }
+        paramOut.put(LOGIN_USER_ID, userId);
         return paramOut;
     }
-
 
     /***********************************JWT start***************************************/
 

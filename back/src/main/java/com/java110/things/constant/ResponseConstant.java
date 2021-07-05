@@ -11,6 +11,8 @@ public class ResponseConstant {
     //失败
     public static final int ERROR = -1;
 
+    public static final String SUCCESS_MSG = "成功";
+
     //未知异常
     public static final String NO_RESULT = "未知异常";
 }

@@ -1,11 +1,16 @@
 package com.java110.things.aop;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.java110.things.constant.ResponseConstant;
+import com.java110.things.constant.SystemConstant;
+import com.java110.things.entity.response.ResultDto;
 import com.java110.things.exception.FilterException;
+import com.java110.things.exception.NoAuthorityException;
 import com.java110.things.exception.Result;
 import com.java110.things.factory.AuthenticationFactory;
 
+import com.java110.things.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +35,6 @@ public class JwtFilter implements Filter {
 
     private static Logger logger = LoggerFactory.getLogger(JwtFilter.class);
 
-    private static final String COOKIE_AUTH_TOKEN = "_java110_token";
 
     private String[] excludedUris;
 
@@ -82,10 +86,13 @@ public class JwtFilter implements Filter {
                 //response.sendRedirect("/flow/login");
                 noLogin(request, response);
             }
-
-        } catch (Exception e) {
+        } catch (NoAuthorityException e) {
             //response.sendRedirect("/flow/login");
             noLogin(request, response);
+        } catch (Exception e) {
+            ResultDto resultDto = new ResultDto(ResponseConstant.ERROR, e.getMessage());
+            writeJson(response, JSONObject.toJSONString(resultDto),
+                    "UTF-8");
         }
     }
 
@@ -112,7 +119,7 @@ public class JwtFilter implements Filter {
     private String getToken(HttpServletRequest request) throws FilterException {
         String token = "";
         for (Cookie cookie : request.getCookies()) {
-            if (COOKIE_AUTH_TOKEN.equals(cookie.getName())) {
+            if (SystemConstant.COOKIE_AUTH_TOKEN.equals(cookie.getName())) {
                 token = cookie.getValue();
             }
         }

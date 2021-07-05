@@ -6,4 +6,24 @@
         select * from u_user
     </select>
 
+    <select id="getUser" parameterType="com.java110.things.entity.user.UserDto" resultType="com.java110.things.entity.user.UserDto">
+        SELECT
+            u. NAME userName,
+            u.`password`,
+            u.email,
+            u.user_id userId,
+            u.tel,
+            u.level_cd levelCd,
+            u.create_time createTime,
+            u.sex,
+            u.age
+        FROM
+            u_user u
+        WHERE
+            u. NAME = #{userName}
+            and u.password = #{password}
+            and u.status_cd = '0'
+        limit 1
+    </select>
+
 </mapper>

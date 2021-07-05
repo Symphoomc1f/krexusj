@@ -2,6 +2,7 @@ package com.java110.things.init;
 
 import com.java110.things.accessControl.HeartbeatCloudApiThread;
 import com.java110.things.factory.ApplicationContextFactory;
+import com.java110.things.thread.ClearExpireJwtThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -21,10 +22,22 @@ public class ServiceStartInit {
             ApplicationContextFactory.setApplicationContext(context);
             //启动心跳
             startHeartbeatCloudApiThread();
+
+            //清理会话
+            startClearJwtThread();
         } catch (Exception ex) {
             logger.error("系统初始化失败", ex);
             throw new IllegalStateException("系统初始化失败", ex);
         }
+    }
+
+    /**
+     * 清理jwt 会话
+     */
+    private static void startClearJwtThread() {
+        ClearExpireJwtThread clearExpireJwtThread = new ClearExpireJwtThread(true);
+        Thread clearThread = new Thread(clearExpireJwtThread,"ClearExpireJwtThread");
+        clearThread.start();
     }
 
     /**

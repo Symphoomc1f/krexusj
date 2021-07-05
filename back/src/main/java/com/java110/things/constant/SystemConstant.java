@@ -19,4 +19,14 @@ public class SystemConstant {
     public final static String HTTP_USER_ID = "user_id";
     public final static String ORDER_DEFAULT_USER_ID = "-1";
 
+
+    /**
+     * 登录时的用户ID
+     */
+    public final static String LOGIN_USER_ID = "userId";
+
+    public final static String LOGIN_USER_NAME = "userName";
+
+    public static final String COOKIE_AUTH_TOKEN = "_java110_token_";
+
 }

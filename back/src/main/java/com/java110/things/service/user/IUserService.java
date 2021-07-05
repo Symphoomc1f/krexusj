@@ -1,5 +1,6 @@
 package com.java110.things.service.user;
 
+import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.UserDto;
 import org.springframework.http.ResponseEntity;
 
@@ -13,5 +14,5 @@ import org.springframework.http.ResponseEntity;
  **/
 public interface IUserService {
 
-    public ResponseEntity<String> login(UserDto userDto);
+    public ResultDto login(UserDto userDto) throws Exception;
 }

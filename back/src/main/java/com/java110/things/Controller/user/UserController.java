@@ -2,6 +2,8 @@ package com.java110.things.Controller.user;
 
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
+import com.java110.things.constant.SystemConstant;
+import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.UserDto;
 import com.java110.things.service.user.IUserService;
 import com.java110.things.util.Assert;
@@ -42,13 +44,9 @@ public class UserController extends BaseController {
 
         Assert.hasKeyAndValue(paramObj, "password", "请求报文中未包含密码信息");
 
-        ResponseEntity<String> responseEntity = userServiceImpl.login(BeanConvertUtil.covertBean(paramObj, UserDto.class));
-
-        if(responseEntity.getStatusCode() != HttpStatus.OK){
-            return responseEntity;
-        }
-
-
+        ResultDto resultDto = userServiceImpl.login(BeanConvertUtil.covertBean(paramObj, UserDto.class));
+        request.setAttribute(SystemConstant.COOKIE_AUTH_TOKEN, ((JSONObject) resultDto.getData()).getString("token"));
+        return super.createResponseEntity(resultDto);
     }
 
     public IUserService getUserServiceImpl() {
