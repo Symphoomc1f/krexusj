@@ -22,7 +22,7 @@ import java.nio.charset.Charset;
  * @Version 1.0
  * add by wuxw 2020/5/10
  **/
-@MapperScan("com.java110.dao")
+@MapperScan("com.java110.things.dao")
 @SpringBootApplication
 public class ThingsApplicationStart {
 

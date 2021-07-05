@@ -101,6 +101,9 @@ public class JWTFactory {
     public static void clearExpireJwt() {
 
         JwtDto jwtDto = null;
+        if(cacheJwt.isEmpty()){
+            return ;
+        }
         for (String key : cacheJwt.keySet()) {
             try {
                 jwtDto = cacheJwt.get(key);

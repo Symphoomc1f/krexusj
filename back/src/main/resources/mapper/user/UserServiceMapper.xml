@@ -20,7 +20,7 @@
         FROM
             u_user u
         WHERE
-            u. NAME = #{userName}
+            u.name = #{username}
             and u.password = #{password}
             and u.status_cd = '0'
         limit 1

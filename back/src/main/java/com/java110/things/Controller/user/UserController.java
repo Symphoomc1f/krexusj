@@ -29,18 +29,18 @@ import javax.servlet.http.HttpServletRequest;
  * add by wuxw 2020/5/14
  **/
 @RestController
-@RequestMapping(path = "/back")
+@RequestMapping(path = "/api/user")
 public class UserController extends BaseController {
 
     @Autowired
     private IUserService userServiceImpl;
 
     @RequestMapping(path = "/login", method = RequestMethod.POST)
-    public ResponseEntity<String> login(@RequestBody String param, HttpServletRequest request) {
+    public ResponseEntity<String> login(@RequestBody String param, HttpServletRequest request) throws Exception{
 
         JSONObject paramObj = super.getParamJson(param);
 
-        Assert.hasKeyAndValue(paramObj, "userName", "请求报文中未包含用户名信息");
+        Assert.hasKeyAndValue(paramObj, "username", "请求报文中未包含用户名信息");
 
         Assert.hasKeyAndValue(paramObj, "password", "请求报文中未包含密码信息");
 

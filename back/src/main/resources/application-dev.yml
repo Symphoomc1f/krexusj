@@ -62,8 +62,8 @@ spring :
     cache: false
 
 mybatis:
-  mapper-locations: classpath:mapping/*Mapper.xml
-  type-aliases-package: com.java110.entity
+  mapper-locations: classpath:mapper/*/*Mapper.xml
+  type-aliases-package: com.java110.things.entity
 
 logging:
   level:

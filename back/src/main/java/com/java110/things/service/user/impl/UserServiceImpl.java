@@ -50,12 +50,12 @@ public class UserServiceImpl implements IUserService {
 
         Map userMap = new HashMap();
         userMap.put(SystemConstant.LOGIN_USER_ID, tmpUserDto.getUserId());
-        userMap.put(SystemConstant.LOGIN_USER_NAME, tmpUserDto.getUserName());
+        userMap.put(SystemConstant.LOGIN_USER_NAME, tmpUserDto.getUsername());
         String token = AuthenticationFactory.createAndSaveToken(userMap);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("token", token);
 
-        ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, jsonObject.toJSONString());
+        ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, jsonObject);
 
         return resultDto;
     }

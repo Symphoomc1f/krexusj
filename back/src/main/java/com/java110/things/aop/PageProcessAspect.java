@@ -1,7 +1,13 @@
 package com.java110.things.aop;
 
+import com.alibaba.fastjson.JSONObject;
+import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
+import com.java110.things.entity.response.ResultDto;
 import com.java110.things.exception.FilterException;
+import com.java110.things.exception.NoAuthorityException;
+import com.java110.things.exception.Result;
+import com.java110.things.exception.ServiceException;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.After;
@@ -13,6 +19,8 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -99,13 +107,24 @@ public class PageProcessAspect {
     //环绕通知,环绕增强，相当于MethodInterceptor
     @Around("dataProcess()")
     public Object around(ProceedingJoinPoint pjp) {
+        ResultDto resultDto = null;
         try {
             Object o = pjp.proceed();
             return o;
+        } catch (NoAuthorityException e) {
+            //response.sendRedirect("/flow/login");
+            logger.error("请求发生异常", e);
+            resultDto = new ResultDto(ResponseConstant.ERROR, e.getMessage());
+        } catch (Exception e) {
+            logger.error("请求发生异常", e);
+            resultDto = new ResultDto(ResponseConstant.ERROR, e.getMessage());
         } catch (Throwable e) {
-            e.printStackTrace();
-            return null;
+            logger.error("请求发生异常", e);
+            resultDto = new ResultDto(ResponseConstant.ERROR, e.getMessage());
         }
+
+        return new ResponseEntity<String>(resultDto.toString(), HttpStatus.OK);
+
     }
 
 

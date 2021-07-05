@@ -1,6 +1,7 @@
 package com.java110.things.init;
 
 import com.java110.things.accessControl.HeartbeatCloudApiThread;
+import com.java110.things.accessControl.ScanAccessControlThread;
 import com.java110.things.factory.ApplicationContextFactory;
 import com.java110.things.thread.ClearExpireJwtThread;
 import org.slf4j.Logger;
@@ -23,6 +24,9 @@ public class ServiceStartInit {
             //启动心跳
             startHeartbeatCloudApiThread();
 
+            //扫描门禁
+            startScanAccessCrontrolMachine();
+
             //清理会话
             startClearJwtThread();
         } catch (Exception ex) {
@@ -31,22 +35,28 @@ public class ServiceStartInit {
         }
     }
 
+    private static void startScanAccessCrontrolMachine() {
+        ScanAccessControlThread scanAccessControlThread = new ScanAccessControlThread(true);
+        Thread sThread = new Thread(scanAccessControlThread, "ScanAccessControlThread");
+        sThread.start();
+    }
+
     /**
      * 清理jwt 会话
      */
     private static void startClearJwtThread() {
         ClearExpireJwtThread clearExpireJwtThread = new ClearExpireJwtThread(true);
-        Thread clearThread = new Thread(clearExpireJwtThread,"ClearExpireJwtThread");
+        Thread clearThread = new Thread(clearExpireJwtThread, "ClearExpireJwtThread");
         clearThread.start();
     }
 
     /**
      * 启动心跳 线程
      */
-    private static void startHeartbeatCloudApiThread(){
+    private static void startHeartbeatCloudApiThread() {
         //启动业主信息同步 线程 变更业主的场景
         HeartbeatCloudApiThread heartbeatCloudApiThread = new HeartbeatCloudApiThread(true);
-        Thread ownerToMachineThread = new Thread(heartbeatCloudApiThread,"HeartbeatCloudApiThread");
+        Thread ownerToMachineThread = new Thread(heartbeatCloudApiThread, "HeartbeatCloudApiThread");
         ownerToMachineThread.start();
     }
 

@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * 伊兰度 门禁设备
  */
@@ -57,4 +59,16 @@ public class Yld04AssessControlProcessAdapt implements IAssessControlProcess {
         Function.connectCamera(machineDto.getMachineIp());
         Function.clearFace(machineDto.getMachineIp());
     }
+
+    /**
+     * 扫描设备
+     * @return
+     */
+    @Override
+    public List<MachineDto> scanMachine() {
+        Function.searchcerme();
+        logger.debug("硬件扫描完了");
+        return null;
+    }
+
 }

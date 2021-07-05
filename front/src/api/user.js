@@ -2,7 +2,10 @@ import request from '@/utils/request'
 
 export function login(data) {
   return request({
-    url: '/vue-admin-template/user/login',
+    headers: {
+      'app-id': '123'
+    },
+    url: '/api/user/login',
     method: 'post',
     data
   })

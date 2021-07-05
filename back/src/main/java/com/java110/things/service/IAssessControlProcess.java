@@ -4,6 +4,8 @@ import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineDto;
 
+import java.util.List;
+
 /**
  * 门禁处理接口类，各大门禁厂商 需要实现这个类，实现相应的方法
  * add by wuxw
@@ -59,6 +61,13 @@ public interface IAssessControlProcess {
      * @param machineDto 硬件信息
      */
     void clearFace(MachineDto machineDto);
+
+
+    /**
+     * 扫描门禁信息
+     * @return
+     */
+    List<MachineDto> scanMachine();
 
 
 

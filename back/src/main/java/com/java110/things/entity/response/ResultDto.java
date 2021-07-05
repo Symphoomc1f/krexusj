@@ -1,5 +1,7 @@
 package com.java110.things.entity.response;
 
+import com.alibaba.fastjson.JSONObject;
+
 import java.io.Serializable;
 
 /**
@@ -51,5 +53,10 @@ public class ResultDto implements Serializable {
 
     public void setData(Object data) {
         this.data = data;
+    }
+
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
     }
 }

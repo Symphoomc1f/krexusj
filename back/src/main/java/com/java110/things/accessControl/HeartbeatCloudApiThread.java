@@ -95,6 +95,10 @@ public class HeartbeatCloudApiThread implements Runnable {
      */
     private void heartbeatCloud(List<MachineDto> machineDtos) {
 
+        if(machineDtos == null || machineDtos.size() == 0){
+            return;
+        }
+
         for (MachineDto machineDto : machineDtos) {
             try {
                 doHeartbeatCloud(machineDto);
