@@ -36,10 +36,15 @@ import java.util.Map;
  * @Version 1.0
  * add by wuxw 2020/5/10
  **/
-public class HeartbeatCloudApiThread implements Runnable {
+public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnable {
     Logger logger = LoggerFactory.getLogger(HeartbeatCloudApiThread.class);
     public static final long DEFAULT_WAIT_SECOND = 5000 * 6; // 默认30秒执行一次
     public static boolean HEARTBEAT_STATE = false;
+
+    /**
+     * 初始化 硬件状态
+     */
+    public static boolean INIT_MACHINE_STATE = false;
 
     private RestTemplate restTemplate;
     private Java110Properties java110Properties;
@@ -54,6 +59,7 @@ public class HeartbeatCloudApiThread implements Runnable {
 
     public HeartbeatCloudApiThread(boolean state) {
         HEARTBEAT_STATE = state;
+        INIT_MACHINE_STATE = true;
         //orderInnerServiceSMOImpl = ApplicationContextFactory.getBean(IOrderInnerServiceSMO.class.getName(), IOrderInnerServiceSMO.class);
         restTemplate = ApplicationContextFactory.getBean("restTemplate", RestTemplate.class);
         addUpdateFace = ApplicationContextFactory.getBean("addUpdateFace", AddUpdateFace.class);
@@ -67,9 +73,10 @@ public class HeartbeatCloudApiThread implements Runnable {
         long waitTime = DEFAULT_WAIT_SECOND;
         while (HEARTBEAT_STATE) {
             try {
-                executeTask();
                 waitTime = DEFAULT_WAIT_SECOND;
                 Thread.sleep(waitTime);
+                executeTask();
+
             } catch (Throwable e) {
                 logger.error("执行订单中同步业主信息至设备中失败", e);
             }
@@ -80,6 +87,10 @@ public class HeartbeatCloudApiThread implements Runnable {
      * 执行任务
      */
     private void executeTask() {
+        if (INIT_MACHINE_STATE) {
+            getAssessControlProcessImpl().initAssessControlProcess();
+            INIT_MACHINE_STATE = false;
+        }
         //查询设备信息
         List<MachineDto> machineDtos = queryMachines();
 
@@ -95,7 +106,7 @@ public class HeartbeatCloudApiThread implements Runnable {
      */
     private void heartbeatCloud(List<MachineDto> machineDtos) {
 
-        if(machineDtos == null || machineDtos.size() == 0){
+        if (machineDtos == null || machineDtos.size() == 0) {
             return;
         }
 
@@ -286,8 +297,5 @@ public class HeartbeatCloudApiThread implements Runnable {
 
     }
 
-    private IAssessControlProcess getAssessControlProcessImpl() {
-        return null;
-    }
 
 }

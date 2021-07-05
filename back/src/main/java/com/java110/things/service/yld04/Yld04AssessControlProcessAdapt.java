@@ -17,6 +17,12 @@ import java.util.List;
 public class Yld04AssessControlProcessAdapt implements IAssessControlProcess {
 
     private static Logger logger = LoggerFactory.getLogger(Yld04AssessControlProcessAdapt.class);
+    //public static Function fun=new Function();
+
+    @Override
+    public void initAssessControlProcess() {
+        Function.Init();
+    }
 
     @Override
     public int getFaceNum(MachineDto machineDto) {

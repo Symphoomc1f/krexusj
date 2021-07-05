@@ -14,6 +14,10 @@ import java.util.List;
  */
 public interface IAssessControlProcess {
 
+    /**
+     * 初始化方法
+     */
+    void initAssessControlProcess();
 
     /**
      * 查询设备中 人脸数量

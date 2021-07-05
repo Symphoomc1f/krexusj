@@ -30,26 +30,15 @@ module.exports = {
   lintOnSave: process.env.NODE_ENV === 'development',
   productionSourceMap: false,
   devServer: {
-    port: port,
-    open: true,
-    overlay: {
-      warnings: false,
-      errors: true
-    },
-    before: require('./mock/mock-server.js'),
     proxy: {
-      "/api": {
-        target: "http://localhost:6666",
-        changeOrigin: true,
+      '/': {
+        target: 'http://localhost:6666',
         ws: true,
-        secure: false,
-        pathRewrite: {"^/api" : "/api"},
-        onProxyReq(proxyReq) {
-          if (proxyReq.getHeader("origin")) {
-            proxyReq.setHeader("origin", "http://localhost:6666")
-          }
+        pathRewrite: {
+          '^/': '/'
         }
       }
+      // v2.7.0 不需在配置前端代理
     }
   },
   configureWebpack: {

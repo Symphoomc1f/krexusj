@@ -38,7 +38,7 @@ import java.util.Map;
  **/
 public class ScanAccessControlThread implements Runnable {
     Logger logger = LoggerFactory.getLogger(ScanAccessControlThread.class);
-    public static final long DEFAULT_WAIT_SECOND = 5000 * 6; // 默认30秒执行一次
+    public static final long DEFAULT_WAIT_SECOND = 1000 * 60 * 1; // 默认30秒执行一次
     public static boolean HEARTBEAT_STATE = false;
 
     private IAssessControlProcess assessControlProcessImpl;
@@ -55,11 +55,11 @@ public class ScanAccessControlThread implements Runnable {
         long waitTime = DEFAULT_WAIT_SECOND;
         while (HEARTBEAT_STATE) {
             try {
-                executeTask();
                 waitTime = DEFAULT_WAIT_SECOND;
                 Thread.sleep(waitTime);
+                executeTask();
             } catch (Throwable e) {
-                logger.error("执行订单中同步业主信息至设备中失败", e);
+                logger.error("扫描门禁失败", e);
             }
         }
     }
@@ -73,11 +73,6 @@ public class ScanAccessControlThread implements Runnable {
 
     }
 
-    private IAssessControlProcess getAssessControlProcessImpl() {
-        if (assessControlProcessImpl == null) {
-            assessControlProcessImpl = new Yld04AssessControlProcessAdapt();
-        }
-        return assessControlProcessImpl;
-    }
+
 
 }

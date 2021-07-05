@@ -1,6 +1,7 @@
 package com.java110.things.accessControl;
 
 import com.java110.things.service.IAssessControlProcess;
+import com.java110.things.service.yld04.Yld04AssessControlProcessAdapt;
 
 public class BaseAccessControl {
 
@@ -14,6 +15,9 @@ public class BaseAccessControl {
      * @return
      */
     protected IAssessControlProcess getAssessControlProcessImpl() {
-        return null;
+        if (assessControlProcessImpl == null) {
+            assessControlProcessImpl = new Yld04AssessControlProcessAdapt();
+        }
+        return assessControlProcessImpl;
     }
 }

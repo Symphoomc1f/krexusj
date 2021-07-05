@@ -1,25 +1,26 @@
 package com.java110.things.service.yld04;
 
+
 /**
  * Created by HuaChao on 2016/12/29.
  */
 
 import com.sun.jna.*;
-        import com.sun.jna.platform.win32.WinDef;
-        import com.sun.jna.ptr.ByteByReference;
-        import com.sun.jna.ptr.FloatByReference;
-        import com.sun.jna.win32.StdCallLibrary;
-        import java.util.ArrayList;
-        import java.util.Arrays;
-        import java.util.List;
+import com.sun.jna.platform.win32.WinDef;
+import com.sun.jna.ptr.ByteByReference;
+import com.sun.jna.ptr.FloatByReference;
+import com.sun.jna.win32.StdCallLibrary;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-        import com.sun.jna.Library;
-        import com.sun.jna.Native;
-        import com.sun.jna.ptr.IntByReference;
+import com.sun.jna.Library;
+import com.sun.jna.Native;
+import com.sun.jna.ptr.IntByReference;
 
 public interface libFaceRecognition extends StdCallLibrary {
     libFaceRecognition INSTANCE = (libFaceRecognition) Native.loadLibrary(
-            "C:\\Users\\admin\\Desktop\\新建文件夹\\FaceRecongnition_java\\FaceRecongnition\\dll\\libFaceRecognitionSDK_x86", libFaceRecognition.class);
+            "C:\\Users\\Administrator\\Documents\\project\\hc\\MicroCommunityThings\\back\\dll\\yld04\\libFaceRecognitionSDK_x64", libFaceRecognition.class);
 
 
     public static class FaceRecoInfo extends Structure {
@@ -241,13 +242,13 @@ public interface libFaceRecognition extends StdCallLibrary {
     void lib_clsClear();
 
     /**
-     * @param ip         相机ip
-     * @param port       相机端口，固定为9527
-     * @param usrName    用户名，目前版本无效，传空即可
-     * @param password  密码，目前版本无效，传空即可
-     * @param errorNum  连接失败错误号，0为连接成功，-1为连接失败
-     * @param channel    码流通道号，有特殊需求的用户使用，无特殊需求用户直接传0通道即可
-     * @param autoReconn 自动重连标志，为1自动重连，0不会自动重连
+     * @param ip[in]         相机ip
+     * @param port[in]       相机端口，固定为9527
+     * @param usrName[in]    用户名，目前版本无效，传空即可
+     * @param password[in]   密码，目前版本无效，传空即可
+     * @param errorNum[out]  连接失败错误号，0为连接成功，-1为连接失败
+     * @param channel[in]    码流通道号，有特殊需求的用户使用，无特殊需求用户直接传0通道即可
+     * @param autoReconn[in] 自动重连标志，为1自动重连，0不会自动重连
      * @return 建议用户使用自动重连, autoReconn为1
      * @brief 连接相机
      */
