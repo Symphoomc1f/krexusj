@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java110.things.dao.IMachineServiceDao" >
+
+    <select id="get" parameterType="string" resultType="Map" >
+        select * from u_user
+    </select>
+
+    <select id="getUser" parameterType="com.java110.things.entity.machine.MachineDto" resultType="int">
+        INSERT INTO
+        `machine` (`machine_id`, `machine_code`, `machine_version`, `machine_name`, `machine_type_cd`, `machine_ip`, `machine_mac`)
+        VALUES (#{machineId}, #{machineCode}, #{machineVersion}, #{machineName}, #{machineTypeCd}, #{machineIp}, #{machineMac})
+    </select>
+
+</mapper>
