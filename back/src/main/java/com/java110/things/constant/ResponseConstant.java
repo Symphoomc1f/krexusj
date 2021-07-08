@@ -13,6 +13,8 @@ public class ResponseConstant {
 
     public static final String SUCCESS_MSG = "成功";
 
+    public static final String ERROR_MSG = "处理失败";
+
     //未知异常
     public static final String NO_RESULT = "未知异常";
 }

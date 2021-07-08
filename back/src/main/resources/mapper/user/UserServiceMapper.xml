@@ -21,8 +21,9 @@
         FROM
             u_user u
         WHERE
+        1=1
         <if test="username != null and username != ''">
-            u.name = #{username}
+           and u.name = #{username}
         </if>
         <if test="password != null and password != ''">
             and u.password = #{password}

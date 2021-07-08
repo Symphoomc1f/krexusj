@@ -68,7 +68,7 @@ public class NotifyAccessControlServiceImpl implements INotifyAccessControlServi
 
         long machineCnt = machineServiceDao.getMachineCount(tmpMachineDto);
         if (machineCnt > 0) {
-            logger.debug("该设备已经添加无需再添加"+machineServiceDao.toString());
+            logger.debug("该设备已经添加无需再添加"+tmpMachineDto.toString());
             return;
         }
 

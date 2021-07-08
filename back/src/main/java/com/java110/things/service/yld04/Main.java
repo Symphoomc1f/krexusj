@@ -64,7 +64,7 @@ public class Main {
        // Scanner sc = new Scanner(System.in);
       //  System.out.println("请输入相机ip");
        // String str = sc.nextLine();
-        String str="192.168.1.124";
+        String str="192.168.1.23";
         fun.connectCamera(str);
 
 

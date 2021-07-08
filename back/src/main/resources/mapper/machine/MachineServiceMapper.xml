@@ -27,25 +27,25 @@
         from machine t
         where 1=1
         <if test="machineId != null and machineId != ''">
-            t.machine_id = #{machineId}
+            and t.machine_id = #{machineId}
         </if>
         <if test="machineCode != null and machineCode != ''">
-            t.machine_code = #{machineCode}
+            and t.machine_code = #{machineCode}
         </if>
         <if test="machineVersion != null and machineVersion != ''">
-            t.machine_version = #{machineVersion}
+            and t.machine_version = #{machineVersion}
         </if>
         <if test="machineName != null and machineName != ''">
-            t.machine_name = #{machineName}
+            and t.machine_name = #{machineName}
         </if>
         <if test="machineTypeCd != null and machineTypeCd != ''">
-            t.machine_type_cd = #{machineTypeCd}
+            and t.machine_type_cd = #{machineTypeCd}
         </if>
         <if test="machineIp != null and machineIp != ''">
-            t.machine_ip = #{machineId}
+            and t.machine_ip = #{machineIp}
         </if>
         <if test="machineMac != null and machineMac != ''">
-            t.machine_mac = #{machineMac}
+            and t.machine_mac = #{machineMac}
         </if>
         order by t.create_time desc
         <if test="page != -1 and page != null ">
@@ -60,25 +60,25 @@
         from machine t
         where 1=1
         <if test="machineId != null and machineId != ''">
-            t.machine_id = #{machineId}
+            and t.machine_id = #{machineId}
         </if>
         <if test="machineCode != null and machineCode != ''">
-            t.machine_code = #{machineCode}
+            and t.machine_code = #{machineCode}
         </if>
         <if test="machineVersion != null and machineVersion != ''">
-            t.machine_version = #{machineVersion}
+            and t.machine_version = #{machineVersion}
         </if>
         <if test="machineName != null and machineName != ''">
-            t.machine_name = #{machineName}
+            and t.machine_name = #{machineName}
         </if>
         <if test="machineTypeCd != null and machineTypeCd != ''">
-            t.machine_type_cd = #{machineTypeCd}
+            and t.machine_type_cd = #{machineTypeCd}
         </if>
         <if test="machineIp != null and machineIp != ''">
-            t.machine_ip = #{machineId}
+            and t.machine_ip = #{machineIp}
         </if>
         <if test="machineMac != null and machineMac != ''">
-            t.machine_mac = #{machineMac}
+            and t.machine_mac = #{machineMac}
         </if>
         order by t.create_time desc
 

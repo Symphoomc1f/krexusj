@@ -18,6 +18,10 @@ public class ResultDto implements Serializable {
 
     private String msg;
 
+    private long total;
+
+    private long totalPage;
+
     private Object data;
 
     public ResultDto(int code, String msg) {
@@ -29,6 +33,14 @@ public class ResultDto implements Serializable {
         this.code = code;
         this.msg = msg;
         this.data = data;
+    }
+
+    public ResultDto(int code, String msg, long total, long totalPage, Object data) {
+        this.code = code;
+        this.msg = msg;
+        this.data = data;
+        this.total = total;
+        this.totalPage = totalPage;
     }
 
     public int getCode() {
@@ -58,5 +70,21 @@ public class ResultDto implements Serializable {
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);
+    }
+
+    public long getTotal() {
+        return total;
+    }
+
+    public void setTotal(long total) {
+        this.total = total;
+    }
+
+    public long getTotalPage() {
+        return totalPage;
+    }
+
+    public void setTotalPage(long totalPage) {
+        this.totalPage = totalPage;
     }
 }

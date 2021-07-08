@@ -49,24 +49,24 @@ export const constantRoutes = [
     redirect: '/dashboard',
     children: [{
       path: 'dashboard',
-      name: 'Dashboard',
+      name: 'HC物联网',
       component: () => import('@/views/dashboard/index'),
       meta: { title: 'HC小区物联网平台', icon: '' }
     }]
   },
 
   {
-    path: '/example',
+    path: '/accessControl',
     component: Layout,
-    redirect: '/example/table',
+    redirect: '/accessControl/accessControl',
     name: 'Example',
     meta: { title: '门禁管理', icon: 'example' },
     children: [
       {
-        path: 'table',
-        name: 'Table',
-        component: () => import('@/views/table/index'),
-        meta: { title: 'Table', icon: 'table' }
+        path: 'accessControl',
+        name: '门禁',
+        component: () => import('@/views/accessControl/accessControl'),
+        meta: { title: '门禁信息', icon: 'table' }
       },
       {
         path: 'tree',

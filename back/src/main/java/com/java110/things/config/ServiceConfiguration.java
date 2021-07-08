@@ -13,11 +13,11 @@ public class ServiceConfiguration {
     @Bean
     public FilterRegistrationBean jwtFilter() {
         StringBuffer exclusions = new StringBuffer();
-        exclusions.append("/api/user/login,");
+        exclusions.append("/api/user/login");
         final FilterRegistrationBean registrationBean = new FilterRegistrationBean();
         registrationBean.setFilter(new JwtFilter());
         registrationBean.addUrlPatterns("/");
-        registrationBean.addUrlPatterns("/app/*");
+        registrationBean.addUrlPatterns("/api/*");
         registrationBean.addInitParameter("excludedUri", exclusions.toString());
 
         return registrationBean;

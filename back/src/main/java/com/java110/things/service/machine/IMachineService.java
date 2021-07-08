@@ -14,5 +14,19 @@ import com.java110.things.entity.user.UserDto;
  **/
 public interface IMachineService {
 
-    public ResultDto saveMachine(MachineDto machineDto) throws Exception;
+    /**
+     * 保存设备信息
+     * @param machineDto 设备信息
+     * @return
+     * @throws Exception
+     */
+     ResultDto saveMachine(MachineDto machineDto) throws Exception;
+
+    /**
+     * 获取设备信息
+     * @param machineDto 设备信息
+     * @return
+     * @throws Exception
+     */
+     ResultDto getMachine(MachineDto machineDto) throws Exception;
 }

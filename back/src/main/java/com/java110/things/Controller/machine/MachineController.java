@@ -15,9 +15,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -65,6 +67,30 @@ public class MachineController extends BaseController {
 
 
         ResultDto resultDto = machineServiceImpl.saveMachine(BeanConvertUtil.covertBean(paramObj, MachineDto.class));
+        return super.createResponseEntity(resultDto);
+    }
+
+
+    /**
+     * 添加设备接口类
+     *
+     * @param page 页数
+     * @param row  每页显示的数量
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/getMachines", method = RequestMethod.GET)
+    public ResponseEntity<String> getMachines(@RequestParam int page,
+                                              @RequestParam int row,
+                                              @RequestParam String machineTypeCd) throws Exception {
+
+        Assert.hasText(machineTypeCd,"请求报文中未包含设备类型");
+        MachineDto machineDto = new MachineDto();
+        machineDto.setPage(page);
+        machineDto.setRow(row);
+        machineDto.setMachineTypeCd(machineTypeCd);
+
+        ResultDto resultDto = machineServiceImpl.getMachine(machineDto);
         return super.createResponseEntity(resultDto);
     }
 }

@@ -28,7 +28,7 @@ public class JWTFactory {
      * @returne
      */
     public static String getValue(String jdi) {
-        if (!cacheJwt.containsKey("jdi")) {
+        if (!cacheJwt.containsKey(jdi)) {
             return null;
         }
 
