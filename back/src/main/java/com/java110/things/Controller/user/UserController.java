@@ -36,7 +36,7 @@ public class UserController extends BaseController {
     private IUserService userServiceImpl;
 
     @RequestMapping(path = "/login", method = RequestMethod.POST)
-    public ResponseEntity<String> login(@RequestBody String param, HttpServletRequest request) throws Exception{
+    public ResponseEntity<String> login(@RequestBody String param, HttpServletRequest request) throws Exception {
 
         JSONObject paramObj = super.getParamJson(param);
 
@@ -46,6 +46,33 @@ public class UserController extends BaseController {
 
         ResultDto resultDto = userServiceImpl.login(BeanConvertUtil.covertBean(paramObj, UserDto.class));
         request.setAttribute(SystemConstant.COOKIE_AUTH_TOKEN, ((JSONObject) resultDto.getData()).getString("token"));
+        return super.createResponseEntity(resultDto);
+    }
+
+    @RequestMapping(path = "/info", method = RequestMethod.GET)
+    public ResponseEntity<String> getUserInfo(HttpServletRequest request) throws Exception {
+        String userId = super.getUserId(request);
+        Assert.hasText(userId, "用户还未登录");
+
+        UserDto userDto = new UserDto();
+        userDto.setUserId(userId);
+
+        ResultDto resultDto = userServiceImpl.getUser(userDto);
+        return super.createResponseEntity(resultDto);
+    }
+
+    /**
+     * 退出登录
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(path = "/logout", method = RequestMethod.GET)
+    public ResponseEntity<String> logout(@RequestBody String param) throws Exception {
+        JSONObject paramObj = super.getParamJson(param);
+        Assert.hasKeyAndValue(paramObj, "token", "请求报文中未包含token信息");
+
+        ResultDto resultDto = userServiceImpl.loginOut(paramObj.getString("token"));
         return super.createResponseEntity(resultDto);
     }
 

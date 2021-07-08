@@ -6,10 +6,82 @@
         select * from u_user
     </select>
 
-    <select id="getUser" parameterType="com.java110.things.entity.machine.MachineDto" resultType="int">
+    <insert id="saveMachine" parameterType="com.java110.things.entity.machine.MachineDto">
         INSERT INTO
-        `machine` (`machine_id`, `machine_code`, `machine_version`, `machine_name`, `machine_type_cd`, `machine_ip`, `machine_mac`)
+        machine (machine_id, machine_code, machine_version, machine_name, machine_type_cd, machine_ip, machine_mac)
         VALUES (#{machineId}, #{machineCode}, #{machineVersion}, #{machineName}, #{machineTypeCd}, #{machineIp}, #{machineMac})
+    </insert>
+
+    <!--
+        查询设备信息
+    -->
+    <select id="getMachines" parameterType="com.java110.things.entity.machine.MachineDto" resultType="com.java110.things.entity.machine.MachineDto">
+        select
+            t.machine_id machineId,
+            t.machine_code machineCode,
+            t.machine_version machineVersion,
+            t.machine_name machineName,
+            t.machine_type_cd machineTypeCd,
+            t.machine_ip machineIp,
+            t.machine_mac machineMac
+        from machine t
+        where 1=1
+        <if test="machineId != null and machineId != ''">
+            t.machine_id = #{machineId}
+        </if>
+        <if test="machineCode != null and machineCode != ''">
+            t.machine_code = #{machineCode}
+        </if>
+        <if test="machineVersion != null and machineVersion != ''">
+            t.machine_version = #{machineVersion}
+        </if>
+        <if test="machineName != null and machineName != ''">
+            t.machine_name = #{machineName}
+        </if>
+        <if test="machineTypeCd != null and machineTypeCd != ''">
+            t.machine_type_cd = #{machineTypeCd}
+        </if>
+        <if test="machineIp != null and machineIp != ''">
+            t.machine_ip = #{machineId}
+        </if>
+        <if test="machineMac != null and machineMac != ''">
+            t.machine_mac = #{machineMac}
+        </if>
+        order by t.create_time desc
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+        
+    </select>
+
+    <select id="getMachineCount" parameterType="com.java110.things.entity.machine.MachineDto" resultType="long">
+        select
+        count(1) count
+        from machine t
+        where 1=1
+        <if test="machineId != null and machineId != ''">
+            t.machine_id = #{machineId}
+        </if>
+        <if test="machineCode != null and machineCode != ''">
+            t.machine_code = #{machineCode}
+        </if>
+        <if test="machineVersion != null and machineVersion != ''">
+            t.machine_version = #{machineVersion}
+        </if>
+        <if test="machineName != null and machineName != ''">
+            t.machine_name = #{machineName}
+        </if>
+        <if test="machineTypeCd != null and machineTypeCd != ''">
+            t.machine_type_cd = #{machineTypeCd}
+        </if>
+        <if test="machineIp != null and machineIp != ''">
+            t.machine_ip = #{machineId}
+        </if>
+        <if test="machineMac != null and machineMac != ''">
+            t.machine_mac = #{machineMac}
+        </if>
+        order by t.create_time desc
+
     </select>
 
 </mapper>

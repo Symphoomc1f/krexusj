@@ -1,5 +1,7 @@
 package com.java110.things.entity.user;
 
+import com.alibaba.fastjson.JSONObject;
+
 import java.io.Serializable;
 
 /**
@@ -49,5 +51,10 @@ public class UserDto implements Serializable {
 
     public void setTel(String tel) {
         this.tel = tel;
+    }
+
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
     }
 }

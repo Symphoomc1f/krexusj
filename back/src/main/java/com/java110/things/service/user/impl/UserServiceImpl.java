@@ -52,11 +52,40 @@ public class UserServiceImpl implements IUserService {
         userMap.put(SystemConstant.LOGIN_USER_ID, tmpUserDto.getUserId());
         userMap.put(SystemConstant.LOGIN_USER_NAME, tmpUserDto.getUsername());
         String token = AuthenticationFactory.createAndSaveToken(userMap);
+
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("token", token);
 
         ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, jsonObject);
 
+        return resultDto;
+    }
+
+    /**
+     * 查询用户信息
+     * @param userDto 用户信息
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public ResultDto getUser(UserDto userDto) throws Exception {
+
+        UserDto tmpUserDto = userServiceDao.getUser(userDto);
+        tmpUserDto.setPassword("");
+        ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, tmpUserDto.toString());
+        return resultDto;
+    }
+
+    /**
+     * 退出登录
+     * @param token token信息
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public ResultDto loginOut(String token) throws Exception{
+        AuthenticationFactory.deleteToken(token);
+        ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
         return resultDto;
     }
 }

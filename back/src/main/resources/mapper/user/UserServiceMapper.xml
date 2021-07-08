@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.java110.things.dao.IUserServiceDao" >
+<mapper namespace="com.java110.things.dao.IUserServiceDao">
 
-    <select id="get" parameterType="string" resultType="Map" >
+    <select id="get" parameterType="string" resultType="Map">
         select * from u_user
     </select>
 
-    <select id="getUser" parameterType="com.java110.things.entity.user.UserDto" resultType="com.java110.things.entity.user.UserDto">
+    <select id="getUser" parameterType="com.java110.things.entity.user.UserDto"
+            resultType="com.java110.things.entity.user.UserDto">
         SELECT
-            u. NAME userName,
+            u.name userName,
             u.`password`,
             u.email,
             u.user_id userId,
@@ -20,9 +21,19 @@
         FROM
             u_user u
         WHERE
+        <if test="username != null and username != ''">
             u.name = #{username}
+        </if>
+        <if test="password != null and password != ''">
             and u.password = #{password}
-            and u.status_cd = '0'
+        </if>
+        <if test="userId != null and userId != ''">
+            and u.user_id = #{userId}
+        </if>
+        <if test="tel != null and tel != ''">
+            and u.tel = #{tel}
+        </if>
+        and u.status_cd = '0'
         limit 1
     </select>
 

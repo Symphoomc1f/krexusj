@@ -2,6 +2,10 @@ package com.java110.things.service.yld04;
 
 
 import com.java110.things.accessControl.HeartbeatCloudApiThread;
+import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.factory.ApplicationContextFactory;
+import com.java110.things.factory.NotifyAccessControlFactory;
+import com.java110.things.service.INotifyAccessControlService;
 import com.java110.things.util.Base64Convert;
 import com.sun.javafx.collections.MappingChange;
 import com.sun.jna.Memory;
@@ -843,6 +847,19 @@ public static class discover_ipscan_cb_t_Realize implements libFaceRecognition.d
         } else {
             mapcamreip.put(deCode(new String(ips.mac)).trim(), deCode(new String(ips.ip)).trim());
         }
+        //设备上报
+        INotifyAccessControlService notifyAccessControlService= NotifyAccessControlFactory.getINotifyAccessControlService();
+        MachineDto machineDto = new MachineDto();
+        machineDto.setMachineId(UUID.randomUUID().toString());
+        machineDto.setMachineIp(deCode(new String(ips.ip)).trim());
+        machineDto.setMachineMac(deCode(new String(ips.mac)).trim());
+        machineDto.setMachineCode(deCode(new String(ips.manufacturer)).trim());
+        machineDto.setMachineName(deCode(new String(ips.mac)).trim());
+        machineDto.setMachineVersion("v1.0");
+        notifyAccessControlService.uploadMachine(machineDto);
+
+
+
     }
 }
 

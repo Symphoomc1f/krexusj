@@ -3,6 +3,9 @@ package com.java110.things.dao;
 import com.java110.things.entity.machine.MachineDto;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @ClassName IMachineServiceDao
  * @Description TODO
@@ -16,8 +19,23 @@ public interface IMachineServiceDao {
 
     /**
      * 保存设备信息
+     *
      * @param machineDto 设备信息
      * @return 返回影响记录数
      */
     int saveMachine(MachineDto machineDto);
+
+    /**
+     * 查询设备信息
+     * @param machineDto 设备信息
+     * @return
+     */
+    List<MachineDto> getMachines(MachineDto machineDto);
+
+    /**
+     * 查询设备总记录数
+     * @param machineDto 设备信息
+     * @return
+     */
+    long getMachineCount(MachineDto machineDto);
 }

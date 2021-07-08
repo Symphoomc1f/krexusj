@@ -14,5 +14,21 @@ import org.springframework.http.ResponseEntity;
  **/
 public interface IUserService {
 
-    public ResultDto login(UserDto userDto) throws Exception;
+     ResultDto login(UserDto userDto) throws Exception;
+
+    /**
+     * 查询用户信息
+     * @param userDto 用户信息
+     * @return 返回用户信息
+     * @throws Exception
+     */
+    ResultDto getUser(UserDto userDto) throws Exception;
+
+    /**
+     * 退出登录
+     * @param token token信息
+     * @return
+     * @throws Exception
+     */
+    ResultDto loginOut(String token) throws Exception;
 }

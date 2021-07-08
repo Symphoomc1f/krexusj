@@ -3,7 +3,6 @@ import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
 
-console.log(axios.defaults.headers)
 // create an axios instance
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
@@ -17,7 +16,6 @@ service.interceptors.request.use(
   config => {
     // do something before request is sent
     config.headers['Accept'] = '*/*'
-    config.headers['Host'] = ''
     if (store.getters.token) {
       // let each request carry token
       // ['X-Token'] is a custom headers key
@@ -47,9 +45,10 @@ service.interceptors.response.use(
    */
   response => {
     const res = response.data
+    console.log('res', res)
 
     // if the custom code is not 20000, it is judged as an error.
-    if (res.code !== 20000) {
+    if (res.code !== 0) {
       Message({
         message: res.message || 'Error',
         type: 'error',

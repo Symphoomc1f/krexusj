@@ -1,5 +1,8 @@
 package com.java110.things.entity.machine;
 
+import com.alibaba.fastjson.JSONObject;
+import com.java110.things.entity.PageDto;
+
 import java.io.Serializable;
 
 /**
@@ -10,7 +13,7 @@ import java.io.Serializable;
  * @Version 1.0
  * add by wuxw 2020/5/10
  **/
-public class MachineDto implements Serializable {
+public class MachineDto extends PageDto implements Serializable {
     private String machineMac;
     private String machineId;
     private String machineCode;
@@ -101,5 +104,10 @@ public class MachineDto implements Serializable {
 
     public void setMachineIp(String machineIp) {
         this.machineIp = machineIp;
+    }
+
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
     }
 }
