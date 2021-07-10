@@ -57,6 +57,7 @@ public class MachineServiceImpl implements IMachineService {
 
     /**
      * 查询设备信息
+     *
      * @param machineDto 设备信息
      * @return
      * @throws Exception
@@ -71,12 +72,25 @@ public class MachineServiceImpl implements IMachineService {
         long count = machineServiceDao.getMachineCount(machineDto);
         int totalPage = (int) Math.ceil((double) count / (double) machineDto.getRow());
         List<MachineDto> machineDtoList = null;
-        if(count >0){
+        if (count > 0) {
             machineDtoList = machineServiceDao.getMachines(machineDto);
-        }else{
+        } else {
             machineDtoList = new ArrayList<>();
         }
-        ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, count,totalPage, machineDtoList);
+        ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, count, totalPage, machineDtoList);
+        return resultDto;
+    }
+
+    @Override
+    public ResultDto deleteMachine(MachineDto machineDto) throws Exception {
+        machineDto.setStatusCd(SystemConstant.STATUS_INVALID);
+        int count = machineServiceDao.updateMachine(machineDto);
+        ResultDto resultDto = null;
+        if (count < 1) {
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+        } else {
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+        }
         return resultDto;
     }
 

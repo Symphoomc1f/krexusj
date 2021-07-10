@@ -29,4 +29,12 @@ public interface IMachineService {
      * @throws Exception
      */
      ResultDto getMachine(MachineDto machineDto) throws Exception;
+
+    /**
+     * 删除设备
+     * @param machineDto 设备信息
+     * @return
+     * @throws Exception
+     */
+     ResultDto deleteMachine(MachineDto machineDto) throws Exception;
 }

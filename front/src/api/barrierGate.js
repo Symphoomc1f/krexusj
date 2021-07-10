@@ -1,18 +1,18 @@
 import request from '@/utils/request'
 
-export function getAccessControls(params) {
+export function getBarrierGates(params) {
     return request({
         url: '/api/machine/getMachines',
         method: 'get',
         params: {
             page: 1,
             row: 10,
-            machineTypeCd: '9998'
+            machineTypeCd: '9999'
         }
     })
 }
 
-export function getAccessControlsByCondition(params) {
+export function getBarrierGatesByCondition(params) {
     return request({
         url: '/api/machine/getMachines',
         method: 'get',
@@ -20,7 +20,7 @@ export function getAccessControlsByCondition(params) {
     })
 }
 
-export function deleteAccessControls(params) {
+export function deleteBarrierGates(params) {
     return request({
         url: '/api/machine/deleteMachine',
         method: 'post',

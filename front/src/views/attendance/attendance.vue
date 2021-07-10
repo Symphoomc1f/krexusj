@@ -3,20 +3,20 @@
     <div class="filter-container" style="margin-bottom:10px">
       <el-input
         v-model="listQuery.machineCode"
-        placeholder="请输入门禁编码"
+        placeholder="请输入考勤机编码"
         style="width: 200px;"
         class="filter-item"
       />
       <el-input
         v-model="listQuery.machineIp"
-        placeholder="请输入门禁IP"
+        placeholder="请输入考勤机IP"
         style="width: 200px;"
         class="filter-item"
       />
 
       <el-input
         v-model="listQuery.machineMac"
-        placeholder="请输入门禁Mac"
+        placeholder="请输入考勤机Mac"
         style="width: 200px;"
         class="filter-item"
       />
@@ -27,14 +27,14 @@
         type="primary"
         icon="el-icon-search"
         @click="queryMachine"
-      >查询门禁</el-button>
+      >查询考勤机</el-button>
       <el-button
         class="filter-item"
         style="margin-left: 10px;"
         type="primary"
         icon="el-icon-edit"
         @click="addMachine"
-      >添加门禁</el-button>
+      >添加考勤机</el-button>
     </div>
     <el-table
       v-loading="listLoading"
@@ -47,30 +47,30 @@
       <el-table-column align="center" label="编号" width="90">
         <template slot-scope="scope">{{ scope.$index + 1 }}</template>
       </el-table-column>
-      <el-table-column align="center" label="门禁名称">
+      <el-table-column align="center" label="考勤机名称">
         <template slot-scope="scope">{{ scope.row.machineName }}</template>
       </el-table-column>
-      <el-table-column align="center" label="门禁编码">
+      <el-table-column align="center" label="考勤机编码">
         <template slot-scope="scope">{{ scope.row.machineCode }}</template>
       </el-table-column>
-      <el-table-column label="门禁IP" align="center">
+      <el-table-column label="考勤机IP" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.machineIp }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="门禁版本号" align="center">
+      <el-table-column label="考勤机版本号" align="center">
         <template slot-scope="scope">{{ scope.row.machineVersion }}</template>
       </el-table-column>
       <el-table-column class-name="status-col" label="mac地址" align="center">
         <template slot-scope="scope">{{ scope.row.machineMac }}</template>
       </el-table-column>
-      <el-table-column class-name="status-col" label="门禁厂商" align="center">
+      <el-table-column class-name="status-col" label="考勤机厂商" align="center">
         <template slot-scope="scope">{{ scope.row.oem }}</template>
       </el-table-column>
       <el-table-column class-name="status-col" label="操作" align="right">
         <template slot-scope="{row,$index}">
-          <el-button size="mini" type="primary" @click="restartAccessControl(row,$index)">重启</el-button>
-          <el-button size="mini" type="danger" @click="deleteAccessControl(row,$index)">删除</el-button>
+          <el-button size="mini" type="primary" @click="restartBarrierGate(row,$index)">重启</el-button>
+          <el-button size="mini" type="danger" @click="deleteBarrierGate(row,$index)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -82,7 +82,7 @@
       @pagination="queryMachine"
     />
 
-    <el-dialog title="门禁" :visible.sync="dialogFormVisible">
+    <el-dialog title="考勤机" :visible.sync="dialogFormVisible">
       <el-form
         ref="dataForm"
         :rules="rules"
@@ -141,14 +141,14 @@
 
     <el-dialog
       title="温馨提示"
-      :visible.sync="deleteAccessControlDailogVisible"
+      :visible.sync="deleteBarrierGateDailogVisible"
       width="30%"
       :before-close="handleClose"
     >
-      <span>您确定删除当前门禁吗？</span>
+      <span>您确定删除当前考勤机吗？</span>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="deleteAccessControlDailogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="doDeleteAccessControl">确 定</el-button>
+        <el-button @click="deleteBarrierGateDailogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="doDeleteBarrierGate">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -156,10 +156,10 @@
 
 <script>
 import {
-  getAccessControls,
-  getAccessControlsByCondition,
-  deleteAccessControls
-} from "@/api/accessControl";
+  getBarrierGates,
+  getBarrierGatesByCondition,
+  deleteBarrierGates
+} from "@/api/barrierGate";
 import Pagination from "@/components/Pagination";
 import { parseTime } from "@/utils";
 
@@ -180,16 +180,16 @@ export default {
       listQuery: {
         page: 1,
         row: 10,
-        machineTypeCd: "9998",
+        machineTypeCd: "9999",
         machineCode: "",
         machineIp: "",
         machineMac: ""
       },
       list: null,
       listLoading: true,
-      deleteAccessControlDailogVisible: false,
+      deleteBarrierGateDailogVisible: false,
       dialogFormVisible: false,
-      curAccessControl: {},
+      curBarrierGate: {},
       temp: {
         id: undefined,
         importance: 1,
@@ -223,38 +223,38 @@ export default {
   methods: {
     fetchData() {
       this.listLoading = true;
-      getAccessControls().then(response => {
+      getBarrierGates().then(response => {
         this.list = response.data;
         this.listLoading = false;
       });
     },
     queryMachine() {
       this.listLoading = true;
-      getAccessControlsByCondition(this.listQuery).then(response => {
+      getBarrierGatesByCondition(this.listQuery).then(response => {
         this.list = response.data;
         this.listLoading = false;
       });
     },
-    addAccessControl() {
+    addBarrierGate() {
       this.dialogFormVisible = true;
     },
-    deleteAccessControl(_row) {
-      this.deleteAccessControlDailogVisible = true;
-      this.curAccessControl = _row;
+    deleteBarrierGate(_row) {
+      this.deleteBarrierGateDailogVisible = true;
+      this.curBarrierGate = _row;
     },
-    doDeleteAccessControl() {
+    doDeleteBarrierGate() {
       this.listLoading = true;
-      deleteAccessControls(this.curAccessControl).then(response => {
+      deleteBarrierGates(this.curBarrierGate).then(response => {
         this.listLoading = false;
         this.$message({
           type: "info",
           message: response.msg
         });
-        this.deleteAccessControlDailogVisible = false;
+        this.deleteBarrierGateDailogVisible = false;
         this.queryMachine();
       });
     },
-    restartAccessControl(_row) {}
+    restartBarrierGate(_row) {}
   }
 };
 </script>

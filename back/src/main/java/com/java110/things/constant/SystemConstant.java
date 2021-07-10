@@ -19,6 +19,12 @@ public class SystemConstant {
     public final static String HTTP_USER_ID = "user_id";
     public final static String ORDER_DEFAULT_USER_ID = "-1";
 
+    //有效
+    public final static String STATUS_VALID = "0";
+
+    //无效
+    public final static String STATUS_INVALID = "1";
+
 
     /**
      * 登录时的用户ID

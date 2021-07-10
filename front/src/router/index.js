@@ -66,7 +66,7 @@ export const constantRoutes = [
         path: 'accessControl',
         name: '门禁',
         component: () => import('@/views/accessControl/accessControl'),
-        meta: { title: '门禁信息', icon: 'table' }
+        meta: { title: '门禁设备', icon: 'table' }
       },
       {
         path: 'tree',
@@ -76,85 +76,81 @@ export const constantRoutes = [
       }
     ]
   },
-
   {
-    path: '/form',
+    path: '/barrierGate',
     component: Layout,
+    redirect: '/barrierGate/barrierGate',
+    name: 'Example',
+    meta: { title: '道闸管理', icon: 'example' },
     children: [
       {
-        path: 'index',
-        name: 'Form',
-        component: () => import('@/views/form/index'),
-        meta: { title: 'Form', icon: 'form' }
-      }
-    ]
-  },
-
-  {
-    path: '/nested',
-    component: Layout,
-    redirect: '/nested/menu1',
-    name: 'Nested',
-    meta: {
-      title: 'Nested',
-      icon: 'nested'
-    },
-    children: [
-      {
-        path: 'menu1',
-        component: () => import('@/views/nested/menu1/index'), // Parent router-view
-        name: 'Menu1',
-        meta: { title: 'Menu1' },
-        children: [
-          {
-            path: 'menu1-1',
-            component: () => import('@/views/nested/menu1/menu1-1'),
-            name: 'Menu1-1',
-            meta: { title: 'Menu1-1' }
-          },
-          {
-            path: 'menu1-2',
-            component: () => import('@/views/nested/menu1/menu1-2'),
-            name: 'Menu1-2',
-            meta: { title: 'Menu1-2' },
-            children: [
-              {
-                path: 'menu1-2-1',
-                component: () => import('@/views/nested/menu1/menu1-2/menu1-2-1'),
-                name: 'Menu1-2-1',
-                meta: { title: 'Menu1-2-1' }
-              },
-              {
-                path: 'menu1-2-2',
-                component: () => import('@/views/nested/menu1/menu1-2/menu1-2-2'),
-                name: 'Menu1-2-2',
-                meta: { title: 'Menu1-2-2' }
-              }
-            ]
-          },
-          {
-            path: 'menu1-3',
-            component: () => import('@/views/nested/menu1/menu1-3'),
-            name: 'Menu1-3',
-            meta: { title: 'Menu1-3' }
-          }
-        ]
+        path: 'barrierGate',
+        name: '道闸',
+        component: () => import('@/views/barrierGate/barrierGate'),
+        meta: { title: '道闸设备', icon: 'table' }
       },
       {
-        path: 'menu2',
-        component: () => import('@/views/nested/menu2/index'),
-        meta: { title: 'menu2' }
+        path: 'tree',
+        name: 'Tree',
+        component: () => import('@/views/tree/index'),
+        meta: { title: 'Tree', icon: 'tree' }
       }
     ]
   },
-
   {
-    path: 'external-link',
+    path: '/monitor',
     component: Layout,
+    redirect: '/monitor/monitor',
+    name: 'Example',
+    meta: { title: '监控管理', icon: 'example' },
     children: [
       {
-        path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
-        meta: { title: 'External Link', icon: 'link' }
+        path: 'monitor',
+        name: '道闸',
+        component: () => import('@/views/monitorVedio/monitorVedio'),
+        meta: { title: '监控设备', icon: 'table' }
+      },
+      {
+        path: 'tree',
+        name: 'Tree',
+        component: () => import('@/views/tree/index'),
+        meta: { title: 'Tree', icon: 'tree' }
+      }
+    ]
+  },
+  {
+    path: '/attendance',
+    component: Layout,
+    redirect: '/attendance/attendance',
+    name: 'Example',
+    meta: { title: '云考勤管理', icon: 'example' },
+    children: [
+      {
+        path: 'monitor',
+        name: '考勤',
+        component: () => import('@/views/attendance/attendance'),
+        meta: { title: '考勤设备', icon: 'table' }
+      },
+      {
+        path: 'tree',
+        name: 'Tree',
+        component: () => import('@/views/tree/index'),
+        meta: { title: 'Tree', icon: 'tree' }
+      }
+    ]
+  },
+  {
+    path: '/settings',
+    component: Layout,
+    redirect: '/settings/settings',
+    name: 'Example',
+    meta: { title: '系统设置', icon: 'setting' },
+    children: [
+      {
+        path: 'monitor',
+        name: '系统设置',
+        component: () => import('@/views/settings/settings'),
+        meta: { title: '系统设置', icon: 'table' }
       }
     ]
   },

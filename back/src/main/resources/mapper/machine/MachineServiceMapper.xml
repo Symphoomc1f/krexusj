@@ -1,29 +1,32 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.java110.things.dao.IMachineServiceDao" >
+<mapper namespace="com.java110.things.dao.IMachineServiceDao">
 
-    <select id="get" parameterType="string" resultType="Map" >
+    <select id="get" parameterType="string" resultType="Map">
         select * from u_user
     </select>
 
     <insert id="saveMachine" parameterType="com.java110.things.entity.machine.MachineDto">
         INSERT INTO
-        machine (machine_id, machine_code, machine_version, machine_name, machine_type_cd, machine_ip, machine_mac)
-        VALUES (#{machineId}, #{machineCode}, #{machineVersion}, #{machineName}, #{machineTypeCd}, #{machineIp}, #{machineMac})
+        machine (machine_id, machine_code, machine_version, machine_name, machine_type_cd, machine_ip, machine_mac,oem)
+        VALUES (#{machineId}, #{machineCode}, #{machineVersion}, #{machineName}, #{machineTypeCd}, #{machineIp},
+        #{machineMac},#{oem})
     </insert>
 
     <!--
         查询设备信息
     -->
-    <select id="getMachines" parameterType="com.java110.things.entity.machine.MachineDto" resultType="com.java110.things.entity.machine.MachineDto">
+    <select id="getMachines" parameterType="com.java110.things.entity.machine.MachineDto"
+            resultType="com.java110.things.entity.machine.MachineDto">
         select
-            t.machine_id machineId,
-            t.machine_code machineCode,
-            t.machine_version machineVersion,
-            t.machine_name machineName,
-            t.machine_type_cd machineTypeCd,
-            t.machine_ip machineIp,
-            t.machine_mac machineMac
+        t.machine_id machineId,
+        t.machine_code machineCode,
+        t.machine_version machineVersion,
+        t.machine_name machineName,
+        t.machine_type_cd machineTypeCd,
+        t.machine_ip machineIp,
+        t.machine_mac machineMac,
+        t.oem
         from machine t
         where 1=1
         <if test="machineId != null and machineId != ''">
@@ -47,11 +50,15 @@
         <if test="machineMac != null and machineMac != ''">
             and t.machine_mac = #{machineMac}
         </if>
+        <if test="oem != null and oem != ''">
+            and t.oem = #{oem}
+        </if>
+        and t.status_cd = '0'
         order by t.create_time desc
         <if test="page != -1 and page != null ">
             limit #{page}, #{row}
         </if>
-        
+
     </select>
 
     <select id="getMachineCount" parameterType="com.java110.things.entity.machine.MachineDto" resultType="long">
@@ -80,8 +87,50 @@
         <if test="machineMac != null and machineMac != ''">
             and t.machine_mac = #{machineMac}
         </if>
+        <if test="oem != null and oem != ''">
+            and t.oem = #{oem}
+        </if>
+        and t.status_cd = '0'
         order by t.create_time desc
 
     </select>
+
+    <update id="updateMachine" parameterType="com.java110.things.entity.machine.MachineDto">
+        update machine t
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="machineId != null and machineId != ''">
+                 t.machine_id = #{machineId},
+            </if>
+            <if test="machineCode != null and machineCode != ''">
+                 t.machine_code = #{machineCode},
+            </if>
+            <if test="machineVersion != null and machineVersion != ''">
+                 t.machine_version = #{machineVersion},
+            </if>
+            <if test="machineName != null and machineName != ''">
+                 t.machine_name = #{machineName},
+            </if>
+            <if test="machineTypeCd != null and machineTypeCd != ''">
+                 t.machine_type_cd = #{machineTypeCd},
+            </if>
+            <if test="machineIp != null and machineIp != ''">
+                 t.machine_ip = #{machineIp},
+            </if>
+            <if test="machineMac != null and machineMac != ''">
+                 t.machine_mac = #{machineMac},
+            </if>
+            <if test="statusCd != null and statusCd != ''">
+                t.status_cd = #{statusCd},
+            </if>
+            <if test="oem != null and oem != ''">
+                t.oem = #{oem},
+            </if>
+        </trim>
+        where 1=1
+        and t.status_cd = '0'
+        <if test="machineId != null and machineId != ''">
+            and t.machine_id = #{machineId}
+        </if>
+    </update>
 
 </mapper>

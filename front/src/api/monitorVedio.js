@@ -1,18 +1,18 @@
 import request from '@/utils/request'
 
-export function getAccessControls(params) {
+export function getMonitors(params) {
     return request({
         url: '/api/machine/getMachines',
         method: 'get',
         params: {
             page: 1,
             row: 10,
-            machineTypeCd: '9998'
+            machineTypeCd: '9996'
         }
     })
 }
 
-export function getAccessControlsByCondition(params) {
+export function getMonitorsByCondition(params) {
     return request({
         url: '/api/machine/getMachines',
         method: 'get',
@@ -20,7 +20,7 @@ export function getAccessControlsByCondition(params) {
     })
 }
 
-export function deleteAccessControls(params) {
+export function deleteMonitors(params) {
     return request({
         url: '/api/machine/deleteMachine',
         method: 'post',

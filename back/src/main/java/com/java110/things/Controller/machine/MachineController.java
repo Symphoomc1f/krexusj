@@ -84,13 +84,30 @@ public class MachineController extends BaseController {
                                               @RequestParam int row,
                                               @RequestParam String machineTypeCd) throws Exception {
 
-        Assert.hasText(machineTypeCd,"请求报文中未包含设备类型");
+        Assert.hasText(machineTypeCd, "请求报文中未包含设备类型");
         MachineDto machineDto = new MachineDto();
         machineDto.setPage(page);
         machineDto.setRow(row);
         machineDto.setMachineTypeCd(machineTypeCd);
 
         ResultDto resultDto = machineServiceImpl.getMachine(machineDto);
+        return super.createResponseEntity(resultDto);
+    }
+
+    /**
+     * 删除设备 动作
+     *
+     * @param paramIn 入参
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(path = "/deleteMachine", method = RequestMethod.POST)
+    public ResponseEntity<String> deleteMachine(@RequestBody String paramIn) throws Exception {
+        JSONObject paramObj = super.getParamJson(paramIn);
+
+        Assert.hasKeyAndValue(paramObj, "machineId", "请求报文中未包含硬件ID");
+
+        ResultDto resultDto = machineServiceImpl.deleteMachine(BeanConvertUtil.covertBean(paramObj, MachineDto.class));
         return super.createResponseEntity(resultDto);
     }
 }

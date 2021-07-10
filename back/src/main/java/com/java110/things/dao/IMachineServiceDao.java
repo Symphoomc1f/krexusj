@@ -38,4 +38,13 @@ public interface IMachineServiceDao {
      * @return
      */
     long getMachineCount(MachineDto machineDto);
+
+    /**
+     * 修改设备信息
+     *
+     * @param machineDto 设备信息
+     * @return 返回影响记录数
+     */
+    int updateMachine(MachineDto machineDto);
+
 }

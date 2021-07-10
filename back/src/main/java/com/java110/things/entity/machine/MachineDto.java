@@ -24,6 +24,8 @@ public class MachineDto extends PageDto implements Serializable {
     private String machineTypeCd;
     private String machineTypeCdName;
     private String machineIp;
+    private String statusCd;
+    private String oem;
 
 
     public String getMachineMac() {
@@ -104,6 +106,22 @@ public class MachineDto extends PageDto implements Serializable {
 
     public void setMachineIp(String machineIp) {
         this.machineIp = machineIp;
+    }
+
+    public String getStatusCd() {
+        return statusCd;
+    }
+
+    public void setStatusCd(String statusCd) {
+        this.statusCd = statusCd;
+    }
+
+    public String getOem() {
+        return oem;
+    }
+
+    public void setOem(String oem) {
+        this.oem = oem;
     }
 
     @Override

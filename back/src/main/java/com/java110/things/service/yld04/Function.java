@@ -853,13 +853,11 @@ public static class discover_ipscan_cb_t_Realize implements libFaceRecognition.d
         machineDto.setMachineId(UUID.randomUUID().toString());
         machineDto.setMachineIp(deCode(new String(ips.ip)).trim());
         machineDto.setMachineMac(deCode(new String(ips.mac)).trim());
-        machineDto.setMachineCode(deCode(new String(ips.ip)).trim());
+        machineDto.setMachineCode(deCode(new String(ips.mac)).trim());
         machineDto.setMachineName(deCode(new String(ips.mac)).trim());
         machineDto.setMachineVersion("v1.0");
+        machineDto.setOem("伊兰度");
         notifyAccessControlService.uploadMachine(machineDto);
-
-
-
     }
 }
 
