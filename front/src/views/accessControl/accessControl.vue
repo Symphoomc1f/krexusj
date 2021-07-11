@@ -33,7 +33,7 @@
         style="margin-left: 10px;"
         type="primary"
         icon="el-icon-edit"
-        @click="addMachine"
+        @click="addAccessControl"
       >添加门禁</el-button>
     </div>
     <el-table
@@ -91,51 +91,28 @@
         label-width="70px"
         style="width: 400px; margin-left:50px;"
       >
-        <el-form-item label="Type" prop="type">
-          <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-            <el-option
-              v-for="item in calendarTypeOptions"
-              :key="item.key"
-              :label="item.display_name"
-              :value="item.key"
-            />
-          </el-select>
+        <el-form-item label="编码" prop="type">
+          <el-input v-model="temp.machineCode" placeholder="请输入门禁编码" />
         </el-form-item>
-        <el-form-item label="Date" prop="timestamp">
-          <el-date-picker
-            v-model="temp.timestamp"
-            type="datetime"
-            placeholder="Please pick a date"
-          />
+        <el-form-item label="Mac" prop="type">
+          <el-input v-model="temp.machineMac" placeholder="请输入门禁mac" />
         </el-form-item>
-        <el-form-item label="Title" prop="title">
-          <el-input v-model="temp.title" />
+        <el-form-item label="版本" prop="type">
+          <el-input v-model="temp.machineVersion" placeholder="请输入门禁版本" />
         </el-form-item>
-        <el-form-item label="Status">
-          <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
-          </el-select>
+        <el-form-item label="名称">
+          <el-input v-model="temp.machineName" placeholder="请输入门禁名称" />
         </el-form-item>
-        <el-form-item label="Imp">
-          <el-rate
-            v-model="temp.importance"
-            :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
-            :max="3"
-            style="margin-top:8px;"
-          />
+        <el-form-item label="IP" prop="type">
+          <el-input v-model="temp.machineIp" placeholder="请输入门禁版本" />
         </el-form-item>
-        <el-form-item label="Remark">
-          <el-input
-            v-model="temp.remark"
-            :autosize="{ minRows: 2, maxRows: 4}"
-            type="textarea"
-            placeholder="Please input"
-          />
+        <el-form-item label="oem">
+          <el-input v-model="temp.oem" placeholder="请输入门禁厂家" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">Confirm</el-button>
+        <el-button @click="dialogFormVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveAccessControlInfo()">提交</el-button>
       </div>
     </el-dialog>
 
@@ -158,7 +135,8 @@
 import {
   getAccessControls,
   getAccessControlsByCondition,
-  deleteAccessControls
+  deleteAccessControls,
+  saveAccessControls
 } from "@/api/accessControl";
 import Pagination from "@/components/Pagination";
 import { parseTime } from "@/utils";
@@ -191,13 +169,12 @@ export default {
       dialogFormVisible: false,
       curAccessControl: {},
       temp: {
-        id: undefined,
-        importance: 1,
-        remark: "",
-        timestamp: new Date(),
-        title: "",
-        type: "",
-        status: "published"
+        machineCode: "",
+        machineMac: "",
+        machineVersion: "",
+        machineName: "",
+        machineIp: "",
+        oem: ""
       },
       rules: {
         type: [
@@ -251,6 +228,15 @@ export default {
           message: response.msg
         });
         this.deleteAccessControlDailogVisible = false;
+        this.queryMachine();
+      });
+    },
+    saveAccessControlInfo() {
+      this.listLoading = true;
+      saveAccessControls(this.temp).then(response => {
+        
+        this.listLoading = false;
+        this.dialogFormVisible = false;
         this.queryMachine();
       });
     },

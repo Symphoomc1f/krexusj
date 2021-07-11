@@ -27,3 +27,11 @@ export function deleteAccessControls(params) {
         data:params
     })
 }
+
+export function saveAccessControls(params) {
+    return request({
+        url: '/api/machine/saveMachine',
+        method: 'post',
+        data:params
+    })
+}
