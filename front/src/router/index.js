@@ -126,7 +126,7 @@ export const constantRoutes = [
     meta: { title: '云考勤管理', icon: 'example' },
     children: [
       {
-        path: 'monitor',
+        path: '/attendance',
         name: '考勤',
         component: () => import('@/views/attendance/attendance'),
         meta: { title: '考勤设备', icon: 'table' }
@@ -144,13 +144,19 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/settings/settings',
     name: 'Example',
-    meta: { title: '系统设置', icon: 'setting' },
+    meta: { title: '系统设置', icon: 'example' },
     children: [
       {
-        path: 'monitor',
+        path: '/mapping',
         name: '系统设置',
-        component: () => import('@/views/settings/settings'),
-        meta: { title: '系统设置', icon: 'table' }
+        component: () => import('@/views/mapping/mapping'),
+        meta: { title: '系统配置', icon: 'table' }
+      },
+      {
+        path: '/communitySettings',
+        name: '设置小区',
+        component: () => import('@/views/communitySettings/communitySettings'),
+        meta: { title: '设置小区', icon: 'table' }
       }
     ]
   },

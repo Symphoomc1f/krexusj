@@ -8,6 +8,7 @@ import com.java110.things.constant.ExceptionConstant;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
+import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.exception.HeartbeatCloudException;
 import com.java110.things.factory.HttpFactory;
@@ -43,14 +44,14 @@ public class AddUpdateFace extends BaseAccessControl {
      *
      * @param heartbeatTaskDto 心跳下发任务指令
      */
-    void addUpdateFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
+    void addUpdateFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto, CommunityDto communityDto) {
 
 
         String url = java110Properties.getCloudApiUrl() + AccessControlConstant.MACHINE_QUERY_USER_INFO;
 
         Map<String, String> headers = new HashMap<>();
         headers.put("machineCode", machineDto.getMachineCode());
-        headers.put("communityId", java110Properties.getCommunityId());
+        headers.put("communityId", communityDto.getCommunityId());
 
         JSONObject paramIn = new JSONObject();
         paramIn.put("faceid", heartbeatTaskDto.getTaskinfo());

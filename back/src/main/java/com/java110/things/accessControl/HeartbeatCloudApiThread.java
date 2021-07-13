@@ -7,12 +7,17 @@ import com.java110.things.constant.AccessControlConstant;
 import com.java110.things.constant.ExceptionConstant;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
+import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.response.ResultDto;
 import com.java110.things.exception.HeartbeatCloudException;
-import com.java110.things.exception.HeartbeatCloudResultException;
+import com.java110.things.exception.Result;
+import com.java110.things.exception.ThreadException;
 import com.java110.things.factory.ApplicationContextFactory;
 import com.java110.things.factory.HttpFactory;
 import com.java110.things.service.IAssessControlProcess;
+import com.java110.things.service.community.ICommunityService;
+import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
 import com.java110.things.util.DateUtil;
@@ -23,7 +28,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +59,10 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
 
     private DeleteFace deleteFace;
 
+    private ICommunityService communityService;
+
+    private IMachineService machineService;
+
     private ClearAllFace clearAllFace;
 
     public HeartbeatCloudApiThread(boolean state) {
@@ -65,6 +73,8 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
         addUpdateFace = ApplicationContextFactory.getBean("addUpdateFace", AddUpdateFace.class);
         deleteFace = ApplicationContextFactory.getBean("deleteFace", DeleteFace.class);
         clearAllFace = ApplicationContextFactory.getBean("clearAllFace", ClearAllFace.class);
+        communityService = ApplicationContextFactory.getBean("communityServiceImpl", ICommunityService.class);
+        machineService = ApplicationContextFactory.getBean("machineServiceImpl", IMachineService.class);
         java110Properties = ApplicationContextFactory.getBean("java110Properties", Java110Properties.class);
     }
 
@@ -86,7 +96,7 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
     /**
      * 执行任务
      */
-    private void executeTask() {
+    private void executeTask() throws Exception {
         if (INIT_MACHINE_STATE) {
             getAssessControlProcessImpl().initAssessControlProcess();
             INIT_MACHINE_STATE = false;
@@ -94,8 +104,23 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
         //查询设备信息
         List<MachineDto> machineDtos = queryMachines();
 
+        //查询 小区信息
+        CommunityDto communityDto = new CommunityDto();
+        ResultDto resultDto = communityService.getCommunity(communityDto);
+
+        if (resultDto.getCode() != ResponseConstant.SUCCESS) {
+            throw new ThreadException(Result.SYS_ERROR, "查询小区信息失败");
+        }
+
+        List<CommunityDto> communityDtos = (List<CommunityDto>)resultDto.getData();
+
+        if(communityDtos == null || communityDtos.size() < 1){
+            throw new ThreadException(Result.SYS_ERROR, "当前还没有设置小区，请先设置小区");
+        }
+
+
         //心跳云端是否下发指令
-        heartbeatCloud(machineDtos);
+        heartbeatCloud(machineDtos,communityDto);
 
     }
 
@@ -104,7 +129,7 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
      *
      * @param machineDtos 设备信息
      */
-    private void heartbeatCloud(List<MachineDto> machineDtos) {
+    private void heartbeatCloud(List<MachineDto> machineDtos,CommunityDto communityDto) {
 
         if (machineDtos == null || machineDtos.size() == 0) {
             return;
@@ -112,7 +137,7 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
 
         for (MachineDto machineDto : machineDtos) {
             try {
-                doHeartbeatCloud(machineDto);
+                doHeartbeatCloud(machineDto,communityDto);
             } catch (Exception e) {
                 logger.error(machineDto.getMachineCode() + "心跳失败", e);
             }
@@ -125,14 +150,14 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
      *
      * @param machineDto
      */
-    private void doHeartbeatCloud(MachineDto machineDto) {
+    private void doHeartbeatCloud(MachineDto machineDto,CommunityDto communityDto) {
 
         String url = java110Properties.getCloudApiUrl() + AccessControlConstant.MACHINE_HEARTBEART;
 
         Map<String, String> headers = new HashMap<>();
         headers.put("command", "gettask");
         headers.put("machinecode", machineDto.getMachineCode());
-        headers.put("communityId", java110Properties.getCommunityId());
+        headers.put("communityId", communityDto.getCommunityId());
 
         /**
          * {
@@ -220,7 +245,7 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
         JSONArray data = paramOut.getJSONArray("data");
 
         for (int dataIndex = 0; dataIndex < data.size(); dataIndex++) {
-            doHeartbeatCloudResult(machineDto, data.getJSONObject(dataIndex));
+            doHeartbeatCloudResult(machineDto, data.getJSONObject(dataIndex),communityDto);
         }
 
     }
@@ -234,7 +259,7 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
      *                    "taskId": "ed06d2329c774474a05475ac6f3d623d"  任务ID
      *                    }
      */
-    private void doHeartbeatCloudResult(MachineDto machineDto, JSONObject commandInfo) {
+    private void doHeartbeatCloudResult(MachineDto machineDto, JSONObject commandInfo,CommunityDto communityDto) {
 
         Assert.hasKeyAndValue(commandInfo, "taskcmd", "云端返回报文格式错误 未 包含指令编码 taskcmd" + commandInfo.toJSONString());
         Assert.hasKeyAndValue(commandInfo, "taskinfo", "云端返回报文格式错误 未 包含任务内容 taskinfo" + commandInfo.toJSONString());
@@ -244,13 +269,13 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
 
         switch (commandInfo.getInteger("taskcmd")) {
             case AccessControlConstant.CMD_ADD_UPDATE_FACE:
-                addUpdateFace.addUpdateFace(machineDto, heartbeatTaskDto);
+                addUpdateFace.addUpdateFace(machineDto, heartbeatTaskDto,communityDto);
                 break;
             case AccessControlConstant.CMD_DELETE_FACE:
-                deleteFace.deleteFace(machineDto, heartbeatTaskDto);
+                deleteFace.deleteFace(machineDto, heartbeatTaskDto,communityDto);
                 break;
             case AccessControlConstant.CMD_CLEAR_ALL_FACE:
-                clearAllFace.clearFace(machineDto, heartbeatTaskDto);
+                clearAllFace.clearFace(machineDto, heartbeatTaskDto,communityDto);
                 break;
             default:
                 logger.error("不支持的指令", commandInfo.getInteger("taskcmd"));
@@ -264,35 +289,13 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
      *
      * @return
      */
-    private List<MachineDto> queryMachines() {
-        String communityId = java110Properties.getCommunityId();
-        Map<String, Object> paramIn = new HashMap<>();
-        paramIn.put("communityId", communityId);
-        paramIn.put("page", 1);
-        paramIn.put("row", 100);
-        paramIn.put("machineTypeCd", 9996);
-
-        String url = java110Properties.getCloudApiUrl() + AccessControlConstant.LIST_MACHINES + HttpFactory.mapToUrlParam(paramIn);
-
-        ResponseEntity<String> responseEntity = HttpFactory.exchange(restTemplate, url, "", HttpMethod.GET);
-
-        if (responseEntity.getStatusCode() != HttpStatus.OK) {
-            logger.error("查询小区设备信息失败", responseEntity.getBody());
-            return null;
+    private List<MachineDto> queryMachines() throws Exception {
+        MachineDto machineDto = new MachineDto();
+        ResultDto resultDto = machineService.getMachine(machineDto);
+        if (resultDto.getCode() != ResponseConstant.SUCCESS) {
+            throw new ThreadException(Result.SYS_ERROR, "查询设备失败");
         }
-
-        String body = responseEntity.getBody();
-
-        JSONArray machines = JSONObject.parseObject(body).getJSONArray("machines");
-
-        JSONObject machine = null;
-        List<MachineDto> machineDtos = new ArrayList<>();
-        for (int machineIndex = 0; machineIndex < machines.size(); machineIndex++) {
-            machine = machines.getJSONObject(machineIndex);
-
-            machineDtos.add(BeanConvertUtil.covertBean(machine, MachineDto.class));
-        }
-
+        List<MachineDto> machineDtos = (List<MachineDto>) resultDto.getData();
         return machineDtos;
 
     }

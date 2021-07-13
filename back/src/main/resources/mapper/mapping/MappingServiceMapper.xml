@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java110.things.dao.IMappingServiceDao">
+
+    <!-- 添加映射 -->
+    <insert id="saveMapping" parameterType="com.java110.things.entity.mapping.MappingDto">
+        INSERT INTO `c_mapping` (id,`domain`, `name`, `key`, `value`, `remark`)
+        VALUES (#{id},#{domain}, #{name}, #{key}, #{value}, #{remark})
+    </insert>
+
+    <!--
+        查询设备信息
+    -->
+    <select id="getMappings" parameterType="com.java110.things.entity.mapping.MappingDto"
+            resultType="com.java110.things.entity.mapping.MappingDto">
+        select
+        t.id,
+        t.domain ,
+        t.name ,
+        t.key ,
+        t.value ,
+        t.remark ,
+        t.create_time createTime
+        from c_mapping t
+        where 1=1
+        <if test="id != null and id != ''">
+            and t.id = #{id}
+        </if>
+        <if test="domain != null and domain != ''">
+            and t.domain = #{domain}
+        </if>
+        <if test="name != null and name != ''">
+            and t.name = #{name}
+        </if>
+        <if test="key != null and key != ''">
+            and t.key = #{key}
+        </if>
+        <if test="value != null and value != ''">
+            and t.value = #{value}
+        </if>
+        and t.status_cd = '0'
+        order by t.create_time desc
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+
+    </select>
+
+    <select id="getMappingCount" parameterType="com.java110.things.entity.mapping.MappingDto" resultType="long">
+        select
+        count(1) count
+        from c_mapping t
+        where 1=1
+        <if test="id != null and id != ''">
+            and t.id = #{id}
+        </if>
+        <if test="domain != null and domain != ''">
+            and t.domain = #{domain}
+        </if>
+        <if test="name != null and name != ''">
+            and t.name = #{name}
+        </if>
+        <if test="key != null and key != ''">
+            and t.key = #{key}
+        </if>
+        <if test="value != null and value != ''">
+            and t.value = #{value}
+        </if>
+        and t.status_cd = '0'
+
+    </select>
+
+    <update id="updateMapping" parameterType="com.java110.things.entity.mapping.MappingDto">
+        update c_mapping t
+        <trim prefix="SET" suffixOverrides=",">
+
+            <if test="domain != null and domain != ''">
+                 t.domain = #{domain},
+            </if>
+            <if test="name != null and name != ''">
+                 t.name = #{name},
+            </if>
+            <if test="key != null and key != ''">
+                 t.key = #{key},
+            </if>
+            <if test="value != null and value != ''">
+                 t.value = #{value},
+            </if>
+            <if test="remark != null and remark != ''">
+                t.remark = #{remark},
+            </if>
+            <if test="statusCd != null and statusCd != ''">
+                t.status_cd = #{statusCd},
+            </if>
+        </trim>
+        where 1=1
+        and t.status_cd = '0'
+        <if test="id != null and id != ''">
+            and t.id = #{id}
+        </if>
+    </update>
+
+</mapper>

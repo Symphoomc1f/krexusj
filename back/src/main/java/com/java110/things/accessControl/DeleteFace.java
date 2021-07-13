@@ -1,6 +1,7 @@
 package com.java110.things.accessControl;
 
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
+import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +16,7 @@ public class DeleteFace extends BaseAccessControl{
      *
      * @param heartbeatTaskDto 心跳下发任务指令
      */
-    void deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
+    void deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto,CommunityDto communityDt) {
         getAssessControlProcessImpl().deleteFace(machineDto,heartbeatTaskDto);
     }
 }
