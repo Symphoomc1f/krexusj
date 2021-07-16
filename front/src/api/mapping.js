@@ -43,3 +43,11 @@ export function updateMappings(params) {
         data:params
     })
 }
+
+export function freshMappings(params) {
+    return request({
+        url: '/api/mapping/freshMapping',
+        method: 'post',
+        data:params
+    })
+}

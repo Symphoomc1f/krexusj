@@ -3,6 +3,7 @@ package com.java110.things.init;
 import com.java110.things.accessControl.HeartbeatCloudApiThread;
 import com.java110.things.accessControl.ScanAccessControlThread;
 import com.java110.things.factory.ApplicationContextFactory;
+import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.thread.ClearExpireJwtThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +30,21 @@ public class ServiceStartInit {
 
             //清理会话
             startClearJwtThread();
+
+            //刷入缓存
+            freshCache();
         } catch (Exception ex) {
             logger.error("系统初始化失败", ex);
             throw new IllegalStateException("系统初始化失败", ex);
         }
+    }
+
+    /**
+     * 刷新缓存
+     */
+    private static void freshCache() {
+        //刷新映射缓存
+        MappingCacheFactory.flushCacheMappings();
     }
 
     private static void startScanAccessCrontrolMachine() {

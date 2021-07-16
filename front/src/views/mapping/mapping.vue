@@ -1,18 +1,15 @@
 <template>
   <div class="app-container">
     <div class="filter-container" style="margin-bottom:10px">
-        <el-select v-model="listQuery.domain" placeholder="请选择域">
-            <el-option
-              label="请选择域"
-              value=""
-            ></el-option>
-            <el-option
-              v-for="item in domainOption"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            ></el-option>
-          </el-select>
+      <el-select v-model="listQuery.domain" placeholder="请选择域">
+        <el-option label="请选择域" value></el-option>
+        <el-option
+          v-for="item in domainOption"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"
+        ></el-option>
+      </el-select>
       <el-input
         v-model="listQuery.name"
         placeholder="请输入名称"
@@ -40,6 +37,13 @@
         icon="el-icon-edit"
         @click="addMapping"
       >添加配置</el-button>
+      <el-button
+        class="filter-item"
+        style="margin-left: 10px;"
+        type="primary"
+        icon="el-icon-refresh-right"
+        @click="freshMapping"
+      >刷新缓存</el-button>
     </div>
     <el-table
       v-loading="listLoading"
@@ -148,7 +152,8 @@ import {
   getMappingsByCondition,
   deleteMappings,
   saveMappings,
-  updateMappings
+  updateMappings,
+  freshMappings
 } from "@/api/mapping";
 import { parseTime } from "@/utils";
 
@@ -257,7 +262,7 @@ export default {
           this._cancleMapping();
           this.queryMapping();
         });
-        return ;
+        return;
       }
       saveMappings(this.temp).then(response => {
         this.listLoading = false;
@@ -267,6 +272,17 @@ export default {
     },
     _cancleMapping() {
       this.dialogFormVisible = false;
+    },
+    freshMapping() {
+      this.listLoading = true;
+      freshMappings(this.temp).then(response => {
+        this.listLoading = false;
+        this.$notify({
+          title: '成功',
+          message: '刷新缓存完成',
+          type: 'success'
+        });
+      });
     }
   }
 };

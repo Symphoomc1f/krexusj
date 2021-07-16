@@ -49,4 +49,13 @@ public interface IMappingService {
      * @throws Exception
      */
     ResultDto updateMapping(MappingDto mappingDto) throws Exception;
+
+    /**
+     * 刷新映射信息
+     *
+     * @param mappingDto 设备信息
+     * @return
+     * @throws Exception
+     */
+    ResultDto freshMapping(MappingDto mappingDto) throws Exception;
 }

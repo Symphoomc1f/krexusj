@@ -12,6 +12,7 @@ import com.java110.things.entity.response.ResultDto;
 import com.java110.things.exception.Result;
 import com.java110.things.exception.ServiceException;
 import com.java110.things.factory.HttpFactory;
+import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.mapping.IMappingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -124,6 +125,12 @@ public class MappingServiceImpl implements IMappingService {
             resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
         }
         return resultDto;
+    }
+
+    @Override
+    public ResultDto freshMapping(MappingDto mappingDto) throws Exception {
+        MappingCacheFactory.flushCacheMappings();
+        return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
     }
 
 

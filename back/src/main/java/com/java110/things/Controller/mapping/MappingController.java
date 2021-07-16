@@ -118,4 +118,20 @@ public class MappingController extends BaseController {
         ResultDto resultDto = mappingServiceImpl.updateMapping(BeanConvertUtil.covertBean(paramObj, MappingDto.class));
         return super.createResponseEntity(resultDto);
     }
+
+    /**
+     * 添加设备接口类
+     *
+     * @param param 请求报文 包括设备 前台填写信息
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/freshMapping", method = RequestMethod.POST)
+    public ResponseEntity<String> freshMapping(@RequestBody String param) throws Exception {
+
+        JSONObject paramObj = super.getParamJson(param);
+        MappingDto mappingDto = new MappingDto();
+        ResultDto resultDto = mappingServiceImpl.freshMapping(mappingDto);
+        return super.createResponseEntity(resultDto);
+    }
 }
