@@ -12,6 +12,7 @@ import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.exception.HeartbeatCloudException;
 import com.java110.things.factory.HttpFactory;
+import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.IAssessControlProcess;
 import com.java110.things.util.BeanConvertUtil;
 import com.java110.things.util.StringUtil;
@@ -47,7 +48,7 @@ public class AddUpdateFace extends BaseAccessControl {
     void addUpdateFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto, CommunityDto communityDto) {
 
 
-        String url = java110Properties.getCloudApiUrl() + AccessControlConstant.MACHINE_QUERY_USER_INFO;
+        String url = MappingCacheFactory.getValue("CLOUD_API") + AccessControlConstant.MACHINE_QUERY_USER_INFO;
 
         Map<String, String> headers = new HashMap<>();
         headers.put("machineCode", machineDto.getMachineCode());

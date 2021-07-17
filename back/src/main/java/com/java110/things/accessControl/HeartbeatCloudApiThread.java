@@ -1,5 +1,6 @@
 package com.java110.things.accessControl;
 
+import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.config.Java110Properties;
@@ -15,6 +16,7 @@ import com.java110.things.exception.Result;
 import com.java110.things.exception.ThreadException;
 import com.java110.things.factory.ApplicationContextFactory;
 import com.java110.things.factory.HttpFactory;
+import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.IAssessControlProcess;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.machine.IMachineService;
@@ -26,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.NumberUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
@@ -83,7 +86,8 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
         long waitTime = DEFAULT_WAIT_SECOND;
         while (HEARTBEAT_STATE) {
             try {
-                waitTime = DEFAULT_WAIT_SECOND;
+                String heartBeatTime = MappingCacheFactory.getValue("ACCESS_CONTROL_HEARTBEAT_TIME");
+                waitTime = StringUtils.isNumber(heartBeatTime) ? Long.parseLong(heartBeatTime) * 1000 : DEFAULT_WAIT_SECOND;
                 Thread.sleep(waitTime);
                 executeTask();
 
@@ -112,15 +116,15 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
             throw new ThreadException(Result.SYS_ERROR, "查询小区信息失败");
         }
 
-        List<CommunityDto> communityDtos = (List<CommunityDto>)resultDto.getData();
+        List<CommunityDto> communityDtos = (List<CommunityDto>) resultDto.getData();
 
-        if(communityDtos == null || communityDtos.size() < 1){
+        if (communityDtos == null || communityDtos.size() < 1) {
             throw new ThreadException(Result.SYS_ERROR, "当前还没有设置小区，请先设置小区");
         }
 
 
         //心跳云端是否下发指令
-        heartbeatCloud(machineDtos,communityDto);
+        heartbeatCloud(machineDtos, communityDto);
 
     }
 
@@ -129,7 +133,7 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
      *
      * @param machineDtos 设备信息
      */
-    private void heartbeatCloud(List<MachineDto> machineDtos,CommunityDto communityDto) {
+    private void heartbeatCloud(List<MachineDto> machineDtos, CommunityDto communityDto) {
 
         if (machineDtos == null || machineDtos.size() == 0) {
             return;
@@ -137,7 +141,7 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
 
         for (MachineDto machineDto : machineDtos) {
             try {
-                doHeartbeatCloud(machineDto,communityDto);
+                doHeartbeatCloud(machineDto, communityDto);
             } catch (Exception e) {
                 logger.error(machineDto.getMachineCode() + "心跳失败", e);
             }
@@ -150,9 +154,9 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
      *
      * @param machineDto
      */
-    private void doHeartbeatCloud(MachineDto machineDto,CommunityDto communityDto) {
+    private void doHeartbeatCloud(MachineDto machineDto, CommunityDto communityDto) {
 
-        String url = java110Properties.getCloudApiUrl() + AccessControlConstant.MACHINE_HEARTBEART;
+        String url = MappingCacheFactory.getValue("CLOUD_API") + AccessControlConstant.MACHINE_HEARTBEART;
 
         Map<String, String> headers = new HashMap<>();
         headers.put("command", "gettask");
@@ -245,7 +249,7 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
         JSONArray data = paramOut.getJSONArray("data");
 
         for (int dataIndex = 0; dataIndex < data.size(); dataIndex++) {
-            doHeartbeatCloudResult(machineDto, data.getJSONObject(dataIndex),communityDto);
+            doHeartbeatCloudResult(machineDto, data.getJSONObject(dataIndex), communityDto);
         }
 
     }
@@ -259,7 +263,7 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
      *                    "taskId": "ed06d2329c774474a05475ac6f3d623d"  任务ID
      *                    }
      */
-    private void doHeartbeatCloudResult(MachineDto machineDto, JSONObject commandInfo,CommunityDto communityDto) {
+    private void doHeartbeatCloudResult(MachineDto machineDto, JSONObject commandInfo, CommunityDto communityDto) {
 
         Assert.hasKeyAndValue(commandInfo, "taskcmd", "云端返回报文格式错误 未 包含指令编码 taskcmd" + commandInfo.toJSONString());
         Assert.hasKeyAndValue(commandInfo, "taskinfo", "云端返回报文格式错误 未 包含任务内容 taskinfo" + commandInfo.toJSONString());
@@ -269,13 +273,13 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
 
         switch (commandInfo.getInteger("taskcmd")) {
             case AccessControlConstant.CMD_ADD_UPDATE_FACE:
-                addUpdateFace.addUpdateFace(machineDto, heartbeatTaskDto,communityDto);
+                addUpdateFace.addUpdateFace(machineDto, heartbeatTaskDto, communityDto);
                 break;
             case AccessControlConstant.CMD_DELETE_FACE:
-                deleteFace.deleteFace(machineDto, heartbeatTaskDto,communityDto);
+                deleteFace.deleteFace(machineDto, heartbeatTaskDto, communityDto);
                 break;
             case AccessControlConstant.CMD_CLEAR_ALL_FACE:
-                clearAllFace.clearFace(machineDto, heartbeatTaskDto,communityDto);
+                clearAllFace.clearFace(machineDto, heartbeatTaskDto, communityDto);
                 break;
             default:
                 logger.error("不支持的指令", commandInfo.getInteger("taskcmd"));
