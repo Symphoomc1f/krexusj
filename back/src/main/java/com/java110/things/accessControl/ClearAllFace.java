@@ -16,7 +16,7 @@ public class ClearAllFace extends BaseAccessControl {
      *
      * @param heartbeatTaskDto 心跳下发任务指令
      */
-    void clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto, CommunityDto communityDt) {
+    void clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto, CommunityDto communityDt) throws Exception {
         getAssessControlProcessImpl().clearFace(machineDto);
     }
 }

@@ -9,22 +9,22 @@
     <select id="getManufacturers" parameterType="com.java110.things.entity.manufacturer.ManufacturerDto"
             resultType="com.java110.things.entity.manufacturer.ManufacturerDto">
         SELECT
-            t.hm_id hmId,
-            t.hm_name hmName,
-            t.version,
-            t.protocol_impl protocolImpl,
-            t.hm_type tmType,
-            t.author,
-            t.link,
-            t.license,
-            t.prod_url prodUrl,
-            t.create_time createTime,
-            t.default_protocol defaultProtocol
+        t.hm_id hmId,
+        t.hm_name hmName,
+        t.version,
+        t.protocol_impl protocolImpl,
+        t.hm_type hmType,
+        t.author,
+        t.link,
+        t.license,
+        t.prod_url prodUrl,
+        t.create_time createTime,
+        t.default_protocol defaultProtocol
         FROM
-            hardware_manufacturer t
+        hardware_manufacturer t
         WHERE
         1 = 1
-        <if test="hmId null and hmId != ''">
+        <if test="hmId != null and hmId != ''">
             AND t.hm_id = #{hmId}
         </if>
         <if test="hmName != null and hmName != ''">
@@ -36,8 +36,8 @@
         <if test="protocolImpl != null and protocolImpl != ''">
             AND t.protocol_impl = #{protocolImpl}
         </if>
-        <if test="tmType != null and tmType != ''">
-            AND t.hm_type = #{tmType}
+        <if test="hmType != null and hmType != ''">
+            AND t.hm_type = #{hmType}
         </if>
         <if test="defaultProtocol != null and defaultProtocol != ''">
             AND t.default_protocol = #{defaultProtocol}
@@ -53,12 +53,12 @@
     <select id="getManufacturerCount" parameterType="com.java110.things.entity.manufacturer.ManufacturerDto"
             resultType="long">
         select
-            count(1) count
+        count(1) count
         FROM
-            hardware_manufacturer t
+        hardware_manufacturer t
         WHERE
         1 = 1
-        <if test="hmId null and hmId != ''">
+        <if test="hmId != null and hmId != ''">
             AND t.hm_id = #{hmId}
         </if>
         <if test="hmName != null and hmName != ''">
@@ -70,8 +70,8 @@
         <if test="protocolImpl != null and protocolImpl != ''">
             AND t.protocol_impl = #{protocolImpl}
         </if>
-        <if test="tmType != null and tmType != ''">
-            AND t.hm_type = #{tmType}
+        <if test="hmType != null and hmType != ''">
+            AND t.hm_type = #{hmType}
         </if>
         <if test="defaultProtocol != null and defaultProtocol != ''">
             AND t.default_protocol = #{defaultProtocol}
@@ -79,5 +79,20 @@
         AND t.status_cd = '0'
 
     </select>
+
+    <update id="updateManufacturer" parameterType="com.java110.things.entity.manufacturer.ManufacturerDto"
+    >
+        update hardware_manufacturer t
+        set t.default_protocol = #{defaultProtocol}
+        where
+        1=1
+        <if test="hmType != null and hmType != ''">
+            AND t.hm_type = #{hmType}
+        </if>
+        <if test="hmId != null and hmId != ''">
+            AND t.hm_id = #{hmId}
+        </if>
+        AND t.status_cd = '0'
+    </update>
 
 </mapper>

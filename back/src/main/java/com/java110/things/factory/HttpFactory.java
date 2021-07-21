@@ -31,7 +31,7 @@ public class HttpFactory {
     public static HttpHeaders getHeader() {
         HttpHeaders header = new HttpHeaders();
         header.add("Content-Type", "application/json");
-        header.add(SystemConstant.HTTP_APP_ID.toLowerCase(), SystemConstant.APP_ID);
+        header.add(SystemConstant.HTTP_APP_ID.toLowerCase(), MappingCacheFactory.getValue("APP_ID"));
         header.add(SystemConstant.HTTP_USER_ID.toLowerCase(), SystemConstant.ORDER_DEFAULT_USER_ID);
         header.add(SystemConstant.HTTP_TRANSACTION_ID.toLowerCase(), UUID.randomUUID().toString());
         header.add(SystemConstant.HTTP_REQ_TIME.toLowerCase(), DateUtil.getyyyyMMddhhmmssDateString());
@@ -93,9 +93,20 @@ public class HttpFactory {
         HttpHeaders httpHeaders = getHeader();
         if (headers != null && !headers.isEmpty()) {
             for (String key : headers.keySet()) {
+                if (SystemConstant.HTTP_SIGN.equals(key)) {
+                    continue;
+                }
                 httpHeaders.add(key, headers.get(key));
             }
         }
+
+        String paramIn = HttpMethod.GET == httpMethod ? url : param;
+
+        // 生成sign
+        String sign = AuthenticationFactory.generatorSign(headers.get(SystemConstant.HTTP_TRANSACTION_ID),
+                headers.get(SystemConstant.HTTP_REQ_TIME),
+                paramIn);
+        httpHeaders.add(SystemConstant.HTTP_SIGN, sign);
         HttpEntity<String> httpEntity = new HttpEntity<String>(param, httpHeaders);
         ResponseEntity<String> responseEntity = null;
         try {

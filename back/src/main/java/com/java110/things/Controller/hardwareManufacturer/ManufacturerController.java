@@ -6,6 +6,7 @@ import com.java110.things.entity.manufacturer.ManufacturerDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.service.manufacturer.IManufacturerService;
 import com.java110.things.util.Assert;
+import com.java110.things.util.BeanConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -68,11 +69,10 @@ public class ManufacturerController extends BaseController {
 
         JSONObject paramObj = super.getParamJson(param);
 
-        Assert.hasKeyAndValue(paramObj, "hmId", "请求报文中未包含小区编码");
+        Assert.hasKeyAndValue(paramObj, "hmId", "请求报文中未包含厂商编码");
+        Assert.hasKeyAndValue(paramObj, "hmType", "请求报文中未包含厂商类型");
 
-
-        //ResultDto resultDto = manufacturerServiceImpl.getManufacturer(manufacturerDto);
-        ResultDto resultDto = null;
+        ResultDto resultDto = manufacturerServiceImpl.startManufacturer(BeanConvertUtil.covertBean(paramObj, ManufacturerDto.class));
         return super.createResponseEntity(resultDto);
     }
 

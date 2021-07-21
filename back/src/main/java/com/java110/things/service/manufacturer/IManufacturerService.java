@@ -23,5 +23,13 @@ public interface IManufacturerService {
      */
     ResultDto getManufacturer(ManufacturerDto manufacturerDto) throws Exception;
 
+    /**
+     * 选择该协议为 默认协议
+     * @param manufacturerDto 厂商信息
+     * @return
+     * @throws Exception
+     */
+    ResultDto startManufacturer(ManufacturerDto manufacturerDto) throws Exception;
+
 
 }

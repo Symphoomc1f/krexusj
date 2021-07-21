@@ -60,8 +60,8 @@
       </el-table-column>
       <el-table-column class-name="status-col" label="操作" align="right">
         <template slot-scope="{row,$index}">
-          <el-button size="mini" type="primary" @click="restartAccessControl(row,$index)">已经启用</el-button>
-          <el-button size="mini" type="danger" @click="startProtocol(row,$index)">启用</el-button>
+          <el-button  v-if= "row.defaultProtocol == 'T'" size="mini" type="danger" disabled="disabled">已经启用</el-button>
+          <el-button v-else size="mini" type="primary" @click="startProtocol(row,$index)">启用</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -78,10 +78,22 @@
       width="30%"
       :before-close="handleClose"
     >
-      <span>您确定已经阅读许可并启用该协议吗？</span>
+      <span>您确定已经阅读许可并同意启用该协议吗？</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="startProtocolDailogVisible = false">取 消</el-button>
         <el-button type="primary" @click="doStartProtocol">确 定</el-button>
+      </span>
+    </el-dialog>
+
+    <el-dialog
+      title="协议"
+      :visible.sync="viewLicenseVisible"
+      width="30%"
+      :before-close="handleClose"
+    >
+      <span>{{curProtocol.license}}</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="viewLicenseVisible = false">关闭</el-button>
       </span>
     </el-dialog>
   </div>
@@ -120,8 +132,17 @@ export default {
       listLoading: true,
       startProtocolDailogVisible: false,
       dialogFormVisible: false,
+      viewLicenseVisible: false,
       curProtocol: {},
     };
+  },
+  watch: {
+    viewLicenseVisible: function(val) {
+      if (val == false) {
+        this.curProtocol = {
+        };
+      }
+    }
   },
   created() {
     this.fetchData();
@@ -150,11 +171,12 @@ export default {
           message: response.msg
         });
         this.startProtocolDailogVisible = false;
-        this.queryMachine();
+        this.queryProtocol();
       });
     },
-    viewLicense() {
-      
+    viewLicense(_row,_index) {
+       this.viewLicenseVisible = true;
+        this.curProtocol = _row;
     },
     restartAccessControl(_row) {}
   }

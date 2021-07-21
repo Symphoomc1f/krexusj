@@ -96,6 +96,21 @@ public class AuthenticationFactory {
         return md5(transactionId + appId + businesses + code).toLowerCase();
     }
 
+    /**
+     * 生成签名
+     *
+     * @param transactionId
+     * @return
+     */
+    public static String generatorSign(String transactionId, String requestTime, String param) throws NoAuthorityException {
+
+        if ("ON".equals(MappingCacheFactory.getValue("SIGN_FLAG"))) {
+            String reqInfo = transactionId + requestTime + MappingCacheFactory.getValue("APP_ID") + param + MappingCacheFactory.getValue("SECURITY_CODE");
+            return md5(reqInfo);
+        }
+        return "";
+    }
+
 
     /**
      * 加密

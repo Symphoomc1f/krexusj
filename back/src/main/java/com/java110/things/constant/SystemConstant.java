@@ -10,7 +10,7 @@ package com.java110.things.constant;
  **/
 public class SystemConstant {
     //HC物联网平台
-    public static final String APP_ID = "992020051110000047";
+    //public static final String APP_ID = "992020051110000047";
     public final static String HTTP_APP_ID = "app-id";
     public final static String HTTP_TRANSACTION_ID = "transaction-id";
     public final static String HTTP_REQ_TIME = "req-time";

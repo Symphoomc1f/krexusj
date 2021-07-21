@@ -45,7 +45,7 @@ public class AddUpdateFace extends BaseAccessControl {
      *
      * @param heartbeatTaskDto 心跳下发任务指令
      */
-    void addUpdateFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto, CommunityDto communityDto) {
+    void addUpdateFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto, CommunityDto communityDto) throws Exception {
 
 
         String url = MappingCacheFactory.getValue("CLOUD_API") + AccessControlConstant.MACHINE_QUERY_USER_INFO;

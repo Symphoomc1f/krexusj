@@ -154,7 +154,7 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
      *
      * @param machineDto
      */
-    private void doHeartbeatCloud(MachineDto machineDto, CommunityDto communityDto) {
+    private void doHeartbeatCloud(MachineDto machineDto, CommunityDto communityDto) throws Exception {
 
         String url = MappingCacheFactory.getValue("CLOUD_API") + AccessControlConstant.MACHINE_HEARTBEART;
 
@@ -263,7 +263,7 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
      *                    "taskId": "ed06d2329c774474a05475ac6f3d623d"  任务ID
      *                    }
      */
-    private void doHeartbeatCloudResult(MachineDto machineDto, JSONObject commandInfo, CommunityDto communityDto) {
+    private void doHeartbeatCloudResult(MachineDto machineDto, JSONObject commandInfo, CommunityDto communityDto) throws Exception {
 
         Assert.hasKeyAndValue(commandInfo, "taskcmd", "云端返回报文格式错误 未 包含指令编码 taskcmd" + commandInfo.toJSONString());
         Assert.hasKeyAndValue(commandInfo, "taskinfo", "云端返回报文格式错误 未 包含任务内容 taskinfo" + commandInfo.toJSONString());

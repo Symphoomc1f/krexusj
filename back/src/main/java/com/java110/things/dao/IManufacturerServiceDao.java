@@ -28,5 +28,13 @@ public interface IManufacturerServiceDao {
     List<ManufacturerDto> getManufacturers(ManufacturerDto manufacturerDto);
 
 
+    /**
+     * 刷新协议
+     * @param manufacturerDto
+     * @return
+     */
+    long updateManufacturer(ManufacturerDto manufacturerDto);
+
+
 
 }

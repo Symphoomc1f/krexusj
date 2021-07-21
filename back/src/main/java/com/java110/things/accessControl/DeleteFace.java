@@ -16,7 +16,7 @@ public class DeleteFace extends BaseAccessControl{
      *
      * @param heartbeatTaskDto 心跳下发任务指令
      */
-    void deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto,CommunityDto communityDt) {
+    void deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto,CommunityDto communityDt) throws Exception {
         getAssessControlProcessImpl().deleteFace(machineDto,heartbeatTaskDto);
     }
 }
