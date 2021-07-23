@@ -27,6 +27,7 @@
         type="primary"
         icon="el-icon-edit"
         @click="addCommunity"
+        v-if="list.length == 0"
       >添加小区</el-button>
     </div>
     <el-table
@@ -129,7 +130,7 @@ export default {
       return statusMap[status];
     }
   },
-  components: {  },
+  components: {},
   data() {
     return {
       listQuery: {
@@ -147,9 +148,18 @@ export default {
         communityId: "",
         name: ""
       },
-      rules: {
-      }
+      rules: {}
     };
+  },
+  watch: {
+    dialogFormVisible: function(val) {
+      if (val == false) {
+        this.temp = {
+          communityId: "",
+          name: ""
+        };
+      }
+    }
   },
   created() {
     this.fetchData();
@@ -191,7 +201,6 @@ export default {
     saveCommunityInfo() {
       this.listLoading = true;
       saveCommunitys(this.temp).then(response => {
-        
         this.listLoading = false;
         this.dialogFormVisible = false;
         this.queryCommunity();

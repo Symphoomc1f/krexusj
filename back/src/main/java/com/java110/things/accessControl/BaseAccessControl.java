@@ -19,7 +19,7 @@ public class BaseAccessControl {
     /**
      * 访问硬件接口
      */
-    private IAssessControlProcess assessControlProcessImpl;
+    private static IAssessControlProcess assessControlProcessImpl;
 
     private IManufacturerService manufacturerServiceImpl;
 
@@ -29,7 +29,9 @@ public class BaseAccessControl {
      * @return
      */
     protected IAssessControlProcess getAssessControlProcessImpl() throws Exception {
-
+        if (assessControlProcessImpl != null) {
+            return assessControlProcessImpl;
+        }
         IManufacturerService manufacturerServiceImpl = ApplicationContextFactory.getBean("manufacturerServiceImpl", IManufacturerService.class);
         ManufacturerDto tmpManufacturerDto = new ManufacturerDto();
         tmpManufacturerDto.setHmType("1001");

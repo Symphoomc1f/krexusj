@@ -16,7 +16,7 @@ public class SystemConstant {
     public final static String HTTP_REQ_TIME = "req-time";
     public final static String HTTP_RES_TIME = "res-time";
     public final static String HTTP_SIGN = "sign";
-    public final static String HTTP_USER_ID = "user_id";
+    public final static String HTTP_USER_ID = "user-id";
     public final static String ORDER_DEFAULT_USER_ID = "-1";
 
     //有效

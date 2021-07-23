@@ -1,5 +1,6 @@
 package com.java110.things.accessControl;
 
+import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.config.Java110Properties;
@@ -11,6 +12,7 @@ import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.exception.HeartbeatCloudException;
 import com.java110.things.factory.ApplicationContextFactory;
 import com.java110.things.factory.HttpFactory;
+import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.IAssessControlProcess;
 import com.java110.things.service.yld04.Yld04AssessControlProcessAdapt;
 import com.java110.things.util.Assert;
@@ -55,7 +57,8 @@ public class ScanAccessControlThread implements Runnable {
         long waitTime = DEFAULT_WAIT_SECOND;
         while (HEARTBEAT_STATE) {
             try {
-                waitTime = DEFAULT_WAIT_SECOND;
+                String heartBeatTime = MappingCacheFactory.getValue("ACCESS_CONTROL_SCAN_TIME");
+                waitTime = StringUtils.isNumber(heartBeatTime) ? Long.parseLong(heartBeatTime) * 1000 : DEFAULT_WAIT_SECOND;
                 Thread.sleep(waitTime);
                 executeTask();
             } catch (Throwable e) {
@@ -67,7 +70,7 @@ public class ScanAccessControlThread implements Runnable {
     /**
      * 执行任务
      */
-    private void executeTask() {
+    private void executeTask() throws Exception {
 
         scanMachine.scan();
 

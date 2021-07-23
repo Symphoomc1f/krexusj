@@ -1,48 +1,31 @@
 package com.java110.things.service.yld04;
 
 
-import com.java110.things.accessControl.HeartbeatCloudApiThread;
 import com.java110.things.entity.machine.MachineDto;
-import com.java110.things.factory.ApplicationContextFactory;
+import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
 import com.java110.things.service.INotifyAccessControlService;
 import com.java110.things.util.Base64Convert;
-import com.sun.javafx.collections.MappingChange;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.ptr.IntByReference;
-import com.sun.jna.ptr.ByteByReference;
-import com.sun.jna.ptr.FloatByReference;
 
 import javax.imageio.ImageIO;
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.swing.*;
-import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.MemoryImageSource;
 import java.io.*;
-import java.sql.Time;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-import com.sun.jna.Native;
-import com.sun.jna.ptr.IntByReference;
-import com.sun.jna.win32.StdCallLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.misc.BASE64Decoder;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.awt.image.BufferedImage;
-import javax.imageio.ImageIO;
-import java.io.*;
 import java.util.*;
 import java.text.*;
 
@@ -50,14 +33,11 @@ import com.sun.image.codec.jpeg.ImageFormatException;
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
-import java.io.IOException;
-
-import java.io.*;//导入所需的包
-
 public class Function {
     private static Logger logger = LoggerFactory.getLogger(Function.class);
     public static libFaceRecognition m_FaceRecognition = libFaceRecognition.INSTANCE;
     public static Map<String, IntByReference> cameraPoints = new HashMap<>();
+    public static IntByReference cameraPoint = new IntByReference(0);
     public static boolean BOEStream;
     public static java.util.Map<String, String> mapcamreip = new HashMap<String, String>();
     byte[] m_rs485_protocal_no = new byte[1];
@@ -87,13 +67,16 @@ public class Function {
     //连接相机
     public static void connectCamera(String machineIp) {
         IntByReference err_code = new IntByReference(0);
-        if (m_FaceRecognition.ZBX_Connected(cameraPoints.get(machineIp)) == 1) {
+        if (cameraPoints.containsKey(machineIp)) {
+            cameraPoint = cameraPoints.get(machineIp);
+        }
+        if (m_FaceRecognition.ZBX_Connected(cameraPoint) == 1) {
             logger.debug("相机已经连接，若要改变连接相机请先断开相机");
             return;
         }
-        IntByReference cameraPoint = m_FaceRecognition.ZBX_ConnectEx(machineIp, (short) 8099, "", "", err_code,
+        cameraPoint = m_FaceRecognition.ZBX_ConnectEx(machineIp, (short) 8099, "", "", err_code,
                 0, 1);
-        if (m_FaceRecognition.ZBX_Connected(cameraPoints.get(machineIp)) != 1) {
+        if (m_FaceRecognition.ZBX_Connected(cameraPoint) != 1) {
             logger.debug("连接相机失败");
         } else {
             cameraPoints.put(machineIp, cameraPoint);
@@ -158,7 +141,6 @@ public class Function {
 
         flagarray[0].faceName = faceName;//.getBytes();
         flagarray[0].faceID = faceId;//.getBytes();
-        logger.debug("请输入人脸路径+图片名称");
 
         byte[] imagedata = Base64Convert.base64ToByte(image);
         faceimgarray[0].img_len = imagedata.length;
@@ -166,20 +148,19 @@ public class Function {
         a.write(0, imagedata, 0, imagedata.length);
         faceimgarray[0].img.setPointer(a);
         faceimgarray[0].img_fmt = 0;
-//            try {
-//                byte[] imagedata1 = new byte[imagedata.length];
-//                a.read(0, imagedata1, 0, imagedata.length);
-//                String filename = "C:\\Users\\Administrator\\Desktop\\c\\identified\\fgs" + ".jpg";
-//                // 转换成图片
-//                BufferedImage bi = ImageIO.read(new ByteArrayInputStream(imagedata1));
-//                //保存图片
-//                writeImageFile(bi, filename);
-//            } catch (Exception e) {
-//                logger.debug("数据有误");
-//                return;
-//            }
+        try {
+            byte[] imagedata1 = new byte[imagedata.length];
+            a.read(0, imagedata1, 0, imagedata.length);
+            String filename = MappingCacheFactory.getValue("ASSESS_CONTROL_PATH") + faceId + ".jpg";
+            // 转换成图片
+            BufferedImage bi = ImageIO.read(new ByteArrayInputStream(imagedata1));
+            //保存图片
+            writeImageFile(bi, filename);
+        } catch (Exception e) {
+            logger.debug("数据有误", e);
+        }
         int k = m_FaceRecognition.ZBX_AddJpgFaces(cameraPoints.get(machineIp), flagarray,
-                faceimgarray, 1, 0);
+                faceimgarray, 1, 1);
 
         if (k == 0) {
             logger.debug("添加成功");
@@ -705,60 +686,124 @@ public class Function {
     }
 
 
-//抓拍回调实现
-public static class ZBX_FaceRecoCb_t_Realize implements libFaceRecognition.ZBX_FaceRecoCb_t {
-    public void Status(IntByReference cam, libFaceRecognition.FaceRecoInfo.ByReference cb,
-                       Pointer usrParam) {
-        String savepath = "E:\\face";
-        File myPath = new File(savepath);
-        if (!myPath.exists()) {
-            myPath.mkdirs();
+    //抓拍回调实现
+    public static class ZBX_FaceRecoCb_t_Realize implements libFaceRecognition.ZBX_FaceRecoCb_t {
+        public void Status(IntByReference cam, libFaceRecognition.FaceRecoInfo.ByReference cb,
+                           Pointer usrParam) {
+            String savepath = "E:\\face";
+            File myPath = new File(savepath);
+            if (!myPath.exists()) {
+                myPath.mkdirs();
+            }
+            //logger.debug(cb.tvSec);
+            long t = 1000;
+            SimpleDateFormat lFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+            Date date2 = new Date();
+            date2.setTime(cb.tvSec * t);
+            String datetime = lFormat.format(date2);
+
+            if (cb.matched == -1) {
+
+                logger.debug("未识别人员");
+                logger.debug(datetime);
+                String filepath = savepath + "\\unidentified\\";
+                File myfilepath = new File(filepath);
+                if (!myfilepath.exists()) {
+                    myfilepath.mkdirs();
+                }
+
+                String filename = filepath + datetime + ".jpg";
+                byte[] data = cb.faceImg.getPointer().getByteArray(0, cb.faceImgLen);
+                try {
+                    // 转换成图片
+                    BufferedImage bi = ImageIO.read(new ByteArrayInputStream(data));
+                    //保存图片
+                    writeImageFile(bi, filename);
+                } catch (Exception e) {
+                    logger.debug("数据有误");
+                    return;
+                }
+
+            } else {
+                //保存人员信息
+                try {
+                    String personname = new String(getfullbyte(cb.matchPersonName), "gb2312");
+                    logger.debug(personname);
+                } catch (Exception e) {
+                    logger.debug("数据有误");
+                }
+                logger.debug(datetime);
+                String filepath = savepath + "\\identified\\";
+                File myfilepath = new File(filepath);
+                if (!myfilepath.exists()) {
+                    myfilepath.mkdirs();
+                }
+                String filename = filepath + datetime + ".jpg";
+                byte[] data = cb.faceImg.getPointer().getByteArray(0, cb.faceImgLen);
+                try {
+                    // 转换成图片
+                    BufferedImage bi = ImageIO.read(new ByteArrayInputStream(data));
+                    //保存图片
+                    writeImageFile(bi, filename);
+                } catch (Exception e) {
+                    logger.debug("数据有误");
+                    logger.debug(e.toString());
+                    return;
+                }
+
+
+//保存模板图像信息
+                String modepath = savepath + "\\mode\\";
+                File mymodepath = new File(modepath);
+                if (!mymodepath.exists()) {
+                    mymodepath.mkdirs();
+                }
+                String path_mode = modepath + datetime + ".jpg";
+                byte[] data_mode = cb.modelFaceImg.getPointer().getByteArray(0, cb.modelFaceImgLen);
+                try {
+                    // 转换成图片
+                    BufferedImage bi = ImageIO.read(new ByteArrayInputStream(data_mode));
+                    //保存图片
+                    writeImageFile(bi, path_mode);
+                } catch (Exception e) {
+                    logger.debug("数据有误1");
+                    logger.debug(e.toString());
+                    return;
+                }
+            }
+            return;
         }
-        //logger.debug(cb.tvSec);
-        long t = 1000;
-        SimpleDateFormat lFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-        Date date2 = new Date();
-        date2.setTime(cb.tvSec * t);
-        String datetime = lFormat.format(date2);
+    }
 
-        if (cb.matched == -1) {
-
-            logger.debug("未识别人员");
-            logger.debug(datetime);
-            String filepath = savepath + "\\unidentified\\";
-            File myfilepath = new File(filepath);
-            if (!myfilepath.exists()) {
-                myfilepath.mkdirs();
-            }
-
-            String filename = filepath + datetime + ".jpg";
-            byte[] data = cb.faceImg.getPointer().getByteArray(0, cb.faceImgLen);
+    //人员查询回调实现
+    public static class ZBX_FaceQueryCb_t_Realize implements libFaceRecognition.ZBX_FaceQueryCb_t {
+        public void Status(IntByReference cam, libFaceRecognition.QueryFaceInfo.ByReference QueryFaceIn,
+                           Pointer usrParam) {
             try {
-                // 转换成图片
-                BufferedImage bi = ImageIO.read(new ByteArrayInputStream(data));
-                //保存图片
-                writeImageFile(bi, filename);
-            } catch (Exception e) {
-                logger.debug("数据有误");
-                return;
-            }
-
-        } else {
-            //保存人员信息
-            try {
-                String personname = new String(getfullbyte(cb.matchPersonName), "gb2312");
+                String personname = new String(getfullbyte(QueryFaceIn.personName), "gb2312");
                 logger.debug(personname);
             } catch (Exception e) {
                 logger.debug("数据有误");
             }
-            logger.debug(datetime);
-            String filepath = savepath + "\\identified\\";
-            File myfilepath = new File(filepath);
-            if (!myfilepath.exists()) {
-                myfilepath.mkdirs();
+
+            String personId = deCode(new String(QueryFaceIn.personID)).trim();// deCode(matchPersonID).trim();
+            logger.debug(personId);
+            //将data 数据转成byte【】
+            byte[] data = QueryFaceIn.imgBuff[0].getPointer().getByteArray(0, QueryFaceIn.imgSize[0]);
+
+            //
+            SimpleDateFormat lFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+            Date date = new Date();
+            date.getTime();
+            String path = "D:\\camera";   //保存文件路径
+            File myPath = new File(path);
+            if (!myPath.exists()) {
+                myPath.mkdir();
             }
-            String filename = filepath + datetime + ".jpg";
-            byte[] data = cb.faceImg.getPointer().getByteArray(0, cb.faceImgLen);
+            String filename = path + lFormat.format(date) + ".jpg";
+
+            logger.debug(filename);
+
             try {
                 // 转换成图片
                 BufferedImage bi = ImageIO.read(new ByteArrayInputStream(data));
@@ -766,129 +811,65 @@ public static class ZBX_FaceRecoCb_t_Realize implements libFaceRecognition.ZBX_F
                 writeImageFile(bi, filename);
             } catch (Exception e) {
                 logger.debug("数据有误");
-                logger.debug(e.toString());
-                return;
-            }
-
-
-//保存模板图像信息
-            String modepath = savepath + "\\mode\\";
-            File mymodepath = new File(modepath);
-            if (!mymodepath.exists()) {
-                mymodepath.mkdirs();
-            }
-            String path_mode = modepath + datetime + ".jpg";
-            byte[] data_mode = cb.modelFaceImg.getPointer().getByteArray(0, cb.modelFaceImgLen);
-            try {
-                // 转换成图片
-                BufferedImage bi = ImageIO.read(new ByteArrayInputStream(data_mode));
-                //保存图片
-                writeImageFile(bi, path_mode);
-            } catch (Exception e) {
-                logger.debug("数据有误1");
-                logger.debug(e.toString());
                 return;
             }
         }
-        return;
     }
-}
 
-//人员查询回调实现
-public static class ZBX_FaceQueryCb_t_Realize implements libFaceRecognition.ZBX_FaceQueryCb_t {
-    public void Status(IntByReference cam, libFaceRecognition.QueryFaceInfo.ByReference QueryFaceIn,
-                       Pointer usrParam) {
-        try {
-            String personname = new String(getfullbyte(QueryFaceIn.personName), "gb2312");
-            logger.debug(personname);
-        } catch (Exception e) {
-            logger.debug("数据有误");
-        }
 
-        String personId = deCode(new String(QueryFaceIn.personID)).trim();// deCode(matchPersonID).trim();
-        logger.debug(personId);
-        //将data 数据转成byte【】
-        byte[] data = QueryFaceIn.imgBuff[0].getPointer().getByteArray(0, QueryFaceIn.imgSize[0]);
-
-        //
-        SimpleDateFormat lFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-        Date date = new Date();
-        date.getTime();
-        String path = "D:\\camera";   //保存文件路径
-        File myPath = new File(path);
-        if (!myPath.exists()) {
-            myPath.mkdir();
-        }
-        String filename = path + lFormat.format(date) + ".jpg";
-
-        logger.debug(filename);
-
-        try {
-            // 转换成图片
-            BufferedImage bi = ImageIO.read(new ByteArrayInputStream(data));
-            //保存图片
-            writeImageFile(bi, filename);
-        } catch (Exception e) {
-            logger.debug("数据有误");
-            return;
+    //搜索相机回调函数
+    public static class discover_ipscan_cb_t_Realize implements libFaceRecognition.discover_ipscan_cb_t {
+        public void Status(libFaceRecognition.ipscan_t.ByReference ips, int usr_param) {
+            if (mapcamreip.containsKey(deCode(new String(ips.mac)).trim()) == false) {
+                //  输出查到的ip
+                logger.debug(deCode(new String(ips.ip)).trim());
+                logger.debug(deCode(new String(ips.mac)).trim());
+                logger.debug(deCode(new String(ips.manufacturer)).trim());
+            } else {
+                mapcamreip.put(deCode(new String(ips.mac)).trim(), deCode(new String(ips.ip)).trim());
+            }
+            //设备上报
+            INotifyAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getINotifyAccessControlService();
+            MachineDto machineDto = new MachineDto();
+            machineDto.setMachineId(UUID.randomUUID().toString());
+            machineDto.setMachineIp(deCode(new String(ips.ip)).trim());
+            machineDto.setMachineMac(deCode(new String(ips.mac)).trim());
+            machineDto.setMachineCode(deCode(new String(ips.mac)).trim());
+            machineDto.setMachineName(deCode(new String(ips.ip)).trim());
+            machineDto.setMachineVersion("v1.0");
+            machineDto.setOem("伊兰度");
+            notifyAccessControlService.uploadMachine(machineDto);
         }
     }
-}
 
 
-//搜索相机回调函数
-public static class discover_ipscan_cb_t_Realize implements libFaceRecognition.discover_ipscan_cb_t {
-    public void Status(libFaceRecognition.ipscan_t.ByReference ips, int usr_param) {
-        if (mapcamreip.containsKey(deCode(new String(ips.mac)).trim()) == false) {
-            //  输出查到的ip
-            logger.debug(deCode(new String(ips.ip)).trim());
-            logger.debug(deCode(new String(ips.mac)).trim());
-            logger.debug(deCode(new String(ips.manufacturer)).trim());
-        } else {
-            mapcamreip.put(deCode(new String(ips.mac)).trim(), deCode(new String(ips.ip)).trim());
-        }
-        //设备上报
-        INotifyAccessControlService notifyAccessControlService= NotifyAccessControlFactory.getINotifyAccessControlService();
-        MachineDto machineDto = new MachineDto();
-        machineDto.setMachineId(UUID.randomUUID().toString());
-        machineDto.setMachineIp(deCode(new String(ips.ip)).trim());
-        machineDto.setMachineMac(deCode(new String(ips.mac)).trim());
-        machineDto.setMachineCode(deCode(new String(ips.mac)).trim());
-        machineDto.setMachineName(deCode(new String(ips.mac)).trim());
-        machineDto.setMachineVersion("v1.0");
-        machineDto.setOem("伊兰度");
-        notifyAccessControlService.uploadMachine(machineDto);
-    }
-}
-
-
-/* 连接事件回调函数 */
+    /* 连接事件回调函数 */
 // event 1为已连接 2为连接中断
-public static class ZBX_ConnectEventCb_t_Realize implements libFaceRecognition.ZBX_ConnectEventCb_t {
-    public void Status(String machineIp, IntByReference cam, String ip, short port, int event, int usrParam) {
-        if (event == 0) {
-            if (m_FaceRecognition.ZBX_IsServer(cameraPoints.get(machineIp)) == 1) {
-                m_FaceRecognition.ZBX_DisConnect(cameraPoints.get(machineIp));
+    public static class ZBX_ConnectEventCb_t_Realize implements libFaceRecognition.ZBX_ConnectEventCb_t {
+        public void Status(IntByReference cam, String ip, short port, int event, int usrParam) {
+            if (event == 0) {
+                if (m_FaceRecognition.ZBX_IsServer(cameraPoints.get(ip)) == 1) {
+                    m_FaceRecognition.ZBX_DisConnect(cameraPoints.get(ip));
+                }
+                return;
             }
-            return;
         }
     }
-}
 
-//系统升级进度
+    //系统升级进度
 //注意：如果注册此回调 该回调必须返回0 否则会终止传输
-public static class Httpresult_Realize implements libFaceRecognition.ZBX_HTTPRESULT_PROCESS {
-    public int Status(Pointer user_data, double rDlTotal, double rDlNow, double rUlTotal, double rUlNow) {
-        if (!(rUlTotal == 0) && !(rUlNow == 0)) {
+    public static class Httpresult_Realize implements libFaceRecognition.ZBX_HTTPRESULT_PROCESS {
+        public int Status(Pointer user_data, double rDlTotal, double rDlNow, double rUlTotal, double rUlNow) {
+            if (!(rUlTotal == 0) && !(rUlNow == 0)) {
+                return 0;
+            }
+            int process = (int) (rDlNow * 100 / rUlTotal);
+            logger.debug("系统升级进度为： ");
+            //logger.debug(process);
             return 0;
         }
-        int process = (int) (rDlNow * 100 / rUlTotal);
-        logger.debug("系统升级进度为： ");
-        //logger.debug(process);
-        return 0;
-    }
 
-}
+    }
 
 
     //byte数组到图片

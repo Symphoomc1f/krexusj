@@ -44,7 +44,7 @@ public class ScanMachine extends BaseAccessControl {
     /**
      * 扫描设备
      */
-    void scan() {
+    void scan() throws Exception {
         List<MachineDto> machineDtos = getAssessControlProcessImpl().scanMachine();
 
         if (machineDtos == null) {

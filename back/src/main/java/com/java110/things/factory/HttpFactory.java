@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Map;
 import java.util.UUID;
 
@@ -75,7 +77,7 @@ public class HttpFactory {
      * @param httpMethod   请求方法
      * @return 返回 ResponseEntity
      */
-    public static ResponseEntity<String> exchange(RestTemplate restTemplate, String url, String param, HttpMethod httpMethod) {
+    public static ResponseEntity<String> exchange(RestTemplate restTemplate, String url, String param, HttpMethod httpMethod) throws UnsupportedEncodingException {
         return exchange(restTemplate, url, param, null, httpMethod);
     }
 
@@ -89,23 +91,24 @@ public class HttpFactory {
      * @param httpMethod   请求方法
      * @return 返回 ResponseEntity
      */
-    public static ResponseEntity<String> exchange(RestTemplate restTemplate, String url, String param, Map<String, String> headers, HttpMethod httpMethod) {
+    public static ResponseEntity<String> exchange(RestTemplate restTemplate, String url, String param, Map<String, String> headers, HttpMethod httpMethod) throws UnsupportedEncodingException {
         HttpHeaders httpHeaders = getHeader();
         if (headers != null && !headers.isEmpty()) {
             for (String key : headers.keySet()) {
-                if (SystemConstant.HTTP_SIGN.equals(key)) {
-                    continue;
-                }
                 httpHeaders.add(key, headers.get(key));
             }
         }
-
-        String paramIn = HttpMethod.GET == httpMethod ? url : param;
+        String tempGetParam = "";
+        if (url.indexOf("?") > 0) {
+            tempGetParam = url.substring(url.indexOf("?"));
+        }
+        String paramIn = HttpMethod.GET == httpMethod ? tempGetParam : param;
 
         // 生成sign
-        String sign = AuthenticationFactory.generatorSign(headers.get(SystemConstant.HTTP_TRANSACTION_ID),
-                headers.get(SystemConstant.HTTP_REQ_TIME),
+        String sign = AuthenticationFactory.generatorSign(httpHeaders.get(SystemConstant.HTTP_TRANSACTION_ID).get(0),
+                httpHeaders.get(SystemConstant.HTTP_REQ_TIME).get(0),
                 paramIn);
+        httpHeaders.remove(SystemConstant.HTTP_SIGN);
         httpHeaders.add(SystemConstant.HTTP_SIGN, sign);
         HttpEntity<String> httpEntity = new HttpEntity<String>(param, httpHeaders);
         ResponseEntity<String> responseEntity = null;

@@ -124,7 +124,7 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
 
 
         //心跳云端是否下发指令
-        heartbeatCloud(machineDtos, communityDto);
+        heartbeatCloud(machineDtos, communityDtos.get(0));
 
     }
 
@@ -182,6 +182,7 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
         JSONObject paramIn = new JSONObject();
         paramIn.put("machineCode", machineDto.getMachineCode());
         paramIn.put("devGroup", "default");
+        paramIn.put("communityId", communityDto.getCommunityId());
         paramIn.put("name", machineDto.getMachineName());
         paramIn.put("authCode", machineDto.getAuthCode());
         paramIn.put("ip", machineDto.getMachineIp());

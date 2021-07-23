@@ -56,6 +56,7 @@ public class AddUpdateFace extends BaseAccessControl {
 
         JSONObject paramIn = new JSONObject();
         paramIn.put("faceid", heartbeatTaskDto.getTaskinfo());
+        paramIn.put("communityId", communityDto.getCommunityId());
 
         ResponseEntity<String> responseEntity = HttpFactory.exchange(restTemplate, url, paramIn.toJSONString(), headers, HttpMethod.POST);
 

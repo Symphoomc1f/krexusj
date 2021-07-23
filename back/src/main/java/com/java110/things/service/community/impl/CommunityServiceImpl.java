@@ -8,6 +8,7 @@ import com.java110.things.dao.ICommunityServiceDao;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.HttpFactory;
+import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.community.ICommunityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -48,7 +49,7 @@ public class CommunityServiceImpl implements ICommunityService {
     @Override
     public ResultDto saveCommunity(CommunityDto communityDto) throws Exception {
 
-        String url = "/api/community.listCommunitys?communityId=" + communityDto.getCommunityId() + "&name=" + communityDto.getName();
+        String url = MappingCacheFactory.getValue("CLOUD_API") + "/api/community.listCommunitys?page=1&row=1&communityId=" + communityDto.getCommunityId() + "&name=" + communityDto.getName();
 
         ResponseEntity<String> responseEntity = HttpFactory.exchange(restTemplate, url, "", HttpMethod.GET);
 

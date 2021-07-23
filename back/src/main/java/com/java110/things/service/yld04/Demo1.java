@@ -3,7 +3,6 @@ package com.java110.things.service.yld04;
 import com.sun.jna.Native;
 
 import javax.swing.*;
-import java.awt.*;
 
 public class Demo1 {
     // 定义组件
@@ -42,7 +41,7 @@ public class Demo1 {
     }
 
     public static void main(String[] args) {
-        libFaceRecognition INSTANCE = (libFaceRecognition) Native.loadLibrary(
-                "C:\\Users\\Administrator\\Documents\\project\\hc\\MicroCommunityThings\\back\\dll\\yld04\\libFaceRecognitionSDK_x64", libFaceRecognition.class);
+        libFaceRecognition_bak INSTANCE = (libFaceRecognition_bak) Native.loadLibrary(
+                "C:\\Users\\Administrator\\Documents\\project\\hc\\MicroCommunityThings\\back\\dll\\yld04\\libFaceRecognitionSDK_x64", libFaceRecognition_bak.class);
     }
 }

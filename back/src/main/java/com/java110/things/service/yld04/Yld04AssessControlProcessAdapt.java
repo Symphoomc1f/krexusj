@@ -41,6 +41,9 @@ public class Yld04AssessControlProcessAdapt implements IAssessControlProcess {
     public void addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
         Function.connectCamera(machineDto.getMachineIp());
         try {
+            String image = userFaceDto.getFaceBase64();
+            image = image.substring(image.indexOf("base64,") + 7);
+            userFaceDto.setFaceBase64(image);
             Function.AddFace(machineDto.getMachineIp(), userFaceDto.getName(), userFaceDto.getUserId(), userFaceDto.getFaceBase64());
         } catch (Exception e) {
             logger.error("添加人脸失败", e);
@@ -51,7 +54,7 @@ public class Yld04AssessControlProcessAdapt implements IAssessControlProcess {
     @Override
     public void updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
 //        Function.connectCamera(machineDto.getMachineIp());
-        addFace(machineDto,userFaceDto);
+        addFace(machineDto, userFaceDto);
     }
 
     @Override
@@ -68,6 +71,7 @@ public class Yld04AssessControlProcessAdapt implements IAssessControlProcess {
 
     /**
      * 扫描设备
+     *
      * @return
      */
     @Override

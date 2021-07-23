@@ -16,6 +16,7 @@ import javax.crypto.Cipher;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.InvalidParameterException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -110,6 +111,7 @@ public class AuthenticationFactory {
         }
         return "";
     }
+
 
 
     /**
@@ -350,15 +352,23 @@ public class AuthenticationFactory {
 
     /***********************************JWT end***************************************/
     public static void main(String[] args) throws Exception {
-        KeyPair keyPair = genKeyPair(1024);
+//        KeyPair keyPair = genKeyPair(1024);
+//
+//        //获取公钥，并以base64格式打印出来
+//        PublicKey publicKey = keyPair.getPublic();
+//        System.out.println("公钥：" + new String(Base64.getEncoder().encode(publicKey.getEncoded())));
+//
+//        //获取私钥，并以base64格式打印出来
+//        PrivateKey privateKey = keyPair.getPrivate();
+//        System.out.println("私钥：" + new String(Base64.getEncoder().encode(privateKey.getEncoded())));
 
-        //获取公钥，并以base64格式打印出来
-        PublicKey publicKey = keyPair.getPublic();
-        System.out.println("公钥：" + new String(Base64.getEncoder().encode(publicKey.getEncoded())));
+        String tranId = "c0a4028a-52bf-4619-8786-1f0313e4d2f6";
+        String reqTime = "20200519115539";
+        String param = "http://api.demo.winqi.cn/api/community.listCommunitys?communityId=702020042194860039&name=老九学堂";
+        String reqInfo = tranId + reqTime + "992020051967020024" + param + "g3kE9ggkM4Jqrs576rJS0CYg7dbtMXPz";
+        String sign = md5(reqInfo);
 
-        //获取私钥，并以base64格式打印出来
-        PrivateKey privateKey = keyPair.getPrivate();
-        System.out.println("私钥：" + new String(Base64.getEncoder().encode(privateKey.getEncoded())));
+        System.out.printf("sign"+sign);
 
     }
 }

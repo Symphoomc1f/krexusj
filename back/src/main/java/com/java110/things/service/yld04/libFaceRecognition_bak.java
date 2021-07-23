@@ -10,17 +10,16 @@ import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.ptr.ByteByReference;
 import com.sun.jna.ptr.FloatByReference;
 import com.sun.jna.win32.StdCallLibrary;
-import java.util.ArrayList;
+
 import java.util.Arrays;
 import java.util.List;
 
-import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.ptr.IntByReference;
 
-public interface libFaceRecognition extends StdCallLibrary {
-    libFaceRecognition INSTANCE = (libFaceRecognition) Native.loadLibrary(
-            "C:\\Users\\Administrator\\Documents\\project\\hc\\FaceRecongnition\\dll\\libFaceRecognitionSDK_x64", libFaceRecognition.class);
+public interface libFaceRecognition_bak extends StdCallLibrary {
+    libFaceRecognition_bak INSTANCE = (libFaceRecognition_bak) Native.loadLibrary(
+            "C:\\Users\\Administrator\\Documents\\project\\hc\\MicroCommunityThings\\back\\dll\\yld04\\libFaceRecognitionSDK_x64", libFaceRecognition_bak.class);
 
 
     public static class FaceRecoInfo extends Structure {
@@ -144,7 +143,7 @@ public interface libFaceRecognition extends StdCallLibrary {
         }
     }
     public static class SystemNetInfo extends Structure {
-    ;//系统网络信息
+        ;//系统网络信息
 
         public byte[] mac_addr=new byte[18];  //网卡物理地址
         public byte[] ip_addr=new byte[16] ;   //相机ip地址
@@ -254,7 +253,7 @@ public interface libFaceRecognition extends StdCallLibrary {
      */
 
     IntByReference ZBX_ConnectEx(String ip, short port, String usrName, String password,
-                                     IntByReference errorNum, int channel, int autoReconn);
+                                 IntByReference errorNum, int channel, int autoReconn);
 
 //  是否连接相机
 
@@ -300,7 +299,7 @@ public interface libFaceRecognition extends StdCallLibrary {
      * @brief 注册人脸抓拍数据接收回调函数
      */
     void ZBX_RegFaceRecoCb(IntByReference cam, ZBX_FaceRecoCb_t cb,
-                               Pointer usrParam);
+                           Pointer usrParam);
 
 
     /**
@@ -314,8 +313,8 @@ public interface libFaceRecognition extends StdCallLibrary {
      * @brief 注册人脸到相机，支持单个id多张人脸 最大5张人脸图像
      */
     int ZBX_AddJpgFaces(IntByReference cam, FaceFlags[] faceID,
-                            FaceImage[] imgs, int img_count,
-                            int picture_flags);
+                        FaceImage[] imgs, int img_count,
+                        int picture_flags);
 
     /**
      * @param [IN] cam 要查看的相机句柄
@@ -330,8 +329,8 @@ public interface libFaceRecognition extends StdCallLibrary {
      * @brief 通过人员角色查询
      */
     int ZBX_QueryByRole(IntByReference cam, int role, int page_no,
-                            int page_size, char featureFlags,
-                            char imgFlags);
+                        int page_size, char featureFlags,
+                        char imgFlags);
 
     /**
      * @param cb[in]       回调函数指针
@@ -340,7 +339,7 @@ public interface libFaceRecognition extends StdCallLibrary {
      * @brief 注册人脸查询数据回调函数
      */
     void ZBX_RegFaceQueryCb(IntByReference cam, ZBX_FaceQueryCb_t cb,
-                                Pointer usrParam);
+                            Pointer usrParam);
 
     /**
      * @param [IN] cam 要注销的相机句柄
@@ -349,7 +348,7 @@ public interface libFaceRecognition extends StdCallLibrary {
      * @brief 删除一个人员信息
      */
     int ZBX_DeleteFaceDataByPersonID(IntByReference cam,
-                                         String personID);
+                                     String personID);
 
     /**
      * @param [IN] cam 要删除的相机句柄
@@ -366,7 +365,7 @@ public interface libFaceRecognition extends StdCallLibrary {
      * @brief 注册搜索相机回调函数
      */
     void ZBX_RegDiscoverIpscanCb(discover_ipscan_cb_t cb,
-                                     int usrParam);
+                                 int usrParam);
 
     /**
      * @param 无
@@ -491,7 +490,7 @@ public interface libFaceRecognition extends StdCallLibrary {
      * @brief 设置相机时间
      */
     int ZBX_SetSysTimeEx(IntByReference cam, int year, int month, int day,
-                             int hour, int minute, int second);
+                         int hour, int minute, int second);
 
 
     /**
@@ -509,7 +508,7 @@ public interface libFaceRecognition extends StdCallLibrary {
      * @brief 注册连接事件回调函数, 须先调用ZBX_SetNotifyConnected(1)才生效
      */
     void ZBX_RegConnectEventCb(ZBX_ConnectEventCb_t cb,
-                                   int usrParam);
+                               int usrParam);
 
 
     // 判断是否是服务端的conn
@@ -542,8 +541,8 @@ public interface libFaceRecognition extends StdCallLibrary {
      * @return  0 成功
      * @return  <0 失败
      */
-     int  ZBX_OpenTSerial(IntByReference cam, int index, int baudrate,
-                                            int parity, int databit, int stopbit);
+    int  ZBX_OpenTSerial(IntByReference cam, int index, int baudrate,
+                         int parity, int databit, int stopbit);
 
     /**
      * @brief   设置485输出协议编号
@@ -552,7 +551,7 @@ public interface libFaceRecognition extends StdCallLibrary {
      * @return  0 设置成功
      * @return  <0 设置失败  参考错误码
      */
-     int    ZBX_SetRS485ProtocalNo(IntByReference cam, char rs485_protocal_no);
+    int    ZBX_SetRS485ProtocalNo(IntByReference cam, char rs485_protocal_no);
 
     /**
      * @brief   获取透明串口参数
@@ -567,8 +566,8 @@ public interface libFaceRecognition extends StdCallLibrary {
      * @return  0 成功
      * @return  <0 失败
      */
-     int    ZBX_GetTSerial(IntByReference cam, int index, IntByReference baudrate,
-                               IntByReference parity, IntByReference databit, IntByReference stopbit);
+    int    ZBX_GetTSerial(IntByReference cam, int index, IntByReference baudrate,
+                          IntByReference parity, IntByReference databit, IntByReference stopbit);
 
     /**
      * @brief   获取485输出协议编号
@@ -577,8 +576,8 @@ public interface libFaceRecognition extends StdCallLibrary {
      * @return  0 获取成功
      * @return  <0 获取失败  参考错误码
      */
-     int    ZBX_GetRS485ProtocalNo(IntByReference cam,
-                                                     byte[] rs485_protocal_no);
+    int    ZBX_GetRS485ProtocalNo(IntByReference cam,
+                                  byte[] rs485_protocal_no);
 
 
     /**
@@ -590,8 +589,8 @@ public interface libFaceRecognition extends StdCallLibrary {
      * @return  0 成功
      * @return  <0 失败
      */
-     int    ZBX_WriteTSerial(IntByReference cam , int index,
-            byte[] data, int size);
+    int    ZBX_WriteTSerial(IntByReference cam , int index,
+                            byte[] data, int size);
 
     /**
      * @brief   查看网络参数配置
@@ -600,7 +599,7 @@ public interface libFaceRecognition extends StdCallLibrary {
      * @return  0 获取成功
      * @return  <0 获取失败  参考错误码
      */
-     int    ZBX_GetNetConfig(IntByReference cam, SystemNetInfo.ByReference netInfo);
+    int    ZBX_GetNetConfig(IntByReference cam, SystemNetInfo.ByReference netInfo);
 
 
     /**
@@ -610,7 +609,7 @@ public interface libFaceRecognition extends StdCallLibrary {
      * @return  0 设置成功
      * @return  <0 设置失败  参考错误码
      */
-     int    ZBX_SetNetConfig(IntByReference cam, SystemNetInfo.ByReference netInfo);
+    int    ZBX_SetNetConfig(IntByReference cam, SystemNetInfo.ByReference netInfo);
 
 
     /**
@@ -621,8 +620,8 @@ public interface libFaceRecognition extends StdCallLibrary {
      * @param   gateway[in] 默认网关
      * @return  无
      */
-     void    ZBX_SetIpBymac(byte[] mac,byte[]  ip,
-                                byte[]  netmask, byte[]  gateway);
+    void    ZBX_SetIpBymac(byte[] mac,byte[]  ip,
+                           byte[]  netmask, byte[]  gateway);
 
     public interface ZBX_FaceRecoCb_t extends StdCallCallback {
         public void Status(IntByReference cam, FaceRecoInfo.ByReference cb,
@@ -645,14 +644,14 @@ public interface libFaceRecognition extends StdCallLibrary {
     /* 连接事件回调函数 */
 // event 1为已连接 2为连接中断
     public interface ZBX_ConnectEventCb_t extends StdCallCallback {
-      public  void Status(IntByReference cam, String ip,
-                    short port, int event,
-                    int usrParam);
+        public  void Status(String machineIp,IntByReference cam, String ip,
+                            short port, int event,
+                            int usrParam);
     }
 
     //系统升级进度
 //注意：如果注册此回调 该回调必须返回0 否则会终止传输
     public interface ZBX_HTTPRESULT_PROCESS extends StdCallCallback {
-       public int Status(Pointer user_data, double rDlTotal, double rDlNow, double rUlTotal, double rUlNow);
+        public int Status(Pointer user_data, double rDlTotal, double rDlNow, double rUlTotal, double rUlNow);
     }
 }
