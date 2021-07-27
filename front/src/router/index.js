@@ -88,12 +88,6 @@ export const constantRoutes = [
         name: '道闸',
         component: () => import('@/views/barrierGate/barrierGate'),
         meta: { title: '道闸设备', icon: 'table' }
-      },
-      {
-        path: 'tree',
-        name: 'Tree',
-        component: () => import('@/views/tree/index'),
-        meta: { title: 'Tree', icon: 'tree' }
       }
     ]
   },
@@ -109,12 +103,6 @@ export const constantRoutes = [
         name: '道闸',
         component: () => import('@/views/monitorVedio/monitorVedio'),
         meta: { title: '监控设备', icon: 'table' }
-      },
-      {
-        path: 'tree',
-        name: 'Tree',
-        component: () => import('@/views/tree/index'),
-        meta: { title: 'Tree', icon: 'tree' }
       }
     ]
   },
@@ -130,12 +118,6 @@ export const constantRoutes = [
         name: '考勤',
         component: () => import('@/views/attendance/attendance'),
         meta: { title: '考勤设备', icon: 'table' }
-      },
-      {
-        path: 'tree',
-        name: 'Tree',
-        component: () => import('@/views/tree/index'),
-        meta: { title: 'Tree', icon: 'tree' }
       }
     ]
   },

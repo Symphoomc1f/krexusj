@@ -67,7 +67,7 @@ public class UserController extends BaseController {
      * @return
      * @throws Exception
      */
-    @RequestMapping(path = "/logout", method = RequestMethod.GET)
+    @RequestMapping(path = "/logout", method = RequestMethod.POST)
     public ResponseEntity<String> logout(@RequestBody String param) throws Exception {
         JSONObject paramObj = super.getParamJson(param);
         Assert.hasKeyAndValue(paramObj, "token", "请求报文中未包含token信息");
