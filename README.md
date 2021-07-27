@@ -31,4 +31,4 @@
 
 ### 相关视频
 
-	[https://www.bilibili.com/video/BV1pK4y1t7re](https://www.bilibili.com/video/BV1pK4y1t7re)
+	(https://www.bilibili.com/video/BV1pK4y1t7re)[https://www.bilibili.com/video/BV1pK4y1t7re]
