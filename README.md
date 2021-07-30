@@ -31,4 +31,14 @@
 
 ### 相关视频
 
-	(https://www.bilibili.com/video/BV1pK4y1t7re)[https://www.bilibili.com/video/BV1pK4y1t7re]
+[https://www.bilibili.com/video/BV1pK4y1t7re](https://www.bilibili.com/video/BV1pK4y1t7re)
+
+
+### 演示
+
+	注意：这个项目只能每个小区部署，部署云端无法扫描设备，以下效果图
+
+![image](docs/img/login.png)
+![image](docs/img/menjing.png)
+![image](docs/img/menjingxiyi.png)
+![image](docs/img/settings.png)
