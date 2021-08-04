@@ -60,6 +60,16 @@ spring :
     encoding: utf-8
     #禁用缓存 默认false
     cache: false
+  mqtt:
+    client:
+      id: mqttId
+    completionTimeout: 3000
+    default:
+      topic: topic
+    password: admin
+    url: tcp://192.168.1.4:1883
+    username: admin
+    keepalive: 10
 
 mybatis:
   mapper-locations: classpath:mapper/*/*Mapper.xml

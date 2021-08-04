@@ -48,6 +48,7 @@ public class Base64Convert {
      */
     public static byte[] base64ToByte(String strBase64) throws IOException {
         // 解码，然后将字节转换为文件
+        strBase64 = strBase64.replaceAll("\r|\n", "");
         byte[] bytes = new BASE64Decoder().decodeBuffer(strBase64);   //将字符串转换为byte数组
         return bytes;
     }

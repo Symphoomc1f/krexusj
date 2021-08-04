@@ -3,6 +3,7 @@ package com.java110.things.service;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineDto;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.util.List;
 
@@ -72,6 +73,27 @@ public interface IAssessControlProcess {
      * @return
      */
     List<MachineDto> scanMachine();
+
+
+    /**
+     * 接收订阅mqtt 消息，如果不是mqtt 协议对接硬件可以空
+     * @param topic 主题
+     * @param data 消息内容
+     */
+    void mqttMessageArrived(String topic, String data);
+
+
+    /**
+     * 重启设备
+     * @param machineDto 硬件信息
+     */
+    void restartMachine(MachineDto machineDto);
+
+    /**
+     * 开门
+     * @param machineDto  硬件信息
+     */
+    void openDoor(MachineDto machineDto);
 
 
 

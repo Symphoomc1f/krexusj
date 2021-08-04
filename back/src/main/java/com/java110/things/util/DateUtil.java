@@ -148,7 +148,7 @@ public class DateUtil {
         return getFormatTimeString(new Date(), pattern);
     }
 
-    public static String getLastTime(){
+    public static String getLastTime() {
         return LAST_TIME;
     }
 
@@ -397,7 +397,19 @@ public class DateUtil {
         return maxDate;
     }
 
-    public static long getTime(){
+    public static int getCurrentDay() {
+        Calendar a = Calendar.getInstance();
+        int maxDate = a.get(Calendar.DATE);
+        return maxDate;
+    }
+
+    public static int getCurrentMin() {
+        Calendar a = Calendar.getInstance();
+        int maxDate = a.get(Calendar.MINUTE);
+        return maxDate;
+    }
+
+    public static long getTime() {
         return new Date().getTime();
     }
 }

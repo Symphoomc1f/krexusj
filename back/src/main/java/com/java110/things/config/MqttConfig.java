@@ -31,7 +31,7 @@ import org.springframework.messaging.MessagingException;
  **/
 @Configuration
 @IntegrationComponentScan
-public class MqttReceiveConfig {
+public class MqttConfig {
 
     @Value("${spring.mqtt.username}")
     private String username;
@@ -49,72 +49,31 @@ public class MqttReceiveConfig {
     private String defaultTopic;
 
     @Value("${spring.mqtt.completionTimeout}")
-    private int completionTimeout ;   //连接超时
+    private int completionTimeout;   //连接超时
 
     @Value("${spring.mqtt.keepalive}")
     private int keepalive;
 
 
     @Bean
-    public MqttClient mqttClient(){
+    public MqttClient mqttClient() {
+        MqttClient client = null;
         try {
-            MqttClient client = new MqttClient(hostUrl, clientId, new MemoryPersistence());
+            client = new MqttClient(hostUrl, clientId, new MemoryPersistence());
             MqttConnectOptions option = new MqttConnectOptions();
             option.setCleanSession(true);
             option.setUserName(username);
             option.setPassword(password.toCharArray());
             option.setConnectionTimeout(completionTimeout);
-            option.setKeepAliveInterval(MQTT_KEEPALIVE);
+            option.setKeepAliveInterval(keepalive);
             option.setAutomaticReconnect(true);
-            try {
-                client.setCallback(new MqttPushCallback());
-                client.connect(option);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+
+            client.setCallback(new MqttPushCallback());
+            client.connect(option);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-    @Bean
-    public MqttPushClient mqttPushClient() {
-        return new MqttPushClient();
-    }
-
-    //接收通道
-    @Bean
-    public MessageChannel mqttInputChannel() {
-        return new DirectChannel();
-    }
-
-    //配置client,监听的topic
-    @Bean
-    public MessageProducer inbound() {
-        MqttPahoMessageDrivenChannelAdapter adapter =
-                new MqttPahoMessageDrivenChannelAdapter(clientId+"_inbound", mqttClientFactory(),
-                        "hello","hello1");
-        adapter.setCompletionTimeout(completionTimeout);
-        adapter.setConverter(new DefaultPahoMessageConverter());
-        adapter.setQos(1);
-        adapter.setOutputChannel(mqttInputChannel());
-        return adapter;
-    }
-
-    //通过通道获取数据
-    @Bean
-    @ServiceActivator(inputChannel = "mqttInputChannel")
-    public MessageHandler handler() {
-        return new MessageHandler() {
-            @Override
-            public void handleMessage(Message<?> message) throws MessagingException {
-                String topic = message.getHeaders().get("mqtt_receivedTopic").toString();
-                String type = topic.substring(topic.lastIndexOf("/")+1, topic.length());
-                if("hello".equalsIgnoreCase(topic)){
-                    System.out.println("hello,fuckXX,"+message.getPayload().toString());
-                }else if("hello1".equalsIgnoreCase(topic)){
-                    System.out.println("hello1,fuckXX,"+message.getPayload().toString());
-                }
-            }
-        };
+        return client;
     }
 }

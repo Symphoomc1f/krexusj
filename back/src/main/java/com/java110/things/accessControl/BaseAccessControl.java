@@ -16,36 +16,9 @@ import java.util.List;
 
 public class BaseAccessControl {
 
-    /**
-     * 访问硬件接口
-     */
-    private static IAssessControlProcess assessControlProcessImpl;
+
 
     private IManufacturerService manufacturerServiceImpl;
 
-    /**
-     * 获取硬件接口对象
-     *
-     * @return
-     */
-    protected IAssessControlProcess getAssessControlProcessImpl() throws Exception {
-        if (assessControlProcessImpl != null) {
-            return assessControlProcessImpl;
-        }
-        IManufacturerService manufacturerServiceImpl = ApplicationContextFactory.getBean("manufacturerServiceImpl", IManufacturerService.class);
-        ManufacturerDto tmpManufacturerDto = new ManufacturerDto();
-        tmpManufacturerDto.setHmType("1001");
-        tmpManufacturerDto.setDefaultProtocol("T");
-        ResultDto resultDto = manufacturerServiceImpl.getManufacturer(tmpManufacturerDto);
 
-        if (resultDto.getCode() != ResponseConstant.SUCCESS) {
-            throw new ThreadException(Result.SYS_ERROR, resultDto.getMsg());
-        }
-
-        List<ManufacturerDto> manufacturerDtos = (List<ManufacturerDto>) resultDto.getData();
-
-        Assert.listOnlyOne(manufacturerDtos, "当前有多个默认协议或者一个都没有");
-        assessControlProcessImpl = ApplicationContextFactory.getBean(manufacturerDtos.get(0).getProtocolImpl(), IAssessControlProcess.class);
-        return assessControlProcessImpl;
-    }
 }

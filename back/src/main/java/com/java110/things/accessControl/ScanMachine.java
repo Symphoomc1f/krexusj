@@ -10,6 +10,7 @@ import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.exception.HeartbeatCloudException;
+import com.java110.things.factory.AssessControlProcessFactory;
 import com.java110.things.factory.HttpFactory;
 import com.java110.things.util.BeanConvertUtil;
 import com.java110.things.util.StringUtil;
@@ -45,7 +46,7 @@ public class ScanMachine extends BaseAccessControl {
      * 扫描设备
      */
     void scan() throws Exception {
-        List<MachineDto> machineDtos = getAssessControlProcessImpl().scanMachine();
+        List<MachineDto> machineDtos = AssessControlProcessFactory.getAssessControlProcessImpl().scanMachine();
 
         if (machineDtos == null) {
             return;

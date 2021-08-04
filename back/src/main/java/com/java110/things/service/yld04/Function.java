@@ -32,6 +32,7 @@ import java.text.*;
 import com.sun.image.codec.jpeg.ImageFormatException;
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGImageEncoder;
+import sun.misc.BASE64Decoder;
 
 public class Function {
     private static Logger logger = LoggerFactory.getLogger(Function.class);
@@ -149,23 +150,42 @@ public class Function {
         faceimgarray[0].img.setPointer(a);
         faceimgarray[0].img_fmt = 0;
         try {
-            byte[] imagedata1 = new byte[imagedata.length];
-            a.read(0, imagedata1, 0, imagedata.length);
-            String filename = MappingCacheFactory.getValue("ASSESS_CONTROL_PATH") + faceId + ".jpg";
-            // 转换成图片
-            BufferedImage bi = ImageIO.read(new ByteArrayInputStream(imagedata1));
-            //保存图片
-            writeImageFile(bi, filename);
+            GenerateImage(image, faceId);
         } catch (Exception e) {
             logger.debug("数据有误", e);
         }
         int k = m_FaceRecognition.ZBX_AddJpgFaces(cameraPoints.get(machineIp), flagarray,
-                faceimgarray, 1, 1);
+                faceimgarray, 1, 0);
 
         if (k == 0) {
             logger.debug("添加成功");
         } else {
             logger.debug("添加失败");
+        }
+    }
+
+    public static boolean GenerateImage(String imgStr, String faceId) {   //对字节数组字符串进行Base64解码并生成图片
+        if (imgStr == null) //图像数据为空
+            return false;
+        imgStr = imgStr.replaceAll("\r|\n", "");
+        BASE64Decoder decoder = new BASE64Decoder();
+        try {
+            //Base64解码
+            byte[] b = decoder.decodeBuffer(imgStr);
+            for (int i = 0; i < b.length; ++i) {
+                if (b[i] < 0) {//调整异常数据
+                    b[i] += 256;
+                }
+            }
+            //生成jpeg图片
+            String filename = MappingCacheFactory.getValue("ASSESS_CONTROL_PATH") + "\\" + faceId + ".jpg";//新生成的图片
+            OutputStream out = new FileOutputStream(filename);
+            out.write(b);
+            out.flush();
+            out.close();
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 

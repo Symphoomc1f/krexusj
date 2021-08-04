@@ -11,6 +11,7 @@ import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.exception.HeartbeatCloudException;
+import com.java110.things.factory.AssessControlProcessFactory;
 import com.java110.things.factory.HttpFactory;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.IAssessControlProcess;
@@ -99,13 +100,13 @@ public class AddUpdateFace extends BaseAccessControl {
 
 
         //查询 当前用户是否在硬件中存在数据
-        String faceId = getAssessControlProcessImpl().getFace(machineDto,userFaceDto);
+        String faceId = AssessControlProcessFactory.getAssessControlProcessImpl().getFace(machineDto,userFaceDto);
 
         //调用新增人脸接口
         if(StringUtil.isEmpty(faceId)){
-            getAssessControlProcessImpl().addFace(machineDto,userFaceDto);
+            AssessControlProcessFactory.getAssessControlProcessImpl().addFace(machineDto,userFaceDto);
         }else{ //调用更新人脸接口
-            getAssessControlProcessImpl().updateFace(machineDto,userFaceDto);
+            AssessControlProcessFactory.getAssessControlProcessImpl().updateFace(machineDto,userFaceDto);
         }
     }
 

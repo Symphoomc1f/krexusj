@@ -81,4 +81,19 @@ public class Yld04AssessControlProcessAdapt implements IAssessControlProcess {
         return null;
     }
 
+    @Override
+    public void mqttMessageArrived(String topic, String data) {
+
+    }
+
+    @Override
+    public void restartMachine(MachineDto machineDto) {
+
+    }
+
+    @Override
+    public void openDoor(MachineDto machineDto) {
+
+    }
+
 }

@@ -15,6 +15,7 @@ import com.java110.things.exception.HeartbeatCloudException;
 import com.java110.things.exception.Result;
 import com.java110.things.exception.ThreadException;
 import com.java110.things.factory.ApplicationContextFactory;
+import com.java110.things.factory.AssessControlProcessFactory;
 import com.java110.things.factory.HttpFactory;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.IAssessControlProcess;
@@ -102,7 +103,7 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
      */
     private void executeTask() throws Exception {
         if (INIT_MACHINE_STATE) {
-            getAssessControlProcessImpl().initAssessControlProcess();
+            AssessControlProcessFactory.getAssessControlProcessImpl().initAssessControlProcess();
             INIT_MACHINE_STATE = false;
         }
         //查询设备信息
@@ -188,7 +189,7 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
         paramIn.put("ip", machineDto.getMachineIp());
         paramIn.put("mac", machineDto.getMachineMac());
         paramIn.put("remarks", "");
-        paramIn.put("faceNum", getAssessControlProcessImpl().getFaceNum(machineDto));
+        paramIn.put("faceNum", AssessControlProcessFactory.getAssessControlProcessImpl().getFaceNum(machineDto));
         paramIn.put("lastOnTime", DateUtil.getTime());
         paramIn.put("statCode", "");
         paramIn.put("deviceType", machineDto.getMachineTypeCd());
