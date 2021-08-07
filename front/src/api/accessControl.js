@@ -35,3 +35,19 @@ export function saveAccessControls(params) {
         data:params
     })
 }
+
+export function restartAccessControls(params) {
+    return request({
+        url: '/api/machine/startMachine',
+        method: 'post',
+        data:params
+    })
+}
+
+export function openDoor(params) {
+    return request({
+        url: '/api/machine/openDoor',
+        method: 'post',
+        data:params
+    })
+}

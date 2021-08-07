@@ -110,4 +110,40 @@ public class MachineController extends BaseController {
         ResultDto resultDto = machineServiceImpl.deleteMachine(BeanConvertUtil.covertBean(paramObj, MachineDto.class));
         return super.createResponseEntity(resultDto);
     }
+
+
+
+    /**
+     * 重启设备 动作
+     *
+     * @param paramIn 入参
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(path = "/startMachine", method = RequestMethod.POST)
+    public ResponseEntity<String> startMachine(@RequestBody String paramIn) throws Exception {
+        JSONObject paramObj = super.getParamJson(paramIn);
+
+        Assert.hasKeyAndValue(paramObj, "machineId", "请求报文中未包含硬件ID");
+
+        ResultDto resultDto = machineServiceImpl.restartMachine(BeanConvertUtil.covertBean(paramObj, MachineDto.class));
+        return super.createResponseEntity(resultDto);
+    }
+
+    /**
+     * 设备开启 动作
+     *
+     * @param paramIn 入参
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(path = "/openDoor", method = RequestMethod.POST)
+    public ResponseEntity<String> openDoor(@RequestBody String paramIn) throws Exception {
+        JSONObject paramObj = super.getParamJson(paramIn);
+
+        Assert.hasKeyAndValue(paramObj, "machineId", "请求报文中未包含硬件ID");
+
+        ResultDto resultDto = machineServiceImpl.openDoor(BeanConvertUtil.covertBean(paramObj, MachineDto.class));
+        return super.createResponseEntity(resultDto);
+    }
 }

@@ -11,7 +11,6 @@ import com.java110.things.factory.NotifyAccessControlFactory;
 import com.java110.things.service.IAssessControlProcess;
 import com.java110.things.service.INotifyAccessControlService;
 import com.java110.things.service.machine.IMachineService;
-import com.java110.things.service.yld04.Function;
 import com.java110.things.util.SeqUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,17 +56,26 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
     //单设备处理
     public static final String TOPIC_FACE_SN_REQUEST = "face.{sn}.request";
 
+    //接收设备处理
+    public static final String TOPIC_FACE_SN_RESPONSE = "face.{sn}.response";
+
     //识别结果上报
     public static final String TOPIC_FACE_RESPONSE = "face.response";
 
     //硬件上线上报
-    public static final String TOPIC_ONLINE_RESPONSE = "online.response";
+    public static final String TOPIC_ONLINE_RESPONSE = "online/response";
 
     public static final String SN = "{sn}";
 
     @Override
     public void initAssessControlProcess() {
-        Function.Init();
+        logger.debug("初始化是配置器");
+
+        //注册设备上线 topic
+        MqttFactory.subscribe("online.response");
+
+        //推送人脸识别结果
+        MqttFactory.subscribe("face.response");
     }
 
     @Override
@@ -237,6 +245,8 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
         machineDto.setMachineCode(machineCode);
         machineDto.setMachineMac(machineCode);
         ResultDto resultDto = null;
+        MqttFactory.subscribe(TOPIC_FACE_SN_RESPONSE.replace(SN, machineDto.getMachineCode()));
+
         try {
             resultDto = machineServiceImpl.getMachine(machineDto);
         } catch (Exception e) {

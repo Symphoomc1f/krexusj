@@ -69,6 +69,7 @@
       </el-table-column>
       <el-table-column class-name="status-col" label="操作" align="right">
         <template slot-scope="{row,$index}">
+          <el-button size="mini" type="primary" @click="openDoor(row,$index)">开门</el-button>
           <el-button size="mini" type="primary" @click="restartAccessControl(row,$index)">重启</el-button>
           <el-button size="mini" type="danger" @click="deleteAccessControl(row,$index)">删除</el-button>
         </template>
@@ -136,7 +137,9 @@ import {
   getAccessControls,
   getAccessControlsByCondition,
   deleteAccessControls,
-  saveAccessControls
+  saveAccessControls,
+  restartAccessControls,
+  openDoor
 } from "@/api/accessControl";
 import Pagination from "@/components/Pagination";
 import { parseTime } from "@/utils";
@@ -234,13 +237,31 @@ export default {
     saveAccessControlInfo() {
       this.listLoading = true;
       saveAccessControls(this.temp).then(response => {
-        
         this.listLoading = false;
         this.dialogFormVisible = false;
         this.queryMachine();
       });
     },
-    restartAccessControl(_row) {}
+    restartAccessControl(_row, _index) {
+      this.listLoading = true;
+      restartAccessControls(_row).then(response => {
+        this.listLoading = false;
+        this.$message({
+          type: "info",
+          message: "已发送成功指令"
+        });
+      });
+    },
+    openDoor(_row, _index) {
+      this.listLoading = true;
+      openDoor(_row).then(response => {
+        this.listLoading = false;
+        this.$message({
+          type: "info",
+          message: "已发送成功指令"
+        });
+      });
+    }
   }
 };
 </script>

@@ -12,7 +12,9 @@ import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.UserDto;
 import com.java110.things.exception.Result;
 import com.java110.things.exception.ServiceException;
+import com.java110.things.factory.AssessControlProcessFactory;
 import com.java110.things.factory.AuthenticationFactory;
+import com.java110.things.factory.NotifyAccessControlFactory;
 import com.java110.things.service.machine.IMachineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -92,6 +94,19 @@ public class MachineServiceImpl implements IMachineService {
             resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
         }
         return resultDto;
+    }
+
+    @Override
+    public ResultDto restartMachine(MachineDto machineDto) throws Exception {
+
+        AssessControlProcessFactory.getAssessControlProcessImpl().restartMachine(machineDto);
+        return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+    }
+
+    @Override
+    public ResultDto openDoor(MachineDto machineDto) throws Exception {
+        AssessControlProcessFactory.getAssessControlProcessImpl().openDoor(machineDto);
+        return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
     }
 
 

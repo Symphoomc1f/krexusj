@@ -37,4 +37,21 @@ public interface IMachineService {
      * @throws Exception
      */
      ResultDto deleteMachine(MachineDto machineDto) throws Exception;
+
+    /**
+     * 重启设备
+     * @param machineDto 设备信息
+     * @return
+     * @throws Exception
+     */
+    ResultDto restartMachine(MachineDto machineDto) throws Exception;
+
+
+    /**
+     * 开门
+     * @param machineDto 设备信息
+     * @return
+     * @throws Exception
+     */
+    ResultDto openDoor(MachineDto machineDto) throws Exception;
 }

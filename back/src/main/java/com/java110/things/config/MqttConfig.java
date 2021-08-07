@@ -27,10 +27,11 @@ import org.springframework.messaging.MessagingException;
  * @Author wuxw
  * @Date 2020/5/20 16:10
  * @Version 1.0
+ *
+ @IntegrationComponentScan
  * add by wuxw 2020/5/20
  **/
 @Configuration
-@IntegrationComponentScan
 public class MqttConfig {
 
     @Value("${spring.mqtt.username}")
