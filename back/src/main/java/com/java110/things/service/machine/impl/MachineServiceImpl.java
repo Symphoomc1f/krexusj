@@ -1,28 +1,18 @@
 package com.java110.things.service.machine.impl;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.dao.IMachineServiceDao;
-import com.java110.things.dao.IUserServiceDao;
 import com.java110.things.entity.PageDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
-import com.java110.things.entity.user.UserDto;
-import com.java110.things.exception.Result;
-import com.java110.things.exception.ServiceException;
-import com.java110.things.factory.AssessControlProcessFactory;
-import com.java110.things.factory.AuthenticationFactory;
-import com.java110.things.factory.NotifyAccessControlFactory;
+import com.java110.things.factory.AccessControlProcessFactory;
 import com.java110.things.service.machine.IMachineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @ClassName MachineServiceImpl
@@ -99,13 +89,13 @@ public class MachineServiceImpl implements IMachineService {
     @Override
     public ResultDto restartMachine(MachineDto machineDto) throws Exception {
 
-        AssessControlProcessFactory.getAssessControlProcessImpl().restartMachine(machineDto);
+        AccessControlProcessFactory.getAssessControlProcessImpl().restartMachine(machineDto);
         return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
     }
 
     @Override
     public ResultDto openDoor(MachineDto machineDto) throws Exception {
-        AssessControlProcessFactory.getAssessControlProcessImpl().openDoor(machineDto);
+        AccessControlProcessFactory.getAssessControlProcessImpl().openDoor(machineDto);
         return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
     }
 

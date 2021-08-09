@@ -3,8 +3,11 @@ package com.java110.things.accessControl;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
-import com.java110.things.factory.AssessControlProcessFactory;
+import com.java110.things.factory.AccessControlProcessFactory;
+import com.java110.things.factory.ImageFactory;
 import org.springframework.stereotype.Component;
+
+import java.io.File;
 
 /**
  * 添加更新人脸
@@ -18,6 +21,7 @@ public class DeleteFace extends BaseAccessControl{
      * @param heartbeatTaskDto 心跳下发任务指令
      */
     void deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto,CommunityDto communityDt) throws Exception {
-        AssessControlProcessFactory.getAssessControlProcessImpl().deleteFace(machineDto,heartbeatTaskDto);
+        ImageFactory.deleteImage(machineDto.getMachineCode() + File.pathSeparator +heartbeatTaskDto.getTaskinfo() + ".jpg");
+        AccessControlProcessFactory.getAssessControlProcessImpl().deleteFace(machineDto,heartbeatTaskDto);
     }
 }

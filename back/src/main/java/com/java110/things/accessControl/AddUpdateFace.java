@@ -1,6 +1,5 @@
 package com.java110.things.accessControl;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.config.Java110Properties;
 import com.java110.things.constant.AccessControlConstant;
@@ -11,10 +10,10 @@ import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.exception.HeartbeatCloudException;
-import com.java110.things.factory.AssessControlProcessFactory;
+import com.java110.things.factory.AccessControlProcessFactory;
 import com.java110.things.factory.HttpFactory;
+import com.java110.things.factory.ImageFactory;
 import com.java110.things.factory.MappingCacheFactory;
-import com.java110.things.service.IAssessControlProcess;
 import com.java110.things.util.BeanConvertUtil;
 import com.java110.things.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,7 +38,6 @@ public class AddUpdateFace extends BaseAccessControl {
 
     @Autowired
     private Java110Properties java110Properties;
-
 
 
     /**
@@ -100,14 +99,54 @@ public class AddUpdateFace extends BaseAccessControl {
 
 
         //查询 当前用户是否在硬件中存在数据
-        String faceId = AssessControlProcessFactory.getAssessControlProcessImpl().getFace(machineDto,userFaceDto);
+        String faceId = AccessControlProcessFactory.getAssessControlProcessImpl().getFace(machineDto, userFaceDto);
+
+        if (faceId == null) {
+            // 从本地磁盘中检查是否有人脸存在
+            boolean exists = ImageFactory.existsImage(userFaceDto.getUserId() + "jpg");
+            faceId = exists ? userFaceDto.getUserId() : null;
+        }
 
         //调用新增人脸接口
-        if(StringUtil.isEmpty(faceId)){
-            AssessControlProcessFactory.getAssessControlProcessImpl().addFace(machineDto,userFaceDto);
-        }else{ //调用更新人脸接口
-            AssessControlProcessFactory.getAssessControlProcessImpl().updateFace(machineDto,userFaceDto);
+        if (StringUtil.isEmpty(faceId)) {
+            //存储人脸
+            saveFace(machineDto, userFaceDto);
+            AccessControlProcessFactory.getAssessControlProcessImpl().addFace(machineDto, userFaceDto);
+        } else { //调用更新人脸接口
+            updateFace(machineDto, userFaceDto);
+            AccessControlProcessFactory.getAssessControlProcessImpl().updateFace(machineDto, userFaceDto);
         }
+    }
+
+    /**
+     * 本地存储人脸
+     *
+     * @param userFaceDto
+     */
+    private void saveFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+
+        String faceBase = userFaceDto.getFaceBase64();
+        faceBase = faceBase.substring(faceBase.indexOf("base64,") + 7);
+
+        ImageFactory.GenerateImage(faceBase, machineDto.getMachineCode() + File.pathSeparator + userFaceDto.getUserId() + ".jpg");
+
+    }
+
+
+    /**
+     * 本地修改人脸
+     *
+     * @param userFaceDto
+     */
+    private void updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+
+        ImageFactory.deleteImage(machineDto.getMachineCode() + File.pathSeparator + userFaceDto.getUserId() + ".jpg");
+
+        String faceBase = userFaceDto.getFaceBase64();
+        faceBase = faceBase.substring(faceBase.indexOf("base64,") + 7);
+
+        ImageFactory.GenerateImage(faceBase, machineDto.getMachineCode() + File.pathSeparator + userFaceDto.getUserId() + ".jpg");
+
     }
 
 }

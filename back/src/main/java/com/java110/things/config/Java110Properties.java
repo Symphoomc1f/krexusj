@@ -12,33 +12,14 @@ import org.springframework.stereotype.Component;
 @PropertySource("classpath:java110.properties")
 public class Java110Properties {
 
-    private String communityId;
+    private static String cloudFacePath;
 
-    private String communityName;
 
-    private String cloudApiUrl;
-
-    public String getCommunityId() {
-        return communityId;
+    public static String getCloudFacePath() {
+        return cloudFacePath;
     }
 
-    public void setCommunityId(String communityId) {
-        this.communityId = communityId;
-    }
-
-    public String getCommunityName() {
-        return communityName;
-    }
-
-    public void setCommunityName(String communityName) {
-        this.communityName = communityName;
-    }
-
-    public String getCloudApiUrl() {
-        return cloudApiUrl;
-    }
-
-    public void setCloudApiUrl(String cloudApiUrl) {
-        this.cloudApiUrl = cloudApiUrl;
+    public void setCloudFacePath(String cloudFacePath) {
+        this.cloudFacePath = cloudFacePath;
     }
 }

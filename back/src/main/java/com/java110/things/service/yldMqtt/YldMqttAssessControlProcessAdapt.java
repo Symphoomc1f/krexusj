@@ -6,8 +6,10 @@ import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.MqttFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
+import com.java110.things.mqtt.MqttPushClient;
 import com.java110.things.service.IAssessControlProcess;
 import com.java110.things.service.INotifyAccessControlService;
 import com.java110.things.service.machine.IMachineService;
@@ -67,6 +69,11 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
 
     public static final String SN = "{sn}";
 
+    public static final String FACE_URL = "ACCESS_CONTROL_FACE_URL";
+
+    //图片后缀
+    public static final String IMAGE_SUFFIX = ".jpg";
+
     @Override
     public void initAssessControlProcess() {
         logger.debug("初始化是配置器");
@@ -101,7 +108,7 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
         param.put("face_id", userFaceDto.getUserId());
         param.put("per_name", userFaceDto.getName());
         param.put("idcardNum", userFaceDto.getIdNumber());
-        param.put("img_url", "http://39.98.253.100/20200520021223248.jpg");
+        param.put("img_url", MappingCacheFactory.getValue(FACE_URL) + userFaceDto.getUserId() + IMAGE_SUFFIX);
         param.put("idcardper", userFaceDto.getIdNumber());
         param.put("s_time", START_TIME);
         param.put("e_time", END_TIME);
@@ -125,8 +132,7 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
         param.put("face_id", userFaceDto.getUserId());
         param.put("per_name", userFaceDto.getName());
         param.put("idcardNum", userFaceDto.getIdNumber());
-        param.put("img_url", "\"http://dqfile-1251895221.cos.ap-guangzhou.myqcloud.\n" +
-                " com / img / DC681D46EA932574179933CA04F29998A99F2EF9.jpg ");
+        param.put("img_url", MappingCacheFactory.getValue(FACE_URL) + userFaceDto.getUserId() + IMAGE_SUFFIX);
         param.put("idcardper", userFaceDto.getIdNumber());
         param.put("s_time", START_TIME);
         param.put("e_time", END_TIME);
@@ -262,6 +268,7 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
 
         if (machineDtos.size() > 0) {
             logger.debug("门禁已经注册过，无需再次注册");
+            setUiTitle(machineDtos.get(0));
             return;
         }
         String machineName = MANUFACTURER + SeqUtil.getMachineSeq();
@@ -277,17 +284,28 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
         machineDto.setMachineVersion("v1.0");
         machineDto.setOem("伊兰度");
         notifyAccessControlService.uploadMachine(machineDto);
+        //上报标题
+        setUiTitle(machineDto);
 
-        //将修改设备名称，方便对应
-        param = new JSONObject();
-        param.put("client_id", machineCode);
+
+    }
+
+
+    /**
+     * 重启
+     */
+    private void setUiTitle(MachineDto machineDto) {
+
+        JSONObject param = new JSONObject();
+        param.put("client_id", machineDto.getMachineCode());
         param.put("cmd_id", SeqUtil.getId());
         param.put("version", VERSION);
         param.put("cmd", CMD_UI_TITLE);
         JSONObject body = new JSONObject();
-        body.put("title", machineName);
+        body.put("title", "YLD-" + machineDto.getMachineCode());
         param.put("body", body);
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
+
     }
 
 }

@@ -1,5 +1,6 @@
 package com.java110.things.factory;
 
+import com.java110.things.config.Java110Properties;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.manufacturer.ManufacturerDto;
 import com.java110.things.entity.response.ResultDto;
@@ -8,7 +9,10 @@ import com.java110.things.exception.ThreadException;
 import com.java110.things.service.IAssessControlProcess;
 import com.java110.things.service.manufacturer.IManufacturerService;
 import com.java110.things.util.Assert;
+import sun.misc.BASE64Decoder;
 
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -19,7 +23,7 @@ import java.util.List;
  * @Version 1.0
  * add by wuxw 2020/5/20
  **/
-public class AssessControlProcessFactory {
+public class AccessControlProcessFactory {
 
     /**
      * 访问硬件接口
@@ -50,4 +54,5 @@ public class AssessControlProcessFactory {
         assessControlProcessImpl = ApplicationContextFactory.getBean(manufacturerDtos.get(0).getProtocolImpl(), IAssessControlProcess.class);
         return assessControlProcessImpl;
     }
+
 }

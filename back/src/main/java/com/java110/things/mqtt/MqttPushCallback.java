@@ -1,7 +1,7 @@
 package com.java110.things.mqtt;
 
 
-import com.java110.things.factory.AssessControlProcessFactory;
+import com.java110.things.factory.AccessControlProcessFactory;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -33,7 +33,7 @@ public class MqttPushCallback implements MqttCallback {
     public void messageArrived(String topic, MqttMessage message) throws Exception {
         log.info("Topic: " + topic);
         log.info("Message: " + new String(message.getPayload()));
-        AssessControlProcessFactory.getAssessControlProcessImpl().mqttMessageArrived(topic, new String(message.getPayload()));
+        AccessControlProcessFactory.getAssessControlProcessImpl().mqttMessageArrived(topic, new String(message.getPayload()));
     }
 
 }
