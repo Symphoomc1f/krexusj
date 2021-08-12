@@ -171,6 +171,7 @@ export default {
       deleteAccessControlDailogVisible: false,
       dialogFormVisible: false,
       curAccessControl: {},
+      total: 0,
       temp: {
         machineCode: "",
         machineMac: "",
@@ -205,6 +206,8 @@ export default {
       this.listLoading = true;
       getAccessControls().then(response => {
         this.list = response.data;
+        this.total = response.total;
+
         this.listLoading = false;
       });
     },
@@ -212,6 +215,8 @@ export default {
       this.listLoading = true;
       getAccessControlsByCondition(this.listQuery).then(response => {
         this.list = response.data;
+        this.total = response.total;
+
         this.listLoading = false;
       });
     },

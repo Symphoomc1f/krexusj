@@ -4,7 +4,7 @@ package com.java110.things.service.yld04;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
-import com.java110.things.service.INotifyAccessControlService;
+import com.java110.things.service.ICallAccessControlService;
 import com.java110.things.util.Base64Convert;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
@@ -849,7 +849,7 @@ public class Function {
                 mapcamreip.put(deCode(new String(ips.mac)).trim(), deCode(new String(ips.ip)).trim());
             }
             //设备上报
-            INotifyAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getINotifyAccessControlService();
+            ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
             MachineDto machineDto = new MachineDto();
             machineDto.setMachineId(UUID.randomUUID().toString());
             machineDto.setMachineIp(deCode(new String(ips.ip)).trim());

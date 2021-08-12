@@ -37,7 +37,7 @@ public class ThingsApplicationStart implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/face/**").addResourceLocations(
                 "file:" + Java110Properties.getCloudFacePath());
-        logger.debug("自定义静态资源目录、此处功能用于文件映射");
+        logger.debug("自定义静态资源目录、此处功能用于文件映射" + Java110Properties.getCloudFacePath());
     }
 
     /**

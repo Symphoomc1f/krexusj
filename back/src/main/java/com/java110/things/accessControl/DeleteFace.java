@@ -21,7 +21,7 @@ public class DeleteFace extends BaseAccessControl{
      * @param heartbeatTaskDto 心跳下发任务指令
      */
     void deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto,CommunityDto communityDt) throws Exception {
-        ImageFactory.deleteImage(machineDto.getMachineCode() + File.pathSeparator +heartbeatTaskDto.getTaskinfo() + ".jpg");
+        ImageFactory.deleteImage(machineDto.getMachineCode() + File.separatorChar +heartbeatTaskDto.getTaskinfo() + ".jpg");
         AccessControlProcessFactory.getAssessControlProcessImpl().deleteFace(machineDto,heartbeatTaskDto);
     }
 }

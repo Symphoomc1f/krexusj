@@ -25,8 +25,8 @@ public class demo {
 
 
         //createFace();
-        gpioControl();
-        //searchMachine();
+        //gpioControl();
+        searchMachine();
         //reboot();
 
         //setUiTitle();
@@ -117,7 +117,7 @@ public class demo {
         MqttPushClient.MQTT_USERNAME = "admin";
         MqttPushClient.MQTT_PASSWORD = "admin";
         MqttPushClient client = MqttPushClient.getInstance();
-        client.subscribe("face.9f15b229-0422fd6b.response");
+        //client.subscribe("face.9f15b229-0422fd6b.response");
 
         JSONObject param = new JSONObject();
         param.put("client_id", "9f15b229-0422fd6b");

@@ -89,6 +89,13 @@
         </template>
       </el-table-column>
     </el-table>
+    <pagination
+      v-show="total>0"
+      :total="total"
+      :page.sync="listQuery.page"
+      :limit.sync="listQuery.row"
+      @pagination="getMappings"
+    />
 
     <el-dialog title="配置" :visible.sync="dialogFormVisible">
       <el-form
@@ -156,6 +163,7 @@ import {
   freshMappings
 } from "@/api/mapping";
 import { parseTime } from "@/utils";
+import Pagination from "@/components/Pagination";
 
 export default {
   filters: {
@@ -192,6 +200,7 @@ export default {
         value: "",
         remark: ""
       },
+      total: 0,
       rules: {},
       domainOption: [
         { value: "DOMAIN.SYSTEM", label: "系统配置" },
@@ -213,6 +222,7 @@ export default {
       }
     }
   },
+  components: { Pagination },
   created() {
     this.fetchData();
   },
@@ -221,6 +231,7 @@ export default {
       this.listLoading = true;
       getMappings().then(response => {
         this.list = response.data;
+        this.total = response.total;
         this.listLoading = false;
       });
     },
@@ -228,6 +239,7 @@ export default {
       this.listLoading = true;
       getMappingsByCondition(this.listQuery).then(response => {
         this.list = response.data;
+        this.total = response.total;
         this.listLoading = false;
       });
     },

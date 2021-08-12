@@ -51,3 +51,11 @@ export function openDoor(params) {
         data:params
     })
 }
+
+export function getAccessControlsLog(params) {
+    return request({
+        url: '/api/machine/getMachineLogs',
+        method: 'get',
+        params
+    })
+}

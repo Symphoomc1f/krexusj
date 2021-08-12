@@ -6,14 +6,16 @@ import com.java110.things.constant.ResponseConstant;
 import com.java110.things.dao.IMachineServiceDao;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.machine.OperateLogDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.exception.Result;
 import com.java110.things.exception.ServiceException;
 import com.java110.things.exception.ThreadException;
 import com.java110.things.factory.HttpFactory;
 import com.java110.things.factory.MappingCacheFactory;
-import com.java110.things.service.INotifyAccessControlService;
+import com.java110.things.service.ICallAccessControlService;
 import com.java110.things.service.community.ICommunityService;
+import com.java110.things.service.machine.IOperateLogService;
 import com.java110.things.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +37,9 @@ import java.util.UUID;
  * @Version 1.0
  * add by wuxw 2020/5/15
  **/
-@Service("notifyAccessControlServcieImpl")
-public class NotifyAccessControlServiceImpl implements INotifyAccessControlService {
-    Logger logger = LoggerFactory.getLogger(NotifyAccessControlServiceImpl.class);
+@Service("callAccessControlServiceImpl")
+public class CallAccessControlServiceImpl implements ICallAccessControlService {
+    Logger logger = LoggerFactory.getLogger(CallAccessControlServiceImpl.class);
 
     @Autowired
     IMachineServiceDao machineServiceDao;
@@ -47,6 +49,9 @@ public class NotifyAccessControlServiceImpl implements INotifyAccessControlServi
 
     @Autowired
     private ICommunityService communityServiceImpl;
+
+    @Autowired
+    private IOperateLogService operateLogServiceImpl;
 
 
     @Override
@@ -101,6 +106,37 @@ public class NotifyAccessControlServiceImpl implements INotifyAccessControlServi
             throw new ServiceException(Result.SYS_ERROR, "上报云端失败" + e);
 
         }
+    }
+
+    /**
+     * 操作日志记录
+     * @param operateLogDto 日志对象，当logId 在数据库中不存在是做添加，存在时 做修改
+     */
+    @Override
+    public void saveOrUpdateOperateLog(OperateLogDto operateLogDto) {
+        if(StringUtil.isEmpty(operateLogDto.getLogId())){
+            throw new ServiceException(Result.SYS_ERROR, "未包含日志ID，一般为 和设备交互请求返回的唯一编码 如流水");
+        }
+
+        if(StringUtil.isEmpty(operateLogDto.getMachineId())){
+            throw new ServiceException(Result.SYS_ERROR, "设备ID，可以从machineDto 对象中获取，如果没有可以用machineCode 查一下库");
+        }
+//        if(StringUtil.isEmpty(operateLogDto.getState())){
+//            throw new ServiceException(Result.SYS_ERROR, "日志状态，请求成功 10001,返回成功10002,操作失败 10003");
+//        }
+
+        if(StringUtil.isEmpty(operateLogDto.getOperateType())){
+            throw new ServiceException(Result.SYS_ERROR, "操作类型，可以查看t_dict 表");
+        }
+
+        if(StringUtil.isEmpty(operateLogDto.getState())){
+            operateLogDto.setState("10001"); // 默认设置为请求
+        }
+
+        operateLogDto.setMachineTypeCd("9998");
+
+
+        operateLogServiceImpl.saveOperateLog(operateLogDto);
     }
 
     /**

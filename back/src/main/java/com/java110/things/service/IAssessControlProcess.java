@@ -72,7 +72,7 @@ public interface IAssessControlProcess {
      * 扫描门禁信息
      * @return
      */
-    List<MachineDto> scanMachine();
+    List<MachineDto> scanMachine() throws Exception;
 
 
     /**

@@ -1,11 +1,6 @@
 package com.java110.things.factory;
 
-import com.java110.things.constant.SystemConstant;
-import com.java110.things.service.INotifyAccessControlService;
-import com.java110.things.util.DateUtil;
-import org.springframework.http.HttpHeaders;
-
-import java.util.UUID;
+import com.java110.things.service.ICallAccessControlService;
 
 /**
  * @ClassName NotifyAccessControlFactory
@@ -17,8 +12,8 @@ import java.util.UUID;
  **/
 public class NotifyAccessControlFactory {
 
-    public static INotifyAccessControlService getINotifyAccessControlService() {
-        INotifyAccessControlService notifyAccessControlService = ApplicationContextFactory.getBean("notifyAccessControlServcieImpl", INotifyAccessControlService.class);
-        return notifyAccessControlService;
+    public static ICallAccessControlService getCallAccessControlService() {
+        ICallAccessControlService callAccessControlService = ApplicationContextFactory.getBean("callAccessControlServiceImpl", ICallAccessControlService.class);
+        return callAccessControlService;
     }
 }

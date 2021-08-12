@@ -103,7 +103,7 @@ public class AddUpdateFace extends BaseAccessControl {
 
         if (faceId == null) {
             // 从本地磁盘中检查是否有人脸存在
-            boolean exists = ImageFactory.existsImage(userFaceDto.getUserId() + "jpg");
+            boolean exists = ImageFactory.existsImage(machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
             faceId = exists ? userFaceDto.getUserId() : null;
         }
 
@@ -128,7 +128,7 @@ public class AddUpdateFace extends BaseAccessControl {
         String faceBase = userFaceDto.getFaceBase64();
         faceBase = faceBase.substring(faceBase.indexOf("base64,") + 7);
 
-        ImageFactory.GenerateImage(faceBase, machineDto.getMachineCode() + File.pathSeparator + userFaceDto.getUserId() + ".jpg");
+        ImageFactory.GenerateImage(faceBase, machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
 
     }
 
@@ -140,12 +140,12 @@ public class AddUpdateFace extends BaseAccessControl {
      */
     private void updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
 
-        ImageFactory.deleteImage(machineDto.getMachineCode() + File.pathSeparator + userFaceDto.getUserId() + ".jpg");
+        ImageFactory.deleteImage(machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
 
         String faceBase = userFaceDto.getFaceBase64();
         faceBase = faceBase.substring(faceBase.indexOf("base64,") + 7);
 
-        ImageFactory.GenerateImage(faceBase, machineDto.getMachineCode() + File.pathSeparator + userFaceDto.getUserId() + ".jpg");
+        ImageFactory.GenerateImage(faceBase, machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
 
     }
 

@@ -21,7 +21,12 @@ public class MqttPushCallback implements MqttCallback {
     @Override
     public void connectionLost(Throwable cause) {
         log.info("断开连接，建议重连" + this);
-        //断开连接，建议重连
+//        try {
+//            //断开连接，建议重连
+//            AccessControlProcessFactory.getAssessControlProcessImpl().initAssessControlProcess();
+//        } catch (Exception e) {
+//            log.error("初始化失败", e);
+//        }
     }
 
     @Override
@@ -31,9 +36,13 @@ public class MqttPushCallback implements MqttCallback {
 
     @Override
     public void messageArrived(String topic, MqttMessage message) throws Exception {
-        log.info("Topic: " + topic);
-        log.info("Message: " + new String(message.getPayload()));
-        AccessControlProcessFactory.getAssessControlProcessImpl().mqttMessageArrived(topic, new String(message.getPayload()));
+        try {
+            log.info("Topic: " + topic);
+            log.info("Message: " + new String(message.getPayload()));
+            AccessControlProcessFactory.getAssessControlProcessImpl().mqttMessageArrived(topic, new String(message.getPayload()));
+        } catch (Exception e) {
+            log.error("处理订阅消息失败", e);
+        }
     }
 
 }

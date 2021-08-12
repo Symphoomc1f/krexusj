@@ -5,13 +5,13 @@ import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.machine.OperateLogDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.MqttFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
-import com.java110.things.mqtt.MqttPushClient;
 import com.java110.things.service.IAssessControlProcess;
-import com.java110.things.service.INotifyAccessControlService;
+import com.java110.things.service.ICallAccessControlService;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.SeqUtil;
 import org.slf4j.Logger;
@@ -54,9 +54,13 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
     public static final String CMD_DELETE_FACE = "delete_face"; //删除人脸
 
     public static final String CMD_UI_TITLE = "set_ui_title";// 设置名称
+    public static final String CMD_FACE_SEARCH = "face_search";// 搜素设备
 
     //单设备处理
     public static final String TOPIC_FACE_SN_REQUEST = "face.{sn}.request";
+
+    //多设备处理
+    public static final String TOPIC_FACE_REQUEST = "face.request";
 
     //接收设备处理
     public static final String TOPIC_FACE_SN_RESPONSE = "face.{sn}.response";
@@ -99,16 +103,17 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
 
     @Override
     public void addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+        String cmdId = SeqUtil.getId();
         JSONObject param = new JSONObject();
         param.put("client_id", machineDto.getMachineCode());
-        param.put("cmd_id", SeqUtil.getId());
+        param.put("cmd_id", cmdId);
         param.put("version", VERSION);
         param.put("cmd", CMD_ADD_FACE);
         param.put("per_id", userFaceDto.getUserId());
         param.put("face_id", userFaceDto.getUserId());
         param.put("per_name", userFaceDto.getName());
         param.put("idcardNum", userFaceDto.getIdNumber());
-        param.put("img_url", MappingCacheFactory.getValue(FACE_URL) + userFaceDto.getUserId() + IMAGE_SUFFIX);
+        param.put("img_url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
         param.put("idcardper", userFaceDto.getIdNumber());
         param.put("s_time", START_TIME);
         param.put("e_time", END_TIME);
@@ -117,40 +122,50 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
 
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
 
+        saveLog(cmdId, machineDto.getMachineId(), CMD_ADD_FACE, param.toJSONString(), "", "", userFaceDto.getUserId(), userFaceDto.getName());
+
+
     }
 
     @Override
     public void updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+        String cmdId = SeqUtil.getId();
 
         //CMD_UPDATE_FACE
         JSONObject param = new JSONObject();
         param.put("client_id", machineDto.getMachineCode());
-        param.put("cmd_id", SeqUtil.getId());
+        param.put("cmd_id", cmdId);
         param.put("version", VERSION);
         param.put("cmd", CMD_UPDATE_FACE);
         param.put("per_id", userFaceDto.getUserId());
         param.put("face_id", userFaceDto.getUserId());
         param.put("per_name", userFaceDto.getName());
         param.put("idcardNum", userFaceDto.getIdNumber());
-        param.put("img_url", MappingCacheFactory.getValue(FACE_URL) + userFaceDto.getUserId() + IMAGE_SUFFIX);
+        param.put("img_url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
         param.put("idcardper", userFaceDto.getIdNumber());
         param.put("s_time", START_TIME);
         param.put("e_time", END_TIME);
         param.put("per_type", 0);
         param.put("usr_type", 0);
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
+        saveLog(cmdId, machineDto.getMachineId(), CMD_UPDATE_FACE, param.toJSONString(), "", "", userFaceDto.getUserId(), userFaceDto.getName());
+
     }
 
     @Override
     public void deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
+        String cmdId = SeqUtil.getId();
+
         JSONObject param = new JSONObject();
         param.put("client_id", machineDto.getMachineCode());
-        param.put("cmd_id", SeqUtil.getId());
+        param.put("cmd_id", cmdId);
         param.put("version", VERSION);
         param.put("cmd", CMD_DELETE_FACE);
         param.put("type", 0);
         param.put("per_id", heartbeatTaskDto.getTaskinfo());
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
+        saveLog(cmdId, machineDto.getMachineId(), CMD_DELETE_FACE, param.toJSONString(), "", "", heartbeatTaskDto.getTaskinfo(), "");
+
     }
 
     @Override
@@ -162,6 +177,8 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
         param.put("cmd", CMD_DELETE_FACE);
         param.put("type", 4);
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
+        saveLog(param.getString("cmd_id"), machineDto.getMachineId(), CMD_DELETE_FACE, param.toJSONString(), "");
+
     }
 
     /**
@@ -170,12 +187,30 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
      * @return
      */
     @Override
-    public List<MachineDto> scanMachine() {
+    public List<MachineDto> scanMachine() throws Exception {
+
+        MachineDto machineDto = new MachineDto();
+
+        ResultDto resultDto = machineServiceImpl.getMachine(machineDto);
+
+        if (resultDto == null || resultDto.getCode() != ResponseConstant.SUCCESS) {
+            logger.error("查询设备信息失败" + machineDto.toString());
+            return null;
+        }
+
+        List<MachineDto> machineDtos = (List<MachineDto>) resultDto.getData();
+        JSONObject param = null;
+        for (MachineDto tmpMachineDto : machineDtos) {
+            setUiTitle(tmpMachineDto);
+        }
         return null;
     }
 
     @Override
     public void mqttMessageArrived(String topic, String data) {
+
+        JSONObject param = JSONObject.parseObject(data);
+
         switch (topic) {
             case TOPIC_FACE_RESPONSE:
                 openDoorResult(data);
@@ -186,6 +221,33 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
             default:
                 break;
         }
+
+        if (!param.containsKey("cmd_id")) {
+            return;
+        }
+        String state = param.containsKey("code") && "0".equals(param.getString("code")) ? "10002" : "10003";
+        String marchineId = "-1";
+        if (param.containsKey("sn")) {
+            ResultDto resultDto = null;
+            MachineDto machineDto = new MachineDto();
+            machineDto.setMachineCode(param.getString("sn"));
+            machineDto.setMachineTypeCd("9998"); // 标识门禁 以防万一和道闸之类冲突
+            try {
+                resultDto = machineServiceImpl.getMachine(machineDto);
+                if (resultDto != null && resultDto.getCode() == ResponseConstant.SUCCESS) {
+                    List<MachineDto> machineDtos = (List<MachineDto>) resultDto.getData();
+                    if (machineDtos.size() > 0) {
+                        marchineId = machineDtos.get(0).getMachineId();
+                    }
+                }
+            } catch (Exception e) {
+
+            }
+
+
+        }
+        saveLog(param.getString("cmd_id"), marchineId, topic, "", data, state);
+
     }
 
     @Override
@@ -196,6 +258,8 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
         param.put("version", VERSION);
         param.put("cmd", CMD_REBOOT);
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
+        saveLog(param.getString("cmd_id"), machineDto.getMachineId(), CMD_REBOOT, param.toJSONString(), "");
+
     }
 
     @Override
@@ -207,6 +271,8 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
         param.put("cmd", CMD_OPEN_DOOR);
         param.put("ctrl_type", "on");
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
+        saveLog(param.getString("cmd_id"), machineDto.getMachineId(), CMD_OPEN_DOOR, param.toJSONString(), "");
+
     }
 
     /**
@@ -273,19 +339,23 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
         }
         String machineName = MANUFACTURER + SeqUtil.getMachineSeq();
 
-        //设备上报
-        INotifyAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getINotifyAccessControlService();
-        machineDto = new MachineDto();
-        machineDto.setMachineId(UUID.randomUUID().toString());
-        machineDto.setMachineIp("");
-        machineDto.setMachineMac(machineCode);
-        machineDto.setMachineCode(machineCode);
-        machineDto.setMachineName(machineName);
-        machineDto.setMachineVersion("v1.0");
-        machineDto.setOem("伊兰度");
-        notifyAccessControlService.uploadMachine(machineDto);
-        //上报标题
-        setUiTitle(machineDto);
+        try {
+            //设备上报
+            ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
+            machineDto = new MachineDto();
+            machineDto.setMachineId(UUID.randomUUID().toString());
+            machineDto.setMachineIp("设备未上报");
+            machineDto.setMachineMac(machineCode);
+            machineDto.setMachineCode(machineCode);
+            machineDto.setMachineName(machineName);
+            machineDto.setMachineVersion("v1.0");
+            machineDto.setOem("伊兰度");
+            notifyAccessControlService.uploadMachine(machineDto);
+            //上报标题
+            setUiTitle(machineDto);
+        } catch (Exception e) {
+            logger.error("上报设备失败", e);
+        }
 
 
     }
@@ -302,10 +372,66 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
         param.put("version", VERSION);
         param.put("cmd", CMD_UI_TITLE);
         JSONObject body = new JSONObject();
-        body.put("title", "YLD-" + machineDto.getMachineCode());
+        body.put("title", machineDto.getMachineName());
         param.put("body", body);
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
 
+        saveLog(param.getString("cmd_id"), machineDto.getMachineId(), CMD_UI_TITLE, param.toJSONString(), "");
+
+
+    }
+
+    /**
+     * 存储日志
+     *
+     * @param logId     日志ID
+     * @param machineId 设备ID
+     * @param cmd       操作命令
+     * @param reqParam  请求报文
+     * @param resParam  返回报文
+     */
+    private void saveLog(String logId, String machineId, String cmd, String reqParam, String resParam) {
+        saveLog(logId, machineId, cmd, reqParam, resParam, "", "", "");
+    }
+
+    /**
+     * 存储日志
+     *
+     * @param logId     日志ID
+     * @param machineId 设备ID
+     * @param cmd       操作命令
+     * @param reqParam  请求报文
+     * @param resParam  返回报文
+     * @param state     状态
+     */
+    private void saveLog(String logId, String machineId, String cmd, String reqParam, String resParam, String state) {
+        saveLog(logId, machineId, cmd, reqParam, resParam, state, "", "");
+    }
+
+    /**
+     * 存储日志
+     *
+     * @param logId     日志ID
+     * @param machineId 设备ID
+     * @param cmd       操作命令
+     * @param reqParam  请求报文
+     * @param resParam  返回报文
+     * @param state     状态
+     * @param userId    业主ID
+     * @param userName  业主名称
+     */
+    private void saveLog(String logId, String machineId, String cmd, String reqParam, String resParam, String state, String userId, String userName) {
+        ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
+        OperateLogDto operateLogDto = new OperateLogDto();
+        operateLogDto.setLogId(logId);
+        operateLogDto.setMachineId(machineId);
+        operateLogDto.setOperateType(cmd);
+        operateLogDto.setReqParam(reqParam);
+        operateLogDto.setResParam(resParam);
+        operateLogDto.setState(state);
+        operateLogDto.setUserId(userId);
+        operateLogDto.setUserName(userName);
+        notifyAccessControlService.saveOrUpdateOperateLog(operateLogDto);
     }
 
 }

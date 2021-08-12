@@ -5,9 +5,11 @@ import com.java110.things.Controller.BaseController;
 import com.java110.things.constant.MachineConstant;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.machine.OperateLogDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.UserDto;
 import com.java110.things.service.machine.IMachineService;
+import com.java110.things.service.machine.IOperateLogService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,9 @@ public class MachineController extends BaseController {
 
     @Autowired
     private IMachineService machineServiceImpl;
+
+    @Autowired
+    private IOperateLogService operateLogServiceImpl;
 
     /**
      * 添加设备接口类
@@ -112,7 +117,6 @@ public class MachineController extends BaseController {
     }
 
 
-
     /**
      * 重启设备 动作
      *
@@ -144,6 +148,35 @@ public class MachineController extends BaseController {
         Assert.hasKeyAndValue(paramObj, "machineId", "请求报文中未包含硬件ID");
 
         ResultDto resultDto = machineServiceImpl.openDoor(BeanConvertUtil.covertBean(paramObj, MachineDto.class));
+        return super.createResponseEntity(resultDto);
+    }
+
+    /**
+     * 添加设备接口类
+     *
+     * @param page 页数
+     * @param row  每页显示的数量
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/getMachineLogs", method = RequestMethod.GET)
+    public ResponseEntity<String> getMachineLogs(@RequestParam int page,
+                                                 @RequestParam int row,
+                                                 @RequestParam String machineTypeCd,
+                                                 @RequestParam(name = "logId", required = false) String logId,
+                                                 @RequestParam(name = "machineCode", required = false) String machineCode,
+                                                 @RequestParam(name = "machineName", required = false) String machineName) throws Exception {
+
+        Assert.hasText(machineTypeCd, "请求报文中未包含设备类型");
+        OperateLogDto operateLogDto = new OperateLogDto();
+        operateLogDto.setPage(page);
+        operateLogDto.setRow(row);
+        operateLogDto.setMachineTypeCd(machineTypeCd);
+        operateLogDto.setLogId(logId);
+        operateLogDto.setMachineCode(machineCode);
+        operateLogDto.setMachineName(machineName);
+
+        ResultDto resultDto = operateLogServiceImpl.getOperateLogs(operateLogDto);
         return super.createResponseEntity(resultDto);
     }
 }
