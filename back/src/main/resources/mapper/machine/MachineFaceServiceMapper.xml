@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java110.things.dao.IMachineFaceServiceDao">
+
+
+    <insert id="saveMachineFace" parameterType="com.java110.things.entity.machine.MachineFaceDto">
+        INSERT INTO machine_face (`id`, `user_id`, `name`, `id_number`, `start_time`, `end_time`, `face_path`)
+        VALUES (#{id}, #{userId}, #{name}, #{idNumber}, #{startTime}, #{endTime}, #{facePath});
+    </insert>
+
+    <!--
+        查询设备信息
+    -->
+    <select id="getMachineFaces" parameterType="com.java110.things.entity.machine.MachineFaceDto"
+            resultType="com.java110.things.entity.machine.MachineFaceDto">
+        select
+        t.id ,
+        t.user_id userId,
+        t.name ,
+        t.id_number idNumber,
+        t.start_time startTime,
+        t.end_time endTime,
+        t.face_path facePath,
+        t.machine_id machineId,
+        m.machine_code machineCode,
+        m.machine_name machineName,
+        m.machine_ip machineIp
+        from machine_face t,machine m
+        where 1=1
+        and t.machine_id = m.machine_id
+        and m.status_cd = '0'
+        <if test="machineCode != null and machineCode != ''">
+            and m.machine_code = #{machineCode}
+        </if>
+        <if test="machineName != null and machineName != ''">
+            and m.machine_name = #{machineName}
+        </if>
+        <if test="machineIp != null and machineIp != ''">
+            and m.machine_ip = #{machineIp}
+        </if>
+        <if test="id != null and id != ''">
+            and t.id = #{id}
+        </if>
+        <if test="id != null and id != ''">
+            and t.id = #{id}
+        </if>
+        <if test="userId != null and userId != ''">
+            and t.user_id = #{userId}
+        </if>
+        <if test="name != null and name != ''">
+            and t.name = #{name}
+        </if>
+        <if test="idNumber != null and idNumber != ''">
+            and t.id_number = #{idNumber}
+        </if>
+        <if test="machineId != null and machineId != ''">
+            and t.machine_id = #{machineId}
+        </if>
+        and t.status_cd = '0'
+        order by t.create_time desc
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+
+    </select>
+
+    <select id="getMachineFaceCount" parameterType="com.java110.things.entity.machine.MachineFaceDto" resultType="long">
+        select
+        count(1) count
+        from machine_face t,machine m
+        where 1=1
+        and t.machine_id = m.machine_id
+        and m.status_cd = '0'
+        <if test="machineCode != null and machineCode != ''">
+            and m.machine_code = #{machineCode}
+        </if>
+        <if test="machineName != null and machineName != ''">
+            and m.machine_name = #{machineName}
+        </if>
+        <if test="machineIp != null and machineIp != ''">
+            and m.machine_ip = #{machineIp}
+        </if>
+        <if test="id != null and id != ''">
+            and t.id = #{id}
+        </if>
+        <if test="id != null and id != ''">
+            and t.id = #{id}
+        </if>
+        <if test="userId != null and userId != ''">
+            and t.user_id = #{userId}
+        </if>
+        <if test="name != null and name != ''">
+            and t.name = #{name}
+        </if>
+        <if test="idNumber != null and idNumber != ''">
+            and t.id_number = #{idNumber}
+        </if>
+        <if test="machineId != null and machineId != ''">
+            and t.machine_id = #{machineId}
+        </if>
+        and t.status_cd = '0'
+
+    </select>
+
+    <update id="updateMachineFace" parameterType="com.java110.things.entity.machine.MachineFaceDto">
+        update machine_face t
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">
+                 t.name = #{name},
+            </if>
+            <if test="idNumber != null and idNumber != ''">
+                 t.id_number = #{idNumber},
+            </if>
+            <if test="statusCd != null and statusCd != ''">
+                t.status_cd = #{statusCd},
+            </if>
+        </trim>
+        where 1=1
+        and t.status_cd = '0'
+        <if test="machineId != null and machineId != ''">
+            and t.machine_id = #{machineId}
+        </if>
+        <if test="userId != null and userId != ''">
+            and t.user_id = #{userId}
+        </if>
+        <if test="id != null and id != ''">
+            and t.id = #{id}
+        </if>
+    </update>
+
+</mapper>

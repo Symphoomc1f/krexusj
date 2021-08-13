@@ -59,3 +59,11 @@ export function getAccessControlsLog(params) {
         params
     })
 }
+
+export function getAccessControlFace(params) {
+    return request({
+        url: '/api/machine/getMachineFaces',
+        method: 'get',
+        params
+    })
+}

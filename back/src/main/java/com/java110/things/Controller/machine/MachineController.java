@@ -5,9 +5,11 @@ import com.java110.things.Controller.BaseController;
 import com.java110.things.constant.MachineConstant;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.machine.MachineFaceDto;
 import com.java110.things.entity.machine.OperateLogDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.UserDto;
+import com.java110.things.service.machine.IMachineFaceService;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.service.machine.IOperateLogService;
 import com.java110.things.util.Assert;
@@ -41,6 +43,9 @@ public class MachineController extends BaseController {
 
     @Autowired
     private IOperateLogService operateLogServiceImpl;
+
+    @Autowired
+    private IMachineFaceService machineFaceService;
 
     /**
      * 添加设备接口类
@@ -177,6 +182,33 @@ public class MachineController extends BaseController {
         operateLogDto.setMachineName(machineName);
 
         ResultDto resultDto = operateLogServiceImpl.getOperateLogs(operateLogDto);
+        return super.createResponseEntity(resultDto);
+    }
+
+    /**
+     * 添加设备接口类
+     *
+     * @param page 页数
+     * @param row  每页显示的数量
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/getMachineFaces", method = RequestMethod.GET)
+    public ResponseEntity<String> getMachineFaces(@RequestParam int page,
+                                                 @RequestParam int row,
+                                                 @RequestParam(name = "name", required = false) String logId,
+                                                 @RequestParam(name = "machineCode", required = false) String machineCode,
+                                                 @RequestParam(name = "machineId", required = false) String machineId,
+                                                 @RequestParam(name = "machineName", required = false) String machineName) throws Exception {
+
+        MachineFaceDto machineFaceDto = new MachineFaceDto();
+        machineFaceDto.setPage(page);
+        machineFaceDto.setRow(row);
+        machineFaceDto.setMachineId(machineId);
+        machineFaceDto.setMachineCode(machineCode);
+        machineFaceDto.setMachineName(machineName);
+
+        ResultDto resultDto = machineFaceService.getMachineFace(machineFaceDto);
         return super.createResponseEntity(resultDto);
     }
 }
