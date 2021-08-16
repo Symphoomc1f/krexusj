@@ -9,12 +9,15 @@ import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.machine.MachineFaceDto;
 import com.java110.things.exception.HeartbeatCloudException;
 import com.java110.things.factory.AccessControlProcessFactory;
 import com.java110.things.factory.HttpFactory;
 import com.java110.things.factory.ImageFactory;
 import com.java110.things.factory.MappingCacheFactory;
+import com.java110.things.service.machine.IMachineFaceService;
 import com.java110.things.util.BeanConvertUtil;
+import com.java110.things.util.SeqUtil;
 import com.java110.things.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -38,6 +41,9 @@ public class AddUpdateFace extends BaseAccessControl {
 
     @Autowired
     private Java110Properties java110Properties;
+
+    @Autowired
+    private IMachineFaceService machineFaceService;
 
 
     /**
@@ -123,13 +129,19 @@ public class AddUpdateFace extends BaseAccessControl {
      *
      * @param userFaceDto
      */
-    private void saveFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+    private void saveFace(MachineDto machineDto, UserFaceDto userFaceDto) throws Exception {
 
         String faceBase = userFaceDto.getFaceBase64();
         faceBase = faceBase.substring(faceBase.indexOf("base64,") + 7);
 
         ImageFactory.GenerateImage(faceBase, machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
 
+        MachineFaceDto machineFaceDto = BeanConvertUtil.covertBean(userFaceDto, MachineFaceDto.class);
+        machineFaceDto.setId(SeqUtil.getId());
+        machineFaceDto.setMachineId(machineDto.getMachineId());
+        machineFaceDto.setFacePath(machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
+        //machineFaceDto.set
+        machineFaceService.saveMachineFace(machineFaceDto);
     }
 
 
@@ -138,7 +150,7 @@ public class AddUpdateFace extends BaseAccessControl {
      *
      * @param userFaceDto
      */
-    private void updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+    private void updateFace(MachineDto machineDto, UserFaceDto userFaceDto) throws Exception {
 
         ImageFactory.deleteImage(machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
 
@@ -147,6 +159,9 @@ public class AddUpdateFace extends BaseAccessControl {
 
         ImageFactory.GenerateImage(faceBase, machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
 
+
     }
+
+
 
 }

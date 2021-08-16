@@ -12,7 +12,7 @@ public class UserFaceDto extends PageDto implements Serializable {
 
     private long startTime;
 
-    private long endTimne;
+    private long endTime;
 
     private String name;
 
@@ -54,12 +54,12 @@ public class UserFaceDto extends PageDto implements Serializable {
         this.startTime = startTime;
     }
 
-    public long getEndTimne() {
-        return endTimne;
+    public long getEndTime() {
+        return endTime;
     }
 
-    public void setEndTimne(long endTimne) {
-        this.endTimne = endTimne;
+    public void setEndTime(long endTime) {
+        this.endTime = endTime;
     }
 
     public String getName() {
