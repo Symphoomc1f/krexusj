@@ -48,7 +48,7 @@
             class="vx-lazyLoad"
             :src="scope.row.facePath"
             :fit="fit"
-            :preview-src-list="[item.picUrl]"
+            :preview-src-list="[scope.row.facePath]"
           >
             <div slot="placeholder" class="image-slot">
               <i class="el-icon-loading"></i>加载中
@@ -116,6 +116,7 @@ export default {
         row: 10,
         machineName: "",
         machineCode: "",
+        machineId:'',
         name: ""
       },
       list: null,
@@ -124,6 +125,7 @@ export default {
     };
   },
   created() {
+    this.listQuery.machineId = this.$route.query.machineId  //接收参数
     this.fetchData();
   },
   methods: {

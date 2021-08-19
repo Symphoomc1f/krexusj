@@ -24,7 +24,8 @@
         t.machine_id machineId,
         m.machine_code machineCode,
         m.machine_name machineName,
-        m.machine_ip machineIp
+        m.machine_ip machineIp,
+        t.create_time createTime
         from machine_face t,machine m
         where 1=1
         and t.machine_id = m.machine_id

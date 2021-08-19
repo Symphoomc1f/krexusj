@@ -44,10 +44,10 @@
       fit
       highlight-current-row
     >
-      <el-table-column align="center" label="编号" width="90">
+      <el-table-column align="center" label="编号" width="60">
         <template slot-scope="scope">{{ scope.$index + 1 }}</template>
       </el-table-column>
-      <el-table-column align="center" label="门禁名称">
+      <el-table-column align="center" label="名称">
         <template slot-scope="scope">{{ scope.row.machineName }}</template>
       </el-table-column>
       <el-table-column align="center" label="门禁编码">
@@ -58,20 +58,23 @@
           <span>{{ scope.row.machineIp }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="门禁版本号" align="center">
+      <el-table-column label="版本号" align="center">
         <template slot-scope="scope">{{ scope.row.machineVersion }}</template>
       </el-table-column>
       <el-table-column class-name="status-col" label="mac地址" align="center">
         <template slot-scope="scope">{{ scope.row.machineMac }}</template>
       </el-table-column>
-      <el-table-column class-name="status-col" label="门禁厂商" align="center">
+      <el-table-column class-name="status-col" label="厂商" align="center">
         <template slot-scope="scope">{{ scope.row.oem }}</template>
       </el-table-column>
-      <el-table-column class-name="status-col" label="操作" align="right">
+      <el-table-column class-name="status-col" label="操作" width="300" align="center">
         <template slot-scope="{row,$index}">
-          <el-button size="mini" type="primary" @click="openDoor(row,$index)">开门</el-button>
-          <el-button size="mini" type="primary" @click="restartAccessControl(row,$index)">重启</el-button>
-          <el-button size="mini" type="danger" @click="deleteAccessControl(row,$index)">删除</el-button>
+          <el-row>
+            <el-button size="mini"  type="primary" @click="openDoor(row,$index)">开门</el-button>
+            <el-button size="mini"  type="primary" @click="viewFace(row,$index)">人脸</el-button>
+            <el-button size="mini"  type="warning" @click="restartAccessControl(row,$index)">重启</el-button>
+            <el-button size="mini"  type="danger" @click="deleteAccessControl(row,$index)">删除</el-button>
+          </el-row>
         </template>
       </el-table-column>
     </el-table>
@@ -266,6 +269,15 @@ export default {
           message: "已发送成功指令"
         });
       });
+    },
+    viewFace(_row, _index) {
+      this.$router.push({
+        path: "/accessControl/accessControlFace",
+        query: { machineId: _row.machineId }
+      });
+    },
+    handleCommand(command) {
+      command();
     }
   }
 };

@@ -18,6 +18,8 @@ public class MachineFaceDto extends UserFaceDto implements Serializable {
 
     private String statusCd;
 
+    private String createTime;
+
     private String id;
 
     public String getId() {
@@ -34,5 +36,13 @@ public class MachineFaceDto extends UserFaceDto implements Serializable {
 
     public void setStatusCd(String statusCd) {
         this.statusCd = statusCd;
+    }
+
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
     }
 }
