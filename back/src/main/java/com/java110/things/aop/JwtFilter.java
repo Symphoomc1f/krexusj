@@ -79,16 +79,15 @@ public class JwtFilter implements Filter {
             chain.doFilter(req, res);
         } catch (FilterException e) {
             logger.error("业务处理失败", e);
-            if ("POST".equals(request.getMethod())) {
-                writeJson(response, "您还没有登录",
-                        "UTF-8");
-            } else {
-                //response.sendRedirect("/flow/login");
-                noLogin(request, response);
-            }
+            ResultDto resultDto = new ResultDto(ResponseConstant.NO_AUTHORITY_ERROR, "登录信息失效，请重新登录");
+            writeJson(response, JSONObject.toJSONString(resultDto),
+                    "UTF-8");
+
         } catch (NoAuthorityException e) {
             //response.sendRedirect("/flow/login");
-            noLogin(request, response);
+            ResultDto resultDto = new ResultDto(ResponseConstant.NO_AUTHORITY_ERROR, "登录信息失效，请重新登录");
+            writeJson(response, JSONObject.toJSONString(resultDto),
+                    "UTF-8");
         } catch (Exception e) {
             ResultDto resultDto = new ResultDto(ResponseConstant.ERROR, e.getMessage());
             writeJson(response, JSONObject.toJSONString(resultDto),
@@ -97,17 +96,22 @@ public class JwtFilter implements Filter {
     }
 
     public void noLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String type = request.getHeader("X-Requested-With");// XMLHttpRequest     HttpServletRequest -> request
-        if ("XMLHttpRequest".equals(type)) {
-            //是ajax请求
-            // 异步请求下的重定向
-            response.setHeader("CONTEXTPATH", "/user.html#/pages/frame/login");//重定向目标地址
-            response.setHeader("location", "/user.html#/pages/frame/login");//重定向目标地址
-            response.setStatus(401);
-        } else {
-            //非ajax请求，直接使用重定向
-            response.sendRedirect("/user.html#/pages/frame/login");
+        // 异步请求下的重定向
+        response.setHeader("CONTEXTPATH", "/user.html#/pages/frame/login");//重定向目标地址
+        response.setHeader("location", "/user.html#/pages/frame/login");//重定向目标地址
+        response.setStatus(50014);
+        response.setContentType("text/plain;charset=utf-8");
+        response.setCharacterEncoding("utf-8");
+
+        PrintWriter out = null;
+        try {
+            out = response.getWriter();
+            out.write("登录信息失效");
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
     }
 
     /**

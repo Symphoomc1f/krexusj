@@ -69,22 +69,28 @@ export const constantRoutes = [
         meta: { title: '门禁设备', icon: 'table' }
       },
       {
-        path: 'accessControlLog',
-        name: '门禁',
-        component: () => import('@/views/accessControlLog/accessControlLog'),
-        meta: { title: '操作日志', icon: 'table' }
-      },
-      {
         path: 'accessControlFace',
         name: '门禁',
         component: () => import('@/views/accessControlFace/accessControlFace'),
         meta: { title: '门禁人脸', icon: 'table' }
       },
       {
+        path: 'accessControlOpenDoor',
+        name: '门禁',
+        component: () => import('@/views/accessControlOpenDoor/accessControlOpenDoor'),
+        meta: { title: '开门记录', icon: 'table' }
+      },
+      {
         path: 'accessControlProtocol',
         name: '门禁协议',
         component: () => import('@/views/accessControlProtocol/accessControlProtocol'),
         meta: { title: '门禁协议', icon: 'table' }
+      },
+      {
+        path: 'accessControlLog',
+        name: '门禁',
+        component: () => import('@/views/accessControlLog/accessControlLog'),
+        meta: { title: '操作日志', icon: 'table' }
       }
     ]
   },

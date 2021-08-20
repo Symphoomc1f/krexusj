@@ -67,3 +67,11 @@ export function getAccessControlFace(params) {
         params
     })
 }
+
+export function getMachineOpenDoors(params) {
+    return request({
+        url: '/api/machine/getMachineOpenDoors',
+        method: 'get',
+        params
+    })
+}

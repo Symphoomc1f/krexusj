@@ -5,7 +5,7 @@
 
     <insert id="saveMachineFace" parameterType="com.java110.things.entity.machine.MachineFaceDto">
         INSERT INTO machine_face (`id`, `user_id`, `name`, `id_number`, `start_time`, `end_time`, `face_path`)
-        VALUES (#{id}, #{userId}, #{name}, #{idNumber}, #{startTime}, #{endTime}, #{facePath});
+        VALUES (#{id}, #{userId}, #{name}, #{idNumber}, #{startTime}, #{endTime}, #{facePath})
     </insert>
 
     <!--
@@ -38,9 +38,6 @@
         </if>
         <if test="machineIp != null and machineIp != ''">
             and m.machine_ip = #{machineIp}
-        </if>
-        <if test="id != null and id != ''">
-            and t.id = #{id}
         </if>
         <if test="id != null and id != ''">
             and t.id = #{id}

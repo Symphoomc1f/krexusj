@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java110.things.dao.IOpenDoorServiceDao">
+
+
+    <!-- 保存开门记录 -->
+    <insert id="saveOpenDoor" parameterType="com.java110.things.entity.openDoor.OpenDoorDto">
+        INSERT INTO open_door(`open_id`, `machine_id`, `machine_code`, `open_type_cd`, `user_id`, `user_name`, `hat`,
+        `model_face`, `face`, `similarity`, `amount_owed`)
+        VALUES (#{openId}, #{machineId}, #{machineCode}, #{openTypeCd}, #{userId}, #{userName}, #{hat}, #{modelFace},
+        #{face}, #{similarity}, #{amountOwed})
+    </insert>
+
+    <!--
+        查询开门信息
+    -->
+    <select id="getOpenDoors" parameterType="com.java110.things.entity.openDoor.OpenDoorDto"
+            resultType="com.java110.things.entity.openDoor.OpenDoorDto">
+        select
+            t.open_id openId,
+            t.machine_id machineId,
+            t.machine_code machineCode,
+            t.open_type_cd openTypeCd,
+            t.user_id userId,
+            t.user_name userName,
+            t.hat hat,
+            t.model_face modelFace,
+            t.face face,
+            t.amount_owed amountOwed,
+            m.machine_name machineName,
+            m.machine_ip machineIp,
+            t.create_time createTime
+        from open_door t,machine m
+        where 1=1
+            and t.machine_id = m.machine_id
+            and m.status_cd = '0'
+        <if test="machineCode != null and machineCode != ''">
+            and m.machine_code = #{machineCode}
+        </if>
+        <if test="machineName != null and machineName != ''">
+            and m.machine_name = #{machineName}
+        </if>
+        <if test="machineIp != null and machineIp != ''">
+            and m.machine_ip = #{machineIp}
+        </if>
+        <if test="openId != null and openId != ''">
+            and t.open_id = #{openId}
+        </if>
+        <if test="machineId != null and machineId != ''">
+            and t.machine_id = #{machineId}
+        </if>
+        <if test="userId != null and userId != ''">
+            and t.user_id = #{userId}
+        </if>
+        <if test="userName != null and userName != ''">
+            and t.user_name = #{userName}
+        </if>
+        <if test="openTypeCd != null and openTypeCd != ''">
+            and t.open_type_cd = #{openTypeCd}
+        </if>
+        <if test="hat != null and hat != ''">
+            and t.hat = #{hat}
+        </if>
+        <if test="amountOwed != null and amountOwed != ''">
+            and t.amount_owed = #{amountOwed}
+        </if>
+        order by t.create_time desc
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+
+    </select>
+
+    <select id="getOpenDoorCount" parameterType="com.java110.things.entity.openDoor.OpenDoorDto" resultType="long">
+        select
+            count(1) count
+        from open_door t,machine m
+        where 1=1
+            and t.machine_id = m.machine_id
+            and m.status_cd = '0'
+        <if test="machineCode != null and machineCode != ''">
+            and m.machine_code = #{machineCode}
+        </if>
+        <if test="machineName != null and machineName != ''">
+            and m.machine_name = #{machineName}
+        </if>
+        <if test="machineIp != null and machineIp != ''">
+            and m.machine_ip = #{machineIp}
+        </if>
+        <if test="openId != null and openId != ''">
+            and t.open_id = #{openId}
+        </if>
+        <if test="machineId != null and machineId != ''">
+            and t.machine_id = #{machineId}
+        </if>
+        <if test="userId != null and userId != ''">
+            and t.user_id = #{userId}
+        </if>
+        <if test="userName != null and userName != ''">
+            and t.user_name = #{userName}
+        </if>
+        <if test="openTypeCd != null and openTypeCd != ''">
+            and t.open_type_cd = #{openTypeCd}
+        </if>
+        <if test="hat != null and hat != ''">
+            and t.hat = #{hat}
+        </if>
+        <if test="amountOwed != null and amountOwed != ''">
+            and t.amount_owed = #{amountOwed}
+        </if>
+
+    </select>
+
+</mapper>

@@ -7,11 +7,13 @@ import com.java110.things.constant.SystemConstant;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.MachineFaceDto;
 import com.java110.things.entity.machine.OperateLogDto;
+import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.UserDto;
 import com.java110.things.service.machine.IMachineFaceService;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.service.machine.IOperateLogService;
+import com.java110.things.service.openDoor.IOpenDoorService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +48,9 @@ public class MachineController extends BaseController {
 
     @Autowired
     private IMachineFaceService machineFaceService;
+
+    @Autowired
+    private IOpenDoorService openDoorService;
 
     /**
      * 添加设备接口类
@@ -209,6 +214,35 @@ public class MachineController extends BaseController {
         machineFaceDto.setMachineName(machineName);
 
         ResultDto resultDto = machineFaceService.getMachineFace(machineFaceDto);
+        return super.createResponseEntity(resultDto);
+    }
+
+    /**
+     * 添加设备接口类
+     *
+     * @param page 页数
+     * @param row  每页显示的数量
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/getMachineOpenDoors", method = RequestMethod.GET)
+    public ResponseEntity<String> getMachineOpenDoors(@RequestParam int page,
+                                                  @RequestParam int row,
+                                                  @RequestParam(name = "name", required = false) String logId,
+                                                  @RequestParam(name = "machineCode", required = false) String machineCode,
+                                                  @RequestParam(name = "machineId", required = false) String machineId,
+                                                  @RequestParam(name = "machineName", required = false) String machineName,
+                                                  @RequestParam(name = "userName", required = false) String userName) throws Exception {
+
+        OpenDoorDto openDoorDto = new OpenDoorDto();
+        openDoorDto.setPage(page);
+        openDoorDto.setRow(row);
+        openDoorDto.setMachineId(machineId);
+        openDoorDto.setMachineCode(machineCode);
+        openDoorDto.setMachineName(machineName);
+        openDoorDto.setUserName(userName);
+
+        ResultDto resultDto = openDoorService.getOpenDoor(openDoorDto);
         return super.createResponseEntity(resultDto);
     }
 }
