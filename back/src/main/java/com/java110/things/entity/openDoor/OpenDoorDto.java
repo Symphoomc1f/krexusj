@@ -18,13 +18,15 @@ public class OpenDoorDto extends PageDto implements Serializable {
     private String machineCode;
     private String machineName;
     private String openTypeCd;
+    private String openTypeCdName;
     private String userId;
     private String userName;
     private String machineIp;
 
     private String hat;
+    private String hatName;
 
-    private String modeFace;
+    private String modelFace;
 
     private String face;
 
@@ -90,13 +92,6 @@ public class OpenDoorDto extends PageDto implements Serializable {
         this.hat = hat;
     }
 
-    public String getModeFace() {
-        return modeFace;
-    }
-
-    public void setModeFace(String modeFace) {
-        this.modeFace = modeFace;
-    }
 
     public String getFace() {
         return face;
@@ -136,5 +131,37 @@ public class OpenDoorDto extends PageDto implements Serializable {
 
     public void setMachineName(String machineName) {
         this.machineName = machineName;
+    }
+
+    public String getMachineIp() {
+        return machineIp;
+    }
+
+    public void setMachineIp(String machineIp) {
+        this.machineIp = machineIp;
+    }
+
+    public String getModelFace() {
+        return modelFace;
+    }
+
+    public void setModelFace(String modelFace) {
+        this.modelFace = modelFace;
+    }
+
+    public String getOpenTypeCdName() {
+        return openTypeCdName;
+    }
+
+    public void setOpenTypeCdName(String openTypeCdName) {
+        this.openTypeCdName = openTypeCdName;
+    }
+
+    public String getHatName() {
+        return hatName;
+    }
+
+    public void setHatName(String hatName) {
+        this.hatName = hatName;
     }
 }

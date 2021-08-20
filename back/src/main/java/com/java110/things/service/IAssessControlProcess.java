@@ -95,6 +95,13 @@ public interface IAssessControlProcess {
      */
     void openDoor(MachineDto machineDto);
 
+    /**
+     * 人脸推送结果
+     * @param data 这个为设备人脸推送协议，请参考设备协议文档
+     * @return 处理成功时返回 true 失败时返回false
+     */
+    boolean httpFaceResult(String data);
+
 
 
 }

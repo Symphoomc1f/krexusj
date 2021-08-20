@@ -84,11 +84,12 @@ public class JwtFilter implements Filter {
                     "UTF-8");
 
         } catch (NoAuthorityException e) {
-            //response.sendRedirect("/flow/login");
+            logger.error("业务处理失败", e);
             ResultDto resultDto = new ResultDto(ResponseConstant.NO_AUTHORITY_ERROR, "登录信息失效，请重新登录");
             writeJson(response, JSONObject.toJSONString(resultDto),
                     "UTF-8");
         } catch (Exception e) {
+            logger.error("业务处理失败", e);
             ResultDto resultDto = new ResultDto(ResponseConstant.ERROR, e.getMessage());
             writeJson(response, JSONObject.toJSONString(resultDto),
                     "UTF-8");

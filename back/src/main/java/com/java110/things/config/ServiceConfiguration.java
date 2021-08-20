@@ -13,7 +13,8 @@ public class ServiceConfiguration {
     @Bean
     public FilterRegistrationBean jwtFilter() {
         StringBuffer exclusions = new StringBuffer();
-        exclusions.append("/api/user/login");
+        exclusions.append("/api/user/login,");
+        exclusions.append("/api/accessControl/faceResult");
         final FilterRegistrationBean registrationBean = new FilterRegistrationBean();
         registrationBean.setFilter(new JwtFilter());
         registrationBean.addUrlPatterns("/");

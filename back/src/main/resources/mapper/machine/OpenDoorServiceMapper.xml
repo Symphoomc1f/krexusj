@@ -21,19 +21,28 @@
             t.machine_id machineId,
             t.machine_code machineCode,
             t.open_type_cd openTypeCd,
+            td2.name openTypeCdName,
             t.user_id userId,
             t.user_name userName,
             t.hat hat,
+            td1.name hatName,
             t.model_face modelFace,
             t.face face,
             t.amount_owed amountOwed,
             m.machine_name machineName,
             m.machine_ip machineIp,
+            t.similarity,
             t.create_time createTime
-        from open_door t,machine m
+        from open_door t,machine m,t_dict td1,t_dict td2
         where 1=1
             and t.machine_id = m.machine_id
             and m.status_cd = '0'
+            and t.hat = td1.status_cd
+            AND td1.table_name = 'open_door'
+            AND td1.table_columns = 'hat'
+            and t.open_type_cd = td2.status_cd
+            AND td2.table_name = 'open_door'
+            AND td2.table_columns = 'open_type_cd'
         <if test="machineCode != null and machineCode != ''">
             and m.machine_code = #{machineCode}
         </if>

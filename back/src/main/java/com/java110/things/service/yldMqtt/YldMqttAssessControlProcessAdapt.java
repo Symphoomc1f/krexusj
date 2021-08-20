@@ -6,6 +6,7 @@ import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.OperateLogDto;
+import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.MqttFactory;
@@ -37,6 +38,8 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
 
     public static final long START_TIME = new Date().getTime() - 1000 * 60 * 60;
     public static final long END_TIME = new Date().getTime() + 1000 * 60 * 60 * 24 * 365;
+
+    public static final String OPEN_TYPE_FACE = "1000"; // 人脸开门
 
     //平台名称
     public static final String MANUFACTURER = "YLD_";
@@ -74,6 +77,8 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
     public static final String SN = "{sn}";
 
     public static final String FACE_URL = "ACCESS_CONTROL_FACE_URL";
+
+    public static final String FACE_RESULT = "face_result";
 
     //图片后缀
     public static final String IMAGE_SUFFIX = ".jpg";
@@ -276,6 +281,60 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
     }
 
     /**
+     * {
+     * "body" : {
+     * "code" : 101,
+     * "face_imgdata" : "/9j/4AAQSkZJRghDk+tAH/2Q==",
+     * "face_imgsize" : 27178,
+     * "hat" : 1,
+     * "matched" : 91,
+     * "model_imgdata" : "/9j/4AAQSkZJRgABAQAAKDKUT/2Q==",
+     * "model_imgsize" : 6001,
+     * "name" : "吴学文",
+     * "per_id" : "772020051963050001",
+     * "pic_name" : "9f15b229-0422fd6b_1590397611_91_101.jpg",
+     * "role" : 0,
+     * "sec" : 1590397611,
+     * "sequence" : 2085,
+     * "sn" : "9f15b229-0422fd6b",
+     * "usec" : 778083
+     * },
+     * "type" : "face_result"
+     * }
+     *
+     * @param data 这个为设备人脸推送协议，请参考设备协议文档
+     * @return
+     */
+    @Override
+    public boolean httpFaceResult(String data) {
+        ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
+        try {
+            JSONObject param = JSONObject.parseObject(data);
+
+            if (param.containsKey("type") && !FACE_RESULT.equals(param.getString("type"))) {
+                return true;
+            }
+
+            JSONObject body = param.getJSONObject("body");
+            OpenDoorDto openDoorDto = new OpenDoorDto();
+            openDoorDto.setFace(body.getString("face_imgdata"));
+            openDoorDto.setUserName(body.containsKey("name") ? body.getString("name") : "");
+            openDoorDto.setHat(body.getString("hat"));
+            openDoorDto.setMachineCode(body.getString("sn"));
+            openDoorDto.setUserId(body.containsKey("per_id") ? body.getString("per_id") : "");
+            openDoorDto.setOpenId(SeqUtil.getId());
+            openDoorDto.setOpenTypeCd(OPEN_TYPE_FACE);
+            openDoorDto.setSimilarity(body.containsKey("matched") ? body.getString("matched") : "0");
+
+            notifyAccessControlService.saveFaceResult(openDoorDto);
+
+        } catch (Exception e) {
+            logger.error("推送人脸失败", e);
+        }
+        return false;
+    }
+
+    /**
      * 开门记录
      *
      * @param data 设备推送结果
@@ -297,6 +356,7 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
      *             }
      */
     private void openDoorResult(String data) {
+
 
     }
 

@@ -81,11 +81,17 @@
       <el-table-column align="center" label="用户名称">
         <template slot-scope="scope">{{ scope.row.userName }}</template>
       </el-table-column>
+      <el-table-column align="center" label="开门方式">
+        <template slot-scope="scope">{{ scope.row.openTypeCdName }}</template>
+      </el-table-column>
       <el-table-column align="center" label="带帽">
-        <template slot-scope="scope">{{ scope.row.hat }}</template>
+        <template slot-scope="scope">{{ scope.row.hatName }}</template>
       </el-table-column>
       <el-table-column align="center" label="相似度">
-        <template slot-scope="scope">{{ scope.row.similarity }}</template>
+        <template slot-scope="scope">
+          <el-tag v-if="scope.row.similarity > 0" type="success">{{ scope.row.similarity }}</el-tag>
+           <el-tag v-else type="danger">开门失败</el-tag>
+          </template>
       </el-table-column>
       <el-table-column align="center" label="欠费情况">
         <template slot-scope="scope">{{ scope.row.amountOwed }}</template>
@@ -103,7 +109,7 @@
           <span>{{ scope.row.machineIp }}</span>
         </template>
       </el-table-column>
-      <el-table-column class-name="status-col" label="创建时间" align="center">
+      <el-table-column class-name="status-col" label="开门时间" align="center">
         <template slot-scope="scope">{{ scope.row.createTime }}</template>
       </el-table-column>
     </el-table>

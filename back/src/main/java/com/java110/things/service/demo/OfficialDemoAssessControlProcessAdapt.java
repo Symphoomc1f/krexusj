@@ -80,4 +80,9 @@ public class OfficialDemoAssessControlProcessAdapt implements IAssessControlProc
     public void openDoor(MachineDto machineDto) {
 
     }
+
+    @Override
+    public boolean httpFaceResult(String data) {
+        return false;
+    }
 }

@@ -7,15 +7,18 @@ import com.java110.things.dao.IMachineServiceDao;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.OperateLogDto;
+import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.exception.Result;
 import com.java110.things.exception.ServiceException;
 import com.java110.things.exception.ThreadException;
 import com.java110.things.factory.HttpFactory;
+import com.java110.things.factory.ImageFactory;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.ICallAccessControlService;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.machine.IOperateLogService;
+import com.java110.things.service.openDoor.IOpenDoorService;
 import com.java110.things.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +44,8 @@ import java.util.UUID;
 public class CallAccessControlServiceImpl implements ICallAccessControlService {
     Logger logger = LoggerFactory.getLogger(CallAccessControlServiceImpl.class);
 
+    public static final String FACE_RESULT = "-result";
+
     @Autowired
     IMachineServiceDao machineServiceDao;
 
@@ -52,6 +57,9 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
 
     @Autowired
     private IOperateLogService operateLogServiceImpl;
+
+    @Autowired
+    private IOpenDoorService openDoorServiceImpl;
 
 
     @Override
@@ -110,26 +118,27 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
 
     /**
      * 操作日志记录
+     *
      * @param operateLogDto 日志对象，当logId 在数据库中不存在是做添加，存在时 做修改
      */
     @Override
     public void saveOrUpdateOperateLog(OperateLogDto operateLogDto) {
-        if(StringUtil.isEmpty(operateLogDto.getLogId())){
+        if (StringUtil.isEmpty(operateLogDto.getLogId())) {
             throw new ServiceException(Result.SYS_ERROR, "未包含日志ID，一般为 和设备交互请求返回的唯一编码 如流水");
         }
 
-        if(StringUtil.isEmpty(operateLogDto.getMachineId())){
+        if (StringUtil.isEmpty(operateLogDto.getMachineId())) {
             throw new ServiceException(Result.SYS_ERROR, "设备ID，可以从machineDto 对象中获取，如果没有可以用machineCode 查一下库");
         }
 //        if(StringUtil.isEmpty(operateLogDto.getState())){
 //            throw new ServiceException(Result.SYS_ERROR, "日志状态，请求成功 10001,返回成功10002,操作失败 10003");
 //        }
 
-        if(StringUtil.isEmpty(operateLogDto.getOperateType())){
+        if (StringUtil.isEmpty(operateLogDto.getOperateType())) {
             throw new ServiceException(Result.SYS_ERROR, "操作类型，可以查看t_dict 表");
         }
 
-        if(StringUtil.isEmpty(operateLogDto.getState())){
+        if (StringUtil.isEmpty(operateLogDto.getState())) {
             operateLogDto.setState("10001"); // 默认设置为请求
         }
 
@@ -137,6 +146,39 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
 
 
         operateLogServiceImpl.saveOperateLog(operateLogDto);
+    }
+
+    @Override
+    public void saveFaceResult(OpenDoorDto openDoorDto) throws Exception {
+
+        String faceBase = openDoorDto.getFace();
+        String facePath = "/" + openDoorDto.getMachineCode() + FACE_RESULT + "/" + openDoorDto.getUserId() + "-" + openDoorDto.getOpenId() + ".jpg";
+        String modelFacePath = "/" + openDoorDto.getMachineCode() + "/" + openDoorDto.getUserId() + ".jpg";
+        ImageFactory.GenerateImage(faceBase, facePath);
+
+        openDoorDto.setFace(facePath);
+        openDoorDto.setModelFace(modelFacePath);
+        MachineDto tmpMachineDto = new MachineDto();
+        tmpMachineDto.setMachineCode(openDoorDto.getMachineCode());
+
+        List<MachineDto> machineDtos = machineServiceDao.getMachines(tmpMachineDto);
+
+        if (machineDtos == null || machineDtos.size() < 1) {
+            throw new ServiceException(Result.SYS_ERROR, "不存在该设备");
+        }
+
+        openDoorDto.setMachineId(machineDtos.get(0).getMachineId());
+        openDoorDto.setMachineName(machineDtos.get(0).getMachineName());
+
+        //保存 抓拍照片
+        ResultDto resultDto = openDoorServiceImpl.saveOpenDoor(openDoorDto);
+
+        if (ResponseConstant.SUCCESS != resultDto.getCode()) {
+            throw new ServiceException(Result.SYS_ERROR, resultDto.getMsg());
+        }
+
+        //上报云端
+
     }
 
     /**

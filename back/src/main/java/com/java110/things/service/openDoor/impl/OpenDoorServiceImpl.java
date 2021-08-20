@@ -83,7 +83,8 @@ public class OpenDoorServiceImpl implements IOpenDoorService {
         String faceUrl = MappingCacheFactory.getValue("ACCESS_CONTROL_FACE_URL");
 
         for (OpenDoorDto openDoorDto : openDoorDtoList) {
-            openDoorDto.setModeFace(faceUrl + openDoorDto.getModeFace());
+            openDoorDto.setModelFace(faceUrl + openDoorDto.getModelFace());
+            openDoorDto.setFace(faceUrl+openDoorDto.getFace());
         }
     }
 

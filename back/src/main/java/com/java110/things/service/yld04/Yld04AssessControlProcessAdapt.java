@@ -96,4 +96,9 @@ public class Yld04AssessControlProcessAdapt implements IAssessControlProcess {
 
     }
 
+    @Override
+    public boolean httpFaceResult(String data) {
+        return false;
+    }
+
 }

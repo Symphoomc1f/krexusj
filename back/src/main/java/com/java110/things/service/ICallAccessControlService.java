@@ -2,6 +2,7 @@ package com.java110.things.service;
 
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.OperateLogDto;
+import com.java110.things.entity.openDoor.OpenDoorDto;
 
 /**
  * @ClassName INotifyAccessControlServcie
@@ -24,4 +25,12 @@ public interface ICallAccessControlService {
      * @param operateLogDto 日志对象，当logId 在数据库中不存在是做添加，存在时 做修改
      */
     void saveOrUpdateOperateLog(OperateLogDto operateLogDto);
+
+    /**
+     * 人脸推送接口
+     * 这里只处理 抓拍图片记录，模板图片本身就存在 不做记录
+     *
+     * @param openDoorDto 必填信息
+     */
+    void saveFaceResult(OpenDoorDto openDoorDto) throws Exception;
 }
