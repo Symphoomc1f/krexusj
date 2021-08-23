@@ -81,6 +81,13 @@ export const constantRoutes = [
         meta: { title: '开门记录', icon: 'table' }
       },
       {
+        path: 'accessControlOpenDoorMonitor',
+        name: '门禁',
+        component: () => import('@/views/accessControlOpenDoorMonitor/accessControlOpenDoorMonitor'),
+        meta: { title: '开门监控', icon: 'table' },
+        hidden: true
+      },
+      {
         path: 'accessControlProtocol',
         name: '门禁协议',
         component: () => import('@/views/accessControlProtocol/accessControlProtocol'),

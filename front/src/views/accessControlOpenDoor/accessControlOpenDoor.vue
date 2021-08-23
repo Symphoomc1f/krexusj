@@ -90,8 +90,8 @@
       <el-table-column align="center" label="相似度">
         <template slot-scope="scope">
           <el-tag v-if="scope.row.similarity > 0" type="success">{{ scope.row.similarity }}</el-tag>
-           <el-tag v-else type="danger">开门失败</el-tag>
-          </template>
+          <el-tag v-else type="danger">开门失败</el-tag>
+        </template>
       </el-table-column>
       <el-table-column align="center" label="欠费情况">
         <template slot-scope="scope">{{ scope.row.amountOwed }}</template>
@@ -111,6 +111,11 @@
       </el-table-column>
       <el-table-column class-name="status-col" label="开门时间" align="center">
         <template slot-scope="scope">{{ scope.row.createTime }}</template>
+      </el-table-column>
+      <el-table-column class-name="status-col" label="操作" align="center">
+        <template slot-scope="scope">
+          <el-button @click="openMonitor(scope.row)">监控</el-button>
+        </template>
       </el-table-column>
     </el-table>
     <pagination
@@ -147,7 +152,7 @@ export default {
         row: 10,
         machineName: "",
         machineCode: "",
-        machineId:'',
+        machineId: "",
         name: ""
       },
       list: null,
@@ -156,7 +161,7 @@ export default {
     };
   },
   created() {
-    this.listQuery.machineId = this.$route.query.machineId  //接收参数
+    this.listQuery.machineId = this.$route.query.machineId; //接收参数
     this.fetchData();
   },
   methods: {
@@ -175,6 +180,12 @@ export default {
         this.list = response.data;
         this.total = response.total;
         this.listLoading = false;
+      });
+    },
+    openMonitor(_row) {
+      this.$router.push({
+        path: "/accessControl/accessControlOpenDoorMonitor",
+        query: { machineId: _row.machineId }
       });
     }
   }

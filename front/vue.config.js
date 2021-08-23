@@ -32,7 +32,7 @@ module.exports = {
   devServer: {
     proxy: {
       '/': {
-        target: 'http://localhost:6666',
+        target: 'http://localhost:9999',
         ws: true,
         pathRewrite: {
           '^/': '/'

@@ -1,6 +1,7 @@
 package com.java110.things.service.accessControl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.java110.things.Controller.accessControl.OpenDoorMonitorWebSocketServer;
 import com.java110.things.constant.MachineConstant;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.dao.IMachineServiceDao;
@@ -176,6 +177,11 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
         if (ResponseConstant.SUCCESS != resultDto.getCode()) {
             throw new ServiceException(Result.SYS_ERROR, resultDto.getMsg());
         }
+        String faceUrl = MappingCacheFactory.getValue("ACCESS_CONTROL_FACE_URL");
+        openDoorDto.setFace(faceUrl + "/" + openDoorDto.getFace());
+        openDoorDto.setModelFace(faceUrl + "/" + openDoorDto.getModelFace());
+
+        OpenDoorMonitorWebSocketServer.sendInfo(JSONObject.toJSONString(openDoorDto), machineDtos.get(0).getMachineId());
 
         //上报云端
 
