@@ -4,8 +4,8 @@
 
 
     <insert id="saveMachineFace" parameterType="com.java110.things.entity.machine.MachineFaceDto">
-        INSERT INTO machine_face (`id`, `user_id`, `name`, `id_number`, `start_time`, `end_time`, `face_path`)
-        VALUES (#{id}, #{userId}, #{name}, #{idNumber}, #{startTime}, #{endTime}, #{facePath})
+        INSERT INTO machine_face (`id`, `user_id`, `name`, `id_number`, `start_time`, `end_time`, `face_path`,machine_id)
+        VALUES (#{id}, #{userId}, #{name}, #{idNumber}, #{startTime}, #{endTime}, #{facePath},#{machineId})
     </insert>
 
     <!--

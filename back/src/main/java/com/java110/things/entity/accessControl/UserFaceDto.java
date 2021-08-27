@@ -10,9 +10,9 @@ public class UserFaceDto extends PageDto implements Serializable {
 
     private String faceBase64;
 
-    private long startTime;
+    private String startTime;
 
-    private long endTime;
+    private String endTime;
 
     private String name;
 
@@ -46,19 +46,19 @@ public class UserFaceDto extends PageDto implements Serializable {
         this.faceBase64 = faceBase64;
     }
 
-    public long getStartTime() {
+    public String getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(long startTime) {
+    public void setStartTime(String startTime) {
         this.startTime = startTime;
     }
 
-    public long getEndTime() {
+    public String getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(long endTime) {
+    public void setEndTime(String endTime) {
         this.endTime = endTime;
     }
 

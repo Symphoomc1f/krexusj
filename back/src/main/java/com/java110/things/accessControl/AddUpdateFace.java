@@ -17,6 +17,7 @@ import com.java110.things.factory.ImageFactory;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.machine.IMachineFaceService;
 import com.java110.things.util.BeanConvertUtil;
+import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
 import com.java110.things.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -101,6 +103,15 @@ public class AddUpdateFace extends BaseAccessControl {
 
         UserFaceDto userFaceDto = BeanConvertUtil.covertBean(data, UserFaceDto.class);
 
+        Date startTime = new Date(data.getLong("startTime"));
+
+        userFaceDto.setStartTime(DateUtil.getFormatTimeString(startTime, DateUtil.DATE_FORMATE_STRING_A));
+
+
+        Date endTime = new Date(data.getLong("endTime"));
+
+        userFaceDto.setEndTime(DateUtil.getFormatTimeString(endTime, DateUtil.DATE_FORMATE_STRING_A));
+
         userFaceDto.setUserId(data.getString("userid"));
 
 
@@ -140,6 +151,7 @@ public class AddUpdateFace extends BaseAccessControl {
         machineFaceDto.setId(SeqUtil.getId());
         machineFaceDto.setMachineId(machineDto.getMachineId());
         machineFaceDto.setFacePath(machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
+
         //machineFaceDto.set
         machineFaceService.saveMachineFace(machineFaceDto);
     }
@@ -161,7 +173,6 @@ public class AddUpdateFace extends BaseAccessControl {
 
 
     }
-
 
 
 }

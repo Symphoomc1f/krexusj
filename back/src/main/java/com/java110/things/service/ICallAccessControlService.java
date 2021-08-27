@@ -1,8 +1,14 @@
 package com.java110.things.service;
 
+import com.java110.things.entity.accessControl.UserFaceDto;
+import com.java110.things.entity.fee.FeeDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.OperateLogDto;
 import com.java110.things.entity.openDoor.OpenDoorDto;
+import com.java110.things.entity.room.RoomDto;
+import com.java110.things.entity.user.UserDto;
+
+import java.util.List;
 
 /**
  * @ClassName INotifyAccessControlServcie
@@ -33,4 +39,20 @@ public interface ICallAccessControlService {
      * @param openDoorDto 必填信息
      */
     void saveFaceResult(OpenDoorDto openDoorDto) throws Exception;
+
+    /**
+     * 获取用户房屋信息
+     * @param userFaceDto 根据用户人脸信息
+     * @return 返回房屋列表
+     */
+    List<RoomDto> getRooms(UserFaceDto userFaceDto)  throws Exception;
+
+    /**
+     * 查询费用信息
+     * @param roomDto 房屋信息
+     * @return 费用列表
+     */
+    List<FeeDto> getFees(RoomDto roomDto)  throws Exception;
+
+
 }

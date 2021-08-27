@@ -4,22 +4,26 @@ import com.alibaba.fastjson.JSONObject;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
+import com.java110.things.entity.fee.FeeDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.OperateLogDto;
 import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.entity.room.RoomDto;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.MqttFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
 import com.java110.things.service.IAssessControlProcess;
 import com.java110.things.service.ICallAccessControlService;
 import com.java110.things.service.machine.IMachineService;
+import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -326,12 +330,58 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
             openDoorDto.setOpenTypeCd(OPEN_TYPE_FACE);
             openDoorDto.setSimilarity(body.containsKey("matched") ? body.getString("matched") : "0");
 
+
+            freshOwnerFee(openDoorDto);
+
             notifyAccessControlService.saveFaceResult(openDoorDto);
 
         } catch (Exception e) {
             logger.error("推送人脸失败", e);
         }
         return false;
+    }
+
+    /**
+     * 查询费用信息
+     *
+     * @param openDoorDto
+     */
+    private void freshOwnerFee(OpenDoorDto openDoorDto) {
+
+        ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
+        List<FeeDto> feeDtos = new ArrayList<>();
+        try {
+            //查询业主房屋信息
+            UserFaceDto userFaceDto = new UserFaceDto();
+            userFaceDto.setUserId(openDoorDto.getUserId());
+            List<RoomDto> roomDtos = notifyAccessControlService.getRooms(userFaceDto);
+
+            if (roomDtos == null || roomDtos.size() < 1) {
+                return;
+            }
+
+            for (RoomDto roomDto : roomDtos) {
+                List<FeeDto> tmpFeeDtos = notifyAccessControlService.getFees(roomDto);
+                if (tmpFeeDtos == null || tmpFeeDtos.size() < 1) {
+                    continue;
+                }
+                feeDtos.addAll(tmpFeeDtos);
+            }
+        } catch (Exception e) {
+            logger.error("云端查询物业费失败", e);
+        }
+
+        if (feeDtos.size() < 1) {
+            openDoorDto.setAmountOwed("0");
+            return;
+        }
+        double own = 0.00;
+        for (FeeDto feeDto : feeDtos) {
+            logger.debug("查询费用信息" + JSONObject.toJSONString(feeDto));
+            own += feeDto.getAmountOwed();
+        }
+
+        openDoorDto.setAmountOwed(own + "");
     }
 
     /**

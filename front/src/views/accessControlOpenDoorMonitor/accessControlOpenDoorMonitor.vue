@@ -1,8 +1,9 @@
 <template>
   <div class="app-container">
-    <el-row :gutter="20">
-      <el-col :span="16">
-        <div class="grid-content bg-purple">
+    <el-row :gutter="20" justify="center" type="flex">
+      <el-col :span="8" justify="center">
+        <el-tag>模板图片</el-tag>
+        <div class="grid-content bg-purple" style="width:300px;height:350px">
           <el-image
             ref="lazyImg"
             lazy
@@ -10,6 +11,7 @@
             :src="monitor.modelFace"
             :fit="fit"
             :preview-src-list="[monitor.modelFace]"
+            style="width:300px"
           >
             <div slot="placeholder" class="image-slot">
               <i class="el-icon-loading"></i>加载中
@@ -19,6 +21,7 @@
             </div>
           </el-image>
         </div>
+        <el-tag>抓拍图片</el-tag>
         <div class="grid-content bg-purple">
           <el-image
             ref="lazyImg"
@@ -27,6 +30,7 @@
             :src="monitor.face"
             :fit="fit"
             :preview-src-list="[monitor.face]"
+            style="width:300px"
           >
             <div slot="placeholder" class="image-slot">
               <i class="el-icon-loading"></i>加载中
@@ -41,32 +45,32 @@
         <div class="grid-content bg-purple">
           <el-form ref="form" :model="form" label-width="80px">
             <el-form-item label="姓名">
-              <el-input v-model="monitor.userName"></el-input>
+              <el-input v-model="monitor.userName" disabled="true"></el-input>
             </el-form-item>
             <el-form-item label="开门方式">
-              <el-input v-model="monitor.openTypeCdName"></el-input>
+              <el-input v-model="monitor.openTypeCdName" disabled="true"></el-input>
             </el-form-item>
             <el-form-item label="是否带帽">
-              <el-input v-model="monitor.hatName"></el-input>
+              <el-input v-model="monitor.hatName" disabled="true"></el-input>
             </el-form-item>
             <el-form-item label="相似度">
               <el-tag v-if="monitor.similarity > 0" type="success">{{ monitor.similarity }}</el-tag>
               <el-tag v-else type="danger">开门失败</el-tag>
             </el-form-item>
             <el-form-item label="欠费情况">
-              <el-input v-model="monitor.amountOwed"></el-input>
+              <el-input v-model="monitor.amountOwed" disabled="true"></el-input>
             </el-form-item>
             <el-form-item label="门禁名称">
-              <el-input v-model="monitor.machineName"></el-input>
+              <el-input v-model="monitor.machineName" disabled="true"></el-input>
             </el-form-item>
             <el-form-item label="门禁编码">
-              <el-input v-model="monitor.machineCode"></el-input>
+              <el-input v-model="monitor.machineCode" disabled="true"></el-input>
             </el-form-item>
             <el-form-item label="门禁IP">
-              <el-input v-model="monitor.machineIp"></el-input>
+              <el-input v-model="monitor.machineIp" disabled="true"></el-input>
             </el-form-item>
             <el-form-item label="开门时间">
-              <el-input v-model="monitor.createTime"></el-input>
+              <el-input v-model="monitor.createTime" disabled="true"></el-input>
             </el-form-item>
           </el-form>
         </div>
@@ -175,13 +179,15 @@ export default {
         modelFace: _data.modelFace,
         face: _data.face,
         userName: _data.userName,
-        openTypeCdName: _data.openTypeCd == '1000'?'人脸':'其他',
-        hatName: _data.hat == '1' ? '无':'有',
+        openTypeCdName: _data.openTypeCd == "1000" ? "人脸" : "其他",
+        hatName: _data.hat == "1" ? "无" : "有",
         similarity: _data.similarity,
         amountOwed: "0",
         machineName: _data.machineName,
         machineId: _data.machineId,
-        machineCode: _data.machineCode
+        machineCode: _data.machineCode,
+        machineIp: _data.machineIp,
+        createTime: _data.createTime
       };
     },
     uuid() {

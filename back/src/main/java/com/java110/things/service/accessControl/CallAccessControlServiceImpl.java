@@ -1,15 +1,19 @@
 package com.java110.things.service.accessControl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.accessControl.OpenDoorMonitorWebSocketServer;
 import com.java110.things.constant.MachineConstant;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.dao.IMachineServiceDao;
+import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.community.CommunityDto;
+import com.java110.things.entity.fee.FeeDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.OperateLogDto;
 import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.entity.room.RoomDto;
 import com.java110.things.exception.Result;
 import com.java110.things.exception.ServiceException;
 import com.java110.things.exception.ThreadException;
@@ -20,6 +24,8 @@ import com.java110.things.service.ICallAccessControlService;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.machine.IOperateLogService;
 import com.java110.things.service.openDoor.IOpenDoorService;
+import com.java110.things.util.BeanConvertUtil;
+import com.java110.things.util.DateUtil;
 import com.java110.things.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +36,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -170,6 +180,7 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
 
         openDoorDto.setMachineId(machineDtos.get(0).getMachineId());
         openDoorDto.setMachineName(machineDtos.get(0).getMachineName());
+        openDoorDto.setMachineIp(machineDtos.get(0).getMachineIp());
 
         //保存 抓拍照片
         ResultDto resultDto = openDoorServiceImpl.saveOpenDoor(openDoorDto);
@@ -180,11 +191,121 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
         String faceUrl = MappingCacheFactory.getValue("ACCESS_CONTROL_FACE_URL");
         openDoorDto.setFace(faceUrl + "/" + openDoorDto.getFace());
         openDoorDto.setModelFace(faceUrl + "/" + openDoorDto.getModelFace());
+        openDoorDto.setCreateTime(DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
 
         OpenDoorMonitorWebSocketServer.sendInfo(JSONObject.toJSONString(openDoorDto), machineDtos.get(0).getMachineId());
 
         //上报云端
 
+    }
+
+    /**
+     * 查询房屋信息
+     *
+     * @param userFaceDto 根据用户人脸信息
+     * @return
+     */
+    @Override
+    public List<RoomDto> getRooms(UserFaceDto userFaceDto) throws Exception {
+
+        //查询 小区信息
+        CommunityDto communityDto = new CommunityDto();
+        ResultDto resultDto = communityServiceImpl.getCommunity(communityDto);
+
+        if (resultDto.getCode() != ResponseConstant.SUCCESS) {
+            throw new ThreadException(Result.SYS_ERROR, "查询小区信息失败");
+        }
+
+        List<CommunityDto> communityDtos = (List<CommunityDto>) resultDto.getData();
+
+        if (communityDtos == null || communityDtos.size() < 1) {
+            throw new ThreadException(Result.SYS_ERROR, "当前还没有设置小区，请先设置小区");
+        }
+
+        String url = MappingCacheFactory.getValue("CLOUD_API") + "/api/room.queryRoomsByOwner";
+        JSONObject paramIn = new JSONObject();
+        paramIn.put("communityId", communityDtos.get(0).getCommunityId());
+        paramIn.put("ownerId", userFaceDto.getUserId());
+        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, url + HttpFactory.mapToUrlParam(paramIn), paramIn.toJSONString(), HttpMethod.GET);
+
+        if (tmpResponseEntity.getStatusCode() != HttpStatus.OK) {
+            logger.error("查询房屋失败" + tmpResponseEntity.getBody());
+
+            return null;
+        }
+
+        JSONObject paramOut = JSONObject.parseObject(tmpResponseEntity.getBody());
+        if (!paramOut.containsKey("rooms") || paramOut.getJSONArray("rooms").size() < 1) {
+            return null;
+        }
+
+        JSONArray rooms = paramOut.getJSONArray("rooms");
+        List<RoomDto> roomDtos = new ArrayList<>();
+        for (int roomIndex = 0; roomIndex < rooms.size(); roomIndex++) {
+            roomDtos.add(BeanConvertUtil.covertBean(rooms.get(roomIndex), RoomDto.class));
+        }
+        return roomDtos;
+    }
+
+    @Override
+    public List<FeeDto> getFees(RoomDto roomDto) throws Exception {
+
+        //查询 小区信息
+        CommunityDto communityDto = new CommunityDto();
+        ResultDto resultDto = communityServiceImpl.getCommunity(communityDto);
+
+        if (resultDto.getCode() != ResponseConstant.SUCCESS) {
+            throw new ThreadException(Result.SYS_ERROR, "查询小区信息失败");
+        }
+
+        List<CommunityDto> communityDtos = (List<CommunityDto>) resultDto.getData();
+
+        if (communityDtos == null || communityDtos.size() < 1) {
+            throw new ThreadException(Result.SYS_ERROR, "当前还没有设置小区，请先设置小区");
+        }
+
+        String url = MappingCacheFactory.getValue("CLOUD_API") + "/api/fee.listFee";
+        JSONObject paramIn = new JSONObject();
+        paramIn.put("communityId", communityDtos.get(0).getCommunityId());
+        paramIn.put("page", 1);
+        paramIn.put("row", 100);
+        paramIn.put("payerObjId", roomDto.getRoomId());
+        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, url + HttpFactory.mapToUrlParam(paramIn), paramIn.toJSONString(), HttpMethod.GET);
+
+        if (tmpResponseEntity.getStatusCode() != HttpStatus.OK) {
+            logger.error("查询费用失败" + tmpResponseEntity.getBody());
+
+            return null;
+        }
+
+        JSONObject paramOut = JSONObject.parseObject(tmpResponseEntity.getBody());
+        if (!paramOut.containsKey("fees") || paramOut.getJSONArray("fees").size() < 1) {
+            return null;
+        }
+
+        JSONArray fees = paramOut.getJSONArray("fees");
+        List<FeeDto> feeDtos = new ArrayList<>();
+        for (int feeIndex = 0; feeIndex < fees.size(); feeIndex++) {
+            feeDtos.add(BeanConvertUtil.covertBean(fees.get(feeIndex), FeeDto.class));
+        }
+        Calendar now = Calendar.getInstance();
+        for (FeeDto feeDto : feeDtos) {
+            Calendar endDate = Calendar.getInstance();
+            endDate.setTime(feeDtos.get(0).getEndTime());
+            int surplus = now.get(Calendar.DATE) - endDate.get(Calendar.DATE);
+            int result = now.get(Calendar.MONTH) - endDate.get(Calendar.MONTH);
+            int month = (now.get(Calendar.YEAR) - endDate.get(Calendar.YEAR)) * 12;
+            int monthSub = (Math.abs(month + result) + surplus);
+            if (monthSub < 0) {
+                feeDto.setAmountOwed(0.00);
+            }
+            BigDecimal additionalAmount = new BigDecimal(feeDto.getFeePrice());
+            BigDecimal monthDec = new BigDecimal(monthSub);
+            feeDto.setAmountOwed(monthDec.multiply(additionalAmount).doubleValue());
+        }
+
+
+        return feeDtos;
     }
 
     /**
