@@ -29,10 +29,18 @@ public class ImageFactory {
 
     private static Logger logger = LoggerFactory.getLogger(ImageFactory.class);
 
+    public static void main(String[] args) {
+            String req = "data:image/jpeg;base64,AQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB\nAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEB\nAQEBAQEBAQEBAQEB";
+        req = req.substring(req.indexOf("base64,") + 7);
+
+        System.out.printf("req" + req);
+    }
+
     public static boolean GenerateImage(String imgStr, String imagePath) {   //对字节数组字符串进行Base64解码并生成图片
         if (imgStr == null) //图像数据为空
             return false;
-        imgStr = imgStr.replaceAll("\r|\n", "");
+         imgStr = imgStr.replaceAll("\r|\n", "");
+        System.out.printf("imgStr="+imgStr);
         BASE64Decoder decoder = new BASE64Decoder();
         try {
             //Base64解码

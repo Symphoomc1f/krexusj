@@ -107,8 +107,11 @@ public class AddUpdateFace extends BaseAccessControl {
 
         userFaceDto.setStartTime(DateUtil.getFormatTimeString(startTime, DateUtil.DATE_FORMATE_STRING_A));
 
-
         Date endTime = new Date(data.getLong("endTime"));
+
+        if (endTime.getTime() > DateUtil.getDateFromString("2038-01-01", DateUtil.DATE_FORMATE_STRING_B).getTime()) {
+            endTime = DateUtil.getDateFromString("2037-12-01", DateUtil.DATE_FORMATE_STRING_B);
+        }
 
         userFaceDto.setEndTime(DateUtil.getFormatTimeString(endTime, DateUtil.DATE_FORMATE_STRING_A));
 
@@ -143,7 +146,9 @@ public class AddUpdateFace extends BaseAccessControl {
     private void saveFace(MachineDto machineDto, UserFaceDto userFaceDto) throws Exception {
 
         String faceBase = userFaceDto.getFaceBase64();
-        faceBase = faceBase.substring(faceBase.indexOf("base64,") + 7);
+        if (faceBase.contains("base64,")) {
+            faceBase = faceBase.substring(faceBase.indexOf("base64,") + 7);
+        }
 
         ImageFactory.GenerateImage(faceBase, machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
 
@@ -167,7 +172,9 @@ public class AddUpdateFace extends BaseAccessControl {
         ImageFactory.deleteImage(machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
 
         String faceBase = userFaceDto.getFaceBase64();
-        faceBase = faceBase.substring(faceBase.indexOf("base64,") + 7);
+        if (faceBase.contains("base64,")) {
+            faceBase = faceBase.substring(faceBase.indexOf("base64,") + 7);
+        }
 
         ImageFactory.GenerateImage(faceBase, machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
 

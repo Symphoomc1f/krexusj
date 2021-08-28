@@ -42,6 +42,9 @@ public class Yld04AssessControlProcessAdapt implements IAssessControlProcess {
         Function.connectCamera(machineDto.getMachineIp());
         try {
             String image = userFaceDto.getFaceBase64();
+            if (image.contains("base64,")) {
+                image = image.substring(image.indexOf("base64,") + 7);
+            }
             image = image.substring(image.indexOf("base64,") + 7);
             userFaceDto.setFaceBase64(image);
             Function.AddFace(machineDto.getMachineIp(), userFaceDto.getName(), userFaceDto.getUserId(), userFaceDto.getFaceBase64());
