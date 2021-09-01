@@ -6,8 +6,10 @@ import com.java110.things.Controller.BaseController;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.attendance.ResultQunyingDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.service.attendance.IAttendanceProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +30,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class QunyingDataController extends BaseController {
 
     private static Logger logger = LoggerFactory.getLogger(QunyingDataController.class);
+
+
+    private IAttendanceProcess attendanceProcess;
 
     /**
      * 添加设备接口类
