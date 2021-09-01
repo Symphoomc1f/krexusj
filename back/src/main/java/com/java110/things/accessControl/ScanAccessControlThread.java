@@ -1,34 +1,11 @@
 package com.java110.things.accessControl;
 
 import com.alibaba.druid.util.StringUtils;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.java110.things.config.Java110Properties;
-import com.java110.things.constant.AccessControlConstant;
-import com.java110.things.constant.ExceptionConstant;
-import com.java110.things.constant.ResponseConstant;
-import com.java110.things.entity.accessControl.HeartbeatTaskDto;
-import com.java110.things.entity.machine.MachineDto;
-import com.java110.things.exception.HeartbeatCloudException;
 import com.java110.things.factory.ApplicationContextFactory;
-import com.java110.things.factory.HttpFactory;
 import com.java110.things.factory.MappingCacheFactory;
-import com.java110.things.service.IAssessControlProcess;
-import com.java110.things.service.yld04.Yld04AssessControlProcessAdapt;
-import com.java110.things.util.Assert;
-import com.java110.things.util.BeanConvertUtil;
-import com.java110.things.util.DateUtil;
+import com.java110.things.service.accessControl.IAssessControlProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @ClassName HeartbeatCloudApiThread

@@ -18,7 +18,7 @@ import com.java110.things.factory.ApplicationContextFactory;
 import com.java110.things.factory.AccessControlProcessFactory;
 import com.java110.things.factory.HttpFactory;
 import com.java110.things.factory.MappingCacheFactory;
-import com.java110.things.service.IAssessControlProcess;
+import com.java110.things.service.accessControl.IAssessControlProcess;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.Assert;

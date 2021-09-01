@@ -2,6 +2,7 @@ package com.java110.things.Controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.constant.SystemConstant;
+import com.java110.things.entity.attendance.ResultQunyingDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.util.Assert;
 import com.java110.things.util.StringUtil;
@@ -32,6 +33,10 @@ public class BaseController {
     }
 
     public ResponseEntity<String> createResponseEntity(ResultDto resultDto) {
+        return new ResponseEntity<String>(JSONObject.toJSONString(resultDto), HttpStatus.OK);
+    }
+
+    public ResponseEntity<String> createResponseEntity(ResultQunyingDto resultDto) {
         return new ResponseEntity<String>(JSONObject.toJSONString(resultDto), HttpStatus.OK);
     }
 

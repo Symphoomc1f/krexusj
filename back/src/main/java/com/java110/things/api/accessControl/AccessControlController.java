@@ -1,26 +1,16 @@
-package com.java110.things.Controller.accessControl;
+package com.java110.things.api.accessControl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
-import com.java110.things.ThingsApplicationStart;
 import com.java110.things.constant.ResponseConstant;
-import com.java110.things.entity.community.CommunityDto;
-import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.AccessControlProcessFactory;
-import com.java110.things.service.IAssessControlProcess;
-import com.java110.things.service.community.ICommunityService;
-import com.java110.things.service.openDoor.IOpenDoorService;
-import com.java110.things.util.Assert;
-import com.java110.things.util.BeanConvertUtil;
+import com.java110.things.service.accessControl.IAssessControlProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
