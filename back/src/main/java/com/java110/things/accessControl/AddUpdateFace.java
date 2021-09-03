@@ -155,7 +155,7 @@ public class AddUpdateFace extends BaseAccessControl {
         MachineFaceDto machineFaceDto = BeanConvertUtil.covertBean(userFaceDto, MachineFaceDto.class);
         machineFaceDto.setId(SeqUtil.getId());
         machineFaceDto.setMachineId(machineDto.getMachineId());
-        machineFaceDto.setFacePath(machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
+        machineFaceDto.setFacePath("/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + ".jpg");
 
         //machineFaceDto.set
         machineFaceService.saveMachineFace(machineFaceDto);
