@@ -164,6 +164,12 @@ export const constantRoutes = [
         name: '设置小区',
         component: () => import('@/views/communitySettings/communitySettings'),
         meta: { title: '设置小区', icon: 'table' }
+      },
+      {
+        path: '/transactionLog',
+        name: '系统交互日志',
+        component: () => import('@/views/transactionLog/transactionLog'),
+        meta: { title: '系统交互日志', icon: 'table' }
       }
     ]
   },

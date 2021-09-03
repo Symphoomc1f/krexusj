@@ -7,12 +7,14 @@ import com.java110.things.constant.SystemConstant;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.MachineFaceDto;
 import com.java110.things.entity.machine.OperateLogDto;
+import com.java110.things.entity.machine.TransactionLogDto;
 import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.UserDto;
 import com.java110.things.service.machine.IMachineFaceService;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.service.machine.IOperateLogService;
+import com.java110.things.service.machine.ITransactionLogService;
 import com.java110.things.service.openDoor.IOpenDoorService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
@@ -45,6 +47,9 @@ public class MachineController extends BaseController {
 
     @Autowired
     private IOperateLogService operateLogServiceImpl;
+
+    @Autowired
+    private ITransactionLogService transactionLogServiceImpl;
 
     @Autowired
     private IMachineFaceService machineFaceService;
@@ -200,11 +205,11 @@ public class MachineController extends BaseController {
      */
     @RequestMapping(path = "/getMachineFaces", method = RequestMethod.GET)
     public ResponseEntity<String> getMachineFaces(@RequestParam int page,
-                                                 @RequestParam int row,
-                                                 @RequestParam(name = "name", required = false) String logId,
-                                                 @RequestParam(name = "machineCode", required = false) String machineCode,
-                                                 @RequestParam(name = "machineId", required = false) String machineId,
-                                                 @RequestParam(name = "machineName", required = false) String machineName) throws Exception {
+                                                  @RequestParam int row,
+                                                  @RequestParam(name = "name", required = false) String logId,
+                                                  @RequestParam(name = "machineCode", required = false) String machineCode,
+                                                  @RequestParam(name = "machineId", required = false) String machineId,
+                                                  @RequestParam(name = "machineName", required = false) String machineName) throws Exception {
 
         MachineFaceDto machineFaceDto = new MachineFaceDto();
         machineFaceDto.setPage(page);
@@ -227,12 +232,12 @@ public class MachineController extends BaseController {
      */
     @RequestMapping(path = "/getMachineOpenDoors", method = RequestMethod.GET)
     public ResponseEntity<String> getMachineOpenDoors(@RequestParam int page,
-                                                  @RequestParam int row,
-                                                  @RequestParam(name = "name", required = false) String logId,
-                                                  @RequestParam(name = "machineCode", required = false) String machineCode,
-                                                  @RequestParam(name = "machineId", required = false) String machineId,
-                                                  @RequestParam(name = "machineName", required = false) String machineName,
-                                                  @RequestParam(name = "userName", required = false) String userName) throws Exception {
+                                                      @RequestParam int row,
+                                                      @RequestParam(name = "name", required = false) String logId,
+                                                      @RequestParam(name = "machineCode", required = false) String machineCode,
+                                                      @RequestParam(name = "machineId", required = false) String machineId,
+                                                      @RequestParam(name = "machineName", required = false) String machineName,
+                                                      @RequestParam(name = "userName", required = false) String userName) throws Exception {
 
         OpenDoorDto openDoorDto = new OpenDoorDto();
         openDoorDto.setPage(page);
@@ -243,6 +248,32 @@ public class MachineController extends BaseController {
         openDoorDto.setUserName(userName);
 
         ResultDto resultDto = openDoorService.getOpenDoor(openDoorDto);
+        return super.createResponseEntity(resultDto);
+    }
+
+    /**
+     * 交互日志
+     *
+     * @param page 页数
+     * @param row  每页显示的数量
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/getTranLogs", method = RequestMethod.GET)
+    public ResponseEntity<String> getTranLogs(@RequestParam int page,
+                                              @RequestParam int row,
+                                              @RequestParam(name = "tranId", required = false) String tranId,
+                                              @RequestParam(name = "machineCode", required = false) String machineCode,
+                                              @RequestParam(name = "machineName", required = false) String machineName) throws Exception {
+
+        TransactionLogDto transactionLogDto = new TransactionLogDto();
+        transactionLogDto.setPage(page);
+        transactionLogDto.setRow(row);
+        transactionLogDto.setTranId(tranId);
+        transactionLogDto.setMachineCode(machineCode);
+        transactionLogDto.setMachineName(machineName);
+
+        ResultDto resultDto = transactionLogServiceImpl.getTransactionLogs(transactionLogDto);
         return super.createResponseEntity(resultDto);
     }
 }

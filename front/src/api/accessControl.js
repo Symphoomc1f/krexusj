@@ -75,3 +75,12 @@ export function getMachineOpenDoors(params) {
         params
     })
 }
+
+export function getTranLog(params) {
+    return request({
+        url: '/api/machine/getTranLogs',
+        method: 'get',
+        params
+    })
+}
+

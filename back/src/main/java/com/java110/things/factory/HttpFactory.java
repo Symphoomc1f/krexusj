@@ -1,8 +1,12 @@
 package com.java110.things.factory;
 
+import com.alibaba.fastjson.JSONObject;
 import com.java110.things.accessControl.HeartbeatCloudApiThread;
 import com.java110.things.constant.SystemConstant;
+import com.java110.things.entity.machine.TransactionLogDto;
+import com.java110.things.service.machine.ITransactionLogService;
 import com.java110.things.util.DateUtil;
+import com.java110.things.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +20,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
@@ -93,6 +98,7 @@ public class HttpFactory {
      */
     public static ResponseEntity<String> exchange(RestTemplate restTemplate, String url, String param, Map<String, String> headers, HttpMethod httpMethod) throws UnsupportedEncodingException {
         HttpHeaders httpHeaders = getHeader();
+        Date startTime = DateUtil.getCurrentDate();
         if (headers != null && !headers.isEmpty()) {
             for (String key : headers.keySet()) {
                 httpHeaders.add(key, headers.get(key));
@@ -120,7 +126,36 @@ public class HttpFactory {
             responseEntity = new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } finally {
             logger.debug("请求地址为,{} 请求中心服务信息，{},中心服务返回信息，{}", url, httpEntity, responseEntity);
+            Date endTime = DateUtil.getCurrentDate();
+            saveTranLog(url, headers, param, responseEntity.getHeaders().toString(), responseEntity.getBody().toString(), startTime, endTime);
             return responseEntity;
+        }
+    }
+
+    private static void saveTranLog(String url, Map<String, String> reqHeader, String reqParam, String resHeader, String resParam, Date startTime, Date endTime) {
+        try {
+            String tranLogSwitch = MappingCacheFactory.getValue("TRAN_LOG_SWITCH");
+            if (!"ON".equals(tranLogSwitch)) {
+                return;
+            }
+            String machineCode = reqHeader.containsKey("machinecode") ? reqHeader.get("machinecode").toString() : "";
+            if (StringUtil.isEmpty(machineCode)) {
+                machineCode = reqHeader.containsKey("machineCode") ? reqHeader.get("machineCode").toString() : "";
+            }
+            ITransactionLogService transactionLogServiceImpl = ApplicationContextFactory.getBean("transactionLogServiceImpl", ITransactionLogService.class);
+            TransactionLogDto transactionLogDto = new TransactionLogDto();
+            transactionLogDto.setTranId(UUID.randomUUID().toString());
+            transactionLogDto.setMachineCode(machineCode);
+            transactionLogDto.setReqHeader(JSONObject.toJSONString(reqHeader));
+            transactionLogDto.setReqParam(reqParam);
+            transactionLogDto.setResHeader(resHeader);
+            transactionLogDto.setResParam(resParam);
+            transactionLogDto.setUrl(url);
+            transactionLogDto.setReqTime(DateUtil.getFormatTimeString(startTime, DateUtil.DATE_FORMATE_STRING_A));
+            transactionLogDto.setResTime(DateUtil.getFormatTimeString(endTime, DateUtil.DATE_FORMATE_STRING_A));
+            transactionLogServiceImpl.saveTransactionLog(transactionLogDto);
+        } catch (Exception e) {
+            logger.error("保存日志出错", e);
         }
     }
 }
