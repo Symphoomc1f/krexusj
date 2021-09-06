@@ -62,7 +62,9 @@ public class MappingController extends BaseController {
      * @throws Exception
      */
     @RequestMapping(path = "/getMappings", method = RequestMethod.GET)
-    public ResponseEntity<String> getMappings(@RequestParam(name = "id", required = false) String id,
+    public ResponseEntity<String> getMappings(@RequestParam int page,
+                                              @RequestParam int row,
+                                              @RequestParam(name = "id", required = false) String id,
                                               @RequestParam(name = "name", required = false) String name,
                                               @RequestParam(name = "domain", required = false) String domain,
                                               @RequestParam(name = "key", required = false) String key
@@ -70,7 +72,8 @@ public class MappingController extends BaseController {
 
 
         MappingDto mappingDto = new MappingDto();
-
+        mappingDto.setPage(page);
+        mappingDto.setRow(row);
         mappingDto.setId(id);
         mappingDto.setName(name);
         mappingDto.setDomain(domain);

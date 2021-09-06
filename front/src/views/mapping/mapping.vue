@@ -94,7 +94,7 @@
       :total="total"
       :page.sync="listQuery.page"
       :limit.sync="listQuery.row"
-      @pagination="getMappings"
+      @pagination="queryMapping"
     />
 
     <el-dialog title="配置" :visible.sync="dialogFormVisible">
@@ -176,7 +176,6 @@ export default {
       return statusMap[status];
     }
   },
-  components: {},
   data() {
     return {
       listQuery: {

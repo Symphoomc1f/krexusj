@@ -62,9 +62,11 @@
       <el-table-column label="结束时间" align="center">
         <template slot-scope="scope">{{ scope.row.resTime }}</template>
       </el-table-column>
-     
-      <el-table-column class-name="status-col" label="操作时间" align="center">
-        <template slot-scope="scope">{{ scope.row.createTime }}</template>
+
+      <el-table-column class-name="status-col" label="报文" align="center">
+        <template slot-scope="{row,$index}">
+          <el-button size="mini" type="primary" @click="viewBody(row,$index)">查看</el-button>
+        </template>
       </el-table-column>
     </el-table>
     <pagination
@@ -74,6 +76,25 @@
       :limit.sync="listQuery.row"
       @pagination="getTranLog"
     />
+
+    <el-dialog
+      title="请求内容"
+      :visible.sync="viewParamVisible"
+      width="30%"
+      :before-close="handleClose"
+    >
+      <div>请求头：</div>
+      <div>{{curTranLog.reqHeader}}</div>
+      <div>请求报文：</div>
+      <div>{{curTranLog.reqParam}}</div>
+      <div>返回头：</div>
+      <div>{{curTranLog.resHeader}}</div>
+      <div>返回报文：</div>
+      <div>{{curTranLog.resParam}}</div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="viewParamVisible = false">关闭</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -99,14 +120,15 @@ export default {
       listQuery: {
         page: 1,
         row: 10,
-        machineTypeCd: "9998",
         machineName: "",
         machineCode: "",
-        logId: ""
+        tranId: ""
       },
+      viewParamVisible: false,
       list: null,
       listLoading: true,
-      total:0
+      total: 0,
+      curTranLog: {}
     };
   },
   created() {
@@ -117,7 +139,7 @@ export default {
       this.listLoading = true;
       getTranLog(this.listQuery).then(response => {
         this.list = response.data;
-        
+
         this.total = response.total;
         this.listLoading = false;
       });
@@ -129,6 +151,11 @@ export default {
         this.total = response.total;
         this.listLoading = false;
       });
+    },
+    viewBody(_row) {
+      this.curTranLog = {};
+      this.curTranLog = _row;
+      this.viewParamVisible = true;
     }
   }
 };
