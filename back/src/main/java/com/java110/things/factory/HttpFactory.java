@@ -138,9 +138,9 @@ public class HttpFactory {
             if (!"ON".equals(tranLogSwitch)) {
                 return;
             }
-            String machineCode = reqHeader.containsKey("machinecode") ? reqHeader.get("machinecode").toString() : "";
+            String machineCode = reqHeader !=null && reqHeader.containsKey("machinecode") ? reqHeader.get("machinecode").toString() : "";
             if (StringUtil.isEmpty(machineCode)) {
-                machineCode = reqHeader.containsKey("machineCode") ? reqHeader.get("machineCode").toString() : "";
+                machineCode = reqHeader !=null &&  reqHeader.containsKey("machineCode") ? reqHeader.get("machineCode").toString() : "";
             }
             ITransactionLogService transactionLogServiceImpl = ApplicationContextFactory.getBean("transactionLogServiceImpl", ITransactionLogService.class);
             TransactionLogDto transactionLogDto = new TransactionLogDto();

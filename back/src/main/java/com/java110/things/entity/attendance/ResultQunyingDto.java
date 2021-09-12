@@ -1,5 +1,7 @@
 package com.java110.things.entity.attendance;
 
+import com.alibaba.fastjson.JSONObject;
+
 import java.io.Serializable;
 
 /**
@@ -18,6 +20,16 @@ public class ResultQunyingDto implements Serializable {
 
     private Object data;
 
+    public ResultQunyingDto(int status, String info, Object data) {
+        this.status = status;
+        this.info = info;
+        this.data = data;
+    }
+
+    public ResultQunyingDto(int status, String info) {
+        this.status = status;
+        this.info = info;
+    }
 
     public int getStatus() {
         return status;
@@ -41,5 +53,10 @@ public class ResultQunyingDto implements Serializable {
 
     public void setData(Object data) {
         this.data = data;
+    }
+
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
     }
 }

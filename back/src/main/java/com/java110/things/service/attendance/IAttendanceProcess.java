@@ -1,7 +1,8 @@
 package com.java110.things.service.attendance;
 
-import com.java110.things.entity.attendance.ResultQunyingDto;
+import com.java110.things.entity.attendance.AttendanceUploadDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.response.ResultDto;
 
 /**
  * @ClassName IDealQunyingGetService
@@ -15,8 +16,16 @@ public interface IAttendanceProcess {
 
     /**
      * 给设备下发指令
+     *
      * @param machineDto
      * @return
      */
-    ResultQunyingDto heartbeat(MachineDto machineDto);
+    ResultDto heartbeat(MachineDto machineDto);
+
+    /**
+     * 设备上报数据
+     * @param attendanceUploadDto 设备上报数据封装
+     * @return
+     */
+    ResultDto attendanceUploadData(AttendanceUploadDto attendanceUploadDto);
 }

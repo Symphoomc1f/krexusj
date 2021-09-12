@@ -3,13 +3,19 @@ package com.java110.things.api.attendance.qunying;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
+import com.java110.things.api.attendance.BaseAttendanceController;
 import com.java110.things.constant.ResponseConstant;
+import com.java110.things.entity.attendance.AttendanceUploadDto;
 import com.java110.things.entity.attendance.ResultQunyingDto;
+import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.exception.ControllerException;
+import com.java110.things.exception.Result;
 import com.java110.things.service.attendance.IAttendanceProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
  **/
 @RestController
 @RequestMapping(path = "/api/data")
-public class QunyingDataController extends BaseController {
+public class QunyingDataController extends BaseAttendanceController {
 
     private static Logger logger = LoggerFactory.getLogger(QunyingDataController.class);
 
@@ -49,20 +55,23 @@ public class QunyingDataController extends BaseController {
             @RequestParam(name = "sign", required = false) String sign
     ) throws Exception {
         logger.debug("考勤机请求接口 get" + sn);
+        MachineDto machineDto = new MachineDto();
+        machineDto.setMachineCode(sn);
 
-        ResultQunyingDto resultQunyingDto = new ResultQunyingDto();
+        ResultDto resultDto = null;
+        try {
+            IAttendanceProcess attendanceProcess = super.getAttendanceProcess();
+            resultDto = attendanceProcess.heartbeat(machineDto);
+            if (resultDto.getCode() != ResponseConstant.SUCCESS) {
+                throw new ControllerException(Result.SYS_ERROR, resultDto.getMsg());
+            }
+        } catch (Exception e) {
+            logger.error("考勤处理失败", e);
+            ResultQunyingDto qunyingDto = new ResultQunyingDto(1, "ok", new JSONArray());
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG, qunyingDto);
+        }
 
-        resultQunyingDto.setStatus(1);
-        resultQunyingDto.setInfo("ok");
-        JSONArray data = new JSONArray();
-        JSONObject dataInfo = new JSONObject();
-        dataInfo.put("id","1006");
-        dataInfo.put("do","upload");
-        dataInfo.put("data","info");
-        data.add(dataInfo);
-        resultQunyingDto.setData(data);
-
-        return super.createResponseEntity(resultQunyingDto);
+        return new ResponseEntity<String>(resultDto.getData().toString(), HttpStatus.OK);
     }
 
 
@@ -80,7 +89,23 @@ public class QunyingDataController extends BaseController {
     ) throws Exception {
 
         logger.debug("考勤机请求接口 post " + param);
+        ResultDto resultDto = null;
+        try {
+            IAttendanceProcess attendanceProcess = super.getAttendanceProcess();
+            AttendanceUploadDto attendanceUploadDto = new AttendanceUploadDto();
+            attendanceUploadDto.setData(param);
+            attendanceUploadDto.setMachineCode("");
+            resultDto = attendanceProcess.attendanceUploadData(attendanceUploadDto);
+            if (resultDto.getCode() != ResponseConstant.SUCCESS) {
+                throw new ControllerException(Result.SYS_ERROR, resultDto.getMsg());
+            }
+        } catch (Exception e) {
+            logger.error("考勤处理失败", e);
+            ResultQunyingDto qunyingDto = new ResultQunyingDto(1, "ok", new JSONArray());
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG, qunyingDto);
+        }
 
-        return super.createResponseEntity(new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG));
+        return new ResponseEntity<String>(resultDto.getData().toString(), HttpStatus.OK);
     }
+
 }

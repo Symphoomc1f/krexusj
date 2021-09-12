@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.java110.things.config.Java110Properties;
 import com.java110.things.constant.AccessControlConstant;
 import com.java110.things.constant.ExceptionConstant;
+import com.java110.things.constant.MachineConstant;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.community.CommunityDto;
@@ -296,6 +297,7 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
      */
     private List<MachineDto> queryMachines() throws Exception {
         MachineDto machineDto = new MachineDto();
+        machineDto.setMachineTypeCd(MachineConstant.MACHINE_TYPE_ACCESS_CONTROL);
         ResultDto resultDto = machineService.getMachine(machineDto);
         if (resultDto.getCode() != ResponseConstant.SUCCESS) {
             throw new ThreadException(Result.SYS_ERROR, "查询设备失败");
