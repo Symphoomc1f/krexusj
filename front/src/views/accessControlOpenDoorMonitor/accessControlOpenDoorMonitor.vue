@@ -125,7 +125,7 @@ export default {
       var _that = this;
 
       var url =
-        "ws://localhost:9999/openDoorMonitor/" +
+        "ws://"+window.location.host+"/openDoorMonitor/" +
         this.uuid() +
         "/" +
         this.monitor.machineId;

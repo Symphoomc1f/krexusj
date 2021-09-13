@@ -18,7 +18,7 @@ public class ServiceConfiguration {
         exclusions.append("/api/accessControl/faceResult");
         final FilterRegistrationBean registrationBean = new FilterRegistrationBean();
         registrationBean.setFilter(new JwtFilter());
-        registrationBean.addUrlPatterns("/");
+        //registrationBean.addUrlPatterns("/");
         registrationBean.addUrlPatterns("/api/*");
         registrationBean.addInitParameter("excludedUri", exclusions.toString());
 
