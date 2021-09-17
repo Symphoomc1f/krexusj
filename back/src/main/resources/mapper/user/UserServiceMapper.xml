@@ -38,4 +38,18 @@
         limit 1
     </select>
 
+    <update id="updateUserPassword" parameterType="com.java110.things.entity.user.UserDto"
+    >
+        update u_user u
+        set u.password = #{password}
+        where
+        1=1
+        <if test="username != null and username != ''">
+            AND u.name = #{username}
+        </if>
+        <if test="userId != null and userId != ''">
+            AND t.user_id = #{userId}
+        </if>
+    </update>
+
 </mapper>
