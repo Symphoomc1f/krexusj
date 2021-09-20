@@ -3,8 +3,10 @@ package com.java110.things.Controller.user;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
 import com.java110.things.constant.SystemConstant;
+import com.java110.things.entity.manufacturer.ManufacturerDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.UserDto;
+import com.java110.things.factory.AuthenticationFactory;
 import com.java110.things.service.user.IUserService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
@@ -12,11 +14,7 @@ import com.sun.xml.internal.rngom.parse.host.Base;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -75,6 +73,27 @@ public class UserController extends BaseController {
         ResultDto resultDto = userServiceImpl.loginOut(paramObj.getString("token"));
         return super.createResponseEntity(resultDto);
     }
+
+    /**
+     * 修改密码
+     *
+     * @param password 新密码
+     * @param userId 用户id
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/changePassword", method = RequestMethod.GET)
+    public ResponseEntity<String> changePassword(@RequestParam(name = "password", required = true) String password,
+                                                   @RequestParam(name = "userId", required = true) String userId
+    ) throws Exception {
+        UserDto userDto = new UserDto();
+        userDto.setUserId(userId);
+        userDto.setPassword(AuthenticationFactory.md5UserPassword(password));
+        ResultDto resultDto = userServiceImpl.changePassword(userDto);
+        return super.createResponseEntity(resultDto);
+    }
+
+
 
     public IUserService getUserServiceImpl() {
         return userServiceImpl;
