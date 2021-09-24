@@ -19,4 +19,10 @@ public interface IUserServiceDao {
     Map get(String userId);
 
     UserDto getUser(UserDto userDto);
+    /**
+     * 根据用户名、用户id 更新用户密码
+     * @param userDto
+     * @return
+     */
+    long updateUserPassword(UserDto userDto);
 }
