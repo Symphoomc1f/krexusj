@@ -31,4 +31,13 @@ public interface IUserService {
      * @throws Exception
      */
     ResultDto loginOut(String token) throws Exception;
+
+    /**
+     * 修改密码
+     * @param userDto 用户信息
+     * @return
+     * @throws Exception
+     */
+    ResultDto changePassword(UserDto userDto) throws Exception;
+
 }

@@ -4,15 +4,20 @@ import com.alibaba.fastjson.JSONObject;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.dao.IUserServiceDao;
+import com.java110.things.entity.manufacturer.ManufacturerDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.UserDto;
 import com.java110.things.exception.Result;
 import com.java110.things.exception.ServiceException;
 import com.java110.things.factory.AuthenticationFactory;
+import com.java110.things.service.manufacturer.impl.ManufacturerServiceImpl;
 import com.java110.things.service.user.IUserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +33,7 @@ import java.util.Map;
 
 @Service("userServiceImpl")
 public class UserServiceImpl implements IUserService {
+    private Logger logger = LoggerFactory.getLogger(ManufacturerServiceImpl.class);
 
     @Autowired
     private IUserServiceDao userServiceDao;
@@ -88,4 +94,21 @@ public class UserServiceImpl implements IUserService {
         ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
         return resultDto;
     }
+
+    /**
+     * 修改密码
+     * @param userDto 用户信息
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public ResultDto changePassword(UserDto userDto) throws Exception {
+        long cnt = userServiceDao.updateUserPassword(userDto);
+        if (cnt < 1) {
+            logger.error("密码修改失败" + JSONObject.toJSONString(userDto));
+            throw new ServiceException(Result.SYS_ERROR, "密码修改失败");
+        }
+        return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+    }
+
 }
