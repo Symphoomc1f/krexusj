@@ -48,7 +48,7 @@
             AND u.name = #{username}
         </if>
         <if test="userId != null and userId != ''">
-            AND t.user_id = #{userId}
+            AND u.user_id = #{userId}
         </if>
     </update>
 
