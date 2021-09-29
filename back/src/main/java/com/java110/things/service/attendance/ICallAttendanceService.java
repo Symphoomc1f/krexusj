@@ -1,6 +1,9 @@
 package com.java110.things.service.attendance;
 
+import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
+
+import java.util.List;
 
 /**
  * @ClassName ICallAttendanceService
@@ -25,4 +28,11 @@ public interface ICallAttendanceService {
      * @param machineDto 设备对象
      */
     void uploadMachine(MachineDto machineDto);
+
+    /**
+     * 查询设备指令
+     * @param machineDto 设备信息
+     * @return 返回设备指令
+     */
+    List<MachineCmdDto> getMachineCmds(MachineDto machineDto) throws Exception;
 }

@@ -1,8 +1,6 @@
 package com.java110.things.api.attendance.qunying;
 
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.java110.things.Controller.BaseController;
 import com.java110.things.api.attendance.BaseAttendanceController;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.attendance.AttendanceUploadDto;
@@ -11,7 +9,7 @@ import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.exception.ControllerException;
 import com.java110.things.exception.Result;
-import com.java110.things.service.attendance.IAttendanceProcess;
+import com.java110.things.service.attendance.IAttendanceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +36,8 @@ public class QunyingDataController extends BaseAttendanceController {
     private static Logger logger = LoggerFactory.getLogger(QunyingDataController.class);
 
 
-    private IAttendanceProcess attendanceProcess;
+    @Autowired
+    private IAttendanceService attendanceServiceImpl;
 
     /**
      * 添加设备接口类
@@ -60,8 +59,7 @@ public class QunyingDataController extends BaseAttendanceController {
 
         ResultDto resultDto = null;
         try {
-            IAttendanceProcess attendanceProcess = super.getAttendanceProcess();
-            resultDto = attendanceProcess.heartbeat(machineDto);
+            resultDto = attendanceServiceImpl.heartbeat(machineDto);
             if (resultDto.getCode() != ResponseConstant.SUCCESS) {
                 throw new ControllerException(Result.SYS_ERROR, resultDto.getMsg());
             }
@@ -91,11 +89,11 @@ public class QunyingDataController extends BaseAttendanceController {
         logger.debug("考勤机请求接口 post " + param);
         ResultDto resultDto = null;
         try {
-            IAttendanceProcess attendanceProcess = super.getAttendanceProcess();
+
             AttendanceUploadDto attendanceUploadDto = new AttendanceUploadDto();
             attendanceUploadDto.setData(param);
             attendanceUploadDto.setMachineCode("");
-            resultDto = attendanceProcess.attendanceUploadData(attendanceUploadDto);
+            resultDto = attendanceServiceImpl.attendanceUploadData(attendanceUploadDto);
             if (resultDto.getCode() != ResponseConstant.SUCCESS) {
                 throw new ControllerException(Result.SYS_ERROR, resultDto.getMsg());
             }

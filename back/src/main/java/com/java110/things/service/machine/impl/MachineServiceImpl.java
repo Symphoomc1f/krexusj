@@ -1,5 +1,6 @@
 package com.java110.things.service.machine.impl;
 
+import com.java110.things.constant.MachineConstant;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.dao.IMachineServiceDao;
@@ -7,6 +8,7 @@ import com.java110.things.entity.PageDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.AccessControlProcessFactory;
+import com.java110.things.factory.AttendanceProcessFactory;
 import com.java110.things.service.machine.IMachineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -89,7 +91,11 @@ public class MachineServiceImpl implements IMachineService {
     @Override
     public ResultDto restartMachine(MachineDto machineDto) throws Exception {
 
-        AccessControlProcessFactory.getAssessControlProcessImpl().restartMachine(machineDto);
+        if (MachineConstant.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
+            AccessControlProcessFactory.getAssessControlProcessImpl().restartMachine(machineDto);
+        } else if (MachineConstant.MACHINE_TYPE_ATTENDANCE.equals(machineDto.getMachineTypeCd())) {
+            AttendanceProcessFactory.getAttendanceProcessImpl().restartAttendanceMachine(machineDto);
+        }
         return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
     }
 

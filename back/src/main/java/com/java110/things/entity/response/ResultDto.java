@@ -14,6 +14,22 @@ import java.io.Serializable;
  **/
 public class ResultDto implements Serializable {
 
+
+    //成功
+    public static final int SUCCESS = 0;
+
+    //失败
+    public static final int ERROR = -1;
+
+    public static final int NO_AUTHORITY_ERROR = 401; // 认证失败
+
+    public static final String SUCCESS_MSG = "成功";
+
+    public static final String ERROR_MSG = "处理失败";
+
+    //未知异常
+    public static final String NO_RESULT = "未知异常";
+
     private int code;
 
     private String msg;

@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.attendance.AttendanceUploadDto;
 import com.java110.things.entity.attendance.ResultQunyingDto;
+import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.CallAttendanceFactory;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -62,26 +64,15 @@ public class QunyingAttendanceProcessAdapt implements IAttendanceProcess {
     private static final String UPLOAD_DATA_HEAD_UNBOUND = "unbound";
 
 
+
+
     @Override
-    public ResultDto heartbeat(MachineDto machineDto) {
+    public void restartAttendanceMachine(MachineDto machineDto) {
 
-        ResultDto resultDto = null;
-        //查询是否存在该设备
-        ResultQunyingDto resultQunyingDto = getMachine(machineDto);
-        //下发上传设备信息指令
-//        if (resultQunyingDto != null) {
-//            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, resultQunyingDto);
-//            return resultDto;
-//        }
-
-        resultQunyingDto = new ResultQunyingDto(DEFAULT_STATUS, INFO_OK, "");
-
-        return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, resultQunyingDto);
     }
 
     @Override
     public ResultDto attendanceUploadData(AttendanceUploadDto attendanceUploadDto) {
-
         JSONArray uploadData = JSONArray.parseArray(attendanceUploadDto.getData());
         JSONArray ids = new JSONArray();
         String id = "";
@@ -92,6 +83,13 @@ public class QunyingAttendanceProcessAdapt implements IAttendanceProcess {
         }
         ResultQunyingDto resultQunyingDto = new ResultQunyingDto(DEFAULT_STATUS, INFO_OK, ids);
         return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, resultQunyingDto.toString());
+    }
+
+    @Override
+    public String getDefaultResult() {
+
+        ResultQunyingDto resultQunyingDto = new ResultQunyingDto(DEFAULT_STATUS, INFO_OK, "");
+        return resultQunyingDto.toString();
     }
 
     private String doAttendanceUploadData(JSONObject dataObj) {
@@ -129,11 +127,11 @@ public class QunyingAttendanceProcessAdapt implements IAttendanceProcess {
      * @param machineDto 设备信息
      * @return
      */
-    private ResultQunyingDto getMachine(MachineDto machineDto) {
+    public void initMachine(MachineDto machineDto) {
         ICallAttendanceService callAttendanceService = CallAttendanceFactory.getCallAttendanceService();
         MachineDto tmpMachineDto = callAttendanceService.getMachine(machineDto);
         if (tmpMachineDto != null) {
-            return null;
+            return;
         }
 
         String machineName = MANUFACTURER + SeqUtil.getMachineSeq();
@@ -145,10 +143,5 @@ public class QunyingAttendanceProcessAdapt implements IAttendanceProcess {
         machineDto.setMachineVersion("v2.1_2.0.3");
         machineDto.setOem("群英");
         callAttendanceService.uploadMachine(machineDto);
-
-        //上传硬件指令
-        ResultQunyingDto resultQunyingDto = new ResultQunyingDto(DEFAULT_STATUS, INFO_OK, "info");
-
-        return resultQunyingDto;
     }
 }

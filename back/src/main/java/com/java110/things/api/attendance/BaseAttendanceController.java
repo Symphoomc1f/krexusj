@@ -15,12 +15,5 @@ import com.java110.things.service.attendance.IAttendanceProcess;
 public class BaseAttendanceController extends BaseController {
 
 
-    /**
-     * 获取 考勤机处理类
-     *
-     * @return
-     */
-    protected IAttendanceProcess getAttendanceProcess() throws Exception {
-        return AttendanceProcessFactory.getAttendanceProcessImpl();
-    }
+
 }
