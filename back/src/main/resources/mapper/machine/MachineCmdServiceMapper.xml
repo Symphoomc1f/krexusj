@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java110.things.dao.IMachineCmdServiceDao">
+
+    <insert id="saveMachineCmd" parameterType="com.java110.things.entity.machine.MachineCmdDto">
+        INSERT INTO machine_cmd (`cmd_id`, `machine_id`, `machine_code`, `machine_type_cd`, `community_id`, `cmd_code`,
+        `cmd_name`, `state`)
+        VALUES (#{cmdId}, #{machineId}, #{machineCode}, #{machineTypeCd}, #{communityId}, #{cmdCode}, #{cmdName},
+        #{state})
+    </insert>
+    <!--
+        查询设备信息
+    -->
+    <select id="getMachineCmds" parameterType="com.java110.things.entity.machine.MachineCmdDto"
+            resultType="com.java110.things.entity.machine.MachineCmdDto">
+        select
+            t.cmd_id cmdId,
+            t.machine_id machineId,
+            t.machine_code machineCode,
+            t.machine_type_cd machineTypeCd,
+            t.community_id communityId,
+            t.cmd_code cmdCode,
+            t.cmd_name cmdName,
+            t.state,
+            t.create_time createTime,
+            t.read_time readTime,
+            t.finish_time finishTime
+        from machine_cmd t
+        where 1=1
+        <if test="cmdId != null and cmdId != ''">
+            and t.cmd_id = #{cmdId}
+        </if>
+        <if test="machineId != null and machineId != ''">
+            and t.machine_id = #{machineId}
+        </if>
+        <if test="machineCode != null and machineCode != ''">
+            and t.machine_code = #{machineCode}
+        </if>
+        <if test="machineTypeCd != null and machineTypeCd != ''">
+            and t.machine_type_cd = #{machineTypeCd}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="cmdCode != null and cmdCode != ''">
+            and t.cmd_code = #{cmdCode}
+        </if>
+        <if test="cmdName != null and cmdName != ''">
+            and t.cmd_name = #{cmdName}
+        </if>
+        <if test="state != null and state != ''">
+            and t.state = #{state}
+        </if>
+        order by t.create_time desc
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+
+    </select>
+
+    <select id="getMachineCmdCount" parameterType="com.java110.things.entity.machine.MachineCmdDto" resultType="long">
+        select
+        count(1) count
+        from machine_cmd t
+        where 1=1
+        <if test="cmdId != null and cmdId != ''">
+            and t.cmd_id = #{cmdId}
+        </if>
+        <if test="machineId != null and machineId != ''">
+            and t.machine_id = #{machineId}
+        </if>
+        <if test="machineCode != null and machineCode != ''">
+            and t.machine_code = #{machineCode}
+        </if>
+        <if test="machineTypeCd != null and machineTypeCd != ''">
+            and t.machine_type_cd = #{machineTypeCd}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="cmdCode != null and cmdCode != ''">
+            and t.cmd_code = #{cmdCode}
+        </if>
+        <if test="cmdName != null and cmdName != ''">
+            and t.cmd_name = #{cmdName}
+        </if>
+        <if test="state != null and state != ''">
+            and t.state = #{state}
+        </if>
+        order by t.create_time desc
+
+    </select>
+
+    <update id="updateMachineCmd" parameterType="com.java110.things.entity.machine.MachineCmdDto">
+        update machine_cmd t
+        <trim prefix="SET" suffixOverrides=",">
+
+            <if test="state != null and state != ''">
+                t.state = #{state},
+            </if>
+            <if test="readTime != null">
+                t.read_time = #{readTime},
+            </if>
+            <if test="finishTime != null">
+                t.finish_time = #{finishTime}
+            </if>
+        </trim>
+        where 1=1
+        <if test="machineCmdId != null and machineCmdId != ''">
+            and t.machineCmd_id = #{machineCmdId}
+        </if>
+        <if test="cmdId != null and cmdId != ''">
+            and t.cmd_id = #{cmdId}
+        </if>
+        <if test="machineId != null and machineId != ''">
+            and t.machine_id = #{machineId}
+        </if>
+        <if test="machineCode != null and machineCode != ''">
+            and t.machine_code = #{machineCode}
+        </if>
+        <if test="machineTypeCd != null and machineTypeCd != ''">
+            and t.machine_type_cd = #{machineTypeCd}
+        </if>
+    </update>
+
+</mapper>

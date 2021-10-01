@@ -5,6 +5,7 @@ import com.java110.things.constant.MachineConstant;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.dao.IMachineServiceDao;
 import com.java110.things.entity.community.CommunityDto;
+import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.exception.Result;
@@ -12,8 +13,9 @@ import com.java110.things.exception.ServiceException;
 import com.java110.things.exception.ThreadException;
 import com.java110.things.factory.HttpFactory;
 import com.java110.things.factory.MappingCacheFactory;
-import com.java110.things.service.attendance.qunying.QunyingAttendanceProcessAdapt;
 import com.java110.things.service.community.ICommunityService;
+import com.java110.things.service.machine.IMachineCmdService;
+import com.java110.things.util.Assert;
 import com.java110.things.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,8 +42,14 @@ public class CallAttendanceServiceImpl implements ICallAttendanceService {
 
     private static Logger logger = LoggerFactory.getLogger(CallAttendanceServiceImpl.class);
 
+    private static final int DEFAULT_PAGE = 1; // 默认获取指令 页
+    private static final int DEFAULT_ROW = 5; //默认指令获取最大数
+
     @Autowired
     private ICommunityService communityServiceImpl;
+
+    @Autowired
+    private IMachineCmdService machineCmdServiceImpl;
 
 
     @Autowired
@@ -116,6 +124,30 @@ public class CallAttendanceServiceImpl implements ICallAttendanceService {
             throw new ServiceException(Result.SYS_ERROR, "上报云端失败" + e);
 
         }
+    }
+
+    @Override
+    public List<MachineCmdDto> getMachineCmds(MachineDto machineDto) throws Exception {
+
+        Assert.notNull(machineDto, "设备信息不能为空");
+
+        Assert.hasText(machineDto.getMachineCode(), "设备编码不能为空");
+
+        MachineCmdDto machineCmdDto = new MachineCmdDto();
+        machineCmdDto.setMachineCode(machineDto.getMachineCode());
+        machineCmdDto.setPage(DEFAULT_PAGE);
+        if (machineDto.getPage() < 1) {
+            machineCmdDto.setRow(DEFAULT_ROW);
+        }
+        ResultDto resultDto = machineCmdServiceImpl.getMachineCmd(machineCmdDto);
+
+        if (resultDto.getCode() != ResultDto.SUCCESS) {
+            return null;
+        }
+
+        List<MachineCmdDto> machineCmdDtos = (List<MachineCmdDto>) resultDto.getData();
+
+        return machineCmdDtos;
     }
 
     /**

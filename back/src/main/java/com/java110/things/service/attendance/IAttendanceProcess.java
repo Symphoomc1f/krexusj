@@ -14,18 +14,28 @@ import com.java110.things.entity.response.ResultDto;
  **/
 public interface IAttendanceProcess {
 
+
+
+    ResultDto attendanceUploadData(AttendanceUploadDto attendanceUploadDto);
     /**
-     * 给设备下发指令
+     * 查询设备是否存在
      *
-     * @param machineDto
+     * @param machineDto 设备信息
      * @return
      */
-    ResultDto heartbeat(MachineDto machineDto);
+     void initMachine(MachineDto machineDto);
+
+
 
     /**
-     * 设备上报数据
-     * @param attendanceUploadDto 设备上报数据封装
+     * 重启设备
+     * @param machineDto 设备信息
+     */
+    void restartAttendanceMachine(MachineDto machineDto);
+
+    /**
+     * 返回默认结果值，在没有指令的情况下返回设备的 结果值
      * @return
      */
-    ResultDto attendanceUploadData(AttendanceUploadDto attendanceUploadDto);
+    String getDefaultResult();
 }

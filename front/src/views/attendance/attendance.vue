@@ -158,7 +158,8 @@
 import {
   getBarrierGates,
   getBarrierGatesByCondition,
-  deleteBarrierGates
+  deleteBarrierGates,
+  restartBarrierGates
 } from "@/api/barrierGate";
 import Pagination from "@/components/Pagination";
 import { parseTime } from "@/utils";
@@ -254,7 +255,14 @@ export default {
         this.queryMachine();
       });
     },
-    restartBarrierGate(_row) {}
+    restartBarrierGate(_row) {
+      restartBarrierGates(_row).then(response => {
+        this.$message({
+          type: "info",
+          message: '重启成功'
+        });
+      });
+    }
   }
 };
 </script>
