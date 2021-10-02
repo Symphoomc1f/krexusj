@@ -19,6 +19,14 @@ export function getInfo(token) {
   })
 }
 
+export function changePwd(data) {
+  return request({
+    url: '/api/user/changePassword',
+    method: 'post',
+    data
+  })
+}
+
 export function logout(token) {
   return request({
     url: '/api/user/logout',
