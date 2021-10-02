@@ -97,12 +97,28 @@ public class UserServiceImpl implements IUserService {
 
     /**
      * 修改密码
-     * @param userDto 用户信息
+     * @param uid 用户id
+     * @param oldpwd 旧密码
+     * @param newpwd 新密码
      * @return
      * @throws Exception
      */
     @Override
-    public ResultDto changePassword(UserDto userDto) throws Exception {
+    public ResultDto changePassword(String uid,String oldpwd,String newpwd) throws Exception {
+        UserDto userDto = new UserDto();
+        userDto.setUserId(uid);
+        UserDto tmpUserDto = userServiceDao.getUser(userDto);
+        if (newpwd.length() < 6) {
+            logger.error("密码修改失败，密码不能小于6位");
+            throw new ServiceException(Result.SYS_ERROR, "密码不能小于6位");
+        }
+        if (!tmpUserDto.getPassword().equals(AuthenticationFactory.md5UserPassword(oldpwd))) {
+            logger.error("密码修改失败，旧密码输入错误");
+            throw new ServiceException(Result.SYS_ERROR, "旧密码输入错误");
+        }
+        userDto = new UserDto();
+        userDto.setUserId(uid);
+        userDto.setPassword(AuthenticationFactory.md5UserPassword(newpwd));
         long cnt = userServiceDao.updateUserPassword(userDto);
         if (cnt < 1) {
             logger.error("密码修改失败" + JSONObject.toJSONString(userDto));

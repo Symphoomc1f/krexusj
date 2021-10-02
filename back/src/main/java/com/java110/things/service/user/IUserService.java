@@ -34,10 +34,12 @@ public interface IUserService {
 
     /**
      * 修改密码
-     * @param userDto 用户信息
+     * @param uid 用户id
+     * @param oldpwd 旧密码
+     * @param newpwd 新密码
      * @return
      * @throws Exception
      */
-    ResultDto changePassword(UserDto userDto) throws Exception;
+    ResultDto changePassword(String uid,String oldpwd,String newpwd) throws Exception;
 
 }

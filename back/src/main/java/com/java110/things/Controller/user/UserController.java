@@ -77,19 +77,20 @@ public class UserController extends BaseController {
     /**
      * 修改密码
      *
-     * @param password 新密码
-     * @param userId 用户id
+     * @param param 新旧密码
      * @return 成功或者失败
      * @throws Exception
      */
-    @RequestMapping(path = "/changePassword", method = RequestMethod.GET)
-    public ResponseEntity<String> changePassword(@RequestParam(name = "password", required = true) String password,
-                                                   @RequestParam(name = "userId", required = true) String userId
-    ) throws Exception {
-        UserDto userDto = new UserDto();
-        userDto.setUserId(userId);
-        userDto.setPassword(AuthenticationFactory.md5UserPassword(password));
-        ResultDto resultDto = userServiceImpl.changePassword(userDto);
+    @RequestMapping(path = "/changePassword", method = RequestMethod.POST)
+    public ResponseEntity<String> changePassword(HttpServletRequest request,@RequestBody String param) throws Exception {
+        JSONObject paramObj = super.getParamJson(param);
+        Assert.hasKeyAndValue(paramObj, "oldpwd", "请求报文中未包含旧密码");
+        Assert.hasKeyAndValue(paramObj, "newpwd", "请求报文中未包含新密码");
+        String userId = super.getUserId(request);
+        Assert.hasText(userId, "用户还未登录");
+        String oldpwd = paramObj.get("oldpwd").toString();
+        String newpwd = paramObj.get("newpwd").toString();
+        ResultDto resultDto = userServiceImpl.changePassword(userId,oldpwd,newpwd);
         return super.createResponseEntity(resultDto);
     }
 
