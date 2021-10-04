@@ -174,6 +174,12 @@ export const constantRoutes = [
         meta: { title: '设置小区', icon: 'table' }
       },
       {
+        path: '/changepwd',
+        name: '修改密码',
+        component: () => import('@/views/changepwd/changepwd'),
+        meta: { title: '修改密码', icon: 'table' }
+      },
+      {
         path: '/transactionLog',
         name: '系统交互日志',
         component: () => import('@/views/transactionLog/transactionLog'),
