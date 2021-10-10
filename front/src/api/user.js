@@ -36,3 +36,47 @@ export function logout(token) {
     }
   })
 }
+
+export function getUsers(params) {
+  return request({
+      url: '/api/user/getUsers',
+      method: 'get',
+      params: {
+          page: 1,
+          row: 10,
+          levelCd: '02'
+      }
+  })
+}
+
+export function getUsersByCondition(params) {
+  return request({
+      url: '/api/user/getUsers',
+      method: 'get',
+      params
+  })
+}
+
+export function deleteUserControls(params) {
+  return request({
+      url: '/api/user/deleteUser',
+      method: 'post',
+      data:params
+  })
+}
+
+export function updateUser(params) {
+  return request({
+      url: '/api/user/updateUser',
+      method: 'post',
+      data:params
+  })
+}
+
+export function insertUser(params) {
+  return request({
+      url: '/api/user/insertUser',
+      method: 'post',
+      data:params
+  })
+}
