@@ -174,6 +174,12 @@ export const constantRoutes = [
         meta: { title: '设置小区', icon: 'table' }
       },
       {
+        path: '/userManager',
+        name: '员工管理',
+        component: () => import('@/views/userManager/userManager'),
+        meta: { title: '员工管理', icon: 'table' }
+      },
+      {
         path: '/changepwd',
         name: '修改密码',
         component: () => import('@/views/changepwd/changepwd'),
