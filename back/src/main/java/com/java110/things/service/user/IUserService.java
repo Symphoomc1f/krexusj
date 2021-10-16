@@ -42,4 +42,25 @@ public interface IUserService {
      */
     ResultDto changePassword(String uid,String oldpwd,String newpwd) throws Exception;
 
+    /**
+     * 查询用户信息
+     * @param userDto 用户信息
+     * @return
+     * @throws Exception
+     */
+    public ResultDto getUserList(UserDto userDto)throws Exception;
+
+
+    /**
+     * 保存用户信息
+     * @param userDto 用户信息
+     * @return
+     * @throws Exception
+     */
+
+    public ResultDto insertUser(UserDto userDto) throws Exception;
+
+    public ResultDto updateUser(UserDto userDto) throws Exception;
+
+    public ResultDto deleteUser(UserDto userDto)  throws Exception;
 }

@@ -9,6 +9,7 @@
     <select id="getUser" parameterType="com.java110.things.entity.user.UserDto"
             resultType="com.java110.things.entity.user.UserDto">
         SELECT
+            u.id,
             u.name userName,
             u.`password`,
             u.email,
@@ -38,8 +39,64 @@
         limit 1
     </select>
 
-    <update id="updateUserPassword" parameterType="com.java110.things.entity.user.UserDto"
-    >
+    <select id="getUserList" parameterType="com.java110.things.entity.user.UserDto"
+            resultType="com.java110.things.entity.user.UserDto">
+        SELECT
+        u.id,
+        u.name userName,
+        u.`password`,
+        u.email,
+        u.user_id userId,
+        u.tel,
+        u.level_cd levelCd,
+        u.create_time createTime,
+        u.sex,
+        u.age
+        FROM
+        u_user u
+        WHERE
+        1=1
+        <if test="username != null and username != ''">
+            and u.name like '%${username}%'
+        </if>
+        <if test="password != null and password != ''">
+            and u.password = #{password}
+        </if>
+        <if test="userId != null and userId != ''">
+            and u.user_id = #{userId}
+        </if>
+        <if test="tel != null and tel != ''">
+            and u.tel = #{tel}
+        </if>
+        and u.status_cd = '0' and u.name != 'admin'
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+    </select>
+
+    <select id="getUserCount" parameterType="com.java110.things.entity.user.UserDto" resultType="long">
+        select
+        count(1) count
+        FROM
+        u_user u
+        WHERE
+        1=1
+        <if test="username != null and username != ''">
+            and u.name like '%${username}%'
+        </if>
+        <if test="password != null and password != ''">
+            and u.password = #{password}
+        </if>
+        <if test="userId != null and userId != ''">
+            and u.user_id = #{userId}
+        </if>
+        <if test="tel != null and tel != ''">
+            and u.tel = #{tel}
+        </if>
+        and u.status_cd = '0' and u.name != 'admin'
+    </select>
+
+    <update id="updateUserPassword" parameterType="com.java110.things.entity.user.UserDto">
         update u_user u
         set u.password = #{password}
         where
@@ -52,4 +109,56 @@
         </if>
     </update>
 
+    <insert id="insertUser" parameterType="com.java110.things.entity.user.UserDto">
+        insert into u_user
+        (
+        `user_id`,
+        `name`,
+        `address`,
+         `email`,
+        `password`,
+        `age`,
+        `sex`,
+        `tel`,
+        `level_cd`,
+        `create_time`,
+        `status_cd`
+        )
+        values
+        (
+        #{userId},
+        #{username},
+        #{address},
+        #{email},
+        #{password},
+        #{age},
+        #{sex},
+        #{tel},
+        #{levelCd},
+        #{createTime},
+        #{statusCd}
+        )
+    </insert>
+
+    <update id="updateUser" parameterType="com.java110.things.entity.user.UserDto">
+        update u_user
+        <set>
+            <if test="userId != null">`user_id` = #{userId}, </if>
+            <if test="username != null">`name` = #{username}, </if>
+            <if test="email != null">`email` = #{email}, </if>
+            <if test="address != null">`address` = #{address}, </if>
+            <if test="password != null">`password` = #{password}, </if>
+            <if test="age != null">`age` = #{age}, </if>
+            <if test="sex != null">`sex` = #{sex}, </if>
+            <if test="tel != null">`tel` = #{tel}, </if>
+            <if test="levelCd != null">`level_cd` = #{levelCd}, </if>
+            <if test="createTime != null">`create_time` = #{createTime}, </if>
+            <if test="statusCd != null">`status_cd` = #{statusCd}</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="string">
+		delete from u_user where user_id = #{value}
+	</delete>
 </mapper>

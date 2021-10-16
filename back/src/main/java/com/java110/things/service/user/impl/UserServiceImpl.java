@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.dao.IUserServiceDao;
-import com.java110.things.entity.manufacturer.ManufacturerDto;
+import com.java110.things.entity.PageDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.UserDto;
 import com.java110.things.exception.Result;
@@ -15,11 +15,11 @@ import com.java110.things.service.user.IUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -127,4 +127,85 @@ public class UserServiceImpl implements IUserService {
         return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
     }
 
+    /**
+     * 查询用户信息
+     *
+     * @param userDto 用户信息
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public ResultDto getUserList(UserDto userDto) throws Exception {
+        int page = userDto.getPage();
+
+        if (page != PageDto.DEFAULT_PAGE) {
+            userDto.setPage((page - 1) * userDto.getRow());
+        }
+        long count = userServiceDao.getUserCount(userDto);
+        int totalPage = (int) Math.ceil((double) count / (double) userDto.getRow());
+        List<UserDto> userList = null;
+        if (count > 0) {
+            userList = userServiceDao.getUserList(userDto);
+        } else {
+            userList = new ArrayList<>();
+        }
+        ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, count, totalPage, userList);
+        return resultDto;
+    }
+
+    /**
+     * 添加用户信息
+     *
+     * @param userDto 添加用户
+     * @return
+     */
+    @Override
+    public ResultDto insertUser(UserDto userDto) throws Exception {
+        userDto.setPassword(AuthenticationFactory.md5UserPassword("hc123456"));
+        userDto.setLevelCd("02");
+        userDto.setStatusCd("0");
+        int count = userServiceDao.insertUser(userDto);
+        ResultDto resultDto = null;
+        if (count < 1) {
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+        } else {
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+        }
+        return resultDto;
+    }
+
+    /**
+     * 更新用户信息
+     * @param userDto 用户信息
+     * @return
+     */
+    @Override
+    public ResultDto updateUser(UserDto userDto) throws Exception {
+        int count = userServiceDao.updateUser(userDto);
+        ResultDto resultDto = null;
+        if (count < 1) {
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+        } else {
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+        }
+        return resultDto;
+    }
+
+    /**
+     * 删除用户
+     * @param userDto
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public ResultDto deleteUser(UserDto userDto)  throws Exception {
+        int count = userServiceDao.delete(userDto.getUserId());
+        ResultDto resultDto = null;
+        if (count < 1) {
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+        } else {
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+        }
+        return resultDto;
+    }
 }

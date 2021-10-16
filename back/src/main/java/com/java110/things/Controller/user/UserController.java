@@ -3,14 +3,12 @@ package com.java110.things.Controller.user;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
 import com.java110.things.constant.SystemConstant;
-import com.java110.things.entity.manufacturer.ManufacturerDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.UserDto;
 import com.java110.things.factory.AuthenticationFactory;
 import com.java110.things.service.user.IUserService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
-import com.sun.xml.internal.rngom.parse.host.Base;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -94,7 +92,77 @@ public class UserController extends BaseController {
         return super.createResponseEntity(resultDto);
     }
 
+    /**
+     * 用户列表
+     *
+     * @param page 页数
+     * @param row  每页显示的数量
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/getUsers", method = RequestMethod.GET)
+    public ResponseEntity<String> getUsers(@RequestParam int page,
+                                              @RequestParam int row,
+                                              @RequestParam(name = "username", required = false) String username,
+                                           @RequestParam(name = "tel", required = false) String tel) throws Exception {
+        UserDto userDto = new UserDto();
+        userDto.setPage(page);
+        userDto.setRow(row);
+        userDto.setUsername(username);
+        userDto.setTel(tel);
+        ResultDto resultDto = userServiceImpl.getUserList(userDto);
+        return super.createResponseEntity(resultDto);
+    }
+    /**
+     * 添加用户
+     *
+     * @param param 请求报文
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/insertUser", method = RequestMethod.POST)
+    public ResponseEntity<String> insertUser(@RequestBody String param) throws Exception {
+        JSONObject paramObj = super.getParamJson(param);
+        Assert.hasKeyAndValue(paramObj, "userId", "请求报文中未包含用户ID");
+        Assert.hasKeyAndValue(paramObj, "username", "请求报文中未包含用户账户名称");
+        Assert.hasKeyAndValue(paramObj, "tel", "请求报文中未包电话");
+       // Assert.hasKeyAndValue(paramObj, "password", "请求报文中未包密码");
+        ResultDto resultDto = userServiceImpl.insertUser(BeanConvertUtil.covertBean(paramObj, UserDto.class));
+        return super.createResponseEntity(resultDto);
+    }
 
+    /**
+     * 更细用户
+     *
+     * @param param 请求报文
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/updateUser", method = RequestMethod.POST)
+    public ResponseEntity<String> updateUser(@RequestBody String param) throws Exception {
+        JSONObject paramObj = super.getParamJson(param);
+        Assert.hasKeyAndValue(paramObj, "id", "请求报文中未包含用户表ID");
+        Assert.hasKeyAndValue(paramObj, "userId", "请求报文中未包含用户ID");
+        Assert.hasKeyAndValue(paramObj, "username", "请求报文中未包含用户账户名称");
+        Assert.hasKeyAndValue(paramObj, "tel", "请求报文中未包电话");
+        ResultDto resultDto = userServiceImpl.updateUser(BeanConvertUtil.covertBean(paramObj, UserDto.class));
+        return super.createResponseEntity(resultDto);
+    }
+
+    /**
+     * 删除用户
+     * @param uid 表id
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(path = "/deleteUser", method = RequestMethod.POST)
+    public ResponseEntity<String> deleteUser(@RequestBody String uid) throws Exception {
+        JSONObject paramObj = super.getParamJson(uid);
+        Assert.hasKeyAndValue(paramObj, "userId", "请求报文中未包含用户ID");
+
+        ResultDto resultDto = userServiceImpl.deleteUser(BeanConvertUtil.covertBean(paramObj, UserDto.class));
+        return super.createResponseEntity(resultDto);
+    }
 
     public IUserService getUserServiceImpl() {
         return userServiceImpl;
