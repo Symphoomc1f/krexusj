@@ -187,6 +187,13 @@
       <artifactId>spring-integration-mqtt</artifactId>
       <version>5.0.6.RELEASE</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/org.cometd.java/cometd-java-server -->
+    <dependency>
+      <groupId>org.cometd.java</groupId>
+      <artifactId>cometd-java-server</artifactId>
+      <version>4.0.7</version>
+    </dependency>
+
   </dependencies>
 
   <build>
