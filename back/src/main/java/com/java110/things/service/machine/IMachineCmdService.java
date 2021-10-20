@@ -2,6 +2,7 @@ package com.java110.things.service.machine;
 
 import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.entity.user.UserDto;
 
 /**
  * @ClassName IUserService
@@ -40,4 +41,12 @@ public interface IMachineCmdService {
      */
     ResultDto updateMachineCmd(MachineCmdDto machineCmdDto) throws Exception;
 
+    /**
+     * 删除指令
+     *
+     * @param machineCmdDto 设备指令信息
+     * @return
+     * @throws Exception
+     */
+    ResultDto deleteMachineCmd(MachineCmdDto machineCmdDto)  throws Exception;
 }

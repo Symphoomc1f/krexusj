@@ -48,4 +48,11 @@ public interface IMachineCmdServiceDao {
      */
     int updateMachineCmd(MachineCmdDto machineCmdDto);
 
+    /**
+     * 删除指令
+     *
+     * @param value 指令id
+     * @return 返回影响记录数
+     */
+    int delete(String value);
 }

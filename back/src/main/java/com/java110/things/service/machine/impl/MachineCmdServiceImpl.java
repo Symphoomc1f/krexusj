@@ -83,5 +83,23 @@ public class MachineCmdServiceImpl implements IMachineCmdService {
         return resultDto;
     }
 
+    /**
+     * 删除指令
+     * @param machineCmdDto
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public ResultDto deleteMachineCmd(MachineCmdDto machineCmdDto)  throws Exception {
+        int count = machineCmdServiceDao.delete(machineCmdDto.getCmdId());
+        ResultDto resultDto = null;
+        if (count < 1) {
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+        } else {
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+        }
+        return resultDto;
+    }
+
 
 }

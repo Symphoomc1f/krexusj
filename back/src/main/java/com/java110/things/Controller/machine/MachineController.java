@@ -4,17 +4,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
 import com.java110.things.constant.MachineConstant;
 import com.java110.things.constant.SystemConstant;
-import com.java110.things.entity.machine.MachineDto;
-import com.java110.things.entity.machine.MachineFaceDto;
-import com.java110.things.entity.machine.OperateLogDto;
-import com.java110.things.entity.machine.TransactionLogDto;
+import com.java110.things.entity.machine.*;
 import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.response.ResultDto;
-import com.java110.things.entity.user.UserDto;
-import com.java110.things.service.machine.IMachineFaceService;
-import com.java110.things.service.machine.IMachineService;
-import com.java110.things.service.machine.IOperateLogService;
-import com.java110.things.service.machine.ITransactionLogService;
+import com.java110.things.service.machine.*;
 import com.java110.things.service.openDoor.IOpenDoorService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
@@ -56,6 +49,9 @@ public class MachineController extends BaseController {
 
     @Autowired
     private IOpenDoorService openDoorService;
+
+    @Autowired
+    private IMachineCmdService machineCmdService;
 
     /**
      * 添加设备接口类
@@ -110,6 +106,22 @@ public class MachineController extends BaseController {
         machineDto.setRow(row);
         machineDto.setMachineTypeCd(machineTypeCd);
 
+        ResultDto resultDto = machineServiceImpl.getMachine(machineDto);
+        return super.createResponseEntity(resultDto);
+    }
+
+    /**
+     * 根据类型查询设备
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/getMachineCodes", method = RequestMethod.GET)
+
+    public ResponseEntity<String> getMachineCodes(@RequestParam String machineTypeCd) throws Exception {
+
+        Assert.hasText(machineTypeCd, "请求报文中未包含设备类型");
+        MachineDto machineDto = new MachineDto();
+        machineDto.setMachineTypeCd(machineTypeCd);
         ResultDto resultDto = machineServiceImpl.getMachine(machineDto);
         return super.createResponseEntity(resultDto);
     }
@@ -274,6 +286,81 @@ public class MachineController extends BaseController {
         transactionLogDto.setMachineName(machineName);
 
         ResultDto resultDto = transactionLogServiceImpl.getTransactionLogs(transactionLogDto);
+        return super.createResponseEntity(resultDto);
+    }
+
+    /**
+     * 添加设备指令
+     *
+     * @param param 请求报文 包括设备 前台填写信息
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/saveMachineCmd", method = RequestMethod.POST)
+    public ResponseEntity<String> saveMachineCmd(@RequestBody String param) throws Exception {
+
+        JSONObject paramObj = super.getParamJson(param);
+
+        Assert.hasKeyAndValue(paramObj, "machineTypeCd", "请求报文中未包含设备类型");
+
+        Assert.hasKeyAndValue(paramObj, "machineCode", "请求报文中未包含硬件编码");
+
+        Assert.hasKeyAndValue(paramObj, "machineId", "请求报文中未包含硬件ID");
+
+        Assert.hasKeyAndValue(paramObj, "cmdCode", "请求报文中未包含命令编码");
+
+        Assert.hasKeyAndValue(paramObj, "cmdName", "请求报文中未包含命令编码名称");
+
+        if (!paramObj.containsKey("machineTypeCd")) {
+            paramObj.put("machineTypeCd", MachineConstant.MACHINE_TYPE_ACCESS_CONTROL);
+        }
+
+        paramObj.put("cmdId", UUID.randomUUID().toString());
+        paramObj.put("communityId", "99999");
+
+        ResultDto resultDto = machineCmdService.saveMachineCmd(BeanConvertUtil.covertBean(paramObj, MachineCmdDto.class));
+        return super.createResponseEntity(resultDto);
+    }
+
+
+    /**
+     * 查询指令
+     *
+     * @param page 页数
+     * @param row  每页显示的数量
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/getMachineCmds", method = RequestMethod.GET)
+    public ResponseEntity<String> getMachineCmds(@RequestParam int page,
+                                              @RequestParam int row,
+                                              @RequestParam(name = "machineCode", required = false) String machineCode,
+                                              @RequestParam(name = "cmdName", required = false) String cmdName) throws Exception {
+
+        MachineCmdDto machineCmdDto = new MachineCmdDto();
+        machineCmdDto.setPage(page);
+        machineCmdDto.setRow(row);
+        machineCmdDto.setMachineCode(machineCode);
+        machineCmdDto.setCmdName(cmdName);
+        ResultDto resultDto = machineCmdService.getMachineCmd(machineCmdDto);
+        return super.createResponseEntity(resultDto);
+    }
+
+
+    /**
+     * 删除指令
+     *
+     * @param paramIn 入参
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(path = "/deleteMachineCmd", method = RequestMethod.POST)
+    public ResponseEntity<String> deleteMachineCmd(@RequestBody String paramIn) throws Exception {
+        JSONObject paramObj = super.getParamJson(paramIn);
+
+        Assert.hasKeyAndValue(paramObj, "cmdId", "请求报文中未包含指令ID");
+
+        ResultDto resultDto = machineCmdService.deleteMachineCmd(BeanConvertUtil.covertBean(paramObj, MachineCmdDto.class));
         return super.createResponseEntity(resultDto);
     }
 }
