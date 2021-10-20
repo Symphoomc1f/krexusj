@@ -123,4 +123,8 @@
         </if>
     </update>
 
+    <delete id="delete">
+		delete from machine_cmd where cmd_id = #{value}
+	</delete>
+
 </mapper>
