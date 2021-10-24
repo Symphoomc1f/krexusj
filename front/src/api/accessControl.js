@@ -1,5 +1,41 @@
 import request from '@/utils/request'
 
+export function getMachineCmds(params) {
+    return request({
+        url: '/api/machine/getMachineCmds',
+        method: 'get',
+        params: {
+            page: 1,
+            row: 10,
+            machineTypeCd: '9998'
+        }
+    })
+}
+
+export function getMachineCmdsByCondition(params) {
+    return request({
+        url: '/api/machine/getMachineCmds',
+        method: 'get',
+        params
+    })
+}
+
+export function deleteMachineCmd(params) {
+    return request({
+        url: '/api/machine/deleteMachineCmd',
+        method: 'post',
+        data:params
+    })
+}
+
+export function saveMachineCmd(params) {
+    return request({
+        url: '/api/machine/saveMachineCmd',
+        method: 'post',
+        data:params
+    })
+}
+
 export function getAccessControls(params) {
     return request({
         url: '/api/machine/getMachines',
@@ -12,6 +48,13 @@ export function getAccessControls(params) {
     })
 }
 
+export function getMachineCodes(params) {
+    return request({
+        url: '/api/machine/getMachineCodes',
+        method: 'get',
+        params
+    })
+}
 export function getAccessControlsByCondition(params) {
     return request({
         url: '/api/machine/getMachines',
