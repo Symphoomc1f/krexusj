@@ -168,6 +168,12 @@ export const constantRoutes = [
         meta: { title: '系统配置', icon: 'table' }
       },
       {
+        path: '/machineCmd',
+        name: '硬件指令',
+        component: () => import('@/views/machineCmd/machineCmd'),
+        meta: { title: '硬件指令', icon: 'table' }
+      },
+      {
         path: '/communitySettings',
         name: '设置小区',
         component: () => import('@/views/communitySettings/communitySettings'),
