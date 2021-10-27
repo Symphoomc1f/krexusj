@@ -10,7 +10,7 @@ public class HeartbeatTaskDto implements Serializable {
     //云端下发指令
     private int taskcmd;
     //云端下发 任务流水
-    private String taskId;
+    private String taskid;
     //云端下发 内容
     private String taskinfo;
 
@@ -23,12 +23,12 @@ public class HeartbeatTaskDto implements Serializable {
         this.taskcmd = taskcmd;
     }
 
-    public String getTaskId() {
-        return taskId;
+    public String getTaskid() {
+        return taskid;
     }
 
-    public void setTaskId(String taskId) {
-        this.taskId = taskId;
+    public void setTaskid(String taskid) {
+        this.taskid = taskid;
     }
 
     public String getTaskinfo() {

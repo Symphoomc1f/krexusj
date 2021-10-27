@@ -67,7 +67,7 @@ public class Yld04AssessControlProcessAdapt implements IAssessControlProcess {
     }
 
     @Override
-    public void clearFace(MachineDto machineDto) {
+    public void clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
         Function.connectCamera(machineDto.getMachineIp());
         Function.clearFace(machineDto.getMachineIp());
     }

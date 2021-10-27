@@ -1,6 +1,7 @@
 package com.java110.things.service.accessControl;
 
 import com.java110.things.entity.accessControl.UserFaceDto;
+import com.java110.things.entity.cloud.MachineCmdResultDto;
 import com.java110.things.entity.cloud.MachineUploadFaceDto;
 import com.java110.things.entity.fee.FeeDto;
 import com.java110.things.entity.machine.MachineDto;
@@ -61,6 +62,8 @@ public interface ICallAccessControlService {
      * @throws Exception
      */
     void machineUploadFace(MachineUploadFaceDto machineUploadFaceDto) throws Exception;
+
+    void machineCmdResult(MachineCmdResultDto machineCmdResultDto) throws Exception;
 
 
 }

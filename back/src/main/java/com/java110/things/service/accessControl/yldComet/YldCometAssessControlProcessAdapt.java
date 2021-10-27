@@ -173,7 +173,7 @@ public class YldCometAssessControlProcessAdapt implements IAssessControlProcess 
     }
 
     @Override
-    public void clearFace(MachineDto machineDto) {
+    public void clearFace(MachineDto machineDto,HeartbeatTaskDto heartbeatTaskDto) {
         String cmdId = SeqUtil.getId();
 
         JSONObject param = new JSONObject();

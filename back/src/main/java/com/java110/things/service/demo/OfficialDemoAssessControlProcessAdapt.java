@@ -57,7 +57,7 @@ public class OfficialDemoAssessControlProcessAdapt implements IAssessControlProc
     }
 
     @Override
-    public void clearFace(MachineDto machineDto) {
+    public void clearFace(MachineDto machineDto,HeartbeatTaskDto heartbeatTaskDto) {
 
     }
 

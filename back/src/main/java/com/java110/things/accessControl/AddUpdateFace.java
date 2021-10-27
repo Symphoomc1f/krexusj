@@ -103,6 +103,8 @@ public class AddUpdateFace extends BaseAccessControl {
 
         UserFaceDto userFaceDto = BeanConvertUtil.covertBean(data, UserFaceDto.class);
 
+        userFaceDto.setTaskId(heartbeatTaskDto.getTaskid());
+
         Date startTime = new Date(data.getLong("startTime"));
 
         userFaceDto.setStartTime(DateUtil.getFormatTimeString(startTime, DateUtil.DATE_FORMATE_STRING_A));

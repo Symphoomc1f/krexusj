@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
+import com.java110.things.entity.cloud.MachineCmdResultDto;
 import com.java110.things.entity.fee.FeeDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.OperateLogDto;
@@ -114,7 +115,7 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
         String cmdId = SeqUtil.getId();
         JSONObject param = new JSONObject();
         param.put("client_id", machineDto.getMachineCode());
-        param.put("cmd_id", cmdId);
+        param.put("cmd_id", userFaceDto.getTaskId());
         param.put("version", VERSION);
         param.put("cmd", CMD_ADD_FACE);
         param.put("per_id", userFaceDto.getUserId());
@@ -142,7 +143,7 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
         //CMD_UPDATE_FACE
         JSONObject param = new JSONObject();
         param.put("client_id", machineDto.getMachineCode());
-        param.put("cmd_id", cmdId);
+        param.put("cmd_id", userFaceDto.getTaskId());
         param.put("version", VERSION);
         param.put("cmd", CMD_UPDATE_FACE);
         param.put("per_id", userFaceDto.getUserId());
@@ -166,7 +167,7 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
 
         JSONObject param = new JSONObject();
         param.put("client_id", machineDto.getMachineCode());
-        param.put("cmd_id", cmdId);
+        param.put("cmd_id", heartbeatTaskDto.getTaskid());
         param.put("version", VERSION);
         param.put("cmd", CMD_DELETE_FACE);
         param.put("type", 0);
@@ -177,10 +178,10 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
     }
 
     @Override
-    public void clearFace(MachineDto machineDto) {
+    public void clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
         JSONObject param = new JSONObject();
         param.put("client_id", machineDto.getMachineCode());
-        param.put("cmd_id", SeqUtil.getId());
+        param.put("cmd_id", heartbeatTaskDto.getTaskid());
         param.put("version", VERSION);
         param.put("cmd", CMD_DELETE_FACE);
         param.put("type", 4);
@@ -227,6 +228,7 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
                 machineOnline(data);
                 break;
             default:
+                machineCmdResult(data);
                 break;
         }
 
@@ -256,6 +258,44 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
         }
         saveLog(param.getString("cmd_id"), marchineId, topic, "", data, state);
 
+    }
+
+    private void machineCmdResult(String data) {
+        JSONObject resultCmd = JSONObject.parseObject(data);
+        if (!resultCmd.containsKey("cmd")) {
+            return;
+        }
+        String cmd = resultCmd.getString("cmd");
+        switch (cmd) {
+            case CMD_ADD_FACE:
+                doCmdResultCloud(resultCmd);
+                break;
+            case CMD_UPDATE_FACE:
+                break;
+            case CMD_DELETE_FACE:
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void doCmdResultCloud(JSONObject resultCmd) {
+        try {
+            String taskId = resultCmd.getString("cmd_id");
+            String machineCode = resultCmd.getString("sn");
+            int code = -1;
+            if (!resultCmd.containsKey("code")) {
+                code = -1;
+            } else {
+                code = resultCmd.getIntValue("code") != 0 ? -1 : 0;
+            }
+            String msg = resultCmd.containsKey("reply") ? resultCmd.getString("reply") : "";
+            ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
+            MachineCmdResultDto machineCmdResultDto = new MachineCmdResultDto(code, msg, taskId, machineCode);
+            notifyAccessControlService.machineCmdResult(machineCmdResultDto);
+        } catch (Exception e) {
+            logger.error("上报执行命令失败", e);
+        }
     }
 
     @Override

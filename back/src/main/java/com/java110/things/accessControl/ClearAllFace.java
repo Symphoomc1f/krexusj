@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 public class ClearAllFace extends BaseAccessControl {
     @Autowired
     private IMachineFaceService machineFaceService;
+
     /**
      * 添加 更新人脸 方法
      *
@@ -27,11 +28,12 @@ public class ClearAllFace extends BaseAccessControl {
         //清空硬件下的人脸
         ImageFactory.clearImage(machineDto.getMachineCode());
 
-        AccessControlProcessFactory.getAssessControlProcessImpl().clearFace(machineDto);
+        AccessControlProcessFactory.getAssessControlProcessImpl().clearFace(machineDto, heartbeatTaskDto);
 
         MachineFaceDto machineFaceDto = new MachineFaceDto();
         //machineFaceDto.setUserId(heartbeatTaskDto.getTaskinfo());
         machineFaceDto.setMachineId(machineDto.getMachineId());
+        machineFaceDto.setTaskId(heartbeatTaskDto.getTaskid());
         //machineFaceDto.set
         machineFaceService.deleteMachineFace(machineFaceDto);
     }

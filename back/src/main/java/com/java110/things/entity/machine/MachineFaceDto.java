@@ -20,6 +20,8 @@ public class MachineFaceDto extends UserFaceDto implements Serializable {
 
     private String createTime;
 
+    private String taskId;
+
     private String id;
 
     public String getId() {
@@ -44,5 +46,15 @@ public class MachineFaceDto extends UserFaceDto implements Serializable {
 
     public void setCreateTime(String createTime) {
         this.createTime = createTime;
+    }
+
+    @Override
+    public String getTaskId() {
+        return taskId;
+    }
+
+    @Override
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
     }
 }
