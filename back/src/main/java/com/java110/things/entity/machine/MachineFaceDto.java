@@ -1,7 +1,5 @@
 package com.java110.things.entity.machine;
 
-import com.alibaba.fastjson.JSONObject;
-import com.java110.things.entity.PageDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 
 import java.io.Serializable;
@@ -19,6 +17,8 @@ public class MachineFaceDto extends UserFaceDto implements Serializable {
     private String statusCd;
 
     private String createTime;
+
+    private String machineTypeCd;
 
     private String taskId;
 
@@ -56,5 +56,13 @@ public class MachineFaceDto extends UserFaceDto implements Serializable {
     @Override
     public void setTaskId(String taskId) {
         this.taskId = taskId;
+    }
+
+    public String getMachineTypeCd() {
+        return machineTypeCd;
+    }
+
+    public void setMachineTypeCd(String machineTypeCd) {
+        this.machineTypeCd = machineTypeCd;
     }
 }

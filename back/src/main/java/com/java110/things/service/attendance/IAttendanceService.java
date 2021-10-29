@@ -14,6 +14,7 @@ import com.java110.things.entity.response.ResultDto;
  **/
 public interface IAttendanceService {
 
+
     /**
      * 给设备下发指令
      *

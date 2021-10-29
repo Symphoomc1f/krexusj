@@ -106,9 +106,6 @@
             </if>
         </trim>
         where 1=1
-        <if test="machineCmdId != null and machineCmdId != ''">
-            and t.machineCmd_id = #{machineCmdId}
-        </if>
         <if test="cmdId != null and cmdId != ''">
             and t.cmd_id = #{cmdId}
         </if>

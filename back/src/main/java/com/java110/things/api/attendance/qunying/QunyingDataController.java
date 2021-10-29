@@ -69,6 +69,7 @@ public class QunyingDataController extends BaseAttendanceController {
             resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG, qunyingDto);
         }
 
+        logger.debug("返回硬件报文信息：" + resultDto.getData().toString());
         return new ResponseEntity<String>(resultDto.getData().toString(), HttpStatus.OK);
     }
 
@@ -102,6 +103,8 @@ public class QunyingDataController extends BaseAttendanceController {
             ResultQunyingDto qunyingDto = new ResultQunyingDto(1, "ok", new JSONArray());
             resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG, qunyingDto);
         }
+
+        logger.debug("返回硬件报文信息：" + resultDto.getData().toString());
 
         return new ResponseEntity<String>(resultDto.getData().toString(), HttpStatus.OK);
     }

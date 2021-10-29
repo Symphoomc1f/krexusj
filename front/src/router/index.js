@@ -145,6 +145,12 @@ export const constantRoutes = [
         meta: { title: '考勤设备', icon: 'table' }
       },
       {
+        path: 'attendanceFace',
+        name: '考勤',
+        component: () => import('@/views/attendanceFace/attendanceFace'),
+        meta: { title: '设备人脸', icon: 'table' }
+      },
+      {
         path: '/attendanceProtocol',
         name: '考勤',
         component: () => import('@/views/attendanceProtocol/attendanceProtocol'),

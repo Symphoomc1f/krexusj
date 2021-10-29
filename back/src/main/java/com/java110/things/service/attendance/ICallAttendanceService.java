@@ -31,8 +31,8 @@ public interface ICallAttendanceService {
 
     /**
      * 查询设备指令
-     * @param machineDto 设备信息
+     * @param machineCmdDto 设备信息
      * @return 返回设备指令
      */
-    List<MachineCmdDto> getMachineCmds(MachineDto machineDto) throws Exception;
+    List<MachineCmdDto> getMachineCmds(MachineCmdDto machineCmdDto) throws Exception;
 }

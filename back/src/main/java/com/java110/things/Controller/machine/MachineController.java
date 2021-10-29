@@ -206,6 +206,7 @@ public class MachineController extends BaseController {
     @RequestMapping(path = "/getMachineFaces", method = RequestMethod.GET)
     public ResponseEntity<String> getMachineFaces(@RequestParam int page,
                                                   @RequestParam int row,
+                                                  @RequestParam String machineTypeCd,
                                                   @RequestParam(name = "name", required = false) String logId,
                                                   @RequestParam(name = "machineCode", required = false) String machineCode,
                                                   @RequestParam(name = "machineId", required = false) String machineId,
@@ -217,6 +218,7 @@ public class MachineController extends BaseController {
         machineFaceDto.setMachineId(machineId);
         machineFaceDto.setMachineCode(machineCode);
         machineFaceDto.setMachineName(machineName);
+        machineFaceDto.setMachineTypeCd(machineTypeCd);
 
         ResultDto resultDto = machineFaceService.getMachineFace(machineFaceDto);
         return super.createResponseEntity(resultDto);
