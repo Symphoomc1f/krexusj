@@ -3,20 +3,20 @@
     <div class="filter-container" style="margin-bottom:10px">
       <el-input
         v-model="listQuery.machineName"
-        placeholder="请输入门禁名称"
+        placeholder="请输入设备名称"
         style="width: 200px;"
         class="filter-item"
       />
       <el-input
         v-model="listQuery.name"
-        placeholder="请输入用户名称"
+        placeholder="请输入员工名称"
         style="width: 200px;"
         class="filter-item"
       />
 
       <el-input
         v-model="listQuery.machineCode"
-        placeholder="请输入门禁编码"
+        placeholder="请输入设备编码"
         style="width: 200px;"
         class="filter-item"
       />
@@ -26,7 +26,7 @@
         class="filter-item"
         type="primary"
         icon="el-icon-search"
-        @click="getAccessControlFace"
+        @click="getAttendanceFace"
       >查询</el-button>
     </div>
     <el-table
@@ -65,15 +65,15 @@
       <el-table-column align="center" label="身份证">
         <template slot-scope="scope">{{ scope.row.idNumber }}</template>
       </el-table-column>
-      <el-table-column align="center" label="门禁名称">
+      <el-table-column align="center" label="设备名称">
         <template slot-scope="scope">{{ scope.row.machineName }}</template>
       </el-table-column>
-      <el-table-column label="门禁编码" align="center">
+      <el-table-column label="设备编码" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.machineCode }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="门禁IP" align="center">
+      <el-table-column label="设备IP" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.machineIp }}</span>
         </template>
@@ -87,13 +87,13 @@
       :total="total"
       :page.sync="listQuery.page"
       :limit.sync="listQuery.row"
-      @pagination="getAccessControlFace"
+      @pagination="getAttendanceFace"
     />
   </div>
 </template>
 
 <script>
-import { getAccessControlFace } from "@/api/accessControl";
+import { getAttendanceFace } from "@/api/attendance";
 import Pagination from "@/components/Pagination";
 import { parseTime } from "@/utils";
 
@@ -114,10 +114,10 @@ export default {
       listQuery: {
         page: 1,
         row: 10,
-        machineTypeCd: "9998",
+        machineTypeCd: "9997",
         machineName: "",
         machineCode: "",
-        machineId:'',
+        machineId: "",
         name: ""
       },
       list: null,
@@ -126,22 +126,22 @@ export default {
     };
   },
   created() {
-    this.listQuery.machineId = this.$route.query.machineId  //接收参数
+    this.listQuery.machineId = this.$route.query.machineId; //接收参数
     this.fetchData();
   },
   methods: {
     fetchData() {
       this.listLoading = true;
-      getAccessControlFace(this.listQuery).then(response => {
+      getAttendanceFace(this.listQuery).then(response => {
         this.list = response.data;
 
         this.total = response.total;
         this.listLoading = false;
       });
     },
-    getAccessControlFace() {
+    getAttendanceFace() {
       this.listLoading = true;
-      getAccessControlFace(this.listQuery).then(response => {
+      getAttendanceFace(this.listQuery).then(response => {
         this.list = response.data;
         this.total = response.total;
         this.listLoading = false;

@@ -8,6 +8,8 @@ public class UserFaceDto extends PageDto implements Serializable {
 
     private String userId;
 
+    private String taskId;
+
     private String faceBase64;
 
     private String startTime;
@@ -124,5 +126,13 @@ public class UserFaceDto extends PageDto implements Serializable {
 
     public void setMachineIp(String machineIp) {
         this.machineIp = machineIp;
+    }
+
+    public String getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
     }
 }

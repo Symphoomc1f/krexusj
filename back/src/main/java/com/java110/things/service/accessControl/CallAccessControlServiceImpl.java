@@ -7,6 +7,7 @@ import com.java110.things.constant.MachineConstant;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.dao.IMachineServiceDao;
 import com.java110.things.entity.accessControl.UserFaceDto;
+import com.java110.things.entity.cloud.MachineCmdResultDto;
 import com.java110.things.entity.cloud.MachineUploadFaceDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.fee.FeeDto;
@@ -359,6 +360,34 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
             throw new ServiceException(Result.SYS_ERROR, "人脸上报失败" + tmpResponseEntity.getBody());
         }
 
+    }
+
+    @Override
+    public void machineCmdResult(MachineCmdResultDto machineCmdResultDto) throws Exception {
+
+        //查询 小区信息
+        CommunityDto communityDto = new CommunityDto();
+        ResultDto resultDto = communityServiceImpl.getCommunity(communityDto);
+
+        if (resultDto.getCode() != ResponseConstant.SUCCESS) {
+            throw new ThreadException(Result.SYS_ERROR, "查询小区信息失败");
+        }
+
+        List<CommunityDto> communityDtos = (List<CommunityDto>) resultDto.getData();
+
+        if (communityDtos == null || communityDtos.size() < 1) {
+            throw new ThreadException(Result.SYS_ERROR, "当前还没有设置小区，请先设置小区");
+        }
+        String url = MappingCacheFactory.getValue("CLOUD_API") + "/api/machineTranslate.machineCmdResult";
+        Map<String, String> headers = new HashMap<>();
+        headers.put("machineCode", machineCmdResultDto.getMachineCode());
+        headers.put("communityId", communityDtos.get(0).getCommunityId());
+
+        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, url, machineCmdResultDto.toString(), headers, HttpMethod.POST);
+
+        if (tmpResponseEntity.getStatusCode() != HttpStatus.OK) {
+            logger.error("执行结果失败" + tmpResponseEntity.getBody());
+        }
     }
 
     /**

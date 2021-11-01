@@ -21,4 +21,40 @@ public class MachineConstant {
 
     // 摄像头
     public static  final String MACHINE_TYPE_CAMERA = "9998";
+
+
+    //上报设备
+    public static final String CMD_REGISTER = "1";
+
+    //重启设备
+    public static final String CMD_RESTART = "2";
+
+    //设置设备
+    public static final String CMD_SETTINGS = "3";
+    //升级设备
+    public static final String CMD_UPGRADE = "4";
+
+    //开门
+    public static final String CMD_OPEN_DOOR = "5";
+
+    //受控
+    public static final String CMD_CONTROLLED = "6";
+
+    //增加更新人脸
+    public static final String CMD_CREATE_FACE = "101";
+
+    //删除人脸
+    public static final String CMD_DELETE_FACE = "102";
+
+    //清空人脸
+    public static final String CMD_CLEAR_FACE = "103";
+
+
+    public static final String MACHINE_CMD_STATE_NO_DEAL = "1000";//未处理
+
+    public static final String MACHINE_CMD_STATE_DEALING = "2000";//处理中
+
+    public static final String MACHINE_CMD_STATE_DEALED = "3000";//处理完成
+
+    public static final String MACHINE_CMD_STATE_DEAL_ERROR = "4000";//处理失败
 }

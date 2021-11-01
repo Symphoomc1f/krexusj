@@ -5,11 +5,17 @@ import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.dao.IMachineServiceDao;
 import com.java110.things.entity.PageDto;
+import com.java110.things.entity.community.CommunityDto;
+import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.exception.Result;
+import com.java110.things.exception.ThreadException;
 import com.java110.things.factory.AccessControlProcessFactory;
-import com.java110.things.factory.AttendanceProcessFactory;
+import com.java110.things.service.community.ICommunityService;
+import com.java110.things.service.machine.IMachineCmdService;
 import com.java110.things.service.machine.IMachineService;
+import com.java110.things.util.SeqUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +36,12 @@ public class MachineServiceImpl implements IMachineService {
 
     @Autowired
     private IMachineServiceDao machineServiceDao;
+
+    @Autowired
+    private IMachineCmdService machineCmdServiceImpl;
+
+    @Autowired
+    private ICommunityService communityServiceImpl;
 
     /**
      * 添加设备信息
@@ -91,10 +103,34 @@ public class MachineServiceImpl implements IMachineService {
     @Override
     public ResultDto restartMachine(MachineDto machineDto) throws Exception {
 
+        //查询 小区信息
+        CommunityDto communityDto = new CommunityDto();
+        ResultDto resultDto = communityServiceImpl.getCommunity(communityDto);
+
+        if (resultDto.getCode() != ResponseConstant.SUCCESS) {
+            throw new ThreadException(Result.SYS_ERROR, "查询小区信息失败");
+        }
+
+        List<CommunityDto> communityDtos = (List<CommunityDto>) resultDto.getData();
+
+        if (communityDtos == null || communityDtos.size() < 1) {
+            throw new ThreadException(Result.SYS_ERROR, "当前还没有设置小区，请先设置小区");
+        }
+
         if (MachineConstant.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
             AccessControlProcessFactory.getAssessControlProcessImpl().restartMachine(machineDto);
         } else if (MachineConstant.MACHINE_TYPE_ATTENDANCE.equals(machineDto.getMachineTypeCd())) {
-            AttendanceProcessFactory.getAttendanceProcessImpl().restartAttendanceMachine(machineDto);
+            //AttendanceProcessFactory.getAttendanceProcessImpl().restartAttendanceMachine(machineDto);
+            MachineCmdDto machineCmdDto = new MachineCmdDto();
+            machineCmdDto.setCmdId(SeqUtil.getId());
+            machineCmdDto.setState(MachineConstant.MACHINE_CMD_STATE_NO_DEAL);
+            machineCmdDto.setMachineCode(machineDto.getMachineCode());
+            machineCmdDto.setMachineId(machineDto.getMachineId());
+            machineCmdDto.setMachineTypeCd(MachineConstant.MACHINE_TYPE_ATTENDANCE);
+            machineCmdDto.setCommunityId(communityDtos.get(0).getCommunityId());
+            machineCmdDto.setCmdCode(MachineConstant.CMD_RESTART);
+            machineCmdDto.setCmdName("重启设备");
+            machineCmdServiceImpl.saveMachineCmd(machineCmdDto);
         }
         return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
     }

@@ -3,11 +3,14 @@ package com.java110.things.service.attendance.qunying;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.constant.ResponseConstant;
+import com.java110.things.entity.accessControl.SyncGetTaskResultDto;
+import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.attendance.AttendanceUploadDto;
 import com.java110.things.entity.attendance.ResultQunyingDto;
 import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.factory.AuthenticationFactory;
 import com.java110.things.factory.CallAttendanceFactory;
 import com.java110.things.service.attendance.IAttendanceProcess;
 import com.java110.things.service.attendance.ICallAttendanceService;
@@ -16,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -37,6 +39,8 @@ public class QunyingAttendanceProcessAdapt implements IAttendanceProcess {
     private static final int DEFAULT_STATUS = 1;
 
     private static final String INFO_OK = "ok";
+
+    private static final String CMD_REBOOT = "reboot";
 
     //推送指纹
     private static final String UPLOAD_DATA_FINGERPRINT = "fingerprint";
@@ -63,12 +67,118 @@ public class QunyingAttendanceProcessAdapt implements IAttendanceProcess {
     //推送解除绑定
     private static final String UPLOAD_DATA_HEAD_UNBOUND = "unbound";
 
+    private void refreshParamOut(JSONObject paramOut) {
+        if (paramOut.isEmpty()) {
+            JSONArray data = new JSONArray();
+            paramOut.put("status", 1);
+            paramOut.put("info", "ok");
+            paramOut.put("data", data);
+        }
+    }
 
 
+    /**
+     * 重启设备
+     *
+     * @param machineCmdDto 设备信息
+     * @param paramOut
+     */
+    @Override
+    public void restartAttendanceMachine(MachineCmdDto machineCmdDto, JSONObject paramOut) {
+        JSONObject pOut = getCmdResult(machineCmdDto, CMD_REBOOT);
+        refreshParamOut(paramOut);
+        JSONArray data = paramOut.getJSONArray("data");
+        data.add(pOut);
+
+    }
 
     @Override
-    public void restartAttendanceMachine(MachineDto machineDto) {
+    public void addFace(SyncGetTaskResultDto syncGetTaskResultDto, JSONObject paramOut) {
+        refreshParamOut(paramOut);
+        JSONArray data = paramOut.getJSONArray("data");
+        UserFaceDto userFaceDto = syncGetTaskResultDto.getUserFaceDto();
+        JSONObject addStaff = new JSONObject();
+        addStaff.put("id", SeqUtil.getId());
+        addStaff.put("do", "update");
+        addStaff.put("data", "user");
+        addStaff.put("ccid", userFaceDto.getUserId());
+        addStaff.put("name", userFaceDto.getName());
+        addStaff.put("passwd", AuthenticationFactory.md5("123456").toLowerCase());
+        addStaff.put("card", userFaceDto.getIdNumber());
+        addStaff.put("deptid", "0");
+        addStaff.put("auth", 0);
+        data.add(addStaff);
 
+        JSONObject staffFace = new JSONObject();
+        staffFace.put("id", syncGetTaskResultDto.getTaskId());
+        addStaff.put("do", "update");
+        addStaff.put("data", "headpic");
+        addStaff.put("ccid", userFaceDto.getUserId());
+        addStaff.put("headpic", userFaceDto.getFaceBase64());
+        data.add(addStaff);
+    }
+
+    @Override
+    public void updateFace(SyncGetTaskResultDto syncGetTaskResultDto, JSONObject paramOut) {
+        refreshParamOut(paramOut);
+        JSONArray data = paramOut.getJSONArray("data");
+        UserFaceDto userFaceDto = syncGetTaskResultDto.getUserFaceDto();
+        JSONArray dataInfo = new JSONArray();
+        dataInfo.add("headpic");
+        JSONArray ccidInfo = new JSONArray();
+        ccidInfo.add(userFaceDto.getUserId());
+        JSONObject addStaff = new JSONObject();
+        addStaff.put("id", SeqUtil.getId());
+        addStaff.put("do", "delete");
+        addStaff.put("data", dataInfo);
+        addStaff.put("ccid", ccidInfo);
+        data.add(addStaff);
+        JSONObject staffFace = new JSONObject();
+        staffFace.put("id", syncGetTaskResultDto.getTaskId());
+        addStaff.put("do", "update");
+        addStaff.put("data", "headpic");
+        addStaff.put("ccid", userFaceDto.getUserId());
+        addStaff.put("headpic", userFaceDto.getFaceBase64());
+        data.add(addStaff);
+    }
+
+    @Override
+    public void deleteFace(SyncGetTaskResultDto syncGetTaskResultDto, JSONObject paramOut) {
+        refreshParamOut(paramOut);
+        JSONArray data = paramOut.getJSONArray("data");
+        UserFaceDto userFaceDto = syncGetTaskResultDto.getUserFaceDto();
+        JSONArray dataInfo = new JSONArray();
+        dataInfo.add("user");
+        dataInfo.add("face");
+        dataInfo.add("headpic");
+        dataInfo.add("clockin");
+        dataInfo.add("pic");
+        JSONArray ccidInfo = new JSONArray();
+        ccidInfo.add(userFaceDto.getUserId());
+        JSONObject addStaff = new JSONObject();
+        addStaff.put("id", userFaceDto.getTaskId());
+        addStaff.put("do", "delete");
+        addStaff.put("data", dataInfo);
+        addStaff.put("ccid", ccidInfo);
+        data.add(addStaff);
+    }
+
+    @Override
+    public void clearFace(SyncGetTaskResultDto syncGetTaskResultDto, JSONObject paramOut) {
+        refreshParamOut(paramOut);
+        JSONArray data = paramOut.getJSONArray("data");
+        UserFaceDto userFaceDto = syncGetTaskResultDto.getUserFaceDto();
+        JSONArray dataInfo = new JSONArray();
+        dataInfo.add("user");
+        dataInfo.add("face");
+        dataInfo.add("headpic");
+        dataInfo.add("clockin");
+        dataInfo.add("pic");
+        JSONObject addStaff = new JSONObject();
+        addStaff.put("id", userFaceDto.getTaskId());
+        addStaff.put("do", "delete");
+        addStaff.put("data", dataInfo);
+        data.add(addStaff);
     }
 
     @Override
@@ -143,5 +253,37 @@ public class QunyingAttendanceProcessAdapt implements IAttendanceProcess {
         machineDto.setMachineVersion("v2.1_2.0.3");
         machineDto.setOem("群英");
         callAttendanceService.uploadMachine(machineDto);
+    }
+
+    /**
+     * 获取cmd 结果集
+     *
+     * @param machineCmdDto
+     * @param cmd
+     * @return
+     */
+    private JSONObject getCmdResult(MachineCmdDto machineCmdDto, String cmd) {
+        JSONObject paramObj = new JSONObject();
+        paramObj.put("id", machineCmdDto.getCmdId());
+        paramObj.put("do", "cmd");
+        paramObj.put("cmd", cmd);
+
+        return paramObj;
+    }
+
+    /**
+     * 获取cmd 结果集
+     *
+     * @param machineCmdDto
+     * @param data
+     * @return
+     */
+    private JSONObject getDataResult(MachineCmdDto machineCmdDto, Object data) {
+        JSONObject paramObj = new JSONObject();
+        paramObj.put("id", machineCmdDto.getCmdId());
+        paramObj.put("do", "cmd");
+        paramObj.put("data", data);
+
+        return paramObj;
     }
 }

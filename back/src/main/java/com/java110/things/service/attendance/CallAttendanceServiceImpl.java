@@ -127,16 +127,14 @@ public class CallAttendanceServiceImpl implements ICallAttendanceService {
     }
 
     @Override
-    public List<MachineCmdDto> getMachineCmds(MachineDto machineDto) throws Exception {
+    public List<MachineCmdDto> getMachineCmds(MachineCmdDto machineCmdDto) throws Exception {
 
-        Assert.notNull(machineDto, "设备信息不能为空");
+        Assert.notNull(machineCmdDto, "设备信息不能为空");
 
-        Assert.hasText(machineDto.getMachineCode(), "设备编码不能为空");
+        Assert.hasText(machineCmdDto.getMachineCode(), "设备编码不能为空");
 
-        MachineCmdDto machineCmdDto = new MachineCmdDto();
-        machineCmdDto.setMachineCode(machineDto.getMachineCode());
         machineCmdDto.setPage(DEFAULT_PAGE);
-        if (machineDto.getPage() < 1) {
+        if (machineCmdDto.getPage() < 1) {
             machineCmdDto.setRow(DEFAULT_ROW);
         }
         ResultDto resultDto = machineCmdServiceImpl.getMachineCmd(machineCmdDto);

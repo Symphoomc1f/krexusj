@@ -69,8 +69,8 @@
       </el-table-column>
       <el-table-column class-name="status-col" label="操作" align="right">
         <template slot-scope="{row,$index}">
-          <el-button size="mini" type="primary" @click="restartBarrierGate(row,$index)">重启</el-button>
-          <el-button size="mini" type="danger" @click="deleteBarrierGate(row,$index)">删除</el-button>
+          <el-button size="mini" type="primary" @click="restartAttendance(row,$index)">重启</el-button>
+          <el-button size="mini" type="danger" @click="deleteAttendance(row,$index)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -141,14 +141,14 @@
 
     <el-dialog
       title="温馨提示"
-      :visible.sync="deleteBarrierGateDailogVisible"
+      :visible.sync="deleteAttendanceDailogVisible"
       width="30%"
       :before-close="handleClose"
     >
       <span>您确定删除当前考勤机吗？</span>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="deleteBarrierGateDailogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="doDeleteBarrierGate">确 定</el-button>
+        <el-button @click="deleteAttendanceDailogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="doDeleteAttendance">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -156,11 +156,11 @@
 
 <script>
 import {
-  getBarrierGates,
-  getBarrierGatesByCondition,
-  deleteBarrierGates,
-  restartBarrierGates
-} from "@/api/barrierGate";
+  getAttendances,
+  getAttendancesByCondition,
+  deleteAttendances,
+  restartAttendances
+} from "@/api/attendance";
 import Pagination from "@/components/Pagination";
 import { parseTime } from "@/utils";
 
@@ -188,9 +188,9 @@ export default {
       },
       list: null,
       listLoading: true,
-      deleteBarrierGateDailogVisible: false,
+      deleteAttendanceDailogVisible: false,
       dialogFormVisible: false,
-      curBarrierGate: {},
+      curAttendance: {},
       temp: {
         id: undefined,
         importance: 1,
@@ -224,39 +224,39 @@ export default {
   methods: {
     fetchData() {
       this.listLoading = true;
-      getBarrierGates().then(response => {
+      getAttendances().then(response => {
         this.list = response.data;
         this.listLoading = false;
       });
     },
     queryMachine() {
       this.listLoading = true;
-      getBarrierGatesByCondition(this.listQuery).then(response => {
+      getAttendancesByCondition(this.listQuery).then(response => {
         this.list = response.data;
         this.listLoading = false;
       });
     },
-    addBarrierGate() {
+    addAttendance() {
       this.dialogFormVisible = true;
     },
-    deleteBarrierGate(_row) {
-      this.deleteBarrierGateDailogVisible = true;
-      this.curBarrierGate = _row;
+    deleteAttendance(_row) {
+      this.deleteAttendanceDailogVisible = true;
+      this.curAttendance = _row;
     },
-    doDeleteBarrierGate() {
+    doDeleteAttendance() {
       this.listLoading = true;
-      deleteBarrierGates(this.curBarrierGate).then(response => {
+      deleteAttendances(this.curAttendance).then(response => {
         this.listLoading = false;
         this.$message({
           type: "info",
           message: response.msg
         });
-        this.deleteBarrierGateDailogVisible = false;
+        this.deleteAttendanceDailogVisible = false;
         this.queryMachine();
       });
     },
-    restartBarrierGate(_row) {
-      restartBarrierGates(_row).then(response => {
+    restartAttendance(_row) {
+      restartAttendances(_row).then(response => {
         this.$message({
           type: "info",
           message: '重启成功'
