@@ -95,7 +95,7 @@ public class AddUpdateFace extends BaseAccessControl {
          */
 
         if (!paramOut.containsKey("code") || ResponseConstant.SUCCESS != paramOut.getInteger("code")) {
-            String msg = paramOut.containsKey("message") ? paramOut.getString("message") : ResponseConstant.NO_RESULT;
+            String msg = paramOut.containsKey("msg") ? paramOut.getString("msg") : ResponseConstant.NO_RESULT;
             throw new HeartbeatCloudException(ExceptionConstant.ERROR, msg);
         }
 

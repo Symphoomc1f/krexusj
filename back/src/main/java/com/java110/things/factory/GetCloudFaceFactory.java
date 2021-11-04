@@ -107,7 +107,7 @@ public class GetCloudFaceFactory {
 
         Assert.hasKeyAndValue(commandInfo, "taskcmd", "云端返回报文格式错误 未 包含指令编码 taskcmd" + commandInfo.toJSONString());
         Assert.hasKeyAndValue(commandInfo, "taskinfo", "云端返回报文格式错误 未 包含任务内容 taskinfo" + commandInfo.toJSONString());
-        Assert.hasKeyAndValue(commandInfo, "taskId", "云端返回报文格式错误 未 包含任务ID taskId" + commandInfo.toJSONString());
+        Assert.hasKeyAndValue(commandInfo, "taskid", "云端返回报文格式错误 未 包含任务ID taskId" + commandInfo.toJSONString());
 
         HeartbeatTaskDto heartbeatTaskDto = BeanConvertUtil.covertBean(commandInfo, HeartbeatTaskDto.class);
 
@@ -116,7 +116,7 @@ public class GetCloudFaceFactory {
         SyncGetTaskResultDto syncGetTaskResultDto = new SyncGetTaskResultDto();
         syncGetTaskResultDto.setCmd(commandInfo.getString("taskcmd"));
         syncGetTaskResultDto.setTaskId(commandInfo.getString("taskinfo"));
-        syncGetTaskResultDto.setTaskId(commandInfo.getString("taskId"));
+        syncGetTaskResultDto.setTaskId(commandInfo.getString("taskid"));
         syncGetTaskResultDto.setCommunityDto(communityDto);
         syncGetTaskResultDto.setMachineDto(machineDto);
 
@@ -166,7 +166,7 @@ public class GetCloudFaceFactory {
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
 
         if (!paramOut.containsKey("code") || ResponseConstant.SUCCESS != paramOut.getInteger("code")) {
-            String msg = paramOut.containsKey("message") ? paramOut.getString("message") : ResponseConstant.NO_RESULT;
+            String msg = paramOut.containsKey("msg") ? paramOut.getString("msg") : ResponseConstant.NO_RESULT;
             throw new HeartbeatCloudException(ExceptionConstant.ERROR, msg);
         }
 
@@ -198,6 +198,10 @@ public class GetCloudFaceFactory {
             // 从本地磁盘中检查是否有人脸存在
             boolean exists = ImageFactory.existsImage(machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
             faceId = exists ? userFaceDto.getUserId() : null;
+        }
+
+        if (StringUtil.isEmpty(userFaceDto.getFaceBase64())) {
+            return userFaceDto;
         }
 
         //调用新增人脸接口

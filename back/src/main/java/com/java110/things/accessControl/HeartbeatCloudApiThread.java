@@ -269,7 +269,7 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
 
         Assert.hasKeyAndValue(commandInfo, "taskcmd", "云端返回报文格式错误 未 包含指令编码 taskcmd" + commandInfo.toJSONString());
         Assert.hasKeyAndValue(commandInfo, "taskinfo", "云端返回报文格式错误 未 包含任务内容 taskinfo" + commandInfo.toJSONString());
-        Assert.hasKeyAndValue(commandInfo, "taskId", "云端返回报文格式错误 未 包含任务ID taskId" + commandInfo.toJSONString());
+        Assert.hasKeyAndValue(commandInfo, "taskid", "云端返回报文格式错误 未 包含任务ID taskid" + commandInfo.toJSONString());
 
         HeartbeatTaskDto heartbeatTaskDto = BeanConvertUtil.covertBean(commandInfo, HeartbeatTaskDto.class);
 

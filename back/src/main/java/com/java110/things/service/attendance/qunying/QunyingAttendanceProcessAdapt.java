@@ -97,6 +97,7 @@ public class QunyingAttendanceProcessAdapt implements IAttendanceProcess {
         refreshParamOut(paramOut);
         JSONArray data = paramOut.getJSONArray("data");
         UserFaceDto userFaceDto = syncGetTaskResultDto.getUserFaceDto();
+        //员工信息
         JSONObject addStaff = new JSONObject();
         addStaff.put("id", SeqUtil.getId());
         addStaff.put("do", "update");
@@ -109,13 +110,26 @@ public class QunyingAttendanceProcessAdapt implements IAttendanceProcess {
         addStaff.put("auth", 0);
         data.add(addStaff);
 
-        JSONObject staffFace = new JSONObject();
-        staffFace.put("id", syncGetTaskResultDto.getTaskId());
-        addStaff.put("do", "update");
-        addStaff.put("data", "headpic");
-        addStaff.put("ccid", userFaceDto.getUserId());
-        addStaff.put("headpic", userFaceDto.getFaceBase64());
-        data.add(addStaff);
+        JSONObject staffHeadPic = new JSONObject();
+        staffHeadPic.put("id", SeqUtil.getId());
+        staffHeadPic.put("do", "update");
+        staffHeadPic.put("data", "headpic");
+        staffHeadPic.put("ccid", userFaceDto.getUserId());
+        staffHeadPic.put("headpic", userFaceDto.getFaceBase64());
+        data.add(staffHeadPic);
+
+//        JSONArray face = new JSONArray();
+//        face.add(userFaceDto.getFaceBase64());
+//        face.add(userFaceDto.getFaceBase64());
+//        face.add(userFaceDto.getFaceBase64());
+//        JSONObject staffFace = new JSONObject();
+//        staffFace.put("id", syncGetTaskResultDto.getTaskId());
+//        staffFace.put("do", "update");
+//        staffFace.put("data", "face");
+//        staffFace.put("ccid", userFaceDto.getUserId());
+//        staffFace.put("face", face);
+//        data.add(staffFace);
+
     }
 
     @Override
@@ -133,13 +147,14 @@ public class QunyingAttendanceProcessAdapt implements IAttendanceProcess {
         addStaff.put("data", dataInfo);
         addStaff.put("ccid", ccidInfo);
         data.add(addStaff);
-        JSONObject staffFace = new JSONObject();
-        staffFace.put("id", syncGetTaskResultDto.getTaskId());
-        addStaff.put("do", "update");
-        addStaff.put("data", "headpic");
-        addStaff.put("ccid", userFaceDto.getUserId());
-        addStaff.put("headpic", userFaceDto.getFaceBase64());
-        data.add(addStaff);
+        JSONObject staffHeadPic = new JSONObject();
+        staffHeadPic.put("id", syncGetTaskResultDto.getTaskId());
+        staffHeadPic.put("do", "update");
+        staffHeadPic.put("data", "headpic");
+        staffHeadPic.put("ccid", userFaceDto.getUserId());
+        staffHeadPic.put("headpic", userFaceDto.getFaceBase64());
+        data.add(staffHeadPic);
+
     }
 
     @Override
