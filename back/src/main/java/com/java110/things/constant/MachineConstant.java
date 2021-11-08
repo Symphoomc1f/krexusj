@@ -57,4 +57,9 @@ public class MachineConstant {
     public static final String MACHINE_CMD_STATE_DEALED = "3000";//处理完成
 
     public static final String MACHINE_CMD_STATE_DEAL_ERROR = "4000";//处理失败
+
+    public static final String MACHINE_CMD_OBJ_TYPE_SYSTEM = "001"; //系统操控指令
+
+    public static final String MACHINE_CMD_OBJ_TYPE_FACE = "002"; //人脸处理指令
+
 }

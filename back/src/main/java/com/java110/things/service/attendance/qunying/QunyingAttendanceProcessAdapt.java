@@ -2,7 +2,9 @@ package com.java110.things.service.attendance.qunying;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.java110.things.constant.MachineConstant;
 import com.java110.things.constant.ResponseConstant;
+import com.java110.things.dao.IQunyingStaffServiceDao;
 import com.java110.things.entity.accessControl.SyncGetTaskResultDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.attendance.AttendanceUploadDto;
@@ -10,15 +12,19 @@ import com.java110.things.entity.attendance.ResultQunyingDto;
 import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.entity.user.StaffDto;
 import com.java110.things.factory.AuthenticationFactory;
 import com.java110.things.factory.CallAttendanceFactory;
 import com.java110.things.service.attendance.IAttendanceProcess;
 import com.java110.things.service.attendance.ICallAttendanceService;
 import com.java110.things.util.SeqUtil;
+import com.java110.things.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -32,7 +38,11 @@ import java.util.UUID;
 @Service("qunyingAttendanceProcessAdapt")
 public class QunyingAttendanceProcessAdapt implements IAttendanceProcess {
 
+
     private static Logger logger = LoggerFactory.getLogger(QunyingAttendanceProcessAdapt.class);
+
+    @Autowired
+    private IQunyingStaffServiceDao qunyingStaffServiceDao;
 
     private static final String MANUFACTURER = "QY";
 
@@ -67,6 +77,7 @@ public class QunyingAttendanceProcessAdapt implements IAttendanceProcess {
     //推送解除绑定
     private static final String UPLOAD_DATA_HEAD_UNBOUND = "unbound";
 
+
     private void refreshParamOut(JSONObject paramOut) {
         if (paramOut.isEmpty()) {
             JSONArray data = new JSONArray();
@@ -93,10 +104,48 @@ public class QunyingAttendanceProcessAdapt implements IAttendanceProcess {
     }
 
     @Override
+    public void addFace(MachineCmdDto machineCmdDto, JSONObject paramOut) {
+        refreshParamOut(paramOut);
+        JSONArray data = paramOut.getJSONArray("data");
+        StaffDto staffDto = new StaffDto();
+        staffDto.setStaffId(machineCmdDto.getObjTypeValue());
+        List<StaffDto> staffDtos = qunyingStaffServiceDao.getStaffs(staffDto);
+        if (staffDtos == null || staffDtos.size() < 1) {
+            return;
+        }
+        staffDto = staffDtos.get(0);
+        JSONArray face = new JSONArray();
+        face.add(staffDto.getFace1());
+        face.add(staffDto.getFace2());
+        face.add(staffDto.getFace3());
+        JSONObject staffFace = new JSONObject();
+        staffFace.put("id", machineCmdDto.getCmdId());
+        staffFace.put("do", "update");
+        staffFace.put("data", "face");
+        staffFace.put("ccid", staffDto.getStaffId());
+        staffFace.put("face", face);
+        data.add(staffFace);
+    }
+
+    @Override
     public void addFace(SyncGetTaskResultDto syncGetTaskResultDto, JSONObject paramOut) {
         refreshParamOut(paramOut);
         JSONArray data = paramOut.getJSONArray("data");
         UserFaceDto userFaceDto = syncGetTaskResultDto.getUserFaceDto();
+
+        //添加部门
+        JSONObject addDept = new JSONObject();
+        addDept.put("id", SeqUtil.getId());
+        addDept.put("do", "update");
+        addDept.put("data", "dept");
+        JSONArray depts = new JSONArray();
+        JSONObject dept = new JSONObject();
+        dept.put("id", userFaceDto.getDepartmentId());
+        dept.put("pid", "0");
+        dept.put("name", userFaceDto.getDepartmentName());
+        depts.add(dept);
+        addDept.put("dept", depts);
+        data.add(addDept);
         //员工信息
         JSONObject addStaff = new JSONObject();
         addStaff.put("id", SeqUtil.getId());
@@ -106,7 +155,7 @@ public class QunyingAttendanceProcessAdapt implements IAttendanceProcess {
         addStaff.put("name", userFaceDto.getName());
         addStaff.put("passwd", AuthenticationFactory.md5("123456").toLowerCase());
         addStaff.put("card", userFaceDto.getIdNumber());
-        addStaff.put("deptid", "0");
+        addStaff.put("deptid", userFaceDto.getDepartmentId());
         addStaff.put("auth", 0);
         data.add(addStaff);
 
@@ -118,17 +167,41 @@ public class QunyingAttendanceProcessAdapt implements IAttendanceProcess {
         staffHeadPic.put("headpic", userFaceDto.getFaceBase64());
         data.add(staffHeadPic);
 
-//        JSONArray face = new JSONArray();
-//        face.add(userFaceDto.getFaceBase64());
-//        face.add(userFaceDto.getFaceBase64());
-//        face.add(userFaceDto.getFaceBase64());
-//        JSONObject staffFace = new JSONObject();
-//        staffFace.put("id", syncGetTaskResultDto.getTaskId());
-//        staffFace.put("do", "update");
-//        staffFace.put("data", "face");
-//        staffFace.put("ccid", userFaceDto.getUserId());
-//        staffFace.put("face", face);
-//        data.add(staffFace);
+        StaffDto staffDto = new StaffDto();
+        staffDto.setStaffId(userFaceDto.getUserId());
+        List<StaffDto> staffDtos = qunyingStaffServiceDao.getStaffs(staffDto);
+
+        if (staffDtos == null || staffDtos.size() < 1) {
+            staffDto.setStaffId(userFaceDto.getUserId());
+            staffDto.setStaffName(userFaceDto.getName());
+            staffDto.setDepartmentId(userFaceDto.getDepartmentId());
+            staffDto.setDepartmentName(userFaceDto.getDepartmentName());
+            qunyingStaffServiceDao.saveStaff(staffDto);
+            return;
+        } else {
+            staffDto.setStaffId(userFaceDto.getUserId());
+            staffDto.setStaffName(userFaceDto.getName());
+            staffDto.setDepartmentId(userFaceDto.getDepartmentId());
+            staffDto.setDepartmentName(userFaceDto.getDepartmentName());
+            qunyingStaffServiceDao.updateStaff(staffDto);
+        }
+
+        String face1 = staffDto.getFace1();
+        if (StringUtil.isEmpty(face1)) {
+            return;
+        }
+
+        JSONArray face = new JSONArray();
+        face.add(staffDto.getFace1());
+        face.add(staffDto.getFace2());
+        face.add(staffDto.getFace3());
+        JSONObject staffFace = new JSONObject();
+        staffFace.put("id", syncGetTaskResultDto.getTaskId());
+        staffFace.put("do", "update");
+        staffFace.put("data", "face");
+        staffFace.put("ccid", userFaceDto.getUserId());
+        staffFace.put("face", face);
+        data.add(staffFace);
 
     }
 
@@ -225,10 +298,49 @@ public class QunyingAttendanceProcessAdapt implements IAttendanceProcess {
             case UPLOAD_DATA_HEAD_INFO:
                 uploadMachine(dataObj);
                 break;
+            case UPLOAD_DATA_FACE:
+                uploadFace(dataObj);
+                break;
         }
 
         return dataObj.getString("id");
 
+    }
+
+    private void uploadFace(JSONObject dataObj) {
+
+        String staffId = dataObj.getString("ccid");
+        JSONArray faces = dataObj.getJSONArray("face");
+
+        StaffDto staffDto = new StaffDto();
+        staffDto.setStaffId(staffId);
+        List<StaffDto> staffDtos = qunyingStaffServiceDao.getStaffs(staffDto);
+
+        if (staffDtos == null || staffDtos.size() < 1) {
+            staffDto.setStaffId(staffId);
+            staffDto.setStaffName("群英");
+            staffDto.setDepartmentId("0");
+            staffDto.setDepartmentName("群英部门");
+            qunyingStaffServiceDao.saveStaff(staffDto);
+        }
+
+        staffDto.setFace1(faces.getString(0));
+        staffDto.setFace2(faces.getString(1));
+        staffDto.setFace3(faces.getString(2));
+        qunyingStaffServiceDao.updateStaff(staffDto);
+
+        try {
+            //向指令表中写指令
+            ICallAttendanceService callAttendanceService = CallAttendanceFactory.getCallAttendanceService();
+            MachineCmdDto machineCmdDto = new MachineCmdDto();
+            machineCmdDto.setCmdCode(MachineConstant.CMD_CREATE_FACE);
+            machineCmdDto.setCmdName("下发人脸");
+            machineCmdDto.setObjType(MachineConstant.MACHINE_CMD_OBJ_TYPE_FACE);
+            machineCmdDto.setObjTypeValue(staffId);
+            callAttendanceService.insertMachineCmd(machineCmdDto);
+        } catch (Exception e) {
+            logger.error("写入指令失败", e);
+        }
     }
 
     /**

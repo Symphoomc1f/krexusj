@@ -35,4 +35,11 @@ public interface ICallAttendanceService {
      * @return 返回设备指令
      */
     List<MachineCmdDto> getMachineCmds(MachineCmdDto machineCmdDto) throws Exception;
+
+    /**
+     * 插入设备指令
+     * @param machineCmdDto
+     * @throws Exception
+     */
+    void insertMachineCmd(MachineCmdDto machineCmdDto) throws Exception;
 }

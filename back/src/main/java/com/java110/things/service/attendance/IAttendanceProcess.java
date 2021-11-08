@@ -40,6 +40,14 @@ public interface IAttendanceProcess {
     /**
      * 添加人脸
      *
+     * @param machineCmdDto 云端获取任务结果
+     * @param paramOut      返回结果
+     */
+    void addFace(MachineCmdDto machineCmdDto, JSONObject paramOut);
+
+    /**
+     * 添加人脸
+     *
      * @param syncGetTaskResultDto 云端获取任务结果
      * @param paramOut             返回结果
      */

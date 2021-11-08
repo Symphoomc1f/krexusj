@@ -195,6 +195,9 @@ public class AttendanceServiceImpl implements IAttendanceService {
                         .CMD_RESTART:
                     getAttendanceProcess().restartAttendanceMachine(machineCmdDto, paramOut);
                     break;
+                case MachineConstant.CMD_CREATE_FACE:
+                    getAttendanceProcess().addFace(machineCmdDto, paramOut);
+                    break;
             }
 
             //修改指令状态
@@ -214,7 +217,7 @@ public class AttendanceServiceImpl implements IAttendanceService {
         try {
             return getAttendanceProcess().attendanceUploadData(attendanceUploadDto);
         } catch (Exception e) {
-            logger.error("获取设备洗衣");
+            logger.error("获取设备失败", e);
         }
         return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, "读取默认协议失败");
 

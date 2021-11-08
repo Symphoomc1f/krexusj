@@ -319,8 +319,11 @@ public class MachineController extends BaseController {
 
         paramObj.put("cmdId", UUID.randomUUID().toString());
         paramObj.put("communityId", "99999");
+        MachineCmdDto machineCmdDto = BeanConvertUtil.covertBean(paramObj, MachineCmdDto.class);
+        machineCmdDto.setObjType(MachineConstant.MACHINE_CMD_OBJ_TYPE_SYSTEM);
+        machineCmdDto.setObjTypeValue("-1");
 
-        ResultDto resultDto = machineCmdService.saveMachineCmd(BeanConvertUtil.covertBean(paramObj, MachineCmdDto.class));
+        ResultDto resultDto = machineCmdService.saveMachineCmd(machineCmdDto);
         return super.createResponseEntity(resultDto);
     }
 

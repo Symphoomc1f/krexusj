@@ -130,6 +130,8 @@ public class MachineServiceImpl implements IMachineService {
             machineCmdDto.setCommunityId(communityDtos.get(0).getCommunityId());
             machineCmdDto.setCmdCode(MachineConstant.CMD_RESTART);
             machineCmdDto.setCmdName("重启设备");
+            machineCmdDto.setObjType(MachineConstant.MACHINE_CMD_OBJ_TYPE_SYSTEM);
+            machineCmdDto.setObjTypeValue("-1");
             machineCmdServiceImpl.saveMachineCmd(machineCmdDto);
         }
         return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);

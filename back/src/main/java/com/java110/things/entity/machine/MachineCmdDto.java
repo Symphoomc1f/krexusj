@@ -25,6 +25,10 @@ public class MachineCmdDto extends PageDto implements Serializable {
     private String readTime;
     private String finishTime;
 
+    private String objType;
+
+    private String objTypeValue;
+
     public String getCmdId() {
         return cmdId;
     }
@@ -111,5 +115,21 @@ public class MachineCmdDto extends PageDto implements Serializable {
 
     public void setFinishTime(String finishTime) {
         this.finishTime = finishTime;
+    }
+
+    public String getObjType() {
+        return objType;
+    }
+
+    public void setObjType(String objType) {
+        this.objType = objType;
+    }
+
+    public String getObjTypeValue() {
+        return objTypeValue;
+    }
+
+    public void setObjTypeValue(String objTypeValue) {
+        this.objTypeValue = objTypeValue;
     }
 }

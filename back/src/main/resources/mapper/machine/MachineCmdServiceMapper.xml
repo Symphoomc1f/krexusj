@@ -4,9 +4,9 @@
 
     <insert id="saveMachineCmd" parameterType="com.java110.things.entity.machine.MachineCmdDto">
         INSERT INTO machine_cmd (`cmd_id`, `machine_id`, `machine_code`, `machine_type_cd`, `community_id`, `cmd_code`,
-        `cmd_name`, `state`)
+        `cmd_name`, `state`,obj_type,obj_type_value)
         VALUES (#{cmdId}, #{machineId}, #{machineCode}, #{machineTypeCd}, #{communityId}, #{cmdCode}, #{cmdName},
-        #{state})
+        #{state},#{objType},#{objTypeValue})
     </insert>
     <!--
         查询设备信息
@@ -24,7 +24,9 @@
             t.state,
             t.create_time createTime,
             t.read_time readTime,
-            t.finish_time finishTime
+            t.finish_time finishTime,
+            t.obj_type objType,
+            t.obj_type_value objTypeValue
         from machine_cmd t
         where 1=1
         <if test="cmdId != null and cmdId != ''">
@@ -50,6 +52,12 @@
         </if>
         <if test="state != null and state != ''">
             and t.state = #{state}
+        </if>
+        <if test="objType != null and objType != ''">
+            and t.obj_type = #{objType}
+        </if>
+        <if test="objTypeValue != null and objTypeValue != ''">
+            and t.obj_type_value = #{objTypeValue}
         </if>
         order by t.create_time desc
         <if test="page != -1 and page != null ">
@@ -86,6 +94,12 @@
         </if>
         <if test="state != null and state != ''">
             and t.state = #{state}
+        </if>
+        <if test="objType != null and objType != ''">
+            and t.obj_type = #{objType}
+        </if>
+        <if test="objTypeValue != null and objTypeValue != ''">
+            and t.obj_type_value = #{objTypeValue}
         </if>
         order by t.create_time desc
 

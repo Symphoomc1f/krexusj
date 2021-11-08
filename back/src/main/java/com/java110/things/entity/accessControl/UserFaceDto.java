@@ -32,6 +32,9 @@ public class UserFaceDto extends PageDto implements Serializable {
 
     private String machineIp;
 
+    private String departmentId;
+    private String departmentName;
+
     public String getUserId() {
         return userId;
     }
@@ -134,5 +137,21 @@ public class UserFaceDto extends PageDto implements Serializable {
 
     public void setTaskId(String taskId) {
         this.taskId = taskId;
+    }
+
+    public String getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(String departmentId) {
+        this.departmentId = departmentId;
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
     }
 }

@@ -16,6 +16,7 @@ import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.machine.IMachineCmdService;
 import com.java110.things.util.Assert;
+import com.java110.things.util.SeqUtil;
 import com.java110.things.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -146,6 +148,54 @@ public class CallAttendanceServiceImpl implements ICallAttendanceService {
         List<MachineCmdDto> machineCmdDtos = (List<MachineCmdDto>) resultDto.getData();
 
         return machineCmdDtos;
+    }
+
+    /**
+     * 插入指令 给设备
+     *
+     * @param machineCmdDto
+     * @throws Exception
+     */
+    @Override
+    public void insertMachineCmd(MachineCmdDto machineCmdDto) throws Exception {
+        List<MachineDto> machineDtos = null;
+        if (StringUtil.isEmpty(machineCmdDto.getMachineCode())) {
+            //查询所有 考勤设备
+            MachineDto machineDto = new MachineDto();
+            machineDto.setMachineTypeCd(MachineConstant.MACHINE_TYPE_ATTENDANCE);
+            machineDtos = machineServiceDao.getMachines(machineDto);
+        }
+        if (machineDtos == null || machineDtos.size() < 1) {
+            machineDtos = new ArrayList<>();
+            MachineDto machineDto = new MachineDto();
+            machineDto.setMachineTypeCd(MachineConstant.MACHINE_TYPE_ATTENDANCE);
+            machineDto.setMachineCode(machineCmdDto.getMachineCode());
+            machineDto.setMachineId(machineCmdDto.getMachineId());
+            machineDtos.add(machineDto);
+        }
+
+        CommunityDto communityDto = new CommunityDto();
+        ResultDto resultDto = communityServiceImpl.getCommunity(communityDto);
+
+        if (resultDto.getCode() != ResponseConstant.SUCCESS) {
+            throw new ThreadException(Result.SYS_ERROR, "查询小区信息失败");
+        }
+
+        List<CommunityDto> communityDtos = (List<CommunityDto>) resultDto.getData();
+
+        if (communityDtos == null || communityDtos.size() < 1) {
+            throw new ThreadException(Result.SYS_ERROR, "当前还没有设置小区，请先设置小区");
+        }
+
+        for (MachineDto machineDto : machineDtos) {
+            machineCmdDto.setMachineCode(machineDto.getMachineCode());
+            machineCmdDto.setMachineId(machineDto.getMachineId());
+            machineCmdDto.setState(MachineConstant.MACHINE_CMD_STATE_NO_DEAL);
+            machineCmdDto.setMachineTypeCd(MachineConstant.MACHINE_TYPE_ATTENDANCE);
+            machineCmdDto.setCmdId(SeqUtil.getId());
+            machineCmdDto.setCommunityId(communityDtos.get(0).getCommunityId());
+            machineCmdServiceImpl.saveMachineCmd(machineCmdDto);
+        }
     }
 
     /**
