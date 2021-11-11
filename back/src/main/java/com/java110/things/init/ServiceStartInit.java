@@ -23,10 +23,10 @@ public class ServiceStartInit {
         try {
             ApplicationContextFactory.setApplicationContext(context);
             //启动心跳
-            startHeartbeatCloudApiThread();
+            //startHeartbeatCloudApiThread();
 
             //扫描门禁
-            startScanAccessCrontrolMachine();
+            //startScanAccessCrontrolMachine();
 
             //清理会话
             startClearJwtThread();

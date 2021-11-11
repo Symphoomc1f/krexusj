@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java110.things.dao.ITaskServiceDao">
+
+
+    <insert id="saveTask" parameterType="com.java110.things.entity.task.TaskDto">
+        insert into task(
+        task_cron,task_name,state,template_id,task_id
+        ) values (
+        #{taskCron},#{taskName},#{state},#{templateId},#{taskId}
+        )
+    </insert>
+
+
+    <!-- 修改定时任务信息 add by wuxw 2018-07-03 -->
+    <update id="updateTask" parameterType="com.java110.things.entity.task.TaskDto">
+        update task t set t.status_cd = #{statusCd}
+        <if test="taskCron !=null and taskCron != ''">
+            , t.task_cron= #{taskCron}
+        </if>
+        <if test="taskName !=null and taskName != ''">
+            , t.task_name= #{taskName}
+        </if>
+        <if test="state !=null and state != ''">
+            , t.state= #{state}
+        </if>
+        <if test="templateId !=null and templateId != ''">
+            , t.template_id= #{templateId}
+        </if>
+        where 1=1
+        <if test="taskId !=null and taskId != ''">
+            and t.task_id= #{taskId}
+        </if>
+
+    </update>
+
+
+    <!-- 查询定时任务数量 add by wuxw 2018-07-03 -->
+    <select id="queryTasksCount" parameterType="com.java110.things.entity.task.TaskDto" resultType="long">
+        select count(1) count
+        from task t,task_template tt
+        where 1 =1
+        and t.template_id = tt.template_Id
+        and t.status_cd= '0'
+        <if test="taskCron !=null and taskCron != ''">
+            and t.task_cron= #{taskCron}
+        </if>
+        <if test="createTime !=null and createTime != ''">
+            and t.create_time= #{createTime}
+        </if>
+        <if test="taskName !=null and taskName != ''">
+            and t.task_name= #{taskName}
+        </if>
+
+
+        <if test="state !=null and state != ''">
+            and t.state= #{state}
+        </if>
+        <if test="bId !=null and bId != ''">
+            and t.b_id= #{bId}
+        </if>
+        <if test="templateId !=null and templateId != ''">
+            and t.template_id= #{templateId}
+        </if>
+        <if test="taskId !=null and taskId != ''">
+            and t.task_id= #{taskId}
+        </if>
+    </select>
+
+
+    <!-- 查询定时任务信息 add by wuxw 2018-07-03 -->
+    <select id="getTaskInfo" parameterType="com.java110.things.entity.task.TaskDto"
+            resultType="com.java110.things.entity.task.TaskDto">
+        select t.task_cron taskCron,t.create_time createTime,t.task_name
+        taskName,t.status_cd statusCd,t.state,t.template_id
+        templateId,t.task_id taskId,tt.template_name templateName
+        from task t,task_template tt
+        where 1 =1
+        and t.template_id = tt.template_Id
+        and t.status_cd= '0'
+        <if test="taskCron !=null and taskCron != ''">
+            and t.task_cron= #{taskCron}
+        </if>
+        <if test="createTime !=null and createTime != ''">
+            and t.create_time= #{createTime}
+        </if>
+        <if test="taskName !=null and taskName != ''">
+            and t.task_name= #{taskName}
+        </if>
+
+        <if test="state !=null and state != ''">
+            and t.state= #{state}
+        </if>
+        <if test="templateId !=null and templateId != ''">
+            and t.template_id= #{templateId}
+        </if>
+        <if test="taskId !=null and taskId != ''">
+            and t.task_id= #{taskId}
+        </if>
+        order by t.create_time desc
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+
+    </select>
+
+    <insert id="saveTaskAttr" parameterType="com.java110.things.entity.task.TaskAttrDto">
+        insert into task_attr(
+        attr_id,spec_cd,value,task_id
+        ) values (
+        #{attrId},#{specCd},#{value},#{taskId}
+        )
+    </insert>
+
+
+    <!-- 修改定时任务属性信息 add by wuxw 2018-07-03 -->
+    <update id="updateTaskAttr" parameterType="com.java110.things.entity.task.TaskAttrDto">
+        update task_attr t set t.status_cd = #{statusCd}
+
+        <if test="specCd !=null and specCd != ''">
+            , t.spec_cd= #{specCd}
+        </if>
+        <if test="value !=null and value != ''">
+            , t.value= #{value}
+        </if>
+        <if test="taskId !=null and taskId != ''">
+            , t.task_id= #{taskId}
+        </if>
+        where 1=1
+        <if test="attrId !=null and attrId != ''">
+            and t.attr_id= #{attrId}
+        </if>
+        <if test="taskId !=null and taskId != ''">
+            and t.task_id= #{taskId}
+        </if>
+
+    </update>
+
+
+    <!-- 查询定时任务属性信息 add by wuxw 2018-07-03 -->
+    <select id="getTaskAttr" parameterType="com.java110.things.entity.task.TaskAttrDto"
+            resultType="com.java110.things.entity.task.TaskAttrDto">
+        select t.attr_id attrId,t.create_time createTime,t.spec_cd
+        specCd,t.status_cd statusCd,t.value,t.task_id taskId
+        from task_attr t
+        where 1 =1
+        and t.status_cd= '0'
+        <if test="attrId !=null and attrId != ''">
+            and t.attr_id= #{attrId}
+        </if>
+        <if test="createTime !=null">
+            and t.create_time= #{createTime}
+        </if>
+        <if test="specCd !=null and specCd != ''">
+            and t.spec_cd= #{specCd}
+        </if>
+
+
+        <if test="value !=null and value != ''">
+            and t.value= #{value}
+        </if>
+        <if test="taskId !=null and taskId != ''">
+            and t.task_id= #{taskId}
+        </if>
+        order by t.create_time desc
+
+    </select>
+
+
+
+    <!-- 查询定时任务信息 add by wuxw 2018-07-03 -->
+    <select id="getTaskTemplate" parameterType="com.java110.things.entity.task.TaskTemplateDto" resultType="com.java110.things.entity.task.TaskTemplateDto">
+        select t.template_id templateId,t.template_name templateName,t.template_desc templateDesc,t.create_time createTime,t.class_bean classBean
+        from task_template t
+        where 1 =1
+        and t.status_cd= '0'
+        <if test="templateId !=null and templateId != ''">
+            and t.template_id= #{templateId}
+        </if>
+        <if test="templateName !=null and templateName != ''">
+            and t.template_name= #{templateName}
+        </if>
+        <if test="classBean !=null and classBean != ''">
+            and t.class_bean= #{classBean}
+        </if>
+
+        order by t.create_time desc
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+
+    </select>
+
+    <!-- 查询定时任务信息 add by wuxw 2018-07-03 -->
+    <select id="getTaskTemplateSpec" parameterType="com.java110.things.entity.task.TaskTemplateSpecDto" resultType="com.java110.things.entity.task.TaskTemplateSpecDto">
+        select t.template_id templateId,t.spec_id specId,t.spec_cd specCd,t.create_time createTime,t.spec_name specName,
+        t.spec_desc specDesc,t.is_show isShow
+        from task_template_spec t
+        where 1 =1
+        and t.status_cd= '0'
+        <if test="templateId !=null and templateId != ''">
+            and t.template_id= #{templateId}
+        </if>
+        <if test="specCd !=null and specCd != ''">
+            and t.spec_cd= #{specCd}
+        </if>
+        <if test="isShow !=null and isShow != ''">
+            and t.is_show= #{isShow}
+        </if>
+        <if test="specDesc !=null and specDesc != ''">
+            and t.spec_desc= #{specDesc}
+        </if>
+
+
+    </select>
+
+</mapper>

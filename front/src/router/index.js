@@ -198,6 +198,12 @@ export const constantRoutes = [
         meta: { title: '修改密码', icon: 'table' }
       },
       {
+        path: '/task',
+        name: '定时任务',
+        component: () => import('@/views/task/task'),
+        meta: { title: '定时任务', icon: 'table' }
+      },
+      {
         path: '/transactionLog',
         name: '系统交互日志',
         component: () => import('@/views/transactionLog/transactionLog'),

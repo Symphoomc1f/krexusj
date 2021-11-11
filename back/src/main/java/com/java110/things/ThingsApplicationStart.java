@@ -12,6 +12,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -28,6 +29,7 @@ import java.nio.charset.Charset;
  **/
 @MapperScan("com.java110.things.dao")
 @SpringBootApplication
+@EnableScheduling
 public class ThingsApplicationStart implements WebMvcConfigurer {
 
     private static Logger logger = LoggerFactory.getLogger(ThingsApplicationStart.class);

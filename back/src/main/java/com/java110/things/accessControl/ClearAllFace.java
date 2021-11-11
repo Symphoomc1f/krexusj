@@ -23,7 +23,7 @@ public class ClearAllFace extends BaseAccessControl {
      *
      * @param heartbeatTaskDto 心跳下发任务指令
      */
-    void clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto, CommunityDto communityDto) throws Exception {
+    public void clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto, CommunityDto communityDto) throws Exception {
 
         //清空硬件下的人脸
         ImageFactory.clearImage(machineDto.getMachineCode());
