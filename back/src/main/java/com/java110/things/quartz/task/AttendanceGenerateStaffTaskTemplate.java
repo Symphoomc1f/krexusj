@@ -22,5 +22,8 @@ public class AttendanceGenerateStaffTaskTemplate extends TaskSystemQuartz {
     @Override
     protected void process(TaskDto taskDto) throws Exception {
         logger.debug("AttendanceGenerateStaffTaskTemplate定时任务在执行" + taskDto.getTaskName());
+
+        //1.0查询班次表
+
     }
 }
