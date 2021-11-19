@@ -329,6 +329,12 @@
         <if test="state !=null and state != ''">
             and t.state= #{state}
         </if>
+        <if test="states !=null ">
+            and t.state in
+            <foreach collection="states" item="item" index="index" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
 
     </update>
 
@@ -388,6 +394,93 @@
         where 1=1
         <if test="attrId !=null and attrId != ''">
             and t.attr_id= #{attrId}
+        </if>
+        <if test="taskId !=null and taskId != ''">
+            and t.task_id= #{taskId}
+        </if>
+        <if test="specCd !=null and specCd != ''">
+            and t.spec_cd= #{specCd}
+        </if>
+
+    </update>
+
+
+    <insert id="saveAttendanceClassesTaskDetail"
+            parameterType="com.java110.things.entity.attendance.AttendanceClassesTaskDetailDto">
+        INSERT INTO attendance_classes_task_detail(`detail_id`, `task_id`, `spec_cd`, `value`, `check_time`, `state`,
+        `face_path`,`remark`)
+        VALUES
+        (#{detailId},#{taskId},#{specCd},#{value},#{checkTime},#{state},#{facePath},#{remark}
+        )
+    </insert>
+
+    <!-- 查询定时任务信息 add by wuxw 2018-07-03 -->
+    <select id="getAttendanceClassesTaskDetails"
+            parameterType="com.java110.things.entity.attendance.AttendanceClassesTaskDetailDto"
+            resultType="com.java110.things.entity.attendance.AttendanceClassesTaskDetailDto">
+        select t.detail_id detailId,t.create_time createTime,t.task_id
+        taskId,t.status_cd statusCd,t.spec_cd specCd,t.value,t.check_time checkTime,t.state,t.face_path
+        facePath,t.remark
+        from attendance_classes_task_detail t
+        where 1 =1
+        and t.status_cd= '0'
+        <if test="detailId !=null and detailId != ''">
+            and t.detail_id= #{detailId}
+        </if>
+        <if test="state !=null and state != ''">
+            and t.state= #{state}
+        </if>
+        <if test="specCd !=null and specCd != ''">
+            and t.spec_cd= #{specCd}
+        </if>
+        <if test="taskId !=null and taskId != ''">
+            and t.task_id= #{taskId}
+        </if>
+        order by t.create_time desc
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+    </select>
+
+    <!-- 查询定时任务数量 add by wuxw 2018-07-03 -->
+    <select id="getAttendanceClassesTaskDetailCount"
+            parameterType="com.java110.things.entity.attendance.AttendanceClassesTaskDetailDto" resultType="long">
+        select count(1) count
+        from attendance_classes_task_detail t
+        where 1 =1
+        and t.status_cd= '0'
+        <if test="detailId !=null and detailId != ''">
+            and t.detail_id= #{detailId}
+        </if>
+        <if test="state !=null and state != ''">
+            and t.state= #{state}
+        </if>
+        <if test="specCd !=null and specCd != ''">
+            and t.spec_cd= #{specCd}
+        </if>
+        <if test="taskId !=null and taskId != ''">
+            and t.task_id= #{taskId}
+        </if>
+    </select>
+    <!-- 修改定时任务信息 add by wuxw 2018-07-03 -->
+    <update id="updateAttendanceClassesTaskDetailDto"
+            parameterType="com.java110.things.entity.attendance.AttendanceClassesTaskDetailDto">
+        update attendance_classes_task_detail t set t.status_cd = #{statusCd}
+        <if test="checkTime !=null ">
+            , t.check_time= #{checkTime}
+        </if>
+        <if test="state !=null and state !=''">
+            , t.state= #{state}
+        </if>
+        <if test="remark !=null and remark !=''">
+            , t.remark= #{remark}
+        </if>
+        <if test="facePath !=null and facePath !=''">
+            , t.face_path= #{facePath}
+        </if>
+        where 1=1
+        <if test="detailId !=null and detailId != ''">
+            and t.detail_id= #{detailId}
         </if>
         <if test="taskId !=null and taskId != ''">
             and t.task_id= #{taskId}

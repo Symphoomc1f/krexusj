@@ -3,7 +3,10 @@ package com.java110.things.service.attendance;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.constant.MachineConstant;
 import com.java110.things.constant.ResponseConstant;
+import com.java110.things.dao.IAttendanceClassesServiceDao;
 import com.java110.things.dao.IMachineServiceDao;
+import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
+import com.java110.things.entity.attendance.ClockInDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
@@ -28,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -59,6 +63,9 @@ public class CallAttendanceServiceImpl implements ICallAttendanceService {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private IAttendanceClassesServiceDao attendanceClassesServiceDao;
 
     @Override
     public MachineDto getMachine(MachineDto machineDto) {
@@ -196,6 +203,50 @@ public class CallAttendanceServiceImpl implements ICallAttendanceService {
             machineCmdDto.setCommunityId(communityDtos.get(0).getCommunityId());
             machineCmdServiceImpl.saveMachineCmd(machineCmdDto);
         }
+    }
+
+    /**
+     * 开始考勤
+     *
+     * @param clockInDto
+     * @return
+     */
+    @Override
+    public boolean clockIn(ClockInDto clockInDto) {
+
+        Calendar calendar = Calendar.getInstance();
+
+        //根据员工查询今日未考勤任务
+        AttendanceClassesTaskDto attendanceClassesTaskDto = new AttendanceClassesTaskDto();
+        attendanceClassesTaskDto.setStaffId(clockInDto.getStaffId());
+        attendanceClassesTaskDto.setTaskYear(calendar.get(Calendar.YEAR) + "");
+        attendanceClassesTaskDto.setTaskMonth((calendar.get(Calendar.MONTH) + 1) + "");
+        attendanceClassesTaskDto.setTaskDay(calendar.get(Calendar.DATE) + "");
+        attendanceClassesTaskDto.setStates(new String[]{"10000", "20000"});
+        List<AttendanceClassesTaskDto> attendanceClassesTaskDtos = attendanceClassesServiceDao.getAttendanceClassesTasks(attendanceClassesTaskDto);
+        if (attendanceClassesTaskDtos == null || attendanceClassesTaskDtos.size() < 1) {
+            logger.debug("该员工今天没有考勤任务" + JSONObject.toJSONString(clockInDto));
+            return true;
+        }
+        //一个员工不应该有多条考勤任务 如果有多条 我们只取一条
+        AttendanceClassesTaskDto tmpAttendanceClassesTaskDto = attendanceClassesTaskDtos.get(0);
+
+
+        //1.0 判断 在哪个考勤范围内 属于正常考勤
+
+
+        //2.0 判断距离哪个考勤时间最近
+
+        //2.1 如果早于上班时间最近，不允许打卡
+
+        //2.2 如果迟于上班时间最近 ，迟到
+
+
+        //2.3 如果早于下班时间最近 早退
+
+        //2.4 如果迟于下班时间最近 正常考勤
+
+        return false;
     }
 
     /**

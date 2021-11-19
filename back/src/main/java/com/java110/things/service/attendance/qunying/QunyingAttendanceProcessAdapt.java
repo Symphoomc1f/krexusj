@@ -301,10 +301,22 @@ public class QunyingAttendanceProcessAdapt implements IAttendanceProcess {
             case UPLOAD_DATA_FACE:
                 uploadFace(dataObj);
                 break;
+            case UPLOAD_DATA_HEAD_CLOCKIN:
+                clockIn(dataObj);
+                break;
         }
 
         return dataObj.getString("id");
 
+    }
+
+    /**
+     * 打卡记录
+     * @param dataObj
+     */
+    private void clockIn(JSONObject dataObj) {
+
+        String staffId = dataObj.getString("ccid");
     }
 
     private void uploadFace(JSONObject dataObj) {

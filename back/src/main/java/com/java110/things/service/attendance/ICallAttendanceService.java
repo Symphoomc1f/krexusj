@@ -1,7 +1,10 @@
 package com.java110.things.service.attendance;
 
+import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
+import com.java110.things.entity.attendance.ClockInDto;
 import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.user.StaffDto;
 
 import java.util.List;
 
@@ -42,4 +45,11 @@ public interface ICallAttendanceService {
      * @throws Exception
      */
     void insertMachineCmd(MachineCmdDto machineCmdDto) throws Exception;
+
+    /**
+     *  考勤接口
+     * @param clockInDto
+     * @return
+     */
+    boolean clockIn(ClockInDto clockInDto);
 }

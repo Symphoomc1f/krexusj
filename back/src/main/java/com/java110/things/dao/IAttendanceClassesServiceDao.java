@@ -4,6 +4,7 @@ import com.java110.things.entity.attendance.AttendanceClassesAttrDto;
 import com.java110.things.entity.attendance.AttendanceClassesDto;
 import com.java110.things.entity.attendance.AttendanceClassesStaffDto;
 import com.java110.things.entity.attendance.AttendanceClassesTaskAttrDto;
+import com.java110.things.entity.attendance.AttendanceClassesTaskDetailDto;
 import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -187,4 +188,38 @@ public interface IAttendanceClassesServiceDao {
      * @return 返回影响记录数
      */
     int updateAttendanceClassesTaskAttrDto(AttendanceClassesTaskAttrDto attendanceClassesTaskAttrDto);
+
+
+    /**
+     * 保存设备人脸信息
+     *
+     * @param attendanceClassesTaskDetailDto 设备人脸信息
+     * @return 返回影响记录数
+     */
+    int saveAttendanceClassesTaskDetail(AttendanceClassesTaskDetailDto attendanceClassesTaskDetailDto);
+
+    /**
+     * 查询设备人脸信息
+     *
+     * @param attendanceClassesTaskDetailDto 设备人脸信息
+     * @return
+     */
+    List<AttendanceClassesTaskDetailDto> getAttendanceClassesTaskDetails(AttendanceClassesTaskDetailDto attendanceClassesTaskDetailDto);
+
+    /**
+     * 查询设备人脸总记录数
+     *
+     * @param attendanceClassesTaskDetailDto 设备人脸信息
+     * @return
+     */
+    long getAttendanceClassesTaskDetailCount(AttendanceClassesTaskDetailDto attendanceClassesTaskDetailDto);
+
+    /**
+     * 修改设备人脸信息
+     *
+     * @param attendanceClassesTaskDetailDto 设备人脸信息
+     * @return 返回影响记录数
+     */
+    int updateAttendanceClassesTaskDetailDto(AttendanceClassesTaskDetailDto attendanceClassesTaskDetailDto);
+
 }

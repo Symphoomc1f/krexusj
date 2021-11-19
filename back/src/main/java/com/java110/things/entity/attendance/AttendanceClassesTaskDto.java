@@ -21,6 +21,7 @@ public class AttendanceClassesTaskDto extends PageDto implements Serializable {
     private String taskMonth;
     private String taskDay;
     private String state;
+    private String[] states;
     private String createTime;
     private String statusCd;
 
@@ -95,5 +96,13 @@ public class AttendanceClassesTaskDto extends PageDto implements Serializable {
 
     public void setStatusCd(String statusCd) {
         this.statusCd = statusCd;
+    }
+
+    public String[] getStates() {
+        return states;
+    }
+
+    public void setStates(String[] states) {
+        this.states = states;
     }
 }

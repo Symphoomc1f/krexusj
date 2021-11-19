@@ -4,6 +4,7 @@ import com.java110.things.dao.IAttendanceClassesServiceDao;
 import com.java110.things.entity.attendance.AttendanceClassesAttrDto;
 import com.java110.things.entity.attendance.AttendanceClassesDto;
 import com.java110.things.entity.attendance.AttendanceClassesStaffDto;
+import com.java110.things.entity.attendance.AttendanceClassesTaskDetailDto;
 import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
 import com.java110.things.entity.task.TaskDto;
 import com.java110.things.quartz.TaskSystemQuartz;
@@ -42,6 +43,10 @@ public class AttendanceGenerateStaffTaskTemplate extends TaskSystemQuartz {
     private static final String CLOCK_TIME_NIGHT_WORK = "12000";//晚上上班打卡
     private static final String CLOCK_TIME_NIGHT_OFF_DUTY = "22000";//晚上下班打卡
 
+    private static final String CLOCK_TYPE_EVERY_DAY = "1001";//每天打卡
+    private static final String CLOCK_TYPE_NEXT_DAY = "1002";//隔天打卡
+    private static final String CLOCK_TYPE_CUSTOM_DAY = "1003";//自定义
+
 
     @Autowired
     private IAttendanceClassesServiceDao attendanceClassesServiceDao;
@@ -65,22 +70,47 @@ public class AttendanceGenerateStaffTaskTemplate extends TaskSystemQuartz {
 
     }
 
+
     /**
      * 根据班次 生成班次考勤任务
      *
      * @param tmpAttendanceClassesDto
      */
     private void doDealClasses(AttendanceClassesDto tmpAttendanceClassesDto) {
-        String clockCount = tmpAttendanceClassesDto.getClockCount();
+
+        String clockType = tmpAttendanceClassesDto.getClockType();
+        if (CLOCK_TYPE_EVERY_DAY.equals(clockType)) {
+            //每天 不处理
+        } else if (CLOCK_TYPE_NEXT_DAY.equals(clockType)) { //隔天
+            AttendanceClassesTaskDto attendanceClassesTaskDto = new AttendanceClassesTaskDto();
+            attendanceClassesTaskDto.setClassId(tmpAttendanceClassesDto.getClassesId());
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DATE, -1);
+            attendanceClassesTaskDto.setTaskYear(calendar.get(Calendar.YEAR) + "");
+            attendanceClassesTaskDto.setTaskMonth((calendar.get(Calendar.MONTH) + 1) + "");
+            attendanceClassesTaskDto.setTaskDay(calendar.get(Calendar.DATE) + "");
+            long count = attendanceClassesServiceDao.getAttendanceClassesTaskCount(attendanceClassesTaskDto);
+
+            if (count > 0) { //昨天已经生成今天无需生成考勤记录
+                return;
+            }
+        } else if (CLOCK_TYPE_CUSTOM_DAY.equals(clockType)) { //星期自定义
+            String clockTypeValue = tmpAttendanceClassesDto.getClockTypeValue();
+            Calendar calendar = Calendar.getInstance();
+            int weekDay = calendar.get(Calendar.DAY_OF_WEEK);
+            weekDay = weekDay - 1;
+            if (weekDay == 0) {
+                weekDay = 7;
+            }
+            if (!clockTypeValue.contains(weekDay + "")) {
+                return;
+            }
+        }
         AttendanceClassesAttrDto attendanceClassesAttrDto = new AttendanceClassesAttrDto();
         attendanceClassesAttrDto.setClassesId(tmpAttendanceClassesDto.getClassesId());
         List<AttendanceClassesAttrDto> attendanceClassesAttrDtos = attendanceClassesServiceDao.getAttendanceClassesAttrs(attendanceClassesAttrDto);
 
-        switch (clockCount) {
-            case CLOCK_COUNT_TWO: //打卡两次
-                generateTwoClockTask(tmpAttendanceClassesDto, attendanceClassesAttrDtos);
-                break;
-        }
+        generateTwoClockTask(tmpAttendanceClassesDto, attendanceClassesAttrDtos);
 
 
     }
@@ -92,7 +122,7 @@ public class AttendanceGenerateStaffTaskTemplate extends TaskSystemQuartz {
      * @param attendanceClassesAttrDtos
      */
     private void generateTwoClockTask(AttendanceClassesDto tmpAttendanceClassesDto, List<AttendanceClassesAttrDto> attendanceClassesAttrDtos) {
-
+        String clockCount = tmpAttendanceClassesDto.getClockCount();
         AttendanceClassesStaffDto attendanceClassesStaffDto = new AttendanceClassesStaffDto();
         attendanceClassesStaffDto.setClassesId(tmpAttendanceClassesDto.getClassesId());
         attendanceClassesStaffDto.setStatusCd("0");
@@ -111,20 +141,58 @@ public class AttendanceGenerateStaffTaskTemplate extends TaskSystemQuartz {
             attendanceClassesTaskDto.setStaffId(tmpAttendanceClassesStaffDto.getStaffId());
             attendanceClassesTaskDto.setClassId(tmpAttendanceClassesStaffDto.getClassesId());
             long count = attendanceClassesServiceDao.getAttendanceClassesTaskCount(attendanceClassesTaskDto);
-            if(count > 0){
+            if (count > 0) {
                 continue;//已经生成过任务 不能再生成任务
             }
-            generateStaffClockTask(tmpAttendanceClassesStaffDto, startTime, endTime);
+            String taskId = generateStaffClockTask(tmpAttendanceClassesStaffDto);
+            switch (clockCount) {
+                case CLOCK_COUNT_TWO: //打卡两次
+                    insertStaffTaskDetail(startTime, endTime, taskId);
+                    break;
+                case CLOCK_COUNT_FOUR: //打卡四次
+                    insertStaffTaskDetail(startTime, endTime, taskId);
+                    startTime = getClassessAttrValue(attendanceClassesAttrDtos, CLOCK_TIME_NOON_OFF_DUTY);
+                    endTime = getClassessAttrValue(attendanceClassesAttrDtos, CLOCK_TIME_NOON_WORK);
+                    insertStaffTaskDetail(startTime, endTime, taskId);
+                    break;
+                case CLOCK_COUNT_SIX: //打卡六次
+                    insertStaffTaskDetail(startTime, endTime, taskId);
+                    startTime = getClassessAttrValue(attendanceClassesAttrDtos, CLOCK_TIME_NOON_OFF_DUTY);
+                    endTime = getClassessAttrValue(attendanceClassesAttrDtos, CLOCK_TIME_NOON_WORK);
+                    insertStaffTaskDetail(startTime, endTime, taskId);
+                    startTime = getClassessAttrValue(attendanceClassesAttrDtos, CLOCK_TIME_NIGHT_WORK);
+                    endTime = getClassessAttrValue(attendanceClassesAttrDtos, CLOCK_TIME_NIGHT_OFF_DUTY);
+                    insertStaffTaskDetail(startTime, endTime, taskId);
+                    break;
+            }
         }
     }
 
     /**
-     * 生成 考勤任务
-     * @param tmpAttendanceClassesStaffDto
+     * 插入考勤明细
+     *
      * @param startTime
      * @param endTime
      */
-    private void generateStaffClockTask(AttendanceClassesStaffDto tmpAttendanceClassesStaffDto, String startTime, String endTime) {
+    private void insertStaffTaskDetail(String startTime, String endTime, String taskId) {
+        AttendanceClassesTaskDetailDto attendanceClassesTaskDetailDto = new AttendanceClassesTaskDetailDto();
+        attendanceClassesTaskDetailDto.setTaskId(taskId);
+        attendanceClassesTaskDetailDto.setDetailId(SeqUtil.getId());
+        attendanceClassesTaskDetailDto.setSpecCd(CLOCK_TIME_MORNING_WORK);
+        attendanceClassesTaskDetailDto.setValue(startTime);
+        attendanceClassesTaskDetailDto.setState("10000");
+        attendanceClassesServiceDao.saveAttendanceClassesTaskDetail(attendanceClassesTaskDetailDto);
+        attendanceClassesTaskDetailDto.setSpecCd(CLOCK_TIME_AFTERNOON_OFF_DUTY);
+        attendanceClassesTaskDetailDto.setValue(endTime);
+        attendanceClassesServiceDao.saveAttendanceClassesTaskDetail(attendanceClassesTaskDetailDto);
+    }
+
+    /**
+     * 生成 考勤任务
+     *
+     * @param tmpAttendanceClassesStaffDto
+     */
+    private String generateStaffClockTask(AttendanceClassesStaffDto tmpAttendanceClassesStaffDto) {
         AttendanceClassesTaskDto attendanceClassesTaskDto = new AttendanceClassesTaskDto();
         attendanceClassesTaskDto.setClassId(tmpAttendanceClassesStaffDto.getClassesId());
         attendanceClassesTaskDto.setStaffId(tmpAttendanceClassesStaffDto.getStaffId());
@@ -135,6 +203,7 @@ public class AttendanceGenerateStaffTaskTemplate extends TaskSystemQuartz {
         attendanceClassesTaskDto.setTaskDay(calendar.get(Calendar.DATE) + "");
         attendanceClassesTaskDto.setTaskId(SeqUtil.getId());
         attendanceClassesServiceDao.saveAttendanceClassesTask(attendanceClassesTaskDto);
+        return attendanceClassesTaskDto.getTaskId();
     }
 
     private String getClassessAttrValue(List<AttendanceClassesAttrDto> attendanceClassesAttrDtos, String specCd) {
