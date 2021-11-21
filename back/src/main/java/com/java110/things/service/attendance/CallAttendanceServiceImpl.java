@@ -5,8 +5,12 @@ import com.java110.things.constant.MachineConstant;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.dao.IAttendanceClassesServiceDao;
 import com.java110.things.dao.IMachineServiceDao;
+import com.java110.things.entity.attendance.AttendanceClassesDto;
+import com.java110.things.entity.attendance.AttendanceClassesTaskDetailDto;
 import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
 import com.java110.things.entity.attendance.ClockInDto;
+import com.java110.things.entity.attendance.ClockInResultDto;
+import com.java110.things.entity.attendance.StaffAttendanceLogDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
@@ -15,10 +19,12 @@ import com.java110.things.exception.Result;
 import com.java110.things.exception.ServiceException;
 import com.java110.things.exception.ThreadException;
 import com.java110.things.factory.HttpFactory;
+import com.java110.things.factory.ImageFactory;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.machine.IMachineCmdService;
 import com.java110.things.util.Assert;
+import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
 import com.java110.things.util.StringUtil;
 import org.slf4j.Logger;
@@ -32,7 +38,10 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -51,6 +60,19 @@ public class CallAttendanceServiceImpl implements ICallAttendanceService {
     private static final int DEFAULT_PAGE = 1; // 默认获取指令 页
     private static final int DEFAULT_ROW = 5; //默认指令获取最大数
 
+    private static final String CLOCK_COUNT_TWO = "2"; //打卡两次 早晚
+
+    private static final String CLOCK_COUNT_FOUR = "4"; //打卡四次
+
+    private static final String CLOCK_COUNT_SIX = "6"; //打卡四次
+
+    private static final String CLOCK_TIME_MORNING_WORK = "10000";//上午上班打卡
+    private static final String CLOCK_TIME_AFTERNOON_OFF_DUTY = "20000";//下午下班打卡
+    private static final String CLOCK_TIME_NOON_OFF_DUTY = "11000";//中午下班打卡
+    private static final String CLOCK_TIME_NOON_WORK = "21000";//中午上班打卡
+    private static final String CLOCK_TIME_NIGHT_WORK = "12000";//晚上上班打卡
+    private static final String CLOCK_TIME_NIGHT_OFF_DUTY = "22000";//晚上下班打卡
+    public static final String FACE_RESULT = "-result";
     @Autowired
     private ICommunityService communityServiceImpl;
 
@@ -212,8 +234,17 @@ public class CallAttendanceServiceImpl implements ICallAttendanceService {
      * @return
      */
     @Override
-    public boolean clockIn(ClockInDto clockInDto) {
+    public ClockInResultDto clockIn(ClockInDto clockInDto) throws Exception {
 
+        //先写考勤日志
+        StaffAttendanceLogDto staffAttendanceLogDto = new StaffAttendanceLogDto();
+        staffAttendanceLogDto.setClockTime(clockInDto.getClockInTime());
+        staffAttendanceLogDto.setLogId(SeqUtil.getId());
+        staffAttendanceLogDto.setStaffId(clockInDto.getStaffId());
+        staffAttendanceLogDto.setReqParam(clockInDto.getPic());
+        attendanceClassesServiceDao.saveStaffAttendanceLog(staffAttendanceLogDto);
+
+        ClockInResultDto clockInResultDto = null;
         Calendar calendar = Calendar.getInstance();
 
         //根据员工查询今日未考勤任务
@@ -226,27 +257,194 @@ public class CallAttendanceServiceImpl implements ICallAttendanceService {
         List<AttendanceClassesTaskDto> attendanceClassesTaskDtos = attendanceClassesServiceDao.getAttendanceClassesTasks(attendanceClassesTaskDto);
         if (attendanceClassesTaskDtos == null || attendanceClassesTaskDtos.size() < 1) {
             logger.debug("该员工今天没有考勤任务" + JSONObject.toJSONString(clockInDto));
-            return true;
+            return new ClockInResultDto(ClockInResultDto.CODE_ERROR, "该员工今天没有考勤任务");
         }
+
         //一个员工不应该有多条考勤任务 如果有多条 我们只取一条
         AttendanceClassesTaskDto tmpAttendanceClassesTaskDto = attendanceClassesTaskDtos.get(0);
+        AttendanceClassesDto attendanceClassesDto = new AttendanceClassesDto();
+        attendanceClassesDto.setClassesId(tmpAttendanceClassesTaskDto.getClassId());
+        List<AttendanceClassesDto> attendanceClassesDtos = attendanceClassesServiceDao.getAttendanceClassess(attendanceClassesDto);
 
+        if (attendanceClassesDtos == null || attendanceClassesDtos.size() < 1) {
+            return new ClockInResultDto(ClockInResultDto.CODE_ERROR, "班次异常，未找到班次数据");
+        }
 
+        attendanceClassesDto = attendanceClassesDtos.get(0);
+        Assert.isInteger(attendanceClassesDto.getTimeOffset(), "不是有效的整数");
+        int timeOffset = Integer.parseInt(attendanceClassesDto.getTimeOffset());
+        AttendanceClassesTaskDetailDto attendanceClassesTaskDetailDto = new AttendanceClassesTaskDetailDto();
+        attendanceClassesTaskDetailDto.setTaskId(tmpAttendanceClassesTaskDto.getTaskId());
+        attendanceClassesTaskDetailDto.setState("10000");
+        List<AttendanceClassesTaskDetailDto> attendanceClassesTaskDetailDtos =
+                attendanceClassesServiceDao.getAttendanceClassesTaskDetails(attendanceClassesTaskDetailDto);
+
+        Date clockInTime = DateUtil.getDateFromString(clockInDto.getClockInTime(), DateUtil.DATE_FORMATE_STRING_A);
+
+        Map<String, AttendanceClassesTaskDetailDto> mulTimeMap = new HashMap<>();
         //1.0 判断 在哪个考勤范围内 属于正常考勤
+        for (AttendanceClassesTaskDetailDto tmpAttendanceClassesTaskDetailDto : attendanceClassesTaskDetailDtos) {
+            if (!CLOCK_TIME_MORNING_WORK.equals(tmpAttendanceClassesTaskDetailDto.getSpecCd())
+                    && !CLOCK_TIME_AFTERNOON_OFF_DUTY.equals(tmpAttendanceClassesTaskDetailDto.getSpecCd())
+                    && !CLOCK_TIME_NOON_OFF_DUTY.equals(tmpAttendanceClassesTaskDetailDto.getSpecCd())
+                    && !CLOCK_TIME_NOON_WORK.equals(tmpAttendanceClassesTaskDetailDto.getSpecCd())
+                    && !CLOCK_TIME_NIGHT_WORK.equals(tmpAttendanceClassesTaskDetailDto.getSpecCd())
+                    && !CLOCK_TIME_NIGHT_OFF_DUTY.equals(tmpAttendanceClassesTaskDetailDto.getSpecCd())) {
+                continue;
+            }
+
+            try {
+                String timeStr = tmpAttendanceClassesTaskDetailDto.getValue();
+                String dateStr = DateUtil.getFormatTimeString(new Date(), DateUtil.DATE_FORMATE_STRING_B);
+
+                Date hopeTime = DateUtil.getDateFromString(dateStr + " " + timeStr, DateUtil.DATE_FORMATE_STRING_A);
+                Calendar startCal = Calendar.getInstance();
+                startCal.setTime(hopeTime);
+                startCal.add(Calendar.MINUTE, (timeOffset * -1));
+
+                Calendar endCal = Calendar.getInstance();
+                endCal.setTime(hopeTime);
+                endCal.add(Calendar.MINUTE, timeOffset);
+
+                boolean timeIn = belongCalendar(clockInTime, startCal.getTime(), endCal.getTime());
+                //如果在时间段内
+                if (timeIn) { //正常考勤范围内
+                    doClockIn(tmpAttendanceClassesTaskDetailDto, clockInDto);
+                    return new ClockInResultDto(ClockInResultDto.CODE_SUCCESS, "正常考勤");
+                }
+
+                //计算时间差
+                long mulTime = clockInTime.getTime() - hopeTime.getTime();
+                mulTimeMap.put(mulTime + "", tmpAttendanceClassesTaskDetailDto);
+            } catch (Exception e) {
+                logger.error("班次时间设置有误", e);
+                return new ClockInResultDto(ClockInResultDto.CODE_ERROR, "班次时间设置有误");
+            }
+        }
 
 
         //2.0 判断距离哪个考勤时间最近
+        Map returnMap = getMinMulTime(mulTimeMap);
+        AttendanceClassesTaskDetailDto tmpAttendanceClassesTaskDetailDto =
+                (AttendanceClassesTaskDetailDto) returnMap.get("curAttendanceClassesTaskDetailDto");
+        String mulTime = returnMap.get("curTime").toString();
 
-        //2.1 如果早于上班时间最近，不允许打卡
 
-        //2.2 如果迟于上班时间最近 ，迟到
+        if (CLOCK_TIME_MORNING_WORK.equals(tmpAttendanceClassesTaskDetailDto.getSpecCd())
+                || CLOCK_TIME_NOON_WORK.equals(tmpAttendanceClassesTaskDetailDto.getSpecCd())
+                || CLOCK_TIME_NIGHT_WORK.equals(tmpAttendanceClassesTaskDetailDto.getSpecCd())) { //距离上班时间最近
+
+            if (mulTime.startsWith("-")) { //还没有到打卡时间，不能打卡 //2.1 如果早于上班时间最近，不允许打卡
+                return new ClockInResultDto(ClockInResultDto.CODE_ERROR, "还没有到考勤时间，请勿考勤");
+            } else { //迟到  //2.2 如果迟于上班时间最近 ，迟到
+                doClockIn(tmpAttendanceClassesTaskDetailDto, clockInDto, "40000");
+                clockInResultDto = new ClockInResultDto(ClockInResultDto.CODE_SUCCESS, "考勤成功，考勤状态为迟到");
+            }
+        } else { //2.3 如果早于下班时间最近 早退
+            if (mulTime.startsWith("-")) { //2.3 如果早于下班时间最近 早退
+                doClockIn(tmpAttendanceClassesTaskDetailDto, clockInDto, "50000");
+                clockInResultDto = new ClockInResultDto(ClockInResultDto.CODE_SUCCESS, "考勤成功，考勤状态为早退");
+            } else { //2.4 如果迟于下班时间最近 正常考勤
+                doClockIn(tmpAttendanceClassesTaskDetailDto, clockInDto, "30000");
+                clockInResultDto = new ClockInResultDto(ClockInResultDto.CODE_SUCCESS, "考勤成功，请注意休息，早点下班");
+            }
+        }
+
+        return clockInResultDto;
+    }
+
+    private Map getMinMulTime(Map<String, AttendanceClassesTaskDetailDto> mulMap) {
+        long hisTime = 0;
+        Map<String, Object> tmpMap = new HashMap<>();
+        for (String key : mulMap.keySet()) {
+            long curTime = Math.abs(Long.parseLong(key));
+            if (hisTime == 0) {
+                hisTime = curTime;
+                tmpMap.put("curAttendanceClassesTaskDetailDto", mulMap.get(key));
+                tmpMap.put("curTime", key);
+                continue;
+            }
+
+            if (curTime < hisTime) {
+                hisTime = curTime;
+                tmpMap.put("curAttendanceClassesTaskDetailDto", mulMap.get(key));
+                tmpMap.put("curTime", key);
+            }
+        }
+
+        return tmpMap;
+    }
+
+    private void doClockIn(AttendanceClassesTaskDetailDto attendanceClassesTaskDetailDto, ClockInDto clockInDto) {
+        doClockIn(attendanceClassesTaskDetailDto, clockInDto, "30000");
+    }
+
+    private void doClockIn(AttendanceClassesTaskDetailDto attendanceClassesTaskDetailDto, ClockInDto clockInDto, String state) {
 
 
-        //2.3 如果早于下班时间最近 早退
+        String facePath = "/" + clockInDto.getStaffId() + FACE_RESULT + "/" + attendanceClassesTaskDetailDto.getDetailId() + ".jpg";
+        ImageFactory.GenerateImage(clockInDto.getPic(), facePath);
 
-        //2.4 如果迟于下班时间最近 正常考勤
+        AttendanceClassesTaskDetailDto tmpAttendanceClassesTaskDetailDto = new AttendanceClassesTaskDetailDto();
+        tmpAttendanceClassesTaskDetailDto.setTaskId(attendanceClassesTaskDetailDto.getTaskId());
+        tmpAttendanceClassesTaskDetailDto.setDetailId(attendanceClassesTaskDetailDto.getDetailId());
+        tmpAttendanceClassesTaskDetailDto.setCheckTime(clockInDto.getClockInTime());
+        tmpAttendanceClassesTaskDetailDto.setState(state);
+        tmpAttendanceClassesTaskDetailDto.setFacePath(facePath);
+        tmpAttendanceClassesTaskDetailDto.setStatusCd("0");
+        long clockFlag = attendanceClassesServiceDao.updateAttendanceClassesTaskDetailDto(tmpAttendanceClassesTaskDetailDto);
 
-        return false;
+        if (clockFlag < 1) {
+            return;
+        }
+
+        //判断是否所有 打卡完成，如果完成将task 表刷成完成
+        tmpAttendanceClassesTaskDetailDto = new AttendanceClassesTaskDetailDto();
+        tmpAttendanceClassesTaskDetailDto.setTaskId(attendanceClassesTaskDetailDto.getTaskId());
+        List<AttendanceClassesTaskDetailDto> attendanceClassesTaskDetailDtos =
+                attendanceClassesServiceDao.getAttendanceClassesTaskDetails(tmpAttendanceClassesTaskDetailDto);
+        boolean finishAllTaskDetail = true;
+        for (AttendanceClassesTaskDetailDto tmpForAttendanceClassesTaskDetailDto : attendanceClassesTaskDetailDtos) {
+            if ("10000".equals(tmpForAttendanceClassesTaskDetailDto.getState())) {
+                finishAllTaskDetail = false;
+                break;
+            }
+        }
+
+        //还有未完成的任务
+        if (!finishAllTaskDetail) {
+            return;
+        }
+        AttendanceClassesTaskDto attendanceClassesTaskDto = new AttendanceClassesTaskDto();
+        attendanceClassesTaskDto.setTaskId(attendanceClassesTaskDetailDto.getTaskId());
+        attendanceClassesTaskDto.setState("30000");
+        attendanceClassesTaskDto.setStatusCd("0");
+        attendanceClassesServiceDao.updateAttendanceClassesTaskDto(attendanceClassesTaskDto);
+
+    }
+
+    /**
+     * 判断时间是否在时间段内
+     *
+     * @param nowTime
+     * @param beginTime
+     * @param endTime
+     * @return
+     */
+    public boolean belongCalendar(Date nowTime, Date beginTime, Date endTime) {
+        Calendar date = Calendar.getInstance();
+        date.setTime(nowTime);
+        Calendar begin = Calendar.getInstance();
+        begin.setTime(beginTime);
+        Calendar end = Calendar.getInstance();
+        end.setTime(endTime);
+        if (date.after(begin) && date.before(end)) {
+            return true;
+        } else if (nowTime.compareTo(beginTime) == 0 || nowTime.compareTo(endTime) == 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**

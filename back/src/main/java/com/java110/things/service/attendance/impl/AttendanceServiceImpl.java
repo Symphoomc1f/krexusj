@@ -3,17 +3,26 @@ package com.java110.things.service.attendance.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.constant.MachineConstant;
 import com.java110.things.constant.ResponseConstant;
+import com.java110.things.dao.IAttendanceClassesServiceDao;
+import com.java110.things.dao.IStaffServiceDao;
+import com.java110.things.entity.PageDto;
 import com.java110.things.entity.accessControl.SyncGetTaskResultDto;
+import com.java110.things.entity.attendance.AttendanceClassesDto;
+import com.java110.things.entity.attendance.AttendanceClassesStaffDto;
+import com.java110.things.entity.attendance.AttendanceClassesTaskDetailDto;
+import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
 import com.java110.things.entity.attendance.AttendanceUploadDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.entity.user.StaffDto;
 import com.java110.things.exception.Result;
 import com.java110.things.exception.ThreadException;
 import com.java110.things.factory.AttendanceProcessFactory;
 import com.java110.things.factory.CallAttendanceFactory;
 import com.java110.things.factory.GetCloudFaceFactory;
+import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.attendance.IAttendanceProcess;
 import com.java110.things.service.attendance.IAttendanceService;
 import com.java110.things.service.attendance.ICallAttendanceService;
@@ -28,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -52,6 +62,12 @@ public class AttendanceServiceImpl implements IAttendanceService {
 
     @Autowired
     private ICommunityService communityServiceImpl;
+
+    @Autowired
+    private IStaffServiceDao staffServiceDao;
+
+    @Autowired
+    private IAttendanceClassesServiceDao attendanceClassesServiceDao;
 
     /**
      * 获取 考勤机处理类
@@ -223,6 +239,72 @@ public class AttendanceServiceImpl implements IAttendanceService {
 
     }
 
+    @Override
+    public ResultDto getClasses(AttendanceClassesDto attendanceClassesDto) {
+        int page = attendanceClassesDto.getPage();
+
+        if (page != PageDto.DEFAULT_PAGE) {
+            attendanceClassesDto.setPage((page - 1) * attendanceClassesDto.getRow());
+        }
+        long count = attendanceClassesServiceDao.getAttendanceClassesCount(attendanceClassesDto);
+        int totalPage = (int) Math.ceil((double) count / (double) attendanceClassesDto.getRow());
+        List<AttendanceClassesDto> attendanceClassesDtos = null;
+        if (count > 0) {
+            attendanceClassesDtos = attendanceClassesServiceDao.getAttendanceClassess(attendanceClassesDto);
+        } else {
+            attendanceClassesDtos = new ArrayList<>();
+        }
+        ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, count, totalPage, attendanceClassesDtos);
+        return resultDto;
+    }
+
+    @Override
+    public ResultDto getDepartments(StaffDto staffDto) {
+        List<StaffDto> staffDtos = staffServiceDao.getDepartments(staffDto);
+        ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, staffDtos);
+        return resultDto;
+    }
+
+    @Override
+    public ResultDto getStaffs(StaffDto staffDto) {
+        int page = staffDto.getPage();
+
+        if (page != PageDto.DEFAULT_PAGE) {
+            staffDto.setPage((page - 1) * staffDto.getRow());
+        }
+        long count = staffServiceDao.getStaffCount(staffDto);
+        int totalPage = (int) Math.ceil((double) count / (double) staffDto.getRow());
+        List<StaffDto> staffDtos = null;
+        if (count > 0) {
+            staffDtos = staffServiceDao.getStaffs(staffDto);
+        } else {
+            staffDtos = new ArrayList<>();
+        }
+        ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, count, totalPage, staffDtos);
+        return resultDto;
+    }
+
+    @Override
+    public ResultDto saveClassStaff(AttendanceClassesStaffDto attendanceClassesStaffDto) {
+        long flag = attendanceClassesServiceDao.saveAttendanceClassesStaff(attendanceClassesStaffDto);
+        if (flag > 0) {
+            return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+        }
+        return new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+    }
+
+    @Override
+    public ResultDto deleteClassStaff(AttendanceClassesStaffDto attendanceClassesStaffDto) {
+        AttendanceClassesStaffDto attendanceClassesStaffDto1 = new AttendanceClassesStaffDto();
+        attendanceClassesStaffDto1.setCsId(attendanceClassesStaffDto.getCsId());
+        attendanceClassesStaffDto1.setStatusCd("1");
+        long flag = attendanceClassesServiceDao.updateAttendanceClassesStaffDto(attendanceClassesStaffDto1);
+        if (flag > 0) {
+            return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+        }
+        return new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+    }
+
     /**
      * 查询设备指令
      *
@@ -233,6 +315,95 @@ public class AttendanceServiceImpl implements IAttendanceService {
         ICallAttendanceService callAttendanceService = CallAttendanceFactory.getCallAttendanceService();
         List<MachineCmdDto> machineCmdDtos = callAttendanceService.getMachineCmds(machineCmdDto);
         return machineCmdDtos;
+    }
+
+
+    @Override
+    public ResultDto getClassStaffs(AttendanceClassesStaffDto attendanceClassesStaffDto) {
+        int page = attendanceClassesStaffDto.getPage();
+
+        if (page != PageDto.DEFAULT_PAGE) {
+            attendanceClassesStaffDto.setPage((page - 1) * attendanceClassesStaffDto.getRow());
+        }
+        long count = attendanceClassesServiceDao.getAttendanceClassesStaffCount(attendanceClassesStaffDto);
+        int totalPage = (int) Math.ceil((double) count / (double) attendanceClassesStaffDto.getRow());
+        List<AttendanceClassesStaffDto> attendanceClassesStaffDtos = null;
+        if (count > 0) {
+            attendanceClassesStaffDtos = attendanceClassesServiceDao.getAttendanceClassesStaffs(attendanceClassesStaffDto);
+        } else {
+            attendanceClassesStaffDtos = new ArrayList<>();
+        }
+        ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, count, totalPage, attendanceClassesStaffDtos);
+        return resultDto;
+    }
+
+    @Override
+    public ResultDto getAttendanceTasks(AttendanceClassesTaskDto attendanceClassesTaskDto) {
+        int page = attendanceClassesTaskDto.getPage();
+
+        if (page != PageDto.DEFAULT_PAGE) {
+            attendanceClassesTaskDto.setPage((page - 1) * attendanceClassesTaskDto.getRow());
+        }
+        long count = attendanceClassesServiceDao.getAttendanceClassesTaskCount(attendanceClassesTaskDto);
+        int totalPage = (int) Math.ceil((double) count / (double) attendanceClassesTaskDto.getRow());
+        List<AttendanceClassesTaskDto> attendanceClassesTaskDtos = null;
+        if (count > 0) {
+            attendanceClassesTaskDtos = attendanceClassesServiceDao.getAttendanceClassesTasks(attendanceClassesTaskDto);
+            for (AttendanceClassesTaskDto tmpAttendanceClassesTaskDto : attendanceClassesTaskDtos) {
+                AttendanceClassesTaskDetailDto attendanceClassesTaskDetailDto = new AttendanceClassesTaskDetailDto();
+                attendanceClassesTaskDetailDto.setTaskId(tmpAttendanceClassesTaskDto.getTaskId());
+                attendanceClassesTaskDetailDto.setStatusCd("0");
+                List<AttendanceClassesTaskDetailDto> attendanceClassesTaskDetailDtos
+                        = attendanceClassesServiceDao.getAttendanceClassesTaskDetails(attendanceClassesTaskDetailDto);
+
+                if (attendanceClassesTaskDetailDtos != null && attendanceClassesTaskDetailDtos.size() > 0) {
+                    freshUserFace(attendanceClassesTaskDetailDtos);
+                    tmpAttendanceClassesTaskDto.setAttendanceClassesTaskDetails(attendanceClassesTaskDetailDtos);
+                }
+
+
+            }
+        } else {
+            attendanceClassesTaskDtos = new ArrayList<>();
+        }
+        ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, count, totalPage, attendanceClassesTaskDtos);
+        return resultDto;
+    }
+
+    @Override
+    public ResultDto getMonthAttendance(AttendanceClassesTaskDto attendanceClassesTaskDto) {
+        int page = attendanceClassesTaskDto.getPage();
+
+        if (page != PageDto.DEFAULT_PAGE) {
+            attendanceClassesTaskDto.setPage((page - 1) * attendanceClassesTaskDto.getRow());
+        }
+        long count = attendanceClassesServiceDao.getMonthAttendanceCount(attendanceClassesTaskDto);
+        int totalPage = (int) Math.ceil((double) count / (double) attendanceClassesTaskDto.getRow());
+        List<AttendanceClassesTaskDto> attendanceClassesTaskDtos = null;
+        if (count > 0) {
+            attendanceClassesTaskDtos = attendanceClassesServiceDao.getMonthAttendance(attendanceClassesTaskDto);
+        } else {
+            attendanceClassesTaskDtos = new ArrayList<>();
+        }
+        ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, count, totalPage, attendanceClassesTaskDtos);
+        return resultDto;
+    }
+
+
+    /**
+     * 刷新人脸地址
+     *
+     * @param attendanceClassesTaskDetailDtos
+     */
+    private void freshUserFace(List<AttendanceClassesTaskDetailDto> attendanceClassesTaskDetailDtos) {
+        String faceUrl = MappingCacheFactory.getValue("ACCESS_CONTROL_FACE_URL");
+
+        for (AttendanceClassesTaskDetailDto tmpAttendanceClassesTaskDetailDto : attendanceClassesTaskDetailDtos) {
+            if (StringUtil.isEmpty(tmpAttendanceClassesTaskDetailDto.getFacePath())) {
+                continue;
+            }
+            tmpAttendanceClassesTaskDetailDto.setFacePath(faceUrl + tmpAttendanceClassesTaskDetailDto.getFacePath());
+        }
     }
 
 

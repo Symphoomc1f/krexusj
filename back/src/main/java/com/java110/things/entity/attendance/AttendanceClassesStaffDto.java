@@ -16,6 +16,7 @@ public class AttendanceClassesStaffDto extends PageDto implements Serializable {
 
     private String csId;
     private String classesId;
+    private String classesName;
     private String staffId;
     private String staffName;
     private String departmentId;
@@ -85,5 +86,13 @@ public class AttendanceClassesStaffDto extends PageDto implements Serializable {
 
     public void setStatusCd(String statusCd) {
         this.statusCd = statusCd;
+    }
+
+    public String getClassesName() {
+        return classesName;
+    }
+
+    public void setClassesName(String classesName) {
+        this.classesName = classesName;
     }
 }

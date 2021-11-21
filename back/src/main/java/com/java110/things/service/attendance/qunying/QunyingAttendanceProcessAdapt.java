@@ -4,10 +4,12 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.constant.MachineConstant;
 import com.java110.things.constant.ResponseConstant;
-import com.java110.things.dao.IQunyingStaffServiceDao;
+import com.java110.things.dao.IStaffServiceDao;
 import com.java110.things.entity.accessControl.SyncGetTaskResultDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.attendance.AttendanceUploadDto;
+import com.java110.things.entity.attendance.ClockInDto;
+import com.java110.things.entity.attendance.ClockInResultDto;
 import com.java110.things.entity.attendance.ResultQunyingDto;
 import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
@@ -42,7 +44,7 @@ public class QunyingAttendanceProcessAdapt implements IAttendanceProcess {
     private static Logger logger = LoggerFactory.getLogger(QunyingAttendanceProcessAdapt.class);
 
     @Autowired
-    private IQunyingStaffServiceDao qunyingStaffServiceDao;
+    private IStaffServiceDao qunyingStaffServiceDao;
 
     private static final String MANUFACTURER = "QY";
 
@@ -312,11 +314,23 @@ public class QunyingAttendanceProcessAdapt implements IAttendanceProcess {
 
     /**
      * 打卡记录
+     *
      * @param dataObj
      */
     private void clockIn(JSONObject dataObj) {
 
-        String staffId = dataObj.getString("ccid");
+        try {
+            String staffId = dataObj.getString("ccid");
+            ICallAttendanceService callAttendanceService = CallAttendanceFactory.getCallAttendanceService();
+            ClockInDto clockInDto = new ClockInDto();
+            clockInDto.setStaffId(staffId);
+            clockInDto.setClockInTime(dataObj.getString("time"));
+            clockInDto.setPic(dataObj.getString("pic"));
+            ClockInResultDto resultDto = callAttendanceService.clockIn(clockInDto);
+            logger.debug("考勤结果", JSONObject.toJSONString(resultDto));
+        } catch (Exception e) {
+            logger.error("考勤失败", e);
+        }
     }
 
     private void uploadFace(JSONObject dataObj) {

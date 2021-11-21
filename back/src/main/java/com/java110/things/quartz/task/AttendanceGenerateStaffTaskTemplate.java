@@ -110,7 +110,7 @@ public class AttendanceGenerateStaffTaskTemplate extends TaskSystemQuartz {
         attendanceClassesAttrDto.setClassesId(tmpAttendanceClassesDto.getClassesId());
         List<AttendanceClassesAttrDto> attendanceClassesAttrDtos = attendanceClassesServiceDao.getAttendanceClassesAttrs(attendanceClassesAttrDto);
 
-        generateTwoClockTask(tmpAttendanceClassesDto, attendanceClassesAttrDtos);
+        generateClockTask(tmpAttendanceClassesDto, attendanceClassesAttrDtos);
 
 
     }
@@ -121,7 +121,7 @@ public class AttendanceGenerateStaffTaskTemplate extends TaskSystemQuartz {
      * @param tmpAttendanceClassesDto
      * @param attendanceClassesAttrDtos
      */
-    private void generateTwoClockTask(AttendanceClassesDto tmpAttendanceClassesDto, List<AttendanceClassesAttrDto> attendanceClassesAttrDtos) {
+    private void generateClockTask(AttendanceClassesDto tmpAttendanceClassesDto, List<AttendanceClassesAttrDto> attendanceClassesAttrDtos) {
         String clockCount = tmpAttendanceClassesDto.getClockCount();
         AttendanceClassesStaffDto attendanceClassesStaffDto = new AttendanceClassesStaffDto();
         attendanceClassesStaffDto.setClassesId(tmpAttendanceClassesDto.getClassesId());
@@ -182,8 +182,12 @@ public class AttendanceGenerateStaffTaskTemplate extends TaskSystemQuartz {
         attendanceClassesTaskDetailDto.setValue(startTime);
         attendanceClassesTaskDetailDto.setState("10000");
         attendanceClassesServiceDao.saveAttendanceClassesTaskDetail(attendanceClassesTaskDetailDto);
+         attendanceClassesTaskDetailDto = new AttendanceClassesTaskDetailDto();
+        attendanceClassesTaskDetailDto.setTaskId(taskId);
+        attendanceClassesTaskDetailDto.setDetailId(SeqUtil.getId());
         attendanceClassesTaskDetailDto.setSpecCd(CLOCK_TIME_AFTERNOON_OFF_DUTY);
         attendanceClassesTaskDetailDto.setValue(endTime);
+        attendanceClassesTaskDetailDto.setState("10000");
         attendanceClassesServiceDao.saveAttendanceClassesTaskDetail(attendanceClassesTaskDetailDto);
     }
 

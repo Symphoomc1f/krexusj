@@ -155,7 +155,26 @@ export const constantRoutes = [
         name: '考勤',
         component: () => import('@/views/attendanceProtocol/attendanceProtocol'),
         meta: { title: '考勤设备协议', icon: 'table' }
+      },
+      {
+        path: 'addAttendanceStaff',
+        name: '考勤',
+        component: () => import('@/views/addAttendanceStaff/addAttendanceStaff'),
+        meta: { title: '考勤员工', icon: 'table' }
+      },
+      {
+        path: 'todayAttendance',
+        name: '考勤',
+        component: () => import('@/views/todayAttendance/todayAttendance'),
+        meta: { title: '今日考勤', icon: 'table' }
+      },
+      {
+        path: 'monthAttendance',
+        name: '考勤',
+        component: () => import('@/views/monthAttendance/monthAttendance'),
+        meta: { title: '月考勤', icon: 'table' }
       }
+      
 
       
     ]
@@ -187,9 +206,9 @@ export const constantRoutes = [
       },
       {
         path: '/userManager',
-        name: '员工管理',
+        name: '系统用户',
         component: () => import('@/views/userManager/userManager'),
-        meta: { title: '员工管理', icon: 'table' }
+        meta: { title: '系统用户', icon: 'table' }
       },
       {
         path: '/changepwd',

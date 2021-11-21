@@ -1,8 +1,12 @@
 package com.java110.things.service.attendance;
 
+import com.java110.things.entity.attendance.AttendanceClassesDto;
+import com.java110.things.entity.attendance.AttendanceClassesStaffDto;
+import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
 import com.java110.things.entity.attendance.AttendanceUploadDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.entity.user.StaffDto;
 
 /**
  * @ClassName IAttendanceService
@@ -29,4 +33,68 @@ public interface IAttendanceService {
      * @return
      */
     ResultDto attendanceUploadData(AttendanceUploadDto attendanceUploadDto);
+
+
+    /**
+     * 查询班次
+     * @param attendanceClassesDto 班次信息
+     * @return
+     */
+    ResultDto getClasses(AttendanceClassesDto attendanceClassesDto);
+
+
+    /**
+     * 查询班次
+     * @param staffDto 班次信息
+     * @return
+     */
+    ResultDto getDepartments(StaffDto staffDto);
+
+    /**
+     * 查询员工
+     * @param staffDto 班次信息
+     * @return
+     */
+    ResultDto getStaffs(StaffDto staffDto);
+
+
+    /**
+     * 保存班次员工
+     * @param attendanceClassesStaffDto 班次信息
+     * @return
+     */
+    ResultDto saveClassStaff(AttendanceClassesStaffDto attendanceClassesStaffDto);
+
+
+    /**
+     * 删除班次员工
+     * @param attendanceClassesStaffDto 班次信息
+     * @return
+     */
+    ResultDto deleteClassStaff(AttendanceClassesStaffDto attendanceClassesStaffDto);
+
+    /**
+     * 查询班次
+     * @param attendanceClassesStaffDto 班次信息
+     * @return
+     */
+    ResultDto getClassStaffs(AttendanceClassesStaffDto attendanceClassesStaffDto);
+
+    /**
+     * 查询考勤情况
+     * @param attendanceClassesTaskDto 班次信息
+     * @return
+     */
+    ResultDto getAttendanceTasks(AttendanceClassesTaskDto attendanceClassesTaskDto);
+
+
+    /**
+     * 查询考勤情况
+     * @param attendanceClassesTaskDto 班次信息
+     * @return
+     */
+    ResultDto getMonthAttendance(AttendanceClassesTaskDto attendanceClassesTaskDto);
+
+
+
 }

@@ -44,3 +44,73 @@ export function getAttendanceFace(params) {
         params
     })
 }
+
+export function getClasses(params) {
+    return request({
+        url: '/api/attendance/getClasses',
+        method: 'get',
+        params
+    })
+}
+
+export function getDepartment(params) {
+    return request({
+        url: '/api/attendance/getDepartments',
+        method: 'get',
+        params
+    })
+}
+
+export function getStaffs(params) {
+    return request({
+        url: '/api/attendance/getStaffs',
+        method: 'get',
+        params
+    })
+}
+
+
+export function saveClassesStaffs(params) {
+    return request({
+        url: '/api/attendance/saveClassesStaffs',
+        method: 'post',
+        data:params
+    })
+}
+
+export function getClassesStaffs(params) {
+    return request({
+        url: '/api/attendance/getClassesStaffs',
+        method: 'get',
+        params
+    })
+}
+
+export function deleteClassesStaff(params) {
+    return request({
+        url: '/api/attendance/deleteClassesStaff',
+        method: 'post',
+        data:params
+    })
+}
+
+
+export function getAttendanceTasks(params) {
+    return request({
+        url: '/api/attendance/getAttendanceTasks',
+        method: 'get',
+        params
+    })
+}
+
+export function getMonthAttendance(params) {
+    return request({
+        url: '/api/attendance/getMonthAttendance',
+        method: 'get',
+        params
+    })
+}
+
+
+
+

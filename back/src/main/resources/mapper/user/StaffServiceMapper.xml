@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.java110.things.dao.IQunyingStaffServiceDao">
+<mapper namespace="com.java110.things.dao.IStaffServiceDao">
 
     <insert id="saveStaff" parameterType="com.java110.things.entity.user.StaffDto">
-        INSERT INTO qunying_staff
+        INSERT INTO staff
             (`staff_id`, `staff_name`, `department_id`, `department_name`, `face1`, `face2`, `face3`)
         values
         (
@@ -23,7 +23,7 @@
         SELECT
         u.`staff_id` staffId, u.`staff_name` staffName, u.`department_id` departmentId, u.`department_name` departmentName, u.`face1`, u.`face2`,u.`face3`
         FROM
-        qunying_staff u
+        staff u
         WHERE
         1=1
         <if test="staffName != null and staffName != ''">
@@ -45,7 +45,7 @@
         select
         count(1) count
         FROM
-        qunying_staff u
+        staff u
         WHERE
         1=1
         <if test="staffName != null and staffName != ''">
@@ -62,7 +62,7 @@
 
 
     <update id="updateStaff" parameterType="com.java110.things.entity.user.StaffDto">
-        update qunying_staff
+        update staff
         <set>
             <if test="staffName != null and staffName != ''">
                  staff_name = #{staffName},
@@ -82,4 +82,16 @@
             and staff_id = #{staffId}
         </if>
     </update>
+
+
+    <select id="getDepartments" parameterType="com.java110.things.entity.user.StaffDto"
+            resultType="com.java110.things.entity.user.StaffDto">
+        select distinct t.department_id departmentId,t.department_name departmentName
+        from staff t
+        where 1=1
+        <if test="departmentId != null and departmentId != ''">
+            and department_id = #{departmentId}
+        </if>
+         group by t.department_id
+    </select>
 </mapper>

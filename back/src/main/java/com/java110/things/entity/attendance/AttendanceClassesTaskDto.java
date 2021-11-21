@@ -3,6 +3,7 @@ package com.java110.things.entity.attendance;
 import com.java110.things.entity.PageDto;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @ClassName AttendanceClassesTaskDto
@@ -24,6 +25,18 @@ public class AttendanceClassesTaskDto extends PageDto implements Serializable {
     private String[] states;
     private String createTime;
     private String statusCd;
+    private String noClockIn;
+    private String clockIn;
+    private String late;
+    private String early;
+    private String free;
+
+
+    private List<AttendanceClassesTaskDetailDto> attendanceClassesTaskDetails;
+
+    private String staffName;
+    private String departmentName;
+    private String departmentId;
 
 
     public String getTaskId() {
@@ -104,5 +117,77 @@ public class AttendanceClassesTaskDto extends PageDto implements Serializable {
 
     public void setStates(String[] states) {
         this.states = states;
+    }
+
+    public String getStaffName() {
+        return staffName;
+    }
+
+    public void setStaffName(String staffName) {
+        this.staffName = staffName;
+    }
+
+    public List<AttendanceClassesTaskDetailDto> getAttendanceClassesTaskDetails() {
+        return attendanceClassesTaskDetails;
+    }
+
+    public void setAttendanceClassesTaskDetails(List<AttendanceClassesTaskDetailDto> attendanceClassesTaskDetails) {
+        this.attendanceClassesTaskDetails = attendanceClassesTaskDetails;
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
+
+    public String getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(String departmentId) {
+        this.departmentId = departmentId;
+    }
+
+    public String getNoClockIn() {
+        return noClockIn;
+    }
+
+    public void setNoClockIn(String noClockIn) {
+        this.noClockIn = noClockIn;
+    }
+
+    public String getClockIn() {
+        return clockIn;
+    }
+
+    public void setClockIn(String clockIn) {
+        this.clockIn = clockIn;
+    }
+
+    public String getLate() {
+        return late;
+    }
+
+    public void setLate(String late) {
+        this.late = late;
+    }
+
+    public String getEarly() {
+        return early;
+    }
+
+    public void setEarly(String early) {
+        this.early = early;
+    }
+
+    public String getFree() {
+        return free;
+    }
+
+    public void setFree(String free) {
+        this.free = free;
     }
 }

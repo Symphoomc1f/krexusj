@@ -5,14 +5,17 @@ import com.java110.things.Controller.BaseController;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.UserDto;
-import com.java110.things.factory.AuthenticationFactory;
 import com.java110.things.service.user.IUserService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
+import com.java110.things.util.SeqUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -80,7 +83,7 @@ public class UserController extends BaseController {
      * @throws Exception
      */
     @RequestMapping(path = "/changePassword", method = RequestMethod.POST)
-    public ResponseEntity<String> changePassword(HttpServletRequest request,@RequestBody String param) throws Exception {
+    public ResponseEntity<String> changePassword(HttpServletRequest request, @RequestBody String param) throws Exception {
         JSONObject paramObj = super.getParamJson(param);
         Assert.hasKeyAndValue(paramObj, "oldpwd", "请求报文中未包含旧密码");
         Assert.hasKeyAndValue(paramObj, "newpwd", "请求报文中未包含新密码");
@@ -88,7 +91,7 @@ public class UserController extends BaseController {
         Assert.hasText(userId, "用户还未登录");
         String oldpwd = paramObj.get("oldpwd").toString();
         String newpwd = paramObj.get("newpwd").toString();
-        ResultDto resultDto = userServiceImpl.changePassword(userId,oldpwd,newpwd);
+        ResultDto resultDto = userServiceImpl.changePassword(userId, oldpwd, newpwd);
         return super.createResponseEntity(resultDto);
     }
 
@@ -102,8 +105,8 @@ public class UserController extends BaseController {
      */
     @RequestMapping(path = "/getUsers", method = RequestMethod.GET)
     public ResponseEntity<String> getUsers(@RequestParam int page,
-                                              @RequestParam int row,
-                                              @RequestParam(name = "username", required = false) String username,
+                                           @RequestParam int row,
+                                           @RequestParam(name = "username", required = false) String username,
                                            @RequestParam(name = "tel", required = false) String tel) throws Exception {
         UserDto userDto = new UserDto();
         userDto.setPage(page);
@@ -113,6 +116,7 @@ public class UserController extends BaseController {
         ResultDto resultDto = userServiceImpl.getUserList(userDto);
         return super.createResponseEntity(resultDto);
     }
+
     /**
      * 添加用户
      *
@@ -126,7 +130,8 @@ public class UserController extends BaseController {
         Assert.hasKeyAndValue(paramObj, "userId", "请求报文中未包含用户ID");
         Assert.hasKeyAndValue(paramObj, "username", "请求报文中未包含用户账户名称");
         Assert.hasKeyAndValue(paramObj, "tel", "请求报文中未包电话");
-       // Assert.hasKeyAndValue(paramObj, "password", "请求报文中未包密码");
+        paramObj.put("userId", SeqUtil.getId());
+        // Assert.hasKeyAndValue(paramObj, "password", "请求报文中未包密码");
         ResultDto resultDto = userServiceImpl.insertUser(BeanConvertUtil.covertBean(paramObj, UserDto.class));
         return super.createResponseEntity(resultDto);
     }
@@ -151,6 +156,7 @@ public class UserController extends BaseController {
 
     /**
      * 删除用户
+     *
      * @param uid 表id
      * @return
      * @throws Exception

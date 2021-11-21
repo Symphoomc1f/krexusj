@@ -79,11 +79,8 @@
       <el-form-item label="ID" v-if="temp.id !=''" prop="type">
           <el-input v-model="temp.id" disabled="true" placeholder="请输入ID" />
         </el-form-item>
-        <el-form-item label="用户Id">
-          <el-input v-model="temp.userId" placeholder="请输入用户Id" />
-        </el-form-item>
         <el-form-item label="用户名">
-          <el-input v-model="temp.username" placeholder="请输入用户名" />
+          <el-input v-model="temp.username" :disabled="temp.id !=''" placeholder="请输入用户名" />
         </el-form-item>
         <el-form-item label="邮箱">
           <el-input v-model="temp.email" placeholder="请输入用户名" />

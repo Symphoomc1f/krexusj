@@ -2,10 +2,12 @@ package com.java110.things.service.attendance;
 
 import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
 import com.java110.things.entity.attendance.ClockInDto;
+import com.java110.things.entity.attendance.ClockInResultDto;
 import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.user.StaffDto;
 
+import java.text.ParseException;
 import java.util.List;
 
 /**
@@ -51,5 +53,5 @@ public interface ICallAttendanceService {
      * @param clockInDto
      * @return
      */
-    boolean clockIn(ClockInDto clockInDto);
+    ClockInResultDto clockIn(ClockInDto clockInDto) throws Exception;
 }

@@ -150,12 +150,14 @@
     <select id="getAttendanceClassesStaffs"
             parameterType="com.java110.things.entity.attendance.AttendanceClassesStaffDto"
             resultType="com.java110.things.entity.attendance.AttendanceClassesStaffDto">
-        select t.cs_id csId,t.create_time createTime,t.classes_id
-        classesId,t.status_cd statusCd,t.staff_id staffId,t.staff_name
-        staffName,t.department_id departmentId,t.department_name department_id
-        from attendance_classes_staff t
+        select t.cs_id csId,t.create_time createTime,t.classes_id classesId
+        ,t.status_cd statusCd,t.staff_id staffId,t.staff_name
+        staffName,t.department_id departmentId,t.department_name departmentName,ac.classes_name classesName
+        from attendance_classes_staff t,attendance_classes ac
         where 1 =1
         and t.status_cd= '0'
+        and t.classes_id = ac.classes_id
+        and ac.status_cd = '0'
         <if test="staffId !=null and staffId != ''">
             and t.staff_id= #{staffId}
         </if>
@@ -230,9 +232,17 @@
             resultType="com.java110.things.entity.attendance.AttendanceClassesTaskDto">
         select t.task_id taskId,t.class_id classId,t.staff_id staffId,t.task_year
         taskYear,t.task_month taskMonth,t.task_day taskDay,t.state,t.create_time createTime,t.status_cd statusCd
+        ,s.staff_name staffName,s.department_name departmentName
         from attendance_classes_task t
+        left join staff s on t.staff_id = s.staff_id and s.status_cd = '0'
         where 1 =1
         and t.status_cd= '0'
+        <if test="staffName !=null and staffName != ''">
+            and s.staff_name like concat('%',#{staffName},'%')
+        </if>
+        <if test="departmentId !=null and departmentId != ''">
+            and s.department_id = #{departmentId}
+        </if>
         <if test="taskId !=null and taskId != ''">
             and t.task_id= #{taskId}
         </if>
@@ -258,19 +268,33 @@
         <if test="state !=null and state != ''">
             and t.state= #{state}
         </if>
+        <if test="states !=null ">
+            and t.state in
+            <foreach collection="states" item="item" index="index" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
         order by t.create_time desc
         <if test="page != -1 and page != null ">
             limit #{page}, #{row}
         </if>
     </select>
 
+
     <!-- 查询定时任务数量 add by wuxw 2018-07-03 -->
     <select id="getAttendanceClassesTaskCount"
             parameterType="com.java110.things.entity.attendance.AttendanceClassesTaskDto" resultType="long">
         select count(1) count
         from attendance_classes_task t
+        left join staff s on t.staff_id = s.staff_id and s.status_cd = '0'
         where 1 =1
         and t.status_cd= '0'
+        <if test="staffName !=null and staffName != ''">
+            and s.staff_name like concat('%',#{staffName},'%')
+        </if>
+        <if test="departmentId !=null and departmentId != ''">
+            and s.department_id = #{departmentId}
+        </if>
         <if test="taskId !=null and taskId != ''">
             and t.task_id= #{taskId}
         </if>
@@ -325,9 +349,6 @@
         </if>
         <if test="taskDay !=null and taskDay != ''">
             and t.task_day= #{taskDay}
-        </if>
-        <if test="state !=null and state != ''">
-            and t.state= #{state}
         </if>
         <if test="states !=null ">
             and t.state in
@@ -420,8 +441,12 @@
             resultType="com.java110.things.entity.attendance.AttendanceClassesTaskDetailDto">
         select t.detail_id detailId,t.create_time createTime,t.task_id
         taskId,t.status_cd statusCd,t.spec_cd specCd,t.value,t.check_time checkTime,t.state,t.face_path
-        facePath,t.remark
+        facePath,t.remark,td.name specName,td1.name stateName
         from attendance_classes_task_detail t
+        left join t_dict td on t.spec_cd = td.status_cd and td.table_name = 'attendance_classes_task_detail' and
+        td.table_columns = 'spec_cd'
+        left join t_dict td1 on t.state = td1.status_cd and td1.table_name = 'attendance_classes_task_detail' and
+        td1.table_columns = 'state'
         where 1 =1
         and t.status_cd= '0'
         <if test="detailId !=null and detailId != ''">
@@ -490,5 +515,133 @@
         </if>
 
     </update>
+
+
+    <insert id="saveStaffAttendanceLog"
+            parameterType="com.java110.things.entity.attendance.StaffAttendanceLogDto">
+        INSERT INTO staff_attendance_log (`log_id`, `staff_id`, `clock_time`, `req_param`)
+        VALUES
+        (#{logId},#{staffId},#{clockTime},#{reqParam})
+    </insert>
+
+    <!-- 查询定时任务信息 add by wuxw 2018-07-03 -->
+    <select id="getStaffAttendanceLogs"
+            parameterType="com.java110.things.entity.attendance.StaffAttendanceLogDto"
+            resultType="com.java110.things.entity.attendance.StaffAttendanceLogDto">
+        select t.log_id logId,t.create_time createTime,t.staff_id staffId,t.clock_time clockTime,t.req_param reqParam
+        from staff_attendance_log t
+        where 1 =1
+        and t.status_cd= '0'
+        <if test="logId !=null and logId != ''">
+            and t.log_id= #{logId}
+        </if>
+        <if test="staffId !=null and staffId != ''">
+            and t.staff_id= #{staffId}
+        </if>
+        <if test="clockTime !=null ">
+            and t.clock_time= #{clockTime}
+        </if>
+        order by t.create_time desc
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+    </select>
+
+    <!-- 查询定时任务数量 add by wuxw 2018-07-03 -->
+    <select id="getStaffAttendanceLogCount"
+            parameterType="com.java110.things.entity.attendance.StaffAttendanceLogDto" resultType="long">
+        select count(1) count
+        from staff_attendance_log t
+        where 1 =1
+        and t.status_cd= '0'
+        <if test="logId !=null and logId != ''">
+            and t.log_id= #{logId}
+        </if>
+        <if test="staffId !=null and staffId != ''">
+            and t.staff_id= #{staffId}
+        </if>
+        <if test="clockTime !=null ">
+            and t.clock_time= #{clockTime}
+        </if>
+    </select>
+
+
+    <!-- 查询定时任务信息 add by wuxw 2018-07-03 -->
+    <select id="getMonthAttendanceCount" parameterType="com.java110.things.entity.attendance.AttendanceClassesTaskDto"
+            resultType="long">
+        select count(1) count from (
+        select t.staff_id
+        from attendance_classes_task t
+        left join staff s on t.staff_id = s.staff_id and s.status_cd = '0'
+        where 1 =1
+        and t.status_cd= '0'
+        <if test="staffName !=null and staffName != ''">
+            and s.staff_name like concat('%',#{staffName},'%')
+        </if>
+        <if test="departmentId !=null and departmentId != ''">
+            and s.department_id = #{departmentId}
+        </if>
+        <if test="taskId !=null and taskId != ''">
+            and t.task_id= #{taskId}
+        </if>
+        <if test="classId !=null and classId != ''">
+            and t.class_id= #{classId}
+        </if>
+        <if test="staffId !=null and staffId != ''">
+            and t.staff_id= #{staffId}
+        </if>
+        <if test="taskYear !=null and taskYear != ''">
+            and t.task_year= #{taskYear}
+        </if>
+        <if test="taskMonth !=null and taskMonth != ''">
+            and t.task_month= #{taskMonth}
+        </if>
+        group by t.staff_id
+        ) tt
+    </select>
+
+
+    <!-- 查询定时任务信息 add by wuxw 2018-07-03 -->
+    <select id="getMonthAttendance" parameterType="com.java110.things.entity.attendance.AttendanceClassesTaskDto"
+            resultType="com.java110.things.entity.attendance.AttendanceClassesTaskDto">
+        select t.task_id taskId,t.class_id classId,t.staff_id staffId,
+        s.staff_name staffName,s.department_name departmentName,
+        (select count(1) from attendance_classes_task_detail b where t.task_id = b.task_id and b.state = '10000')
+        noClockIn,
+        (select count(1) from attendance_classes_task_detail b where t.task_id = b.task_id and b.state = '30000')
+        clockIn,
+        (select count(1) from attendance_classes_task_detail b where t.task_id = b.task_id and b.state = '40000') late,
+        (select count(1) from attendance_classes_task_detail b where t.task_id = b.task_id and b.state = '50000') early,
+        (select count(1) from attendance_classes_task_detail b where t.task_id = b.task_id and b.state = '60000') free
+        from attendance_classes_task t
+        left join staff s on t.staff_id = s.staff_id and s.status_cd = '0'
+        where 1 =1
+        and t.status_cd= '0'
+        <if test="staffName !=null and staffName != ''">
+            and s.staff_name like concat('%',#{staffName},'%')
+        </if>
+        <if test="departmentId !=null and departmentId != ''">
+            and s.department_id = #{departmentId}
+        </if>
+        <if test="taskId !=null and taskId != ''">
+            and t.task_id= #{taskId}
+        </if>
+        <if test="classId !=null and classId != ''">
+            and t.class_id= #{classId}
+        </if>
+        <if test="staffId !=null and staffId != ''">
+            and t.staff_id= #{staffId}
+        </if>
+        <if test="taskYear !=null and taskYear != ''">
+            and t.task_year= #{taskYear}
+        </if>
+        <if test="taskMonth !=null and taskMonth != ''">
+            and t.task_month= #{taskMonth}
+        </if>
+        group by t.staff_id
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+    </select>
 
 </mapper>
