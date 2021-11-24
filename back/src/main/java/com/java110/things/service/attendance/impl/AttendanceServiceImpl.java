@@ -407,4 +407,41 @@ public class AttendanceServiceImpl implements IAttendanceService {
     }
 
 
+    /**
+     * 删除班次
+     * @param attendanceClassesDto
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public ResultDto deleteAttendanceClassesDto(AttendanceClassesDto attendanceClassesDto) {
+        int count = attendanceClassesServiceDao.deleteAttendanceClasses(attendanceClassesDto.getClassesId());
+        ResultDto resultDto = null;
+        if (count < 1) {
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+        } else {
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+        }
+        return resultDto;
+    }
+
+
+
+    /**
+     * 更新班次信息
+     * @param attendanceClassesDto 用户信息
+     * @return
+     */
+    @Override
+    public ResultDto updateAttendanceClasses(AttendanceClassesDto attendanceClassesDto){
+        int count = attendanceClassesServiceDao.updateAttendanceClasses(attendanceClassesDto);
+        ResultDto resultDto = null;
+        if (count < 1) {
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+        } else {
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+        }
+        return resultDto;
+    }
+
 }

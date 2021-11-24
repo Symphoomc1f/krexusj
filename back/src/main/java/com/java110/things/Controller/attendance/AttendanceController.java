@@ -7,11 +7,9 @@ import com.java110.things.entity.attendance.AttendanceClassesStaffDto;
 import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.StaffDto;
+import com.java110.things.entity.user.UserDto;
 import com.java110.things.service.attendance.IAttendanceService;
-import com.java110.things.util.BeanConvertUtil;
-import com.java110.things.util.DateUtil;
-import com.java110.things.util.SeqUtil;
-import com.java110.things.util.StringUtil;
+import com.java110.things.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,12 +46,15 @@ public class AttendanceController extends BaseController {
      */
     @RequestMapping(path = "/getClasses", method = RequestMethod.GET)
     public ResponseEntity<String> getClasses(@RequestParam int page,
-                                             @RequestParam int row) throws Exception {
+                                             @RequestParam int row,
+                                             @RequestParam(name = "classesName", required = false) String classesName
+                                            ) throws Exception {
 
 
         AttendanceClassesDto attendanceClassesDto = new AttendanceClassesDto();
         attendanceClassesDto.setPage(page);
         attendanceClassesDto.setRow(row);
+        attendanceClassesDto.setClassesName(classesName);
 
         ResultDto resultDto = attendanceServiceImpl.getClasses(attendanceClassesDto);
         return super.createResponseEntity(resultDto);
@@ -222,5 +223,41 @@ public class AttendanceController extends BaseController {
         return super.createResponseEntity(resultDto);
     }
 
+    /**
+     * 删除班次
+     *
+     * @param classesId 表id
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(path = "/deleteAttClass", method = RequestMethod.POST)
+    public ResponseEntity<String> deleteAttClass(@RequestBody String classesId) throws Exception {
+        JSONObject paramObj = super.getParamJson(classesId);
+        Assert.hasKeyAndValue(paramObj, "classesId", "请求报文中未包含班次ID");
 
+        ResultDto resultDto = attendanceServiceImpl.deleteAttendanceClassesDto(BeanConvertUtil.covertBean(paramObj, AttendanceClassesDto.class));
+        return super.createResponseEntity(resultDto);
+    }
+
+    /**
+     * 更新班次
+     *
+     * @param param 请求报文
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/updateAttClass", method = RequestMethod.POST)
+    public ResponseEntity<String> updateAttClass(@RequestBody String param) throws Exception {
+        JSONObject paramObj = super.getParamJson(param);
+        Assert.hasKeyAndValue(paramObj, "classesId", "请求报文中未包含班Id");
+        Assert.hasKeyAndValue(paramObj, "classesName", "请求报文中未包含班次名");
+        Assert.hasKeyAndValue(paramObj, "timeOffset", "请求报文中未包含打卡时间范围");
+        Assert.hasKeyAndValue(paramObj, "clockCount", "请求报文中未包含打卡次数");
+        Assert.hasKeyAndValue(paramObj, "clockType", "请求报文中未包含打卡类型");
+        Assert.hasKeyAndValue(paramObj, "clockTypeValue", "请求报文中未包含打卡规则");
+        Assert.hasKeyAndValue(paramObj, "lateOffset", "请求报文中未包含迟到时间范围");
+        Assert.hasKeyAndValue(paramObj, "leaveOffset", "请求报文中未包含早退时间范围");
+        ResultDto resultDto = attendanceServiceImpl.updateAttendanceClasses(BeanConvertUtil.covertBean(paramObj, AttendanceClassesDto.class));
+        return super.createResponseEntity(resultDto);
+    }
 }

@@ -96,5 +96,7 @@ public interface IAttendanceService {
     ResultDto getMonthAttendance(AttendanceClassesTaskDto attendanceClassesTaskDto);
 
 
+    ResultDto deleteAttendanceClassesDto(AttendanceClassesDto attendanceClassesDto);
 
+    public ResultDto updateAttendanceClasses(AttendanceClassesDto attendanceClassesDto);
 }

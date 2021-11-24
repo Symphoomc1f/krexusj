@@ -36,12 +36,22 @@ export function restartAttendances(params) {
     })
 }
 
-
 export function getAttendanceFace(params) {
     return request({
         url: '/api/machine/getMachineFaces',
         method: 'get',
         params
+    })
+}
+
+export function getAttendanceClasses(params) {
+    return request({
+        url: '/api/attendance/getClasses',
+        method: 'get',
+        params: {
+            page: 1,
+            row: 10
+        }
     })
 }
 
@@ -111,6 +121,27 @@ export function getMonthAttendance(params) {
     })
 }
 
+export function updateAttClass(params) {
+    return request({
+        url: '/api/attendance/updateAttClass',
+        method: 'post',
+        data:params
+    })
+  }
+  
+  export function insertAttClass(params) {
+    return request({
+        url: '/api/attendance/insertAttClass',
+        method: 'post',
+        data:params
+    })
+  }
 
-
-
+  export function deleteAttClassControls(params) {
+    return request({
+        url: '/api/attendance/deleteAttClass',
+        method: 'post',
+        data:params
+    })
+  }
+  

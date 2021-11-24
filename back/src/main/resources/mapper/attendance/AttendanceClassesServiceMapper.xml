@@ -5,11 +5,16 @@
 
     <insert id="saveAttendanceClasses" parameterType="com.java110.things.entity.attendance.AttendanceClassesDto">
         INSERT INTO attendance_classes(`classes_id`, `classes_name`, `time_offset`, `clock_count`, `clock_type`,
-        `clock_type_value`)
+        `clock_type_value`,`late_offset`,`leave_offset`)
         values (
-        #{classesId},#{classesName},#{timeOffset},#{clockCount},#{clockType},#{clockTypeValue}
+        #{classesId},#{classesName},#{timeOffset},#{clockCount},#{clockType},#{clockTypeValue},#{lateOffset},#{leaveOffset}
         )
     </insert>
+
+    <delete id="deleteAttendanceClasses" parameterType="string">
+		delete from attendance_classes where classes_id = #{value}
+	</delete>
+
 
     <!-- 查询定时任务数量 add by wuxw 2018-07-03 -->
     <select id="getAttendanceClassesCount" parameterType="com.java110.things.entity.attendance.AttendanceClassesDto"
@@ -32,10 +37,14 @@
             resultType="com.java110.things.entity.attendance.AttendanceClassesDto">
         select t.classes_id classesId,t.create_time createTime,t.classes_name
         classesName,t.status_cd statusCd,t.time_offset timeOffset,t.clock_count
-        clockCount,t.clock_type clockType,t.clock_type_value clockTypeValue
+        clockCount,t.clock_type clockType,t.clock_type_value clockTypeValue,
+        t.late_offset lateOffset,t.leave_offset leaveOffset
         from attendance_classes t
         where 1 =1
         and t.status_cd= '0'
+        <if test="classesName !=null and classesName != ''">
+            and t.classes_name like '%${classesName}%'
+        </if>
         <if test="classesId !=null and classesId != ''">
             and t.classes_id= #{classesId}
         </if>
@@ -63,11 +72,16 @@
         <if test="clockTypeValue !=null and clockTypeValue != ''">
             , t.clock_type_value= #{clockTypeValue}
         </if>
+        <if test="lateOffset !=null and lateOffset != ''">
+            , t.late_offset= #{lateOffset}
+        </if>
+        <if test="leaveOffset !=null and leaveOffset != ''">
+            , t.leave_offset= #{leaveOffset}
+        </if>
         where 1=1
         <if test="classesId !=null and classesId != ''">
             and t.classes_id= #{classesId}
         </if>
-
     </update>
 
 

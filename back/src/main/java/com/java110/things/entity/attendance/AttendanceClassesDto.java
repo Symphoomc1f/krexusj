@@ -22,6 +22,8 @@ public class AttendanceClassesDto extends PageDto implements Serializable {
     private String clockType;
     private String clockTypeValue;
     private String statusCd;
+    private String lateOffset;
+    private String leaveOffset;
 
     public String getClassesId() {
         return classesId;
@@ -86,4 +88,12 @@ public class AttendanceClassesDto extends PageDto implements Serializable {
     public void setStatusCd(String statusCd) {
         this.statusCd = statusCd;
     }
+
+    public String getLateOffset() {return lateOffset;}
+
+    public void setLateOffset(String lateOffset) {this.lateOffset = lateOffset; }
+
+    public String getLeaveOffset() {return leaveOffset;}
+
+    public void setLeaveOffset(String leaveOffset) {this.leaveOffset = leaveOffset;}
 }

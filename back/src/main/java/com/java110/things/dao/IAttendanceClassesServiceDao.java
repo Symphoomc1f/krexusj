@@ -266,5 +266,5 @@ public interface IAttendanceClassesServiceDao {
      */
     long getMonthAttendanceCount(AttendanceClassesTaskDto attendanceClassesTaskDto);
 
-
+    int deleteAttendanceClasses(String value);
 }
