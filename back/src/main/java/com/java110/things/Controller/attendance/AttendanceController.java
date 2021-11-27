@@ -5,6 +5,7 @@ import com.java110.things.Controller.BaseController;
 import com.java110.things.entity.attendance.AttendanceClassesDto;
 import com.java110.things.entity.attendance.AttendanceClassesStaffDto;
 import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
+import com.java110.things.entity.attendance.StaffAttendanceLogDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.StaffDto;
 import com.java110.things.entity.user.UserDto;
@@ -73,7 +74,7 @@ public class AttendanceController extends BaseController {
 
         StaffDto staffDto = new StaffDto();
         staffDto.setDepartmentId(departmentId);
-        ResultDto resultDto = attendanceServiceImpl.getStaffs(staffDto);
+        ResultDto resultDto = attendanceServiceImpl.getDepartments(staffDto);
         return super.createResponseEntity(resultDto);
     }
 
@@ -176,7 +177,7 @@ public class AttendanceController extends BaseController {
         attendanceClassesTaskDto.setClassId(classesId);
         attendanceClassesTaskDto.setStaffName(staffName);
         attendanceClassesTaskDto.setDepartmentId(departmentId);
-        if (!StringUtil.isEmpty(date) ) {
+        if (!StringUtil.isEmpty(date)) {
             Date reqDate = DateUtil.getDateFromString(date, DateUtil.DATE_FORMATE_STRING_B);
 
             Calendar calendar = Calendar.getInstance();
@@ -212,7 +213,7 @@ public class AttendanceController extends BaseController {
         attendanceClassesTaskDto.setClassId(classesId);
         attendanceClassesTaskDto.setStaffName(staffName);
         attendanceClassesTaskDto.setDepartmentId(departmentId);
-        if (!StringUtil.isEmpty(date) ) {
+        if (!StringUtil.isEmpty(date)) {
             Date reqDate = DateUtil.getDateFromString(date, DateUtil.DATE_FORMATE_STRING_B);
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(reqDate);
@@ -224,6 +225,7 @@ public class AttendanceController extends BaseController {
     }
 
     /**
+<<<<<<< HEAD
      * 删除班次
      *
      * @param classesId 表id
@@ -238,6 +240,39 @@ public class AttendanceController extends BaseController {
         ResultDto resultDto = attendanceServiceImpl.deleteAttendanceClassesDto(BeanConvertUtil.covertBean(paramObj, AttendanceClassesDto.class));
         return super.createResponseEntity(resultDto);
     }
+=======
+     * 添加设备接口类
+     *
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/getStaffAttendanceLog", method = RequestMethod.GET)
+    public ResponseEntity<String> getStaffAttendanceLog(
+            @RequestParam int page,
+            @RequestParam int row,
+            @RequestParam(name = "staffName", required = false) String staffName,
+            @RequestParam(name = "date", required = false) String date,
+            @RequestParam(name = "departmentId", required = false
+            ) String departmentId,
+            @RequestParam(name = "startDate", required = false) String startDate,
+            @RequestParam(name = "endDate", required = false) String endDate
+    ) throws Exception {
+
+        StaffAttendanceLogDto staffAttendanceLogDto = new StaffAttendanceLogDto();
+        staffAttendanceLogDto.setPage(page);
+        staffAttendanceLogDto.setRow(row);
+        staffAttendanceLogDto.setStaffName(staffName);
+        staffAttendanceLogDto.setDepartmentId(departmentId);
+        if (!StringUtil.isEmpty(startDate)) {
+            staffAttendanceLogDto.setStartDate(DateUtil.getDateFromString(startDate, DateUtil.DATE_FORMATE_STRING_B));
+            staffAttendanceLogDto.setEndDate(DateUtil.getDateFromString(endDate, DateUtil.DATE_FORMATE_STRING_B));
+        }
+
+        ResultDto resultDto = attendanceServiceImpl.getStaffAttendanceLog(staffAttendanceLogDto);
+        return super.createResponseEntity(resultDto);
+    }
+
+>>>>>>> 19db1f50d0285160654e4bb13737ff261b581328
 
     /**
      * 更新班次

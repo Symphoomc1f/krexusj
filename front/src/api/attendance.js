@@ -121,6 +121,7 @@ export function getMonthAttendance(params) {
     })
 }
 
+<<<<<<< HEAD
 export function updateAttClass(params) {
     return request({
         url: '/api/attendance/updateAttClass',
@@ -136,6 +137,18 @@ export function updateAttClass(params) {
         data:params
     })
   }
+=======
+export function getStaffAttendanceLog(params) {
+    return request({
+        url: '/api/attendance/getStaffAttendanceLog',
+        method: 'get',
+        params
+    })
+}
+
+
+
+>>>>>>> 19db1f50d0285160654e4bb13737ff261b581328
 
   export function deleteAttClassControls(params) {
     return request({
