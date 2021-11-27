@@ -12,6 +12,7 @@ import com.java110.things.entity.attendance.AttendanceClassesStaffDto;
 import com.java110.things.entity.attendance.AttendanceClassesTaskDetailDto;
 import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
 import com.java110.things.entity.attendance.AttendanceUploadDto;
+import com.java110.things.entity.attendance.StaffAttendanceLogDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
@@ -386,6 +387,25 @@ public class AttendanceServiceImpl implements IAttendanceService {
             attendanceClassesTaskDtos = new ArrayList<>();
         }
         ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, count, totalPage, attendanceClassesTaskDtos);
+        return resultDto;
+    }
+
+    @Override
+    public ResultDto getStaffAttendanceLog(StaffAttendanceLogDto staffAttendanceLogDto) {
+        int page = staffAttendanceLogDto.getPage();
+
+        if (page != PageDto.DEFAULT_PAGE) {
+            staffAttendanceLogDto.setPage((page - 1) * staffAttendanceLogDto.getRow());
+        }
+        long count = attendanceClassesServiceDao.getStaffAttendanceLogCount(staffAttendanceLogDto);
+        int totalPage = (int) Math.ceil((double) count / (double) staffAttendanceLogDto.getRow());
+        List<StaffAttendanceLogDto> staffAttendanceLogDtos = null;
+        if (count > 0) {
+            staffAttendanceLogDtos = attendanceClassesServiceDao.getStaffAttendanceLogs(staffAttendanceLogDto);
+        } else {
+            staffAttendanceLogDtos = new ArrayList<>();
+        }
+        ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, count, totalPage, staffAttendanceLogDtos);
         return resultDto;
     }
 

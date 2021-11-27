@@ -173,6 +173,12 @@ export const constantRoutes = [
         name: '考勤',
         component: () => import('@/views/monthAttendance/monthAttendance'),
         meta: { title: '月考勤', icon: 'table' }
+      },
+      {
+        path: 'staffAttendanceLog',
+        name: '考勤记录',
+        component: () => import('@/views/staffAttendanceLog/staffAttendanceLog'),
+        meta: { title: '考勤记录', icon: 'table' }
       }
       
 

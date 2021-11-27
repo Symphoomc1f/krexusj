@@ -87,7 +87,7 @@
       :total="total"
       :page.sync="listQuery.page"
       :limit.sync="listQuery.row"
-      @pagination="fetchData"
+      @pagination="getTodayAttendances"
     />
 
     <el-dialog
@@ -232,6 +232,13 @@ export default {
       });
       getDepartment().then(response => {
         this.departments = response.data;
+        this.total = response.total;
+        this.listLoading = false;
+      });
+    },
+    getTodayAttendances() {
+      getAttendanceTasks(this.listQuery).then(response => {
+        this.list = response.data;
         this.total = response.total;
         this.listLoading = false;
       });

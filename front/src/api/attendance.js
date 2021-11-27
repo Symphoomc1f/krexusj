@@ -111,6 +111,16 @@ export function getMonthAttendance(params) {
     })
 }
 
+export function getStaffAttendanceLog(params) {
+    return request({
+        url: '/api/attendance/getStaffAttendanceLog',
+        method: 'get',
+        params
+    })
+}
+
+
+
 
 
 

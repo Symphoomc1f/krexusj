@@ -127,7 +127,7 @@ public class UserController extends BaseController {
     @RequestMapping(path = "/insertUser", method = RequestMethod.POST)
     public ResponseEntity<String> insertUser(@RequestBody String param) throws Exception {
         JSONObject paramObj = super.getParamJson(param);
-        Assert.hasKeyAndValue(paramObj, "userId", "请求报文中未包含用户ID");
+//        Assert.hasKeyAndValue(paramObj, "userId", "请求报文中未包含用户ID");
         Assert.hasKeyAndValue(paramObj, "username", "请求报文中未包含用户账户名称");
         Assert.hasKeyAndValue(paramObj, "tel", "请求报文中未包电话");
         paramObj.put("userId", SeqUtil.getId());

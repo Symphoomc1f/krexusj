@@ -1,15 +1,8 @@
 <template>
   <div class="app-container">
     <div class="filter-container" style="margin-bottom:10px">
-      <el-select v-model="listQuery.classesId" class="filter-item" placeholder="请选择班次">
-        <el-option
-          v-for="item in classes"
-          :key="item.classesId"
-          :label="item.classesName"
-          :value="item.classesId"
-        />
-      </el-select>
       <el-select v-model="listQuery.departmentId" class="filter-item" placeholder="请选择部门">
+        <el-option label="请选择部门" value />
         <el-option
           v-for="item in departments"
           :key="item.departmentId"
@@ -25,10 +18,10 @@
       />
       <el-date-picker
         v-model="listQuery.date"
-        align="right"
-        type="month"
-        placeholder="选择日期"
-        :picker-options="pickerOptions"
+        type="daterange"
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
         value-format="yyyy-MM-dd"
       ></el-date-picker>
 
@@ -64,29 +57,9 @@
           <span>{{ scope.row.staffId }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="正常考勤" align="center">
+      <el-table-column label="考勤时间" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.clockIn }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="迟到" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.late }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="早退" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.early }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="旷工" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.noClockIn }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="免考勤" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.free }}</span>
+          <span>{{ scope.row.clockTime }}</span>
         </template>
       </el-table-column>
     </el-table>
@@ -95,7 +68,7 @@
       :total="total"
       :page.sync="listQuery.page"
       :limit.sync="listQuery.row"
-      @pagination="getMonthAttendances"
+      @pagination="getStaffAttendanceLog"
     />
   </div>
 </template>
@@ -104,7 +77,7 @@
 import {
   getDepartment,
   getClasses,
-  getMonthAttendance
+  getStaffAttendanceLog
 } from "@/api/attendance";
 import Pagination from "@/components/Pagination";
 import { parseTime } from "@/utils";
@@ -128,7 +101,7 @@ export default {
         row: 10,
         classesId: "",
         staffName: "",
-        date: "",
+        date: [],
         departmentId: ""
       },
       classes: [],
@@ -152,15 +125,11 @@ export default {
   methods: {
     fetchData() {
       this.listLoading = true;
-      getClasses({
-        page: 1,
-        row: 50
-      }).then(response => {
-        this.classes = response.data;
-        this.total = response.total;
-        this.listLoading = false;
-      });
-      getMonthAttendance(this.listQuery).then(response => {
+      if (this.listQuery.date.length > 0) {
+        this.listQuery.startDate = this.listQuery.date[0];
+        this.listQuery.endDate = this.listQuery.date[1];
+      }
+      getStaffAttendanceLog(this.listQuery).then(response => {
         this.list = response.data;
         this.total = response.total;
         this.listLoading = false;
@@ -171,17 +140,17 @@ export default {
         this.listLoading = false;
       });
     },
-    getMonthAttendances() {
+    getStaffAttendanceLog() {
       this.listLoading = true;
-      getMonthAttendance(this.listQuery).then(response => {
+      if (this.listQuery.date.length > 0) {
+        this.listQuery.startDate = this.listQuery.date[0];
+        this.listQuery.endDate = this.listQuery.date[1];
+      }
+      getStaffAttendanceLog(this.listQuery).then(response => {
         this.list = response.data;
         this.total = response.total;
         this.listLoading = false;
       });
-    },
-    viewDetail(_row) {
-      this.deleteClassesStaffDailogVisible = true;
-      this.curTask = _row;
     }
   }
 };

@@ -4,6 +4,7 @@ import com.java110.things.entity.attendance.AttendanceClassesDto;
 import com.java110.things.entity.attendance.AttendanceClassesStaffDto;
 import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
 import com.java110.things.entity.attendance.AttendanceUploadDto;
+import com.java110.things.entity.attendance.StaffAttendanceLogDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.StaffDto;
@@ -96,5 +97,10 @@ public interface IAttendanceService {
     ResultDto getMonthAttendance(AttendanceClassesTaskDto attendanceClassesTaskDto);
 
 
-
+    /**
+     * 查询考勤记录
+     * @param staffAttendanceLogDto 班次信息
+     * @return
+     */
+    ResultDto getStaffAttendanceLog(StaffAttendanceLogDto staffAttendanceLogDto);
 }
