@@ -225,7 +225,7 @@ public class AttendanceController extends BaseController {
     }
 
     /**
-<<<<<<< HEAD
+
      * 删除班次
      *
      * @param classesId 表id
@@ -240,7 +240,8 @@ public class AttendanceController extends BaseController {
         ResultDto resultDto = attendanceServiceImpl.deleteAttendanceClassesDto(BeanConvertUtil.covertBean(paramObj, AttendanceClassesDto.class));
         return super.createResponseEntity(resultDto);
     }
-=======
+
+    /*
      * 添加设备接口类
      *
      * @return 成功或者失败
@@ -272,7 +273,6 @@ public class AttendanceController extends BaseController {
         return super.createResponseEntity(resultDto);
     }
 
->>>>>>> 19db1f50d0285160654e4bb13737ff261b581328
 
     /**
      * 更新班次

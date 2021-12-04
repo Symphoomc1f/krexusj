@@ -97,16 +97,16 @@ public interface IAttendanceService {
     ResultDto getMonthAttendance(AttendanceClassesTaskDto attendanceClassesTaskDto);
 
 
-<<<<<<< HEAD
+
     ResultDto deleteAttendanceClassesDto(AttendanceClassesDto attendanceClassesDto);
 
     public ResultDto updateAttendanceClasses(AttendanceClassesDto attendanceClassesDto);
-=======
+
     /**
      * 查询考勤记录
      * @param staffAttendanceLogDto 班次信息
      * @return
      */
     ResultDto getStaffAttendanceLog(StaffAttendanceLogDto staffAttendanceLogDto);
->>>>>>> 19db1f50d0285160654e4bb13737ff261b581328
+
 }
