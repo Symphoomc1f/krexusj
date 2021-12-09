@@ -8,7 +8,6 @@ import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
 import com.java110.things.entity.attendance.StaffAttendanceLogDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.StaffDto;
-import com.java110.things.entity.user.UserDto;
 import com.java110.things.service.attendance.IAttendanceService;
 import com.java110.things.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -225,6 +224,7 @@ public class AttendanceController extends BaseController {
     }
 
     /**
+
      * 删除班次
      *
      * @param classesId 表id
@@ -239,6 +239,7 @@ public class AttendanceController extends BaseController {
         ResultDto resultDto = attendanceServiceImpl.deleteAttendanceClassesDto(BeanConvertUtil.covertBean(paramObj, AttendanceClassesDto.class));
         return super.createResponseEntity(resultDto);
     }
+
     /*
      * 添加设备接口类
      *
@@ -270,7 +271,6 @@ public class AttendanceController extends BaseController {
         ResultDto resultDto = attendanceServiceImpl.getStaffAttendanceLog(staffAttendanceLogDto);
         return super.createResponseEntity(resultDto);
     }
-
 
 
     /**
