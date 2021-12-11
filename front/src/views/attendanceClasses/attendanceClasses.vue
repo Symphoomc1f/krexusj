@@ -90,13 +90,94 @@
           <el-input v-model="temp.timeOffset" placeholder="请输入打卡范围" />
         </el-form-item>
         <el-form-item label="打卡次数">
-          <el-input v-model="temp.clockCount" placeholder="请输入打卡次数" />
+          <el-select v-model="temp.clockCount" @change="selectClockCount($event)"  class="filter-item" placeholder="请选择打卡次数">
+            <el-option v-for="item in clockCountSel" 
+              :key="item.value"
+              :label="item.label"
+              :value="item.value" />
+          </el-select>
         </el-form-item>
+        <el-form-item label="上下班打卡1"  v-show="startendtime1">
+          <el-time-select
+              placeholder="上班时间1"
+              v-model="temp.startTime1"
+              :picker-options="{
+                start: '00:00',
+                step: '00:05',
+                end: '23:55'
+              }">
+            </el-time-select>
+            <el-time-select
+              placeholder="下班时间1"
+              v-model="temp.endTime1"
+              :picker-options="{
+                 start: '00:00',
+                step: '00:05',
+                end: '23:55',
+                minTime: temp.startTime1
+              }">
+            </el-time-select>
+      </el-form-item>
+       <el-form-item label="上下班打卡2"  v-show="startendtime2">
+          <el-time-select
+              placeholder="上班时间2"
+              v-model="temp.startTime2"
+              :picker-options="{
+                start: '00:00',
+                step: '00:05',
+                end: '23:55'
+              }">
+            </el-time-select>
+            <el-time-select
+              placeholder="下班时间2"
+              v-model="temp.endTime2"
+              :picker-options="{
+                 start: '00:00',
+                step: '00:05',
+                end: '23:55',
+                minTime: temp.startTime2
+              }">
+            </el-time-select>
+      </el-form-item>
+       <el-form-item label="上下班打卡3"  v-show="startendtime3">
+          <el-time-select
+              placeholder="上班时间3"
+              v-model="temp.startTime3"
+              :picker-options="{
+                start: '00:00',
+                step: '00:05',
+                end: '23:55'
+              }">
+            </el-time-select>
+            <el-time-select
+              placeholder="下班时间3"
+              v-model="temp.endTime3"
+              :picker-options="{
+                 start: '00:00',
+                step: '00:05',
+                end: '23:55',
+                minTime: temp.startTime3
+              }">
+            </el-time-select>
+      </el-form-item>
         <el-form-item label="打卡类型">
-          <el-input v-model="temp.clockType" placeholder="请输入打卡类型" />
+          <el-select v-model="temp.clockType" @change="selectClockType($event)"  class="filter-item" placeholder="请选择打卡类型">
+            <el-option v-for="item in clockTypeSel" 
+              :key="item.value"
+              :label="item.label"
+              :value="item.value" />
+          </el-select>
         </el-form-item>
-         <el-form-item label="打卡规则">
-          <el-input v-model="temp.clockTypeValue" placeholder="请输入打卡规则" />
+         <el-form-item label="选择打卡"  v-show="clockTypeShow">
+            <el-checkbox-group v-model="temp.checkWeekList" @change="selectCheckWeek">
+              <el-checkbox label="0" >星期一</el-checkbox>
+              <el-checkbox label="1" >星期二</el-checkbox>
+              <el-checkbox label="2" >星期三</el-checkbox>
+              <el-checkbox label="3" >星期四</el-checkbox>
+              <el-checkbox label="4" >星期五</el-checkbox>
+              <el-checkbox label="5" >星期六</el-checkbox>
+              <el-checkbox label="6" >星期七</el-checkbox>
+            </el-checkbox-group>
         </el-form-item>
            <el-form-item label="迟到时间范围">
           <el-input v-model="temp.lateOffset" placeholder="请输入迟到时间范围" />
@@ -150,8 +231,18 @@ export default {
    watch: {
     dialogFormVisible: function(val) {
       if (val == false) {
+       this.startendtime1= false;
+       this.startendtime2=false;
+       this.startendtime3= false;
+       this.clockTypeShow= false;
         this.temp= {
-           classesId: "",
+          startTime1: '',
+          endTime1: '',
+          startTime2: '',
+          endTime2: '',
+          startTime3: '',
+          endTime3: '',
+          classesId: "",
           classesName: "",
           timeOffset: "",
           clockCount: "",
@@ -176,9 +267,30 @@ export default {
       listLoading: true,
       deleteAttClassControlDailogVisible: false,
       dialogFormVisible: false,
+      startendtime1: false,
+      startendtime2: false,
+      startendtime3: false,
+      clockTypeShow: false,
       curAccessControl: {},
       total: 0,
+      clockTypeSel: [
+         { value: "1001", label: "每天打卡" },
+         { value: "1002", label: "隔天打卡" },
+         { value: "1003", label: "自定义" }
+      ],
+      clockCountSel: [
+         { value: "2", label: "2次" },
+         { value: "4", label: "4次" },
+         { value: "6", label: "6次" }
+      ],
       temp: {
+        checkWeekList:[],
+        startTime1: '',
+        endTime1: '',
+        startTime2: '',
+        endTime2: '',
+        startTime3: '',
+        endTime3: '',
         classesId: "",
         classesName: "",
         timeOffset: "",
@@ -203,6 +315,38 @@ export default {
 
         this.listLoading = false;
       });
+    },
+    selectClockCount(val){
+      if(val == 2){
+          this.startendtime1 = true;
+          this.startendtime2 = false;
+          this.startendtime3 = false;
+      }else if(val == 4){
+          this.startendtime1 = true;
+          this.startendtime2 = true;
+          this.startendtime3 = false;
+      }else if(val == 6){
+          this.startendtime1 = true;
+          this.startendtime2 = true;
+          this.startendtime3 = true;
+      }
+    },
+    selectClockType(val){
+      if(val == '1003'){
+          this.clockTypeShow = true;
+      }else{
+          this.clockTypeShow = false;
+          if(val == '1001'){
+            this.temp.clockTypeValue = "*";
+          }
+          if(val == '1002'){
+            this.temp.clockTypeValue = "?";
+          }
+      }
+      console.log(this.temp.clockTypeValue);
+    },
+    selectCheckWeek(val){
+      this.temp.clockTypeValue = this.temp.checkWeekList.join(',');
     },
     queryAttClass() {
       this.listLoading = true;
@@ -239,7 +383,7 @@ export default {
 
   saveAttclassControlInfo() {
       this.listLoading = true;
-      if (this.temp.id != "") {
+      if (this.temp.classesId != "") {
         updateAttClass(this.temp).then(response => {
           this.listLoading = false;
           this._cancleMapping();

@@ -1,13 +1,11 @@
 package com.java110.things.service.attendance;
 
-import com.java110.things.entity.attendance.AttendanceClassesDto;
-import com.java110.things.entity.attendance.AttendanceClassesStaffDto;
-import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
-import com.java110.things.entity.attendance.AttendanceUploadDto;
-import com.java110.things.entity.attendance.StaffAttendanceLogDto;
+import com.java110.things.entity.attendance.*;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.StaffDto;
+
+import java.util.List;
 
 /**
  * @ClassName IAttendanceService
@@ -96,7 +94,7 @@ public interface IAttendanceService {
      */
     ResultDto getMonthAttendance(AttendanceClassesTaskDto attendanceClassesTaskDto);
 
-
+    ResultDto insertAttendanceClassesDto(AttendanceClassesDto attendanceClassesDto, List<AttendanceClassesAttrDto> attrDtos);
 
     ResultDto deleteAttendanceClassesDto(AttendanceClassesDto attendanceClassesDto);
 

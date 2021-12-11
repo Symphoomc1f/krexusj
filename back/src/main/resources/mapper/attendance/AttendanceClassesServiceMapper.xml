@@ -90,8 +90,7 @@
         INSERT INTO attendance_classes_attr
         (`attr_id`, `classes_id`, `spec_cd`, `value`)
         VALUES
-        #{attrId},#{classesId},#{specCd},#{value}
-        )
+       (#{attrId},#{classesId},#{specCd},#{value})
     </insert>
 
 
