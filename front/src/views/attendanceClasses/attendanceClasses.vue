@@ -1,4 +1,4 @@
-<template>
+<template  slot="header" slot-scope="scope">
   <div class="app-container">
     <div class="filter-container" style="margin-bottom:10px">
       <el-input
@@ -212,7 +212,8 @@ import {
   getClasses,
   deleteAttClassControls,
   updateAttClass,
-  insertAttClass
+  insertAttClass,
+  getAttendanceClassesAttr
 } from "@/api/attendance";
 import Pagination from "@/components/Pagination";
 import { parseTime } from "@/utils";
@@ -334,6 +335,7 @@ export default {
     selectClockType(val){
       if(val == '1003'){
           this.clockTypeShow = true;
+          this.temp.checkWeekList = [];
       }else{
           this.clockTypeShow = false;
           if(val == '1001'){
@@ -343,17 +345,17 @@ export default {
             this.temp.clockTypeValue = "?";
           }
       }
-      console.log(this.temp.clockTypeValue);
     },
     selectCheckWeek(val){
       this.temp.clockTypeValue = this.temp.checkWeekList.join(',');
+       console.log(this.temp.checkWeekList);
+      console.log(this.temp.clockTypeValue);
     },
     queryAttClass() {
       this.listLoading = true;
       getClasses(this.listQuery).then(response => {
         this.list = response.data;
         this.total = response.total;
-
         this.listLoading = false;
       });
     },
@@ -362,7 +364,40 @@ export default {
     },
     editAttClass(_row, _index) {
       this.dialogFormVisible = true;
-      this.temp = _row;
+       getAttendanceClassesAttr(_row.classesId).then(response => {
+         let arr =response.data;
+          arr.forEach(function (item, index) {
+              if(item.specCd == "10000"){
+                    _row.startTime1 = item.value;
+              }
+              if(item.specCd == "20000"){
+                    _row.endTime1 = item.value;
+              }
+              if(item.specCd == "21000"){
+                    _row.startTime2 = item.value;
+              }
+              if(item.specCd == "11000"){
+                    _row.endTime2 = item.value;
+              }
+              if(item.specCd == "12000"){
+                    _row.startTime3 = item.value;
+              }
+              if(item.specCd == "22000"){
+                    _row.endTime3 = item.value;
+              }
+          });
+          this.selectClockCount(arr.length);
+          if(_row.clockType == '1003'){
+              this.clockTypeShow = true;
+              _row.checkWeekList = _row.clockTypeValue.split(",");
+              console.log( "888",_row.checkWeekList );
+          }else{
+              this.clockTypeShow = false;
+          }
+          console.log("999999",_row);
+          this.temp = _row;
+        });
+          
     },
     deleteAttClassControl(_row) {
       this.deleteAttClassControlDailogVisible = true;

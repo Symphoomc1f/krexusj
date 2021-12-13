@@ -321,63 +321,82 @@ public class AttendanceController extends BaseController {
         AttendanceClassesAttrDto attrDto = new AttendanceClassesAttrDto();
         String cc = paramObj.get("clockCount").toString();
         if (cc.equals("2")){
-            Assert.hasKeyAndValue(paramObj, "startTime1", "请求报文中未包含上午上班打卡时间");
-            Assert.hasKeyAndValue(paramObj, "endTime1", "请求报文中未包含晚上下班打卡时间");
-            attrDto.setSpecCd("100000");
+            Assert.hasKeyAndValue(paramObj, "startTime1", "请求报文中未包含上午上班打卡时间10000");
+            Assert.hasKeyAndValue(paramObj, "endTime1", "请求报文中未包含下午下班打卡时间20000");
+            attrDto.setSpecCd("10000");
             attrDto.setValue(paramObj.get("startTime1").toString());
+            attrDtoList.add(attrDto);
             attrDto = new AttendanceClassesAttrDto();
-            attrDto.setSpecCd("100000");
+            attrDto.setSpecCd("20000");
             attrDto.setValue(paramObj.get("endTime1").toString());
             attrDtoList.add(attrDto);
         }
         if (cc.equals("4")){
-            Assert.hasKeyAndValue(paramObj, "startTime1", "请求报文中未包含上午上班打卡时间");
-            Assert.hasKeyAndValue(paramObj, "endTime1", "请求报文中未包含晚上下班打卡时间");
-            Assert.hasKeyAndValue(paramObj, "startTime2", "请求报文中未包含中午上班打卡时间");
-            Assert.hasKeyAndValue(paramObj, "endTime2", "请求报文中未包含晚上下班打卡时间");
-            attrDto.setSpecCd("100000");
+            Assert.hasKeyAndValue(paramObj, "startTime1", "请求报文中未包含上午上班打卡时间10000");
+            Assert.hasKeyAndValue(paramObj, "endTime1", "请求报文中未包含下午下班打卡时间20000");
+            Assert.hasKeyAndValue(paramObj, "startTime2", "请求报文中未包含中午上班打卡时间21000");
+            Assert.hasKeyAndValue(paramObj, "endTime2", "请求报文中未包含中午下班打卡时间11000");
+            attrDto.setSpecCd("10000");
             attrDto.setValue(paramObj.get("startTime1").toString());
+            attrDtoList.add(attrDto);
             attrDto = new AttendanceClassesAttrDto();
-            attrDto.setSpecCd("100000");
+            attrDto.setSpecCd("20000");
             attrDto.setValue(paramObj.get("endTime1").toString());
             attrDtoList.add(attrDto);
             attrDto = new AttendanceClassesAttrDto();
-            attrDto.setSpecCd("100000");
+            attrDto.setSpecCd("21000");
             attrDto.setValue(paramObj.get("startTime2").toString());
+            attrDtoList.add(attrDto);
             attrDto = new AttendanceClassesAttrDto();
-            attrDto.setSpecCd("100000");
+            attrDto.setSpecCd("11000");
             attrDto.setValue(paramObj.get("endTime2").toString());
             attrDtoList.add(attrDto);
         }
         if (cc.equals("6")){
-            Assert.hasKeyAndValue(paramObj, "startTime1", "请求报文中未包含上午上班打卡时间");
-            Assert.hasKeyAndValue(paramObj, "endTime1", "请求报文中未包含晚上下班打卡时间");
-            Assert.hasKeyAndValue(paramObj, "startTime2", "请求报文中未包含中午上班打卡时间");
-            Assert.hasKeyAndValue(paramObj, "endTime2", "请求报文中未包含晚上下班打卡时间");
-            Assert.hasKeyAndValue(paramObj, "startTime3", "请求报文中未包含中午上班打卡时间");
-            Assert.hasKeyAndValue(paramObj, "endTime3", "请求报文中未包含晚上下班打卡时间");
-            attrDto.setSpecCd("100000");
+            Assert.hasKeyAndValue(paramObj, "startTime1", "请求报文中未包含上午上班打卡时间10000");
+            Assert.hasKeyAndValue(paramObj, "endTime1", "请求报文中未包含下午下班打卡时间20000");
+            Assert.hasKeyAndValue(paramObj, "startTime2", "请求报文中未包含中午上班打卡时间21000");
+            Assert.hasKeyAndValue(paramObj, "endTime2", "请求报文中未包含中午下班打卡时间11000");
+            Assert.hasKeyAndValue(paramObj, "startTime3", "请求报文中未包含晚上上班打卡时间12000");
+            Assert.hasKeyAndValue(paramObj, "endTime3", "请求报文中未包含晚上下班打卡时间22000");
+            attrDto.setSpecCd("10000");
             attrDto.setValue(paramObj.get("startTime1").toString());
+            attrDtoList.add(attrDto);
             attrDto = new AttendanceClassesAttrDto();
-            attrDto.setSpecCd("100000");
+            attrDto.setSpecCd("20000");
             attrDto.setValue(paramObj.get("endTime1").toString());
             attrDtoList.add(attrDto);
             attrDto = new AttendanceClassesAttrDto();
-            attrDto.setSpecCd("100000");
+            attrDto.setSpecCd("21000");
             attrDto.setValue(paramObj.get("startTime2").toString());
+            attrDtoList.add(attrDto);
             attrDto = new AttendanceClassesAttrDto();
-            attrDto.setSpecCd("100000");
+            attrDto.setSpecCd("11000");
             attrDto.setValue(paramObj.get("endTime2").toString());
             attrDtoList.add(attrDto);
             attrDto = new AttendanceClassesAttrDto();
-            attrDto.setSpecCd("100000");
+            attrDto.setSpecCd("12000");
             attrDto.setValue(paramObj.get("startTime3").toString());
+            attrDtoList.add(attrDto);
             attrDto = new AttendanceClassesAttrDto();
-            attrDto.setSpecCd("100000");
+            attrDto.setSpecCd("22000");
             attrDto.setValue(paramObj.get("endTime3").toString());
             attrDtoList.add(attrDto);
         }
         ResultDto resultDto = attendanceServiceImpl.insertAttendanceClassesDto(attendanceClassesDto,attrDtoList);
+        return super.createResponseEntity(resultDto);
+    }
+
+    /**
+     * 返回上下班时间配置
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/getClassesAttrs", method = RequestMethod.GET)
+    public ResponseEntity<String> getClassesAttrs(@RequestParam String classId) throws Exception {
+        AttendanceClassesAttrDto attrDto = new AttendanceClassesAttrDto();
+        attrDto.setClassesId(classId);
+        ResultDto resultDto = attendanceServiceImpl.getAttendanceClassesAttrs(attrDto);
         return super.createResponseEntity(resultDto);
     }
 }

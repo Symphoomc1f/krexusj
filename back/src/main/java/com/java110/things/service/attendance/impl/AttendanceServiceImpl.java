@@ -481,5 +481,15 @@ public class AttendanceServiceImpl implements IAttendanceService {
         return resultDto;
     };
 
-
+    /**
+     * 返回班次配置时间信息
+     *
+     * @param attrDto 设备信息
+     * @return
+     */
+    public ResultDto getAttendanceClassesAttrs(AttendanceClassesAttrDto attrDto){
+        List<AttendanceClassesAttrDto> attrDtoList = attendanceClassesServiceDao.getAttendanceClassesAttrs(attrDto);
+        ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, attrDtoList);
+        return  resultDto;
+    }
 }

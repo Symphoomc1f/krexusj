@@ -107,4 +107,5 @@ public interface IAttendanceService {
      */
     ResultDto getStaffAttendanceLog(StaffAttendanceLogDto staffAttendanceLogDto);
 
+    ResultDto getAttendanceClassesAttrs(AttendanceClassesAttrDto attrDto);
 }
