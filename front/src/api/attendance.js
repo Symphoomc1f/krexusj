@@ -63,6 +63,17 @@ export function getClasses(params) {
     })
 }
 
+export function getAttendanceClassesAttr(classId) {
+    return request({
+        url: '/api/attendance/getClassesAttrs',
+        method: 'get',
+        params: {
+            classId: classId
+        }
+    })
+}
+
+
 export function getDepartment(params) {
     return request({
         url: '/api/attendance/getDepartments',

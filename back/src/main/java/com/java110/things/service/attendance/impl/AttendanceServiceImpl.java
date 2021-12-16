@@ -7,12 +7,7 @@ import com.java110.things.dao.IAttendanceClassesServiceDao;
 import com.java110.things.dao.IStaffServiceDao;
 import com.java110.things.entity.PageDto;
 import com.java110.things.entity.accessControl.SyncGetTaskResultDto;
-import com.java110.things.entity.attendance.AttendanceClassesDto;
-import com.java110.things.entity.attendance.AttendanceClassesStaffDto;
-import com.java110.things.entity.attendance.AttendanceClassesTaskDetailDto;
-import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
-import com.java110.things.entity.attendance.AttendanceUploadDto;
-import com.java110.things.entity.attendance.StaffAttendanceLogDto;
+import com.java110.things.entity.attendance.*;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
@@ -20,10 +15,7 @@ import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.StaffDto;
 import com.java110.things.exception.Result;
 import com.java110.things.exception.ThreadException;
-import com.java110.things.factory.AttendanceProcessFactory;
-import com.java110.things.factory.CallAttendanceFactory;
-import com.java110.things.factory.GetCloudFaceFactory;
-import com.java110.things.factory.MappingCacheFactory;
+import com.java110.things.factory.*;
 import com.java110.things.service.attendance.IAttendanceProcess;
 import com.java110.things.service.attendance.IAttendanceService;
 import com.java110.things.service.attendance.ICallAttendanceService;
@@ -37,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -449,7 +442,7 @@ public class AttendanceServiceImpl implements IAttendanceService {
 
     /**
      * 更新班次信息
-     * @param attendanceClassesDto 用户信息
+     * @param attendanceClassesDto 班次信息
      * @return
      */
     @Override
@@ -464,4 +457,39 @@ public class AttendanceServiceImpl implements IAttendanceService {
         return resultDto;
     }
 
+    /**
+     * 保存班次信息
+     * @param attendanceClassesDto 班次信息
+     * @return
+     */
+    @Override
+    @Transactional
+    public ResultDto insertAttendanceClassesDto(AttendanceClassesDto attendanceClassesDto, List<AttendanceClassesAttrDto> attrDtos){
+        int count = attendanceClassesServiceDao.saveAttendanceClasses(attendanceClassesDto);
+        for (AttendanceClassesAttrDto attrDto: attrDtos){
+            attrDto.setAttrId(SeqUtil.getId());
+            attrDto.setClassesId(attendanceClassesDto.getClassesId());
+            attrDto.setStatusCd("0");
+            attendanceClassesServiceDao.saveAttendanceClassesAttr(attrDto);
+        }
+        ResultDto resultDto = null;
+        if (count < 1) {
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+        } else {
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+        }
+        return resultDto;
+    };
+
+    /**
+     * 返回班次配置时间信息
+     *
+     * @param attrDto 设备信息
+     * @return
+     */
+    public ResultDto getAttendanceClassesAttrs(AttendanceClassesAttrDto attrDto){
+        List<AttendanceClassesAttrDto> attrDtoList = attendanceClassesServiceDao.getAttendanceClassesAttrs(attrDto);
+        ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, attrDtoList);
+        return  resultDto;
+    }
 }
