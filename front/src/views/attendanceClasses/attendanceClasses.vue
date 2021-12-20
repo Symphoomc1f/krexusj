@@ -38,7 +38,7 @@
         <template slot-scope="scope">{{ scope.row.classesName }}</template>
       </el-table-column>
       <el-table-column align="center" label="打卡范围">
-        <template slot-scope="scope">{{ scope.row.timeOffset }}</template>
+        <template slot-scope="scope">{{ scope.row.timeOffset }}分钟</template>
       </el-table-column>
       <el-table-column align="center" label="打卡次数">
         <template slot-scope="scope">{{ scope.row.clockCount }}</template>
@@ -50,10 +50,10 @@
         <template slot-scope="scope">{{ scope.row.clockTypeValue }}</template>
       </el-table-column>
       <el-table-column align="center" label="迟到时间范围">
-        <template slot-scope="scope">{{ scope.row.lateOffset }}</template>
+        <template slot-scope="scope">{{ scope.row.lateOffset }}分钟</template>
       </el-table-column>
       <el-table-column align="center" label="早退时间范围">
-        <template slot-scope="scope">{{ scope.row.leaveOffset }}</template>
+        <template slot-scope="scope">{{ scope.row.leaveOffset }}分钟</template>
       </el-table-column>
       <el-table-column class-name="status-col" label="操作" width="180" align="center">
         <template slot-scope="{row,$index}">
@@ -358,7 +358,7 @@ export default {
       }
     },
     selectCheckWeek(val) {
-      let _checkWeekLists = this.checkWeekList;
+      //let _checkWeekLists = this.checkWeekList;
       // this.checkWeekList = [];
       // _checkWeekLists.forEach(item => {
       //   this.checkWeekList.push(item);
