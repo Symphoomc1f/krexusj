@@ -358,14 +358,7 @@ export default {
       }
     },
     selectCheckWeek(val) {
-      //let _checkWeekLists = this.checkWeekList;
-      // this.checkWeekList = [];
-      // _checkWeekLists.forEach(item => {
-      //   this.checkWeekList.push(item);
-      // });
-      this.temp.clockTypeValue = this.checkWeekList.join(",");
-      console.log(this.checkWeekList);
-      console.log(this.temp.clockTypeValue);
+      this.temp.clockTypeValue = this.checkWeekList.sort().join(",");  
     },
     queryAttClass() {
       this.listLoading = true;
