@@ -46,6 +46,8 @@
       <el-table-column align="center" label="打卡类型">
         <template slot-scope="scope">{{ scope.row.clockType }}</template>
       </el-table-column>
+      <el-table-column align="center" label="打卡类型" prop="scope.row.clockType" :formatter="clockTypeFormat">
+      </el-table-column>
       <el-table-column align="center" label="打卡规则">
         <template slot-scope="scope">{{ scope.row.clockTypeValue }}</template>
       </el-table-column>
@@ -328,6 +330,15 @@ export default {
         this.listLoading = false;
       });
     },
+    clockTypeFormat(row, column) {
+      var rename = "";
+      this.clockTypeSel.forEach(item =>{
+                if(item.value == row.clockType){
+                   rename = item.label;
+                }
+              })
+    return rename;
+  },
     selectClockCount(val) {
       if (val == 2) {
         this.startendtime1 = true;
