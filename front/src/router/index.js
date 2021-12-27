@@ -128,6 +128,12 @@ export const constantRoutes = [
         name: '道闸',
         component: () => import('@/views/monitorVedio/monitorVedio'),
         meta: { title: '监控设备', icon: 'table' }
+      },
+      {
+        path: 'camera',
+        name: '摄像头',
+        component: () => import('@/views/camera/camera'),
+        meta: { title: '摄像头', icon: 'table' }
       }
     ]
   },
@@ -186,9 +192,6 @@ export const constantRoutes = [
         component: () => import('@/views/staffAttendanceLog/staffAttendanceLog'),
         meta: { title: '考勤记录', icon: 'table' }
       }
-      
-
-      
     ]
   },
   {
