@@ -38,13 +38,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @ClassName NotifyAccessControlServcieImpl
@@ -74,6 +68,21 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
 
     @Autowired
     private IOpenDoorService openDoorServiceImpl;
+
+    /**
+     * 查询设备信息
+     *
+     * @return
+     */
+    public List<MachineDto> queryMachines() throws Exception {
+
+        MachineDto machineDto = new MachineDto();
+        machineDto.setMachineTypeCd(MachineConstant.MACHINE_TYPE_ACCESS_CONTROL);
+        List<MachineDto> machineDtos = machineServiceDao.getMachines(machineDto);
+
+        return machineDtos;
+
+    }
 
 
     @Override

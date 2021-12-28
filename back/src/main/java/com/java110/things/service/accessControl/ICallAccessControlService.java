@@ -8,7 +8,6 @@ import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.OperateLogDto;
 import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.room.RoomDto;
-import com.java110.things.entity.user.UserDto;
 
 import java.util.List;
 
@@ -23,13 +22,22 @@ import java.util.List;
 public interface ICallAccessControlService {
 
     /**
+     * 查询设备信息
+     *
+     * @return
+     */
+    public List<MachineDto> queryMachines() throws Exception;
+
+    /**
      * 门禁 上报,当门禁上线时 建议将门禁自动上报，系统管理页面和云端可以自动注册设备
+     *
      * @param machineDto 设备对象
      */
     void uploadMachine(MachineDto machineDto);
 
     /**
      * 记录操作日志
+     *
      * @param operateLogDto 日志对象，当logId 在数据库中不存在是做添加，存在时 做修改
      */
     void saveOrUpdateOperateLog(OperateLogDto operateLogDto);
@@ -44,20 +52,23 @@ public interface ICallAccessControlService {
 
     /**
      * 获取用户房屋信息
+     *
      * @param userFaceDto 根据用户人脸信息
      * @return 返回房屋列表
      */
-    List<RoomDto> getRooms(UserFaceDto userFaceDto)  throws Exception;
+    List<RoomDto> getRooms(UserFaceDto userFaceDto) throws Exception;
 
     /**
      * 查询费用信息
+     *
      * @param roomDto 房屋信息
      * @return 费用列表
      */
-    List<FeeDto> getFees(RoomDto roomDto)  throws Exception;
+    List<FeeDto> getFees(RoomDto roomDto) throws Exception;
 
     /**
      * 设备上报人脸
+     *
      * @param machineUploadFaceDto 要求信息
      * @throws Exception
      */
