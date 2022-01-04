@@ -7,6 +7,7 @@ import com.java110.things.factory.AccessControlProcessFactory;
 import com.java110.things.service.accessControl.IAssessControlProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,13 +42,13 @@ public class AccessControlController extends BaseController {
         logger.debug("请求报文：" + param);
         IAssessControlProcess assessControlProcess = AccessControlProcessFactory.getAssessControlProcessImpl();
 
-        boolean save = assessControlProcess.httpFaceResult(param);
+        return  new ResponseEntity<String>(assessControlProcess.httpFaceResult(param), HttpStatus.OK);
 
-        if (save) {
-            return super.createResponseEntity(new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG));
-        }
-
-        return super.createResponseEntity(new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG));
+//        if (save) {
+//            return super.createResponseEntity(new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG));
+//        }
+//
+//        return super.createResponseEntity(new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG));
     }
 
 }

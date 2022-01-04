@@ -11,7 +11,6 @@ import com.java110.things.entity.machine.OperateLogDto;
 import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.room.RoomDto;
-import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.CometFactory;
 import com.java110.things.factory.MqttFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
@@ -125,9 +124,9 @@ public class YldCometAssessControlProcessAdapt implements IAssessControlProcess 
         param.put("e_time", END_TIME);
         param.put("per_type", 0);
         param.put("usr_type", 0);
-        
+
         CometFactory.publish(CHANNELNAME, param.toJSONString());
-        
+
         String cmdId = SeqUtil.getId();
         saveLog(cmdId, machineDto.getMachineId(), CMD_ADD_FACE, param.toJSONString(), "", "", userFaceDto.getUserId(), userFaceDto.getName());
     }
@@ -173,7 +172,7 @@ public class YldCometAssessControlProcessAdapt implements IAssessControlProcess 
     }
 
     @Override
-    public void clearFace(MachineDto machineDto,HeartbeatTaskDto heartbeatTaskDto) {
+    public void clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
         String cmdId = SeqUtil.getId();
 
         JSONObject param = new JSONObject();
@@ -303,13 +302,13 @@ public class YldCometAssessControlProcessAdapt implements IAssessControlProcess 
      * @return
      */
     @Override
-    public boolean httpFaceResult(String data) {
+    public String httpFaceResult(String data) {
         ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
         try {
             JSONObject param = JSONObject.parseObject(data);
 
             if (param.containsKey("type") && !FACE_RESULT.equals(param.getString("type"))) {
-                return true;
+                return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG).toString();
             }
 
             JSONObject body = param.getJSONObject("body");
@@ -331,7 +330,7 @@ public class YldCometAssessControlProcessAdapt implements IAssessControlProcess 
         } catch (Exception e) {
             logger.error("推送人脸失败", e);
         }
-        return false;
+        return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG).toString();
     }
 
     /**

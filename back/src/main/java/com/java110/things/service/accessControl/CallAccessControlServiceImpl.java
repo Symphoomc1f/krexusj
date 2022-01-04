@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.accessControl.OpenDoorMonitorWebSocketServer;
 import com.java110.things.constant.MachineConstant;
 import com.java110.things.constant.ResponseConstant;
+import com.java110.things.dao.IMachineFaceServiceDao;
 import com.java110.things.dao.IMachineServiceDao;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.cloud.MachineCmdResultDto;
@@ -12,6 +13,7 @@ import com.java110.things.entity.cloud.MachineUploadFaceDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.fee.FeeDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.machine.MachineFaceDto;
 import com.java110.things.entity.machine.OperateLogDto;
 import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.response.ResultDto;
@@ -23,6 +25,7 @@ import com.java110.things.factory.HttpFactory;
 import com.java110.things.factory.ImageFactory;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.community.ICommunityService;
+import com.java110.things.service.machine.IMachineFaceService;
 import com.java110.things.service.machine.IOperateLogService;
 import com.java110.things.service.openDoor.IOpenDoorService;
 import com.java110.things.util.BeanConvertUtil;
@@ -69,6 +72,9 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
     @Autowired
     private IOpenDoorService openDoorServiceImpl;
 
+    @Autowired
+    private IMachineFaceServiceDao machineFaceServiceDaoImpl;
+
     /**
      * 查询设备信息
      *
@@ -81,6 +87,34 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
         List<MachineDto> machineDtos = machineServiceDao.getMachines(machineDto);
 
         return machineDtos;
+
+    }
+
+    /**
+     * 查询设备信息
+     *
+     * @return
+     */
+    public List<MachineDto> queryMachines(MachineDto machineDto) throws Exception {
+
+        machineDto.setMachineTypeCd(MachineConstant.MACHINE_TYPE_ACCESS_CONTROL);
+        List<MachineDto> machineDtos = machineServiceDao.getMachines(machineDto);
+
+        return machineDtos;
+
+    }
+
+    /**
+     * 查询设备信息
+     *
+     * @return
+     */
+    public List<MachineFaceDto> queryMachineFaces(MachineFaceDto machineFaceDto) throws Exception {
+
+        machineFaceDto.setMachineTypeCd(MachineConstant.MACHINE_TYPE_ACCESS_CONTROL);
+        List<MachineFaceDto> machineFaceDtos = machineFaceServiceDaoImpl.getMachineFaces(machineFaceDto);
+
+        return machineFaceDtos;
 
     }
 

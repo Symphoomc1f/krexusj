@@ -5,6 +5,7 @@ import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.fee.FeeDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.machine.MachineFaceDto;
 import com.java110.things.entity.machine.OperateLogDto;
 import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.room.RoomDto;
@@ -15,6 +16,7 @@ import com.java110.things.service.accessControl.IAssessControlProcess;
 import com.java110.things.service.accessControl.ICallAccessControlService;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.SeqUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +75,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
     public static final String CMD_FACE_SEARCH = "face_search";// 搜素设备
     public static final String CMD_SET_PASSWORD = "/setPassWord";// 设置密码
     public static final String CMD_SET_SYSTEMMODE = "/device/systemMode";// 设置模式
+    public static final String CMD_SET_IDENTIFY_CALLBACK = "/setIdentifyCallBack";// 设置回调地址
 
 
     //单设备处理
@@ -246,6 +249,18 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
             httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
             responseEntity = restTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
             saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_SYSTEMMODE, param.toJSONString(), responseEntity.getBody());
+
+            //设置回调地址
+            url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_SET_IDENTIFY_CALLBACK;
+            param = new JSONObject();
+            param.put("pass", password);
+            param.put("callbackUrl", MappingCacheFactory.getValue(MappingCacheFactory.COMMON_DOMAIN, "CJ_CALLBACK_URL"));
+            param.put("base64Enable", "2");
+            httpHeaders = new HttpHeaders();
+            httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+            responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+            saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_IDENTIFY_CALLBACK, param.toJSONString(), responseEntity.getBody());
+
         }
         return null;
     }
@@ -287,25 +302,44 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
     }
 
     @Override
-    public boolean httpFaceResult(String data) {
+    public String httpFaceResult(String data) {
         ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
+        JSONObject resultParam = new JSONObject();
         try {
-            JSONObject param = JSONObject.parseObject(data);
+            JSONObject body = JSONObject.parseObject(data);
+            MachineDto machineDto = new MachineDto();
+            machineDto.setMachineIp(body.getString("ip"));
+            List<MachineDto> machineDtos = notifyAccessControlService.queryMachines(machineDto);
 
-            if (param.containsKey("type") && !FACE_RESULT.equals(param.getString("type"))) {
-                return true;
+            if (machineDtos.size() < 0) {
+                resultParam.put("result", 1);
+                resultParam.put("success", true);
+                return resultParam.toJSONString();//未找到设备
             }
 
-            JSONObject body = param.getJSONObject("body");
+            String userId = body.containsKey("personId") ? body.getString("personId") : "";
+            String userName = "";
+            if (!StringUtils.isEmpty(userId)) {
+                MachineFaceDto machineFaceDto = new MachineFaceDto();
+                machineFaceDto.setUserId(userId);
+                machineFaceDto.setMachineId(machineDtos.get(0).getMachineId());
+                List<MachineFaceDto> machineFaceDtos = notifyAccessControlService.queryMachineFaces(machineFaceDto);
+                if (machineFaceDtos != null && machineFaceDtos.size() > 0) {
+                    userName = machineFaceDtos.get(0).getName();
+                }
+
+            }
+
+
             OpenDoorDto openDoorDto = new OpenDoorDto();
-            openDoorDto.setFace(body.getString("face_imgdata"));
-            openDoorDto.setUserName(body.containsKey("name") ? body.getString("name") : "");
-            openDoorDto.setHat(body.getString("hat"));
-            openDoorDto.setMachineCode(body.getString("sn"));
-            openDoorDto.setUserId(body.containsKey("per_id") ? body.getString("per_id") : "");
+            openDoorDto.setFace(body.getString("base64"));
+            openDoorDto.setUserName(userName);
+            openDoorDto.setHat("3");
+            openDoorDto.setMachineCode(machineDtos.get(0).getMachineCode());
+            openDoorDto.setUserId(userId);
             openDoorDto.setOpenId(SeqUtil.getId());
             openDoorDto.setOpenTypeCd(OPEN_TYPE_FACE);
-            openDoorDto.setSimilarity(body.containsKey("matched") ? body.getString("matched") : "0");
+            openDoorDto.setSimilarity(body.containsKey("identifyType") && "1".equals(body.getString("identifyType")) ? "100" : "0");
 
 
             freshOwnerFee(openDoorDto);
@@ -315,7 +349,10 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         } catch (Exception e) {
             logger.error("推送人脸失败", e);
         }
-        return false;
+        resultParam.put("result", 1);
+        resultParam.put("success", true);
+        return resultParam.toJSONString();//未找到设备
+
     }
 
     /**

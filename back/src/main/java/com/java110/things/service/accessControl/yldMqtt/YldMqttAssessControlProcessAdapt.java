@@ -349,13 +349,13 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
      * @return
      */
     @Override
-    public boolean httpFaceResult(String data) {
+    public String httpFaceResult(String data) {
         ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
         try {
             JSONObject param = JSONObject.parseObject(data);
 
             if (param.containsKey("type") && !FACE_RESULT.equals(param.getString("type"))) {
-                return true;
+                return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG).toString();
             }
 
             JSONObject body = param.getJSONObject("body");
@@ -377,7 +377,7 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
         } catch (Exception e) {
             logger.error("推送人脸失败", e);
         }
-        return false;
+        return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG).toString();
     }
 
     /**

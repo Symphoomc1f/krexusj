@@ -24,6 +24,7 @@ public class MappingCacheFactory {
     public final static String _SUFFIX_MAPPING = "_SUFFIX_MAPPING";
 
     public final static String SYSTEM_DOMAIN = "DOMAIN.SYSTEM";
+    public final static String COMMON_DOMAIN = "DOMAIN.COMMON";
 
     /**
      * 缓存

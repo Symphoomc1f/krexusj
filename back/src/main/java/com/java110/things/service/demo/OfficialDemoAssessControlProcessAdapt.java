@@ -82,7 +82,7 @@ public class OfficialDemoAssessControlProcessAdapt implements IAssessControlProc
     }
 
     @Override
-    public boolean httpFaceResult(String data) {
-        return false;
+    public String  httpFaceResult(String data) {
+        return "";
     }
 }

@@ -5,6 +5,7 @@ import com.java110.things.entity.cloud.MachineCmdResultDto;
 import com.java110.things.entity.cloud.MachineUploadFaceDto;
 import com.java110.things.entity.fee.FeeDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.machine.MachineFaceDto;
 import com.java110.things.entity.machine.OperateLogDto;
 import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.room.RoomDto;
@@ -27,6 +28,20 @@ public interface ICallAccessControlService {
      * @return
      */
     public List<MachineDto> queryMachines() throws Exception;
+
+    /**
+     * 查询设备信息
+     *
+     * @return
+     */
+    public List<MachineDto> queryMachines(MachineDto machineDto) throws Exception;
+
+    /**
+     * 查询设备人脸
+     *
+     * @return
+     */
+    public List<MachineFaceDto> queryMachineFaces(MachineFaceDto machineFaceDto) throws Exception;
 
     /**
      * 门禁 上报,当门禁上线时 建议将门禁自动上报，系统管理页面和云端可以自动注册设备
