@@ -123,6 +123,7 @@
       width="30%"
       :before-close="handleClose"
     >
+
       <span>您确定删除当前监控设备吗？</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="deleteMonitorDailogVisible = false">取 消</el-button>
@@ -138,19 +139,18 @@ import {
   getMonitorsByCondition,
   deleteMonitors,
   saveMonitor
-} from "@/api/monitorVedio";
-import Pagination from "@/components/Pagination";
-import { parseTime } from "@/utils";
+} from '@/api/monitorVedio'
+import Pagination from '@/components/Pagination'
 
 export default {
   filters: {
     statusFilter(status) {
       const statusMap = {
-        published: "success",
-        draft: "gray",
-        deleted: "danger"
-      };
-      return statusMap[status];
+        published: 'success',
+        draft: 'gray',
+        deleted: 'danger'
+      }
+      return statusMap[status]
     }
   },
   components: { Pagination },
@@ -159,92 +159,92 @@ export default {
       listQuery: {
         page: 1,
         row: 10,
-        machineTypeCd: "9996",
-        machineCode: "",
-        machineIp: "",
-        machineMac: ""
+        machineTypeCd: '9996',
+        machineCode: '',
+        machineIp: '',
+        machineMac: ''
       },
       list: null,
       listLoading: true,
       deleteMonitorDailogVisible: false,
       dialogFormVisible: false,
       curMonitor: {},
-      dialogStatus:'create',
+      dialogStatus: 'create',
       temp: {
         id: undefined,
         importance: 1,
-        remark: "",
+        remark: '',
         timestamp: new Date(),
-        title: "",
-        type: "",
-        status: "published"
+        title: '',
+        type: '',
+        status: 'published'
       },
       rules: {
         type: [
-          { required: true, message: "type is required", trigger: "change" }
+          { required: true, message: 'type is required', trigger: 'change' }
         ],
         timestamp: [
           {
-            type: "date",
+            type: 'date',
             required: true,
-            message: "timestamp is required",
-            trigger: "change"
+            message: 'timestamp is required',
+            trigger: 'change'
           }
         ],
         title: [
-          { required: true, message: "title is required", trigger: "blur" }
+          { required: true, message: 'title is required', trigger: 'blur' }
         ]
       }
-    };
+    }
   },
   created() {
-    this.fetchData();
+    this.fetchData()
   },
   methods: {
     fetchData() {
-      this.listLoading = true;
+      this.listLoading = true
       getMonitors().then(response => {
-        this.list = response.data;
-        this.listLoading = false;
-      });
+        this.list = response.data
+        this.listLoading = false
+      })
     },
     queryMachine() {
-      this.listLoading = true;
+      this.listLoading = true
       getMonitorsByCondition(this.listQuery).then(response => {
-        this.list = response.data;
-        this.listLoading = false;
-      });
+        this.list = response.data
+        this.listLoading = false
+      })
     },
     addMonitor() {
-      this.dialogFormVisible = true;
+      this.dialogFormVisible = true
     },
     deleteMonitor(_row) {
-      this.deleteMonitorDailogVisible = true;
-      this.curMonitor = _row;
+      this.deleteMonitorDailogVisible = true
+      this.curMonitor = _row
     },
     doDeleteMonitor() {
-      this.listLoading = true;
+      this.listLoading = true
       deleteMonitors(this.curMonitor).then(response => {
-        this.listLoading = false;
+        this.listLoading = false
         this.$message({
-          type: "info",
+          type: 'info',
           message: response.msg
-        });
-        this.deleteMonitorDailogVisible = false;
-        this.queryMachine();
-      });
+        })
+        this.deleteMonitorDailogVisible = false
+        this.queryMachine()
+      })
     },
     restartMonitor(_row) {},
-    createData(){
-      this.temp.machineTypeCd = '9996';
+    createData() {
+      this.temp.machineTypeCd = '9996'
       saveMonitor(this.temp).then(response => {
-        this.listLoading = false;
-        this.dialogFormVisible = false;
-        this.queryMachine();
-      });
+        this.listLoading = false
+        this.dialogFormVisible = false
+        this.queryMachine()
+      })
     },
-    updateData(){}
+    updateData() {}
 
   }
-};
+}
 </script>
