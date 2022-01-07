@@ -170,7 +170,6 @@ export default {
       dialogFormVisible: false,
       curMonitor: {},
       dialogStatus:'create',
-      machineTypeCds:[1,2,3],
       temp: {
         id: undefined,
         importance: 1,
