@@ -113,6 +113,12 @@ export const constantRoutes = [
         name: '道闸',
         component: () => import('@/views/barrierGate/barrierGate'),
         meta: { title: '道闸设备', icon: 'table' }
+      },
+      {
+        path: 'carProtocol',
+        name: '道闸',
+        component: () => import('@/views/carProtocol/carProtocol'),
+        meta: { title: '道闸协议', icon: 'table' }
       }
     ]
   },

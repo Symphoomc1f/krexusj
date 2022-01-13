@@ -32,7 +32,7 @@ spring :
   datasource:
     username: hc_things
     password: hc_things12345678
-    url: jdbc:mysql://122.51.219.127:3306/hc_things?
+    url: jdbc:mysql://things.homecommunity.cn:3306/hc_things?
     useUnicode: true&characterEncoding=gbk&zeroDateTimeBehavior=convertToNull&useSSL=false
     driver-class-name: com.mysql.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
