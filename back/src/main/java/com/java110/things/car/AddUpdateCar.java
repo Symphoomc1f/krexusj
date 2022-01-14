@@ -7,11 +7,17 @@ import com.java110.things.constant.ExceptionConstant;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
+import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.MachineFaceDto;
+import com.java110.things.entity.response.ResultDto;
 import com.java110.things.exception.HeartbeatCloudException;
-import com.java110.things.factory.*;
+import com.java110.things.factory.CarProcessFactory;
+import com.java110.things.factory.HttpFactory;
+import com.java110.things.factory.ImageFactory;
+import com.java110.things.factory.MappingCacheFactory;
+import com.java110.things.service.car.ICarService;
 import com.java110.things.service.machine.IMachineFaceService;
 import com.java110.things.util.BeanConvertUtil;
 import com.java110.things.util.DateUtil;
@@ -42,6 +48,9 @@ public class AddUpdateCar extends BaseCar {
 
     @Autowired
     private IMachineFaceService machineFaceService;
+
+    @Autowired
+    private ICarService carService;
 
 
     /**
@@ -109,7 +118,30 @@ public class AddUpdateCar extends BaseCar {
 
         userFaceDto.setEndTime(DateUtil.getFormatTimeString(endTime, DateUtil.DATE_FORMATE_STRING_A));
         userFaceDto.setUserId(data.getString("userid"));
+
         CarProcessFactory.getCarImpl().addAndUpdateCar(userFaceDto);
+
+        //保存数据
+
+        CarDto carDto = new CarDto();
+        carDto.setCarId(data.getString("userid"));
+        carDto.setCarNum(data.getString("name"));
+        carDto.setStartTime(startTime);
+        carDto.setEndTime(endTime);
+        carDto.setCreateTime(new Date());
+        carDto.setCommunityId(communityDto.getCommunityId());
+
+        CarDto tmpCarDto = new CarDto();
+        tmpCarDto.setCarId(data.getString("userid"));
+
+        ResultDto resultDto = carService.getCar(tmpCarDto);
+
+        if (resultDto.getTotal() > 0) {
+            carService.updateCar(carDto);
+        } else {
+            carService.saveCar(carDto);
+        }
+
 
     }
 
