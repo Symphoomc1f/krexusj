@@ -119,30 +119,36 @@ export const constantRoutes = [
         name: '道闸',
         component: () => import('@/views/carProtocol/carProtocol'),
         meta: { title: '道闸协议', icon: 'table' }
-      }
-    ]
-  },
-  {
-    path: '/monitor',
-    component: Layout,
-    redirect: '/monitor/monitor',
-    name: 'Example',
-    meta: { title: '监控管理', icon: 'example' },
-    children: [
-      {
-        path: 'monitor',
-        name: '道闸',
-        component: () => import('@/views/monitorVedio/monitorVedio'),
-        meta: { title: '监控设备', icon: 'table' }
       },
       {
-        path: 'camera',
-        name: '摄像头',
-        component: () => import('@/views/camera/camera'),
-        meta: { title: '摄像头', icon: 'table' }
+        path: 'car',
+        name: '道闸',
+        component: () => import('@/views/car/car'),
+        meta: { title: '同步车辆', icon: 'table' }
       }
     ]
   },
+  // {
+  //   path: '/monitor',
+  //   component: Layout,
+  //   redirect: '/monitor/monitor',
+  //   name: 'Example',
+  //   meta: { title: '监控管理', icon: 'example' },
+  //   children: [
+  //     {
+  //       path: 'monitor',
+  //       name: '道闸',
+  //       component: () => import('@/views/monitorVedio/monitorVedio'),
+  //       meta: { title: '监控设备', icon: 'table' }
+  //     },
+  //     {
+  //       path: 'camera',
+  //       name: '摄像头',
+  //       component: () => import('@/views/camera/camera'),
+  //       meta: { title: '摄像头', icon: 'table' }
+  //     }
+  //   ]
+  // },
   {
     path: '/attendance',
     component: Layout,
