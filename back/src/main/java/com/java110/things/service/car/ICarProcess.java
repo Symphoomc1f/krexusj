@@ -3,6 +3,7 @@ package com.java110.things.service.car;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineDto;
+import io.netty.channel.ChannelHandlerContext;
 
 import java.util.List;
 
@@ -66,6 +67,13 @@ public interface ICarProcess {
      * @return 处理成功时返回 true 失败时返回false
      */
     String httpFaceResult(String data);
+
+    /**
+     * 接受消息
+     * @param content
+     * @return
+     */
+    Long accept(String content, ChannelHandlerContext ctx);
 
 
 

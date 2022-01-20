@@ -71,6 +71,10 @@ spring :
     username: admin
     keepalive: 10
 
+netty:
+  server:
+    port: 11211
+
 mybatis:
   mapper-locations: classpath:mapper/*/*Mapper.xml
   type-aliases-package: com.java110.things.entity
