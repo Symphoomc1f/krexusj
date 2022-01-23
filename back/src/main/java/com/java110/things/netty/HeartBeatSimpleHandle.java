@@ -3,7 +3,6 @@ package com.java110.things.netty;
 import com.java110.things.factory.CarProcessFactory;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -17,7 +16,7 @@ import org.slf4j.LoggerFactory;
 public class HeartBeatSimpleHandle extends SimpleChannelInboundHandler<String> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(HeartBeatSimpleHandle.class);
-    private static final ByteBuf HEART_BEAT = Unpooled.unreleasableBuffer(Unpooled.copiedBuffer(new CustomProtocol(123456L, "http://www.homecommunity.cn").toString(), CharsetUtil.UTF_8));
+    private static final ByteBuf HEART_BEAT = Unpooled.unreleasableBuffer(Unpooled.copiedBuffer(new Java110CarProtocol(123456L, "http://www.homecommunity.cn").toString(), CharsetUtil.UTF_8));
 
     /**
      * 取消绑定
@@ -46,12 +45,10 @@ public class HeartBeatSimpleHandle extends SimpleChannelInboundHandler<String> {
     protected void channelRead0(ChannelHandlerContext ctx, String content) throws Exception {
         LOGGER.info("收到customProtocol={}", content);
 
-        Long id = CarProcessFactory.getCarImpl().accept(content,ctx);
-        //我们调用writeAndFlush（Object）来逐字写入接收到的消息并刷新线路
-        //ctx.writeAndFlush(customProtocol);
+        Java110CarProtocol java110CarProtocol = CarProcessFactory.getCarImpl().accept(content);
+        ctx.channel().writeAndFlush(Unpooled.unreleasableBuffer(Unpooled.copiedBuffer(java110CarProtocol.getContent(), CharsetUtil.UTF_8)));
         //保存客户端与 Channel 之间的关系
-        ctx.channel().writeAndFlush("来自服务端");
-        NettySocketHolder.put(id, (NioSocketChannel) ctx.channel());
+        NettySocketHolder.put(java110CarProtocol.getId(), (NioSocketChannel) ctx.channel());
 
     }
 }

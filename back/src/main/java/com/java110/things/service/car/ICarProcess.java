@@ -3,6 +3,7 @@ package com.java110.things.service.car;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.netty.Java110CarProtocol;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.util.List;
@@ -73,7 +74,13 @@ public interface ICarProcess {
      * @param content
      * @return
      */
-    Long accept(String content, ChannelHandlerContext ctx);
+    Java110CarProtocol accept(String content);
+
+    /**
+     * 查询需要支付的订单
+     * @return
+     */
+    String getNeedPayOrder();
 
 
 
