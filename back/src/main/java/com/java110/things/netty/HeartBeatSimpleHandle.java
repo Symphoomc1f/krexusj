@@ -1,5 +1,6 @@
 package com.java110.things.netty;
 
+import com.alibaba.fastjson.JSONObject;
 import com.java110.things.factory.CarProcessFactory;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -20,6 +21,7 @@ public class HeartBeatSimpleHandle extends SimpleChannelInboundHandler<String> {
 
     /**
      * 取消绑定
+     *
      * @param ctx
      * @throws Exception
      */
@@ -50,5 +52,22 @@ public class HeartBeatSimpleHandle extends SimpleChannelInboundHandler<String> {
         //保存客户端与 Channel 之间的关系
         NettySocketHolder.put(java110CarProtocol.getId(), (NioSocketChannel) ctx.channel());
 
+        judgeSyncQuery(content);
+    }
+
+    private void judgeSyncQuery(String contentStr) {
+
+        JSONObject content = JSONObject.parseObject(contentStr);
+
+        if (!content.containsKey("service") || !"query_price".equals(content.getString("service"))) {
+            return;
+        }
+
+        String carNum = content.getString("car_number");
+
+        if (!ServerTools.checkQuery(carNum)) {
+            return;
+        }
+        ServerTools.appendQueryDequeData(carNum, content);
     }
 }

@@ -61,20 +61,18 @@ public class CarController extends BaseController {
      */
     @RequestMapping(path = "/getNeedPayOrder", method = RequestMethod.GET)
     public ResponseEntity<String> getNeedPayOrder(@RequestParam int page,
-                                          @RequestParam int row,
-                                          @RequestParam(name = "carNum", required = false) String carNum) throws Exception {
+                                                  @RequestParam int row,
+                                                  @RequestParam(name = "carNum", required = false) String carNum) throws Exception {
 
         CarDto carDto = new CarDto();
         carDto.setPage(page);
         carDto.setRow(row);
         carDto.setCarNum(carNum);
 
-         aiCarSocketProcessAdapt.getNeedPayOrder();
-         ResultDto resultDto = new ResultDto(0,"成功");
+        String data = aiCarSocketProcessAdapt.getNeedPayOrder();
+        ResultDto resultDto = new ResultDto(0, "成功", data);
         return super.createResponseEntity(resultDto);
     }
-
-
 
 
 }

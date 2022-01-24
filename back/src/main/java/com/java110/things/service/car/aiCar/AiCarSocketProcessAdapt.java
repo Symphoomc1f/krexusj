@@ -94,8 +94,8 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
                 "    \"car_number\": \"浙CBB123\",\n" +
                 "    \"pay_scene\": 0\n" +
                 "  }");
-        ChannelFuture channelFuture = NettySocketHolder.sendMsg(java110CarProtocol);
-        return null;
+        JSONObject data = NettySocketHolder.sendMsg(java110CarProtocol,"浙CBB123");
+        return data.toJSONString();
     }
 
     /**
