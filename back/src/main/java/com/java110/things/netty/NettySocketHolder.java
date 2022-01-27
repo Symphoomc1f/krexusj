@@ -34,7 +34,7 @@ public class NettySocketHolder {
     }
 
 
-    public static JSONObject sendMsg(Java110CarProtocol java110CarProtocol, String queryId) {
+    public static JSONObject sendMsgSync(Java110CarProtocol java110CarProtocol, String queryId) {
         NioSocketChannel channel = get(java110CarProtocol.getId());
         if (channel == null) {
             throw new NoSuchElementException("未包含该链接");
@@ -55,5 +55,14 @@ public class NettySocketHolder {
             logger.error("查询失败", e);
         }
         return data;
+    }
+
+    public static void sendMsg(Java110CarProtocol java110CarProtocol) {
+        NioSocketChannel channel = get(java110CarProtocol.getId());
+        if (channel == null) {
+            throw new NoSuchElementException("未包含该链接");
+        }
+
+        channel.writeAndFlush(Unpooled.unreleasableBuffer(Unpooled.copiedBuffer(java110CarProtocol.getContent(), CharsetUtil.UTF_8)));
     }
 }

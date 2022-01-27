@@ -8,7 +8,7 @@ import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.netty.Java110CarProtocol;
 import com.java110.things.netty.NettySocketHolder;
 import com.java110.things.service.car.ICarProcess;
-import io.netty.channel.ChannelFuture;
+import com.java110.things.util.DateUtil;
 import org.springframework.stereotype.Service;
 
 /**
@@ -31,9 +31,51 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
         return null;
     }
 
+    /**
+     * {
+     * "service": "whitelist_sync",
+     * "parkid": "20180001",
+     * "car_number": "粤B99999",
+     * "car_type": 0,
+     * "card_type": 1,
+     * "startdate": "2019-05-25 00:00:01",
+     * "validdate": "2019-06-24 23:59:59",
+     * "cardmoney": 230.50,
+     * "period": "月",
+     * "carusername": "老陈",
+     * "carusertel": "13822220222",
+     * "drive_no": "NO111111222",
+     * "address": "xxxx市xxx区xxx路112号",
+     * "carlocate": "A-1-10",
+     * "create_time": "2019-05-25 20:11:48",
+     * "modify_time": "2019-05-25 20:11:48",
+     * "operator": "李四",
+     * "operate_type": 1,
+     * "limitdaytype": 0,
+     * "remark": ""
+     * }
+     *
+     * @param userFaceDto 用户人脸信息
+     */
     @Override
     public void addAndUpdateCar(UserFaceDto userFaceDto) {
-
+        JSONObject data = new JSONObject();
+        data.put("service", "whitelist_sync");
+        data.put("parkid", "20180001");
+        data.put("car_number", userFaceDto.getName());
+        data.put("car_type", "0");
+        data.put("startdate", userFaceDto.getStartTime());
+        data.put("validdate", userFaceDto.getEndTime());
+        data.put("cardmoney", 0.00);
+        data.put("period", "月");
+        data.put("carusername", "月");
+        data.put("create_time", DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
+        data.put("modify_time", DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
+        data.put("operate_type", "1");
+        Java110CarProtocol java110CarProtocol = new Java110CarProtocol();
+        java110CarProtocol.setId(20180001L);
+        java110CarProtocol.setContent(data.toJSONString());
+        NettySocketHolder.sendMsg(java110CarProtocol);
     }
 
     @Override
@@ -94,7 +136,7 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
                 "    \"car_number\": \"浙CBB123\",\n" +
                 "    \"pay_scene\": 0\n" +
                 "  }");
-        JSONObject data = NettySocketHolder.sendMsg(java110CarProtocol,"浙CBB123");
+        JSONObject data = NettySocketHolder.sendMsgSync(java110CarProtocol, "浙CBB123");
         return data.toJSONString();
     }
 

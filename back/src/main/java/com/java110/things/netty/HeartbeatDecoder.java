@@ -10,6 +10,7 @@ public class HeartbeatDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
         //long id = byteBuf.readLong();
+        System.out.println("byteBuf.length = "+byteBuf.capacity());
         byte[] bytes = new byte[byteBuf.readableBytes()];
         byteBuf.readBytes(bytes);
         String content = new String(bytes,"utf-8");
