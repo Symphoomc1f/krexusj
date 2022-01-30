@@ -3,8 +3,10 @@ package com.java110.things.car;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.config.Java110Properties;
 import com.java110.things.constant.AccessControlConstant;
+import com.java110.things.constant.CarConstant;
 import com.java110.things.constant.ExceptionConstant;
 import com.java110.things.constant.ResponseConstant;
+import com.java110.things.entity.accessControl.CarResultDto;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.car.CarDto;
@@ -30,9 +32,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
 
 /**
  * 添加更新人脸
@@ -58,7 +60,7 @@ public class AddUpdateCar extends BaseCar {
      *
      * @param heartbeatTaskDto 心跳下发任务指令
      */
-    public void addUpdateCar(HeartbeatTaskDto heartbeatTaskDto, CommunityDto communityDto) throws Exception {
+    public void addUpdateCar(HeartbeatTaskDto heartbeatTaskDto, CommunityDto communityDto, int action) throws Exception {
 
 
         String url = MappingCacheFactory.getValue("CLOUD_API") + AccessControlConstant.MACHINE_QUERY_USER_INFO;
@@ -106,35 +108,47 @@ public class AddUpdateCar extends BaseCar {
 
         JSONObject data = paramOut.getJSONObject("data");
 
-        UserFaceDto userFaceDto = BeanConvertUtil.covertBean(data, UserFaceDto.class);
+        CarResultDto carResultDto = BeanConvertUtil.covertBean(data, CarResultDto.class);
 
-        userFaceDto.setTaskId(heartbeatTaskDto.getTaskid());
 
         Date startTime = new Date(data.getLong("startTime"));
 
-        userFaceDto.setStartTime(DateUtil.getFormatTimeString(startTime, DateUtil.DATE_FORMATE_STRING_A));
+        carResultDto.setStartTime(DateUtil.getFormatTimeString(startTime, DateUtil.DATE_FORMATE_STRING_A));
 
         Date endTime = new Date(data.getLong("endTime"));
 
-        userFaceDto.setEndTime(DateUtil.getFormatTimeString(endTime, DateUtil.DATE_FORMATE_STRING_A));
-        userFaceDto.setUserId(data.getString("userid"));
+        carResultDto.setEndTime(DateUtil.getFormatTimeString(endTime, DateUtil.DATE_FORMATE_STRING_A));
+        CarDto tmpCarDto = new CarDto();
+        tmpCarDto.setCarId(carResultDto.getCarId());
+        ResultDto resultDto = carService.getCar(tmpCarDto);
 
-        CarProcessFactory.getCarImpl().addAndUpdateCar(userFaceDto);
+        if (action == CarConstant.CMD_ADD_CAR) {
+            CarProcessFactory.getCarImpl().addCar(carResultDto);
+        } else {
+            if (resultDto.getTotal() < 1) {
+                throw new IllegalArgumentException("未找到 车辆记录");
+            }
+            List<CarDto> carDtoList = (List<CarDto>) resultDto.getData();
+
+            Date preTime = carDtoList.get(0).getEndTime();
+
+            double month = dayCompare(preTime, endTime);
+
+            carResultDto.setCycles(month);
+
+            CarProcessFactory.getCarImpl().updateCar(carResultDto);
+        }
 
         //保存数据
 
         CarDto carDto = new CarDto();
-        carDto.setCarId(data.getString("userid"));
-        carDto.setCarNum(data.getString("name"));
+        carDto.setCarId(carResultDto.getCarId());
+        carDto.setCarNum(carResultDto.getCarNum());
         carDto.setStartTime(startTime);
         carDto.setEndTime(endTime);
         carDto.setCreateTime(new Date());
         carDto.setCommunityId(communityDto.getCommunityId());
 
-        CarDto tmpCarDto = new CarDto();
-        tmpCarDto.setCarId(data.getString("userid"));
-
-        ResultDto resultDto = carService.getCar(tmpCarDto);
 
         if (resultDto.getTotal() > 0) {
             carService.updateCar(carDto);
@@ -186,6 +200,41 @@ public class AddUpdateCar extends BaseCar {
         ImageFactory.GenerateImage(faceBase, machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
 
 
+    }
+
+
+    /**
+     * 计算2个日期之间相差的  以年、月、日为单位，各自计算结果是多少
+     * 比如：2011-02-02 到  2017-03-02
+     * 以年为单位相差为：6年
+     * 以月为单位相差为：73个月
+     * 以日为单位相差为：2220天
+     *
+     * @param fromDate
+     * @param toDate
+     * @return
+     */
+    public static double dayCompare(Date fromDate, Date toDate) {
+        Calendar from = Calendar.getInstance();
+        from.setTime(fromDate);
+        Calendar to = Calendar.getInstance();
+        to.setTime(toDate);
+        int result = to.get(Calendar.MONTH) - from.get(Calendar.MONTH);
+        int month = (to.get(Calendar.YEAR) - from.get(Calendar.YEAR)) * 12;
+
+        result = result + month;
+        Calendar newFrom = Calendar.getInstance();
+        newFrom.setTime(fromDate);
+        newFrom.add(Calendar.MONTH, result);
+
+        long t1 = newFrom.getTimeInMillis();
+        long t2 = to.getTimeInMillis();
+        long days = (t2 - t1) / (24 * 60 * 60 * 1000);
+
+        BigDecimal tmpDays = new BigDecimal(days);
+        BigDecimal monthDay = new BigDecimal(30);
+
+        return tmpDays.divide(monthDay, 2, RoundingMode.HALF_UP).doubleValue() + result;
     }
 
 

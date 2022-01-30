@@ -24,7 +24,8 @@ public class CarConstant {
     public final static String MACHINE_QUERY_USER_INFO="/api/machineTranslate.machineQueryUserInfo";
 
     //增加/更新人脸
-    public final static int CMD_ADD_UPDATE_CAR = 201;
+    public final static int CMD_ADD_CAR = 201;
+    public final static int CMD_UPDATE_CAR = 203;
 
     //删除人脸
     public final static int CMD_DELETE_CAR = 202;

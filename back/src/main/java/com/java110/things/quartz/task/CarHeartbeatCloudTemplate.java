@@ -238,8 +238,11 @@ public class CarHeartbeatCloudTemplate extends TaskSystemQuartz {
         HeartbeatTaskDto heartbeatTaskDto = BeanConvertUtil.covertBean(commandInfo, HeartbeatTaskDto.class);
 
         switch (commandInfo.getInteger("taskcmd")) {
-            case CarConstant.CMD_ADD_UPDATE_CAR:
-                addUpdateCar.addUpdateCar(heartbeatTaskDto, communityDto);
+            case CarConstant.CMD_ADD_CAR:
+                addUpdateCar.addUpdateCar(heartbeatTaskDto, communityDto,CarConstant.CMD_ADD_CAR);
+                break;
+            case CarConstant.CMD_UPDATE_CAR:
+                addUpdateCar.addUpdateCar(heartbeatTaskDto, communityDto,CarConstant.CMD_UPDATE_CAR);
                 break;
             case CarConstant.CMD_DELETE_CAR:
                 deleteCar.deleteCar(heartbeatTaskDto, communityDto);

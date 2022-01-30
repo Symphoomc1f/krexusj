@@ -2,6 +2,7 @@ package com.java110.things.service.car.aiCar;
 
 
 import com.alibaba.fastjson.JSONObject;
+import com.java110.things.entity.accessControl.CarResultDto;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineDto;
@@ -55,20 +56,20 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
      * "remark": ""
      * }
      *
-     * @param userFaceDto 用户人脸信息
+     * @param carResultDto 用户人脸信息
      */
     @Override
-    public void addAndUpdateCar(UserFaceDto userFaceDto) {
+    public void addCar(CarResultDto carResultDto) {
         JSONObject data = new JSONObject();
         data.put("service", "whitelist_sync");
         data.put("parkid", "20180001");
-        data.put("car_number", userFaceDto.getName());
+        data.put("car_number", carResultDto.getCarNum());
         data.put("car_type", "0");
-        data.put("startdate", userFaceDto.getStartTime());
-        data.put("validdate", userFaceDto.getEndTime());
+        data.put("startdate", carResultDto.getStartTime());
+        data.put("validdate", carResultDto.getEndTime());
         data.put("cardmoney", 0.00);
         data.put("period", "月");
-        data.put("carusername", "月");
+        data.put("carusername", carResultDto.getName());
         data.put("create_time", DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
         data.put("modify_time", DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
         data.put("operate_type", "1");
@@ -78,9 +79,49 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
         NettySocketHolder.sendMsg(java110CarProtocol);
     }
 
+    /**
+     * {
+     *     "service": "whitelist_pay_sync",
+     *     "parkid": "20180001",
+     *     "car_number": "粤B99999",
+     *     "period": "月",
+     *     "pay_count": 1,
+     *     "pay_money": 230.50,
+     *     "pay_time": "2018-07-26 20:11:48",
+     *     "trade_no": "PZ000020190528172533",
+     *     "remark": "延期一个月"
+     *   }
+     * @param carResultDto
+     */
     @Override
-    public void deleteCar(HeartbeatTaskDto heartbeatTaskDto) {
+    public void updateCar(CarResultDto carResultDto) {
+        JSONObject data = new JSONObject();
+        data.put("service", "whitelist_pay_sync");
+        data.put("parkid", "20180001");
+        data.put("car_number", carResultDto.getCarNum());
+        data.put("period", "月");
+        data.put("pay_count", (int)Math.floor(carResultDto.getCycles()));
+        data.put("pay_money", 0.00);
+        data.put("pay_time", DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
+        data.put("trade_no", carResultDto.getCarId());
+        data.put("remark", "");
+        Java110CarProtocol java110CarProtocol = new Java110CarProtocol();
+        java110CarProtocol.setId(20180001L);
+        java110CarProtocol.setContent(data.toJSONString());
+        NettySocketHolder.sendMsg(java110CarProtocol);
+    }
 
+    @Override
+    public void deleteCar(CarResultDto carResultDto) {
+        JSONObject data = new JSONObject();
+        data.put("service", "whitelist_sync");
+        data.put("parkid", "20180001");
+        data.put("car_number", carResultDto.getCarNum());
+        data.put("operate_type", "3");
+        Java110CarProtocol java110CarProtocol = new Java110CarProtocol();
+        java110CarProtocol.setId(20180001L);
+        java110CarProtocol.setContent(data.toJSONString());
+        NettySocketHolder.sendMsg(java110CarProtocol);
     }
 
     @Override

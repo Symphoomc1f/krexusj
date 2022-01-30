@@ -1,5 +1,6 @@
 package com.java110.things.service.car;
 
+import com.java110.things.entity.accessControl.CarResultDto;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineDto;
@@ -38,16 +39,19 @@ public interface ICarProcess {
 
     /**
      * 添加修改车牌
-     * @param userFaceDto 用户人脸信息
+     * @param carResultDto 用户人脸信息
      */
-    void addAndUpdateCar(UserFaceDto userFaceDto);
+    void addCar(CarResultDto carResultDto);
+
+
+    void updateCar(CarResultDto carResultDto);
 
 
     /**
      * 删除车牌
-     * @param heartbeatTaskDto 任务ID
+     * @param carResultDto 任务ID
      */
-    void deleteCar(HeartbeatTaskDto heartbeatTaskDto);
+    void deleteCar(CarResultDto carResultDto);
 
 
     /**
