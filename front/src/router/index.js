@@ -125,6 +125,18 @@ export const constantRoutes = [
         name: '道闸',
         component: () => import('@/views/car/car'),
         meta: { title: '同步车辆', icon: 'table' }
+      },
+      {
+        path: 'carIn',
+        name: '道闸',
+        component: () => import('@/views/carIn/carIn'),
+        meta: { title: '车辆进场', icon: 'table' }
+      },
+      {
+        path: 'carOut',
+        name: '道闸',
+        component: () => import('@/views/carOut/carOut'),
+        meta: { title: '车辆出场', icon: 'table' }
       }
     ]
   },

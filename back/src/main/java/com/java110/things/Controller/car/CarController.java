@@ -2,7 +2,9 @@ package com.java110.things.Controller.car;
 
 import com.java110.things.Controller.BaseController;
 import com.java110.things.entity.car.CarDto;
+import com.java110.things.entity.car.CarInoutDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.service.car.ICarInoutService;
 import com.java110.things.service.car.ICarProcess;
 import com.java110.things.service.car.ICarService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,9 @@ public class CarController extends BaseController {
     private ICarService carServiceImpl;
 
     @Autowired
+    private ICarInoutService carInoutService;
+
+    @Autowired
     private ICarProcess aiCarSocketProcessAdapt;
 
 
@@ -49,6 +54,28 @@ public class CarController extends BaseController {
         carDto.setCarNum(carNum);
 
         ResultDto resultDto = carServiceImpl.getCar(carDto);
+        return super.createResponseEntity(resultDto);
+    }
+
+    /**
+     * 添加设备接口类
+     *
+     * @param carNum 页数
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/getCarInouts", method = RequestMethod.GET)
+    public ResponseEntity<String> getCarInouts(@RequestParam int page,
+                                               @RequestParam int row,
+                                               @RequestParam(name = "carNum", required = false) String carNum,
+                                               @RequestParam(name = "inoutType", required = false) String inoutType) throws Exception {
+
+        CarInoutDto carInoutDto = new CarInoutDto();
+        carInoutDto.setPage(page);
+        carInoutDto.setRow(row);
+        carInoutDto.setCarNum(carNum);
+        carInoutDto.setInoutType(inoutType);
+        ResultDto resultDto = carInoutService.getCarInout(carInoutDto);
         return super.createResponseEntity(resultDto);
     }
 

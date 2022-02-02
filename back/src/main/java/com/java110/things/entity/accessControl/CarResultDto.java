@@ -28,6 +28,12 @@ public class CarResultDto implements Serializable {
 
     private double cycles;
 
+    private String num;
+
+    private String paId;
+
+    private String areaNum;
+
     public String getCarId() {
         return carId;
     }
@@ -130,5 +136,29 @@ public class CarResultDto implements Serializable {
 
     public void setCycles(double cycles) {
         this.cycles = cycles;
+    }
+
+    public String getNum() {
+        return num;
+    }
+
+    public void setNum(String num) {
+        this.num = num;
+    }
+
+    public String getPaId() {
+        return paId;
+    }
+
+    public void setPaId(String paId) {
+        this.paId = paId;
+    }
+
+    public String getAreaNum() {
+        return areaNum;
+    }
+
+    public void setAreaNum(String areaNum) {
+        this.areaNum = areaNum;
     }
 }

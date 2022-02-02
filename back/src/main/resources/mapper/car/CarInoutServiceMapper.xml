@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java110.things.dao.ICarInoutServiceDao">
+
+    <insert id="saveCarInout" parameterType="com.java110.things.entity.car.CarInoutDto">
+        INSERT INTO car_inout(`inout_id`, `community_id`, `car_num`, `car_type`, `open_time`, `gate_name`,
+        `pay_charge`, `real_charge`, `pay_type`, `remark`, `inout_type`)
+        VALUES (#{inoutId}, #{communityId}, #{carNum}, #{carType}, #{openTime}, #{gateName}, #{payCharge},
+        #{realCharge}, #{payType}, #{remark}, #{inoutType})
+    </insert>
+    <!--
+        查询设备信息
+    -->
+    <select id="getCarInouts" parameterType="com.java110.things.entity.car.CarInoutDto"
+            resultType="com.java110.things.entity.car.CarInoutDto">
+        select
+            t.inout_id inoutId,
+            t.community_id communityId,
+            t.car_num carNum,
+            t.car_type carType,
+            t.open_time openTime,
+            t.gate_name gateName,
+            t.pay_charge payCharge,
+            t.real_charge realCharge,
+            t.pay_type payType,
+            t.remark,
+            t.inout_type inoutType
+        from car_inout t
+        where 1=1
+        <if test="inoutId != null and inoutId != ''">
+            and t.inout_id = #{inoutId}
+        </if>
+        <if test="carNum != null and carNum != ''">
+            and t.car_num = #{carNum}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="inoutType != null and inoutType != ''">
+            and t.inout_type = #{inoutType}
+        </if>
+        order by t.create_time desc
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+
+    </select>
+
+    <select id="getCarInoutCount" parameterType="com.java110.things.entity.car.CarInoutDto" resultType="long">
+        select
+        count(1) count
+        from car_inout t
+        where 1=1
+        <if test="inoutId != null and inoutId != ''">
+            and t.inout_id = #{inoutId}
+        </if>
+        <if test="carNum != null and carNum != ''">
+            and t.car_num = #{carNum}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="inoutType != null and inoutType != ''">
+            and t.inout_type = #{inoutType}
+        </if>
+
+    </select>
+
+    <update id="updateCarInout" parameterType="com.java110.things.entity.car.CarInoutDto">
+        update car_inout t
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="statusCd != null and statusCd != ''">
+                t.status_cd = #{statusCd},
+            </if>
+        </trim>
+        where 1=1
+        <if test="inoutId != null and inoutId != ''">
+            and t.inout_id = #{inoutId}
+        </if>
+        <if test="carNum != null and carNum != ''">
+            and t.car_num = #{carNum}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="inoutType != null and inoutType != ''">
+            and t.inout_type = #{inoutType}
+        </if>
+    </update>
+
+    <delete id="delete" parameterType="com.java110.things.entity.car.CarInoutDto">
+		delete from car_inout where inout_id = #{inoutId}
+	</delete>
+
+</mapper>
