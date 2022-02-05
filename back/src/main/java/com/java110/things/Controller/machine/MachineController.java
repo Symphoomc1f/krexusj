@@ -87,6 +87,34 @@ public class MachineController extends BaseController {
     }
 
 
+    //添加道闸
+    @RequestMapping(path = "/saveBarrierGate", method = RequestMethod.POST)
+    public ResponseEntity<String> saveBarrierGate(@RequestBody String param) throws Exception {
+
+        JSONObject paramObj = super.getParamJson(param);
+
+        Assert.hasKeyAndValue(paramObj, "machineMac", "请求报文中未包含硬件mac地址");
+
+        Assert.hasKeyAndValue(paramObj, "machineCode", "请求报文中未包含硬件编码");
+
+        Assert.hasKeyAndValue(paramObj, "machineVersion", "请求报文中未包含硬件版本号");
+
+        Assert.hasKeyAndValue(paramObj, "machineIp", "请求报文中未包含硬件IP");
+
+        Assert.hasKeyAndValue(paramObj, "machineName", "请求报文中未包含硬件名称，如果没有可以填写mac或者IP");
+
+        if (!paramObj.containsKey("machineTypeCd")) {
+            paramObj.put("machineTypeCd", MachineConstant.MACHINE_TYPE_BARRIER_GATE);
+        }
+
+        paramObj.put("machineId", UUID.randomUUID().toString());
+
+
+        ResultDto resultDto = machineServiceImpl.saveMachine(BeanConvertUtil.covertBean(paramObj, MachineDto.class));
+        return super.createResponseEntity(resultDto);
+    }
+
+
     /**
      * 添加设备接口类
      *
@@ -327,6 +355,34 @@ public class MachineController extends BaseController {
         return super.createResponseEntity(resultDto);
     }
 
+    @RequestMapping(path = "/saveBarrierGateCmd", method = RequestMethod.POST)
+    public ResponseEntity<String> saveBarrierGateCmd(@RequestBody String param) throws Exception {
+
+        JSONObject paramObj = super.getParamJson(param);
+
+        Assert.hasKeyAndValue(paramObj, "machineTypeCd", "请求报文中未包含设备类型");
+
+        Assert.hasKeyAndValue(paramObj, "machineCode", "请求报文中未包含硬件编码");
+
+        Assert.hasKeyAndValue(paramObj, "machineId", "请求报文中未包含硬件ID");
+
+        Assert.hasKeyAndValue(paramObj, "cmdCode", "请求报文中未包含命令编码");
+
+        Assert.hasKeyAndValue(paramObj, "cmdName", "请求报文中未包含命令编码名称");
+
+        if (!paramObj.containsKey("machineTypeCd")) {
+            paramObj.put("machineTypeCd", MachineConstant.MACHINE_TYPE_BARRIER_GATE);
+        }
+
+        paramObj.put("cmdId", UUID.randomUUID().toString());
+        paramObj.put("communityId", "99999");
+        MachineCmdDto machineCmdDto = BeanConvertUtil.covertBean(paramObj, MachineCmdDto.class);
+        machineCmdDto.setObjType(MachineConstant.MACHINE_CMD_OBJ_TYPE_SYSTEM);
+        machineCmdDto.setObjTypeValue("-1");
+
+        ResultDto resultDto = machineCmdService.saveMachineCmd(machineCmdDto);
+        return super.createResponseEntity(resultDto);
+    }
 
     /**
      * 查询指令

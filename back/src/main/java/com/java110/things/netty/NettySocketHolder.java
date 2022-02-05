@@ -58,6 +58,7 @@ public class NettySocketHolder {
     }
 
     public static void sendMsg(Java110CarProtocol java110CarProtocol) {
+        long lo=java110CarProtocol.getId();
         NioSocketChannel channel = get(java110CarProtocol.getId());
         if (channel == null) {
             throw new NoSuchElementException("未包含该链接");

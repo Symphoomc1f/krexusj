@@ -60,13 +60,13 @@ public class AddUpdateCar extends BaseCar {
      *
      * @param heartbeatTaskDto 心跳下发任务指令
      */
-    public void addUpdateCar(HeartbeatTaskDto heartbeatTaskDto, CommunityDto communityDto, int action) throws Exception {
+    public void addUpdateCar(MachineDto machineDto,HeartbeatTaskDto heartbeatTaskDto, CommunityDto communityDto, int action) throws Exception {
 
 
-        String url = MappingCacheFactory.getValue("CLOUD_API") + AccessControlConstant.MACHINE_QUERY_USER_INFO;
+        String url = MappingCacheFactory.getValue("CLOUD_API") + CarConstant.MACHINE_QUERY_CAR_INFO;
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("machineCode", communityDto.getCommunityId());
+        headers.put("machineCode", machineDto.getMachineCode());
         headers.put("communityId", communityDto.getCommunityId());
 
         JSONObject paramIn = new JSONObject();

@@ -14,14 +14,14 @@ public class CarConstant {
     //public final static String ACCESS_URL = "https://hc.demo.winqi.cn:8008";
 
     //心跳
-    public final static String MACHINE_HEARTBEART = "/api/machineTranslate.machineHeartbeart";
+    public final static String CAR_HEARTBEART = "/api/machineTranslate.machineHeartbeart";
 
     //查询当前小区门禁
 
     public final static String LIST_MACHINES = "/api/machine.listMachines";
 
     //查询用户信息
-    public final static String MACHINE_QUERY_USER_INFO="/api/machineTranslate.machineQueryUserInfo";
+    public final static String MACHINE_QUERY_CAR_INFO="/api/machineTranslate.machineQueryUserInfo";
 
     //增加/更新人脸
     public final static int CMD_ADD_CAR = 201;

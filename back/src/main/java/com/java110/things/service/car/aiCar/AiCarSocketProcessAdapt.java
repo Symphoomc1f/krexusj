@@ -79,6 +79,7 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
         data.put("validdate", carResultDto.getEndTime());
         data.put("cardmoney", 0.00);
         data.put("period", "月");
+        data.put("card_type", "1");
         data.put("carusername", carResultDto.getName());
         data.put("create_time", DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
         data.put("modify_time", DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));

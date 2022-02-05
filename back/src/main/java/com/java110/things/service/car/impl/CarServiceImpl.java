@@ -3,6 +3,7 @@ package com.java110.things.service.car.impl;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.dao.ICarServiceDao;
+import com.java110.things.entity.PageDto;
 import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.service.car.ICarService;
@@ -59,7 +60,9 @@ public class CarServiceImpl implements ICarService {
     @Override
     public ResultDto getCar(CarDto carDto) throws Exception {
 
-
+        if (carDto.getPage() != PageDto.DEFAULT_PAGE) {
+            carDto.setPage((carDto.getPage() - 1) * carDto.getRow());
+        }
         List<CarDto> carDtoList = carServiceDao.getCars(carDto);
         int count = 0;
         int totalPage = 1;

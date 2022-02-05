@@ -78,7 +78,8 @@ public class CarHeartbeatCloudTemplate extends TaskSystemQuartz {
             AccessControlProcessFactory.getAssessControlProcessImpl().initAssessControlProcess();
             INIT_MACHINE_STATE = false;
         }
-
+        //查询设备信息
+        List<MachineDto> machineDtos = queryMachines();
 
         //查询 小区信息
         CommunityDto communityDto = new CommunityDto();
@@ -96,7 +97,7 @@ public class CarHeartbeatCloudTemplate extends TaskSystemQuartz {
 
 
         //心跳云端是否下发指令
-        heartbeatCloud(communityDtos.get(0));
+        heartbeatCloud(machineDtos,communityDtos.get(0));
     }
 
     /**
@@ -104,14 +105,14 @@ public class CarHeartbeatCloudTemplate extends TaskSystemQuartz {
      *
      * @param communityDto 小区信息
      */
-    private void heartbeatCloud(CommunityDto communityDto) {
-
-        try {
-            doHeartbeatCloud(communityDto);
-        } catch (Exception e) {
-            logger.error(communityDto.getCommunityId() + "心跳失败", e);
+    private void heartbeatCloud(List<MachineDto> machineDtos,CommunityDto communityDto) {
+        for (MachineDto machineDto : machineDtos) {
+            try {
+                doHeartbeatCloud(communityDto, machineDto);
+            } catch (Exception e) {
+                logger.error(communityDto.getCommunityId() + "心跳失败", e);
+            }
         }
-
     }
 
     /**
@@ -119,13 +120,16 @@ public class CarHeartbeatCloudTemplate extends TaskSystemQuartz {
      *
      * @param communityDto
      */
-    private void doHeartbeatCloud(CommunityDto communityDto) throws Exception {
+    private void doHeartbeatCloud(CommunityDto communityDto,MachineDto machineDto) throws Exception {
 
-        String url = MappingCacheFactory.getValue("CLOUD_API") + AccessControlConstant.MACHINE_HEARTBEART;
+        String url = MappingCacheFactory.getValue("CLOUD_API") + CarConstant.CAR_HEARTBEART;
+
+
+
 
         Map<String, String> headers = new HashMap<>();
         headers.put("command", "gettask");
-        headers.put("machinecode", communityDto.getCommunityId());
+        headers.put("machinecode", machineDto.getMachineCode());
         headers.put("communityId", communityDto.getCommunityId());
 
         /**
@@ -145,19 +149,19 @@ public class CarHeartbeatCloudTemplate extends TaskSystemQuartz {
          * }
          */
         JSONObject paramIn = new JSONObject();
-        paramIn.put("machineCode", communityDto.getCommunityId());
+        paramIn.put("machineCode", machineDto.getMachineCode());
         paramIn.put("devGroup", "default");
         paramIn.put("communityId", communityDto.getCommunityId());
-        paramIn.put("name", "车辆道闸");
-        paramIn.put("authCode", "");
-        paramIn.put("ip", "");
-        paramIn.put("mac", "");
+        paramIn.put("name", machineDto.getMachineName());
+        paramIn.put("authCode", machineDto.getAuthCode());
+        paramIn.put("ip", machineDto.getMachineIp());
+        paramIn.put("mac", machineDto.getMachineMac());
         paramIn.put("remarks", "");
-        paramIn.put("faceNum", "");
+        paramIn.put("faceNum", AccessControlProcessFactory.getAssessControlProcessImpl().getFaceNum(machineDto));
         paramIn.put("lastOnTime", DateUtil.getTime());
         paramIn.put("statCode", "");
-        paramIn.put("deviceType", "");
-        paramIn.put("versionCode", "v1.0");
+        paramIn.put("deviceType", machineDto.getMachineTypeCd());
+        paramIn.put("versionCode", machineDto.getMachineVersion());
 
         ResponseEntity<String> responseEntity = HttpFactory.exchange(restTemplate, url, paramIn.toJSONString(), headers, HttpMethod.POST);
 
@@ -215,7 +219,7 @@ public class CarHeartbeatCloudTemplate extends TaskSystemQuartz {
         JSONArray data = paramOut.getJSONArray("data");
 
         for (int dataIndex = 0; dataIndex < data.size(); dataIndex++) {
-            doHeartbeatCloudResult(data.getJSONObject(dataIndex), communityDto);
+            doHeartbeatCloudResult(machineDto,data.getJSONObject(dataIndex), communityDto);
         }
 
     }
@@ -229,7 +233,7 @@ public class CarHeartbeatCloudTemplate extends TaskSystemQuartz {
      *                    "taskId": "ed06d2329c774474a05475ac6f3d623d"  任务ID
      *                    }
      */
-    private void doHeartbeatCloudResult(JSONObject commandInfo, CommunityDto communityDto) throws Exception {
+    private void doHeartbeatCloudResult(MachineDto machineDto,JSONObject commandInfo, CommunityDto communityDto) throws Exception {
 
         Assert.hasKeyAndValue(commandInfo, "taskcmd", "云端返回报文格式错误 未 包含指令编码 taskcmd" + commandInfo.toJSONString());
         Assert.hasKeyAndValue(commandInfo, "taskinfo", "云端返回报文格式错误 未 包含任务内容 taskinfo" + commandInfo.toJSONString());
@@ -239,10 +243,10 @@ public class CarHeartbeatCloudTemplate extends TaskSystemQuartz {
 
         switch (commandInfo.getInteger("taskcmd")) {
             case CarConstant.CMD_ADD_CAR:
-                addUpdateCar.addUpdateCar(heartbeatTaskDto, communityDto,CarConstant.CMD_ADD_CAR);
+                addUpdateCar.addUpdateCar(machineDto,heartbeatTaskDto, communityDto,CarConstant.CMD_ADD_CAR);
                 break;
             case CarConstant.CMD_UPDATE_CAR:
-                addUpdateCar.addUpdateCar(heartbeatTaskDto, communityDto,CarConstant.CMD_UPDATE_CAR);
+                addUpdateCar.addUpdateCar(machineDto,heartbeatTaskDto, communityDto,CarConstant.CMD_UPDATE_CAR);
                 break;
             case CarConstant.CMD_DELETE_CAR:
                 deleteCar.deleteCar(heartbeatTaskDto, communityDto);
@@ -261,7 +265,7 @@ public class CarHeartbeatCloudTemplate extends TaskSystemQuartz {
      */
     private List<MachineDto> queryMachines() throws Exception {
         MachineDto machineDto = new MachineDto();
-        machineDto.setMachineTypeCd(MachineConstant.MACHINE_TYPE_ACCESS_CONTROL);
+        machineDto.setMachineTypeCd(MachineConstant.MACHINE_TYPE_BARRIER_GATE);
         ResultDto resultDto = machineService.getMachine(machineDto);
         if (resultDto.getCode() != ResponseConstant.SUCCESS) {
             throw new ThreadException(Result.SYS_ERROR, "查询设备失败");
