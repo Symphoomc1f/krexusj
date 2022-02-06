@@ -5,12 +5,14 @@ import com.java110.things.constant.SystemConstant;
 import com.java110.things.dao.ICarServiceDao;
 import com.java110.things.entity.PageDto;
 import com.java110.things.entity.car.CarDto;
+import com.java110.things.entity.machine.MachineFaceDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.service.car.ICarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -63,14 +65,15 @@ public class CarServiceImpl implements ICarService {
         if (carDto.getPage() != PageDto.DEFAULT_PAGE) {
             carDto.setPage((carDto.getPage() - 1) * carDto.getRow());
         }
-        List<CarDto> carDtoList = carServiceDao.getCars(carDto);
-        int count = 0;
-        int totalPage = 1;
-        if (carDtoList != null && carDtoList.size() > 0) {
-            count = carDtoList.size();
+        long count = carServiceDao.getCarCount(carDto);
+        int totalPage = (int) Math.ceil((double) count / (double) carDto.getRow());
+        List<CarDto> carDtoList = null;
+        if (count > 0) {
+            carDtoList = carServiceDao.getCars(carDto);
+            //刷新人脸地
+        } else {
+            carDtoList = new ArrayList<>();
         }
-        totalPage = (int) Math.ceil((double) count / 10.0);
-
 
         ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, count, totalPage, carDtoList);
         return resultDto;

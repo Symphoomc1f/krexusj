@@ -3,6 +3,8 @@ package com.java110.things.service.car.impl;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.dao.ICarInoutServiceDao;
+import com.java110.things.entity.PageDto;
+import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.car.CarInoutDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.service.car.ICarInoutService;
@@ -10,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -60,16 +63,21 @@ public class CarInoutServiceImpl implements ICarInoutService {
     public ResultDto getCarInout(CarInoutDto carInoutDto) throws Exception {
 
 
-        List<CarInoutDto> carInoutDtoList = carInoutServiceDao.getCarInouts(carInoutDto);
-        int count = 0;
-        int totalPage = 1;
-        if (carInoutDtoList != null && carInoutDtoList.size() > 0) {
-            count = carInoutDtoList.size();
+        if (carInoutDto.getPage() != PageDto.DEFAULT_PAGE) {
+            carInoutDto.setPage((carInoutDto.getPage() - 1) * carInoutDto.getRow());
         }
-        totalPage = (int) Math.ceil((double) count / 10.0);
-
+        long count = carInoutServiceDao.getCarInoutCount(carInoutDto);
+        int totalPage = (int) Math.ceil((double) count / (double) carInoutDto.getRow());
+        List<CarInoutDto> carInoutDtoList = null;
+        if (count > 0) {
+            carInoutDtoList = carInoutServiceDao.getCarInouts(carInoutDto);
+            //刷新人脸地
+        } else {
+            carInoutDtoList = new ArrayList<>();
+        }
 
         ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, count, totalPage, carInoutDtoList);
+
         return resultDto;
     }
 
