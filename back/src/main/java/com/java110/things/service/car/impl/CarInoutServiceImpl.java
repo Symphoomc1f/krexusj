@@ -7,13 +7,22 @@ import com.java110.things.entity.PageDto;
 import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.car.CarInoutDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.exception.Result;
+import com.java110.things.exception.ServiceException;
+import com.java110.things.factory.HttpFactory;
+import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.car.ICarInoutService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @ClassName CarInoutServiceImpl
@@ -49,6 +58,18 @@ public class CarInoutServiceImpl implements ICarInoutService {
         } else {
             resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
         }
+
+        //同步HC云端
+
+        String url = MappingCacheFactory.getValue("CLOUD_API") + "/api/machineTranslate.machineUploadFaceLog";
+//        Map<String, String> headers = new HashMap<>();
+//        headers.put("machineCode", carInoutDto.getMachineCode());
+//        headers.put("communityId", carInoutDto.getCommunityId());
+//        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, url, machineUploadFaceDto.toString(), headers, HttpMethod.POST);
+//
+//        if (tmpResponseEntity.getStatusCode() != HttpStatus.OK) {
+//            throw new ServiceException(Result.SYS_ERROR, "人脸上报失败" + tmpResponseEntity.getBody());
+//        }
         return resultDto;
     }
 
