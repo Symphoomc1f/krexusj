@@ -23,6 +23,7 @@ public class CarInoutDto extends PageDto implements Serializable {
     private String remark;
     private String inoutType;
     private String statusCd;
+    private String machineCode;
 
     public String getInoutId() {
         return inoutId;
@@ -126,5 +127,13 @@ public class CarInoutDto extends PageDto implements Serializable {
 
     public void setStatusCd(String statusCd) {
         this.statusCd = statusCd;
+    }
+
+    public String getMachineCode() {
+        return machineCode;
+    }
+
+    public void setMachineCode(String machineCode) {
+        this.machineCode = machineCode;
     }
 }
