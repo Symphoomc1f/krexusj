@@ -199,6 +199,7 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
         carInoutDto.setPayCharge(acceptJson.getString("paycharge"));
         carInoutDto.setRealCharge(acceptJson.getString("realcharge"));
         carInoutDto.setPayType(acceptJson.getString("pay_type"));
+        carInoutDto.setMachineCode("-1");
 
         try {
             carInoutService.saveCarInout(carInoutDto);
@@ -232,6 +233,7 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
         carInoutDto.setInoutId(acceptJson.getString("order_id"));
         carInoutDto.setOpenTime(acceptJson.getString("in_time"));
         carInoutDto.setRemark(acceptJson.containsKey("remark") ? acceptJson.getString("remark") : "");
+        carInoutDto.setMachineCode("-1");
 
         try {
             carInoutService.saveCarInout(carInoutDto);
