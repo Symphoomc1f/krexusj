@@ -4,12 +4,14 @@ package com.java110.things.service.car.aiCar;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.entity.accessControl.CarResultDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
+import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.car.CarInoutDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.netty.Java110CarProtocol;
 import com.java110.things.netty.NettySocketHolder;
 import com.java110.things.service.car.ICarInoutService;
 import com.java110.things.service.car.ICarProcess;
+import com.java110.things.service.car.ICarService;
 import com.java110.things.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +28,9 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
 
     @Autowired
     private ICarInoutService carInoutService;
+
+    @Autowired
+    private ICarService carService;
 
     @Override
     public void initCar() {
@@ -73,6 +78,7 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
         JSONObject data = new JSONObject();
         data.put("service", "whitelist_sync");
         data.put("parkid", carResultDto.getPaId());
+        data.put("card_id", carResultDto.getCarId());
         data.put("car_number", carResultDto.getCarNum());
         data.put("car_type", "0");
         data.put("startdate", carResultDto.getStartTime());
@@ -110,6 +116,7 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
         JSONObject data = new JSONObject();
         data.put("service", "whitelist_pay_sync");
         data.put("parkid", carResultDto.getPaId());
+        data.put("card_id", carResultDto.getCarId());
         data.put("car_number", carResultDto.getCarNum());
         data.put("period", "月");
         data.put("pay_count", (int) Math.floor(carResultDto.getCycles()));
@@ -128,6 +135,7 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
         JSONObject data = new JSONObject();
         data.put("service", "whitelist_sync");
         data.put("parkid", carResultDto.getPaId());
+        data.put("card_id", carResultDto.getCarId());
         data.put("car_number", carResultDto.getCarNum());
         data.put("operate_type", "3");
         Java110CarProtocol java110CarProtocol = new Java110CarProtocol();
@@ -173,6 +181,10 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
             case "uploadcarout":
                 resObj = uploadcarout(acceptJson);
                 break;
+            case "whitelist_sync":
+                resObj = whitelistSync(acceptJson);
+                break;
+
             default:
                 resObj = new JSONObject();
                 resObj.put("service", service);
@@ -183,6 +195,29 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
         java110CarProtocol.setContent(resObj.toJSONString());
         java110CarProtocol.setId(Long.parseLong(parkId));
         return java110CarProtocol;
+    }
+
+    /***
+     * {"service":"whitelist_sync","car_number":"贵119","result_code":0,"message":"注册固定车成功","card_id":"201106181136297"}
+     * @param acceptJson
+     * @return
+     */
+    private JSONObject whitelistSync(JSONObject acceptJson) {
+        System.out.printf("acceptJson"+acceptJson.toJSONString());
+
+        CarDto carDto = new CarDto();
+        carDto.setCarNum(acceptJson.getString("car_number"));
+        carDto.setCardId(acceptJson.getString("card_id"));
+        try {
+            carService.updateCar(carDto);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        JSONObject resObj = new JSONObject();
+        resObj.put("service", "whitelist_sync");
+        resObj.put("result_code", 0);
+        resObj.put("message", "成功");
+        return resObj;
     }
 
     private JSONObject uploadcarout(JSONObject acceptJson) {

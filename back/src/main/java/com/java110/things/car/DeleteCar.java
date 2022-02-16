@@ -32,7 +32,7 @@ public class DeleteCar extends BaseCar {
      */
     public void deleteCar(HeartbeatTaskDto heartbeatTaskDto, CommunityDto communityDto) throws Exception {
         CarDto tmpCarDto = new CarDto();
-        tmpCarDto.setCarId(heartbeatTaskDto.getTaskid());
+        tmpCarDto.setCarId(heartbeatTaskDto.getTaskinfo());
         ResultDto resultDto = carService.getCar(tmpCarDto);
 
         if (resultDto.getTotal() < 1) {
@@ -42,7 +42,8 @@ public class DeleteCar extends BaseCar {
         CarDto carDto = carDtoList.get(0);
         CarResultDto carResultDto = new CarResultDto();
         carResultDto.setCarNum(carDto.getCarNum());
-        carResultDto.setCarId(carDto.getCarId());
+        carResultDto.setCarId(carDto.getCardId());
+
         carResultDto.setPaId(carDto.getPaId());
 
         CarProcessFactory.getCarImpl().deleteCar(carResultDto);

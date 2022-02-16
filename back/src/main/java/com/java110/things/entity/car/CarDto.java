@@ -15,6 +15,7 @@ public class CarDto extends PageDto implements Serializable {
     private String communityId;
     private String statusCd;
     private String paId;
+    private String cardId;
 
     public String getCarId() {
         return carId;
@@ -78,5 +79,13 @@ public class CarDto extends PageDto implements Serializable {
 
     public void setPaId(String paId) {
         this.paId = paId;
+    }
+
+    public String getCardId() {
+        return cardId;
+    }
+
+    public void setCardId(String cardId) {
+        this.cardId = cardId;
     }
 }
