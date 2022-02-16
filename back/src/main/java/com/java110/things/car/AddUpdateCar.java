@@ -148,7 +148,7 @@ public class AddUpdateCar extends BaseCar {
         carDto.setEndTime(endTime);
         carDto.setCreateTime(new Date());
         carDto.setCommunityId(communityDto.getCommunityId());
-
+        carDto.setPaId(carResultDto.getPaId());
 
         if (resultDto.getTotal() > 0) {
             carService.updateCar(carDto);

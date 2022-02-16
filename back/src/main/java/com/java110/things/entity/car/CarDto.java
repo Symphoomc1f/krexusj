@@ -14,6 +14,7 @@ public class CarDto extends PageDto implements Serializable {
     private Date createTime;
     private String communityId;
     private String statusCd;
+    private String paId;
 
     public String getCarId() {
         return carId;
@@ -69,5 +70,13 @@ public class CarDto extends PageDto implements Serializable {
 
     public void setStatusCd(String statusCd) {
         this.statusCd = statusCd;
+    }
+
+    public String getPaId() {
+        return paId;
+    }
+
+    public void setPaId(String paId) {
+        this.paId = paId;
     }
 }

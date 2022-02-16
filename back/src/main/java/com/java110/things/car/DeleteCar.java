@@ -43,6 +43,7 @@ public class DeleteCar extends BaseCar {
         CarResultDto carResultDto = new CarResultDto();
         carResultDto.setCarNum(carDto.getCarNum());
         carResultDto.setCarId(carDto.getCarId());
+        carResultDto.setPaId(carDto.getPaId());
 
         CarProcessFactory.getCarImpl().deleteCar(carResultDto);
 
