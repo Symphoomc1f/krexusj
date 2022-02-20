@@ -3,6 +3,7 @@ package com.java110.things.service.accessControl.yld04;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.response.ResultDto;
 import com.java110.things.service.accessControl.IAssessControlProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ public class Yld04AssessControlProcessAdapt implements IAssessControlProcess {
     }
 
     @Override
-    public void addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+    public ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
         Function.connectCamera(machineDto.getMachineIp());
         try {
             String image = userFaceDto.getFaceBase64();
@@ -51,19 +52,21 @@ public class Yld04AssessControlProcessAdapt implements IAssessControlProcess {
         } catch (Exception e) {
             logger.error("添加人脸失败", e);
         }
-
+        return null;
     }
 
     @Override
-    public void updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+    public ResultDto updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
 //        Function.connectCamera(machineDto.getMachineIp());
         addFace(machineDto, userFaceDto);
+        return null;
     }
 
     @Override
-    public void deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
+    public ResultDto deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
         Function.connectCamera(machineDto.getMachineIp());
         Function.deleteFace(machineDto.getMachineIp(), heartbeatTaskDto.getTaskinfo());
+        return null;
     }
 
     @Override

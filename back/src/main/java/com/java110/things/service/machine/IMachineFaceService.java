@@ -23,6 +23,15 @@ public interface IMachineFaceService {
     ResultDto saveMachineFace(MachineFaceDto machineFaceDto) throws Exception;
 
     /**
+     * 修改设备人脸
+     *
+     * @param machineFaceDto 设备信息
+     * @return
+     * @throws Exception
+     */
+    ResultDto updateMachineFace(MachineFaceDto machineFaceDto) throws Exception;
+
+    /**
      * 获取设备信息
      *
      * @param machineFaceDto 设备信息

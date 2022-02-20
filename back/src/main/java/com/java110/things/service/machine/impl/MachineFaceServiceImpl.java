@@ -48,6 +48,17 @@ public class MachineFaceServiceImpl implements IMachineFaceService {
         return resultDto;
     }
 
+    @Override
+    public ResultDto updateMachineFace(MachineFaceDto machineFaceDto) throws Exception {
+        int count = machineFaceServiceDao.updateMachineFace(machineFaceDto);
+        ResultDto resultDto = null;
+        if (count < 1) {
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+        } else {
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+        }
+        return resultDto;    }
+
     /**
      * 查询设备信息
      *

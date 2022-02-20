@@ -1,6 +1,8 @@
 package com.java110.things.service.accessControl.chuangjiang;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.java110.things.accessControl.AddUpdateFace;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.fee.FeeDto;
@@ -8,6 +10,7 @@ import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.MachineFaceDto;
 import com.java110.things.entity.machine.OperateLogDto;
 import com.java110.things.entity.openDoor.OpenDoorDto;
+import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.room.RoomDto;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.MqttFactory;
@@ -16,14 +19,12 @@ import com.java110.things.service.accessControl.IAssessControlProcess;
 import com.java110.things.service.accessControl.ICallAccessControlService;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.SeqUtil;
+import com.java110.things.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -59,6 +60,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
     public static final String VERSION = "0.2";
 
     public static final String CMD_ADD_FACE = "/face"; // 创建人脸
+    public static final String CMD_ADD_FACE_FIND = "/face/find"; // 创建人脸
 
     public static final String CMD_OPEN_DOOR = "/device/openDoorControl"; // 开门
 
@@ -117,12 +119,46 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
     @Override
     public String getFace(MachineDto machineDto, UserFaceDto userFaceDto) {
 
+        String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
+        String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_ADD_FACE_FIND;
+        JSONObject param = new JSONObject();
+        param.put("pass", password);
+        param.put("personId", userFaceDto.getUserId());
+        //添加人脸
+        HttpHeaders httpHeaders = new HttpHeaders();
+        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE_FIND, param.toJSONString(), responseEntity.getBody());
 
-        return null;
+
+        if (HttpStatus.OK != responseEntity.getStatusCode()) {
+            return AddUpdateFace.MACHINE_HAS_NOT_FACE;
+        }
+
+        JSONObject outParam = JSONObject.parseObject(responseEntity.getBody());
+
+        if (!outParam.containsKey("data")) {
+            return AddUpdateFace.MACHINE_HAS_NOT_FACE;
+        }
+
+        JSONArray data = outParam.getJSONArray("data");
+
+        if (data == null || data.size() < 1) {
+            return AddUpdateFace.MACHINE_HAS_NOT_FACE;
+        }
+
+        String personId = data.getJSONObject(0).getString("personId");
+
+        if (StringUtil.isEmpty(personId)) {
+            return AddUpdateFace.MACHINE_HAS_NOT_FACE;
+        }
+
+        return personId;
     }
 
     @Override
-    public void addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+    public ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_ADD_USER;
 
@@ -151,11 +187,18 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE, param.toJSONString(), responseEntity.getBody());
 
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            return new ResultDto(ResultDto.ERROR, "调用设备失败");
+        }
+
+        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("msg"));
+
 
     }
 
     @Override
-    public void updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+    public ResultDto updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
 
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         String url = "";
@@ -174,10 +217,17 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE, param.toJSONString(), responseEntity.getBody());
 
+
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            return new ResultDto(ResultDto.ERROR, "调用设备失败");
+        }
+
+        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("msg"));
     }
 
     @Override
-    public void deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
+    public ResultDto deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_DELETE_FACE;
 
@@ -202,6 +252,12 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_DELETE_PERSION_FACE, param.toJSONString(), responseEntity.getBody());
 
 
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            return new ResultDto(ResultDto.ERROR, "调用设备失败");
+        }
+
+        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("msg"));
     }
 
     @Override

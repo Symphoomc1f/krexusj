@@ -110,7 +110,7 @@ public class YldCometAssessControlProcessAdapt implements IAssessControlProcess 
     }
 
     @Override
-    public void addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+    public ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
         JSONObject param = new JSONObject();
         param.put("version", VERSION);
         param.put("cmd", CMD_ADD_FACE);
@@ -129,10 +129,12 @@ public class YldCometAssessControlProcessAdapt implements IAssessControlProcess 
 
         String cmdId = SeqUtil.getId();
         saveLog(cmdId, machineDto.getMachineId(), CMD_ADD_FACE, param.toJSONString(), "", "", userFaceDto.getUserId(), userFaceDto.getName());
+
+        return null;
     }
 
     @Override
-    public void updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+    public ResultDto updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
 
         //CMD_UPDATE_FACE
         JSONObject param = new JSONObject();
@@ -153,11 +155,11 @@ public class YldCometAssessControlProcessAdapt implements IAssessControlProcess 
 
         String cmdId = SeqUtil.getId();
         saveLog(cmdId, machineDto.getMachineId(), CMD_UPDATE_FACE, param.toJSONString(), "", "", userFaceDto.getUserId(), userFaceDto.getName());
-
+        return null;
     }
 
     @Override
-    public void deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
+    public ResultDto deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
         String cmdId = SeqUtil.getId();
 
         JSONObject param = new JSONObject();
@@ -169,6 +171,7 @@ public class YldCometAssessControlProcessAdapt implements IAssessControlProcess 
         CometFactory.publish(CHANNELNAME, param.toJSONString());
 
         saveLog(cmdId, machineDto.getMachineId(), CMD_DELETE_FACE, param.toJSONString(), "", "", heartbeatTaskDto.getTaskinfo(), "");
+        return null;
     }
 
     @Override

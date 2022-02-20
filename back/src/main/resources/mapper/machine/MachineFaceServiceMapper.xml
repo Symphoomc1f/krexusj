@@ -4,8 +4,8 @@
 
 
     <insert id="saveMachineFace" parameterType="com.java110.things.entity.machine.MachineFaceDto">
-        INSERT INTO machine_face (`id`, `user_id`, `name`, `id_number`, `start_time`, `end_time`, `face_path`,machine_id)
-        VALUES (#{id}, #{userId}, #{name}, #{idNumber}, #{startTime}, #{endTime}, #{facePath},#{machineId})
+        INSERT INTO machine_face (`id`, `user_id`, `name`, `id_number`, `start_time`, `end_time`, `face_path`,machine_id,state,message)
+        VALUES (#{id}, #{userId}, #{name}, #{idNumber}, #{startTime}, #{endTime}, #{facePath},#{machineId},{state},{message})
     </insert>
 
     <!--
@@ -25,7 +25,9 @@
         m.machine_code machineCode,
         m.machine_name machineName,
         m.machine_ip machineIp,
-        t.create_time createTime
+        t.create_time createTime,
+        t.state,
+        t.message
         from machine_face t,machine m
         where 1=1
         and t.machine_id = m.machine_id
@@ -56,6 +58,9 @@
         </if>
         <if test="machineId != null and machineId != ''">
             and t.machine_id = #{machineId}
+        </if>
+        <if test="state != null and state != ''">
+            and t.state = #{state}
         </if>
         and t.status_cd = '0'
         order by t.create_time desc
@@ -102,6 +107,9 @@
         <if test="machineId != null and machineId != ''">
             and t.machine_id = #{machineId}
         </if>
+        <if test="state != null and state != ''">
+            and t.state = #{state}
+        </if>
         and t.status_cd = '0'
 
     </select>
@@ -117,6 +125,12 @@
             </if>
             <if test="statusCd != null and statusCd != ''">
                 t.status_cd = #{statusCd},
+            </if>
+            <if test="state != null and state != ''">
+                 t.state = #{state},
+            </if>
+            <if test="message != null and message != ''">
+                t.message = #{message},
             </if>
         </trim>
         where 1=1

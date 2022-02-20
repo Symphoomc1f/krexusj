@@ -10,6 +10,7 @@ import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.MachineFaceDto;
+import com.java110.things.entity.response.ResultDto;
 import com.java110.things.exception.HeartbeatCloudException;
 import com.java110.things.factory.AccessControlProcessFactory;
 import com.java110.things.factory.HttpFactory;
@@ -46,6 +47,8 @@ public class AddUpdateFace extends BaseAccessControl {
 
     @Autowired
     private IMachineFaceService machineFaceService;
+
+    public static final String MACHINE_HAS_NOT_FACE = "-1"; // 设备没有人脸
 
 
     /**
@@ -129,15 +132,28 @@ public class AddUpdateFace extends BaseAccessControl {
             faceId = exists ? userFaceDto.getUserId() : null;
         }
 
+        ResultDto resultDto = null;
         //调用新增人脸接口
-        if (StringUtil.isEmpty(faceId)) {
+        if (StringUtil.isEmpty(faceId) || MACHINE_HAS_NOT_FACE.equals(faceId)) {
             //存储人脸
             saveFace(machineDto, userFaceDto);
-            AccessControlProcessFactory.getAssessControlProcessImpl().addFace(machineDto, userFaceDto);
+            resultDto = AccessControlProcessFactory.getAssessControlProcessImpl().addFace(machineDto, userFaceDto);
         } else { //调用更新人脸接口
             updateFace(machineDto, userFaceDto);
-            AccessControlProcessFactory.getAssessControlProcessImpl().updateFace(machineDto, userFaceDto);
+            resultDto = AccessControlProcessFactory.getAssessControlProcessImpl().updateFace(machineDto, userFaceDto);
         }
+
+        if (resultDto == null) {
+            return;
+        }
+
+        MachineFaceDto machineFaceDto = new MachineFaceDto();
+        machineFaceDto.setUserId(userFaceDto.getUserId());
+        machineFaceDto.setMachineId(machineDto.getMachineId());
+        machineFaceDto.setState(resultDto.getCode() == ResultDto.SUCCESS ? "S" : "F");
+        machineFaceDto.setState(resultDto.getMsg());
+
+        machineFaceService.updateMachineFace(machineFaceDto);
     }
 
     /**
@@ -158,6 +174,9 @@ public class AddUpdateFace extends BaseAccessControl {
         machineFaceDto.setId(SeqUtil.getId());
         machineFaceDto.setMachineId(machineDto.getMachineId());
         machineFaceDto.setFacePath("/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + ".jpg");
+        machineFaceDto.setState("W");
+        machineFaceDto.setState("新增人脸待同步设备");
+
 
         //machineFaceDto.set
         machineFaceService.saveMachineFace(machineFaceDto);
@@ -180,6 +199,14 @@ public class AddUpdateFace extends BaseAccessControl {
 
         ImageFactory.GenerateImage(faceBase, machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
 
+
+        MachineFaceDto machineFaceDto = new MachineFaceDto();
+        machineFaceDto.setUserId(userFaceDto.getUserId());
+        machineFaceDto.setMachineId(machineDto.getMachineId());
+        machineFaceDto.setState("W");
+        machineFaceDto.setState("更新人脸待同步设备");
+
+        machineFaceService.updateMachineFace(machineFaceDto);
 
     }
 

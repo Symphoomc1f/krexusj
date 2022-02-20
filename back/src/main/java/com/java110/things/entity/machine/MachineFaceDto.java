@@ -23,6 +23,8 @@ public class MachineFaceDto extends UserFaceDto implements Serializable {
     private String taskId;
 
     private String id;
+    private String state;
+    private String message;
 
     public String getId() {
         return id;
@@ -64,5 +66,21 @@ public class MachineFaceDto extends UserFaceDto implements Serializable {
 
     public void setMachineTypeCd(String machineTypeCd) {
         this.machineTypeCd = machineTypeCd;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

@@ -3,6 +3,7 @@ package com.java110.things.service.demo;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.response.ResultDto;
 import com.java110.things.service.accessControl.IAssessControlProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,18 +43,19 @@ public class OfficialDemoAssessControlProcessAdapt implements IAssessControlProc
     }
 
     @Override
-    public void addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+    public ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
 
+        return null;
     }
 
     @Override
-    public void updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
-
+    public ResultDto updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+        return null;
     }
 
     @Override
-    public void deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
-
+    public ResultDto deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
+        return null;
     }
 
     @Override

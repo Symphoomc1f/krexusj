@@ -3,6 +3,7 @@ package com.java110.things.service.accessControl;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.response.ResultDto;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.util.List;
@@ -42,7 +43,7 @@ public interface IAssessControlProcess {
      * @param machineDto 硬件信息
      * @param userFaceDto 用户人脸信息
      */
-    void addFace(MachineDto machineDto,UserFaceDto userFaceDto);
+    ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto);
 
 
     /**
@@ -50,7 +51,7 @@ public interface IAssessControlProcess {
      * @param machineDto 硬件信息
      * @param userFaceDto 用户人脸信息
      */
-    void updateFace(MachineDto machineDto,UserFaceDto userFaceDto);
+    ResultDto updateFace(MachineDto machineDto,UserFaceDto userFaceDto);
 
 
     /**
@@ -58,7 +59,7 @@ public interface IAssessControlProcess {
      * @param machineDto 硬件信息
      * @param heartbeatTaskDto 任务ID
      */
-    void deleteFace(MachineDto machineDto,HeartbeatTaskDto heartbeatTaskDto);
+    ResultDto deleteFace(MachineDto machineDto,HeartbeatTaskDto heartbeatTaskDto);
 
 
     /**

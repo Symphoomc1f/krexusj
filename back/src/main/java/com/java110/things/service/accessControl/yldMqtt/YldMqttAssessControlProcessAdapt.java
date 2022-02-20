@@ -111,7 +111,7 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
     }
 
     @Override
-    public void addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+    public ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
         String cmdId = SeqUtil.getId();
         JSONObject param = new JSONObject();
         param.put("client_id", machineDto.getMachineCode());
@@ -133,11 +133,11 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
 
         saveLog(cmdId, machineDto.getMachineId(), CMD_ADD_FACE, param.toJSONString(), "", "", userFaceDto.getUserId(), userFaceDto.getName());
 
-
+        return null;
     }
 
     @Override
-    public void updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+    public ResultDto updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
         String cmdId = SeqUtil.getId();
 
         //CMD_UPDATE_FACE
@@ -158,11 +158,11 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
         param.put("usr_type", 0);
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
         saveLog(cmdId, machineDto.getMachineId(), CMD_UPDATE_FACE, param.toJSONString(), "", "", userFaceDto.getUserId(), userFaceDto.getName());
-
+        return null;
     }
 
     @Override
-    public void deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
+    public ResultDto deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
         String cmdId = SeqUtil.getId();
 
         JSONObject param = new JSONObject();
@@ -174,7 +174,7 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
         param.put("per_id", heartbeatTaskDto.getTaskinfo());
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
         saveLog(cmdId, machineDto.getMachineId(), CMD_DELETE_FACE, param.toJSONString(), "", "", heartbeatTaskDto.getTaskinfo(), "");
-
+        return null;
     }
 
     @Override
