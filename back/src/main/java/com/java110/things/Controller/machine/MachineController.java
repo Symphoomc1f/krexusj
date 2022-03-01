@@ -3,7 +3,6 @@ package com.java110.things.Controller.machine;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
 import com.java110.things.constant.MachineConstant;
-import com.java110.things.constant.SystemConstant;
 import com.java110.things.entity.machine.*;
 import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.response.ResultDto;
@@ -13,14 +12,8 @@ import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -140,6 +133,7 @@ public class MachineController extends BaseController {
 
     /**
      * 根据类型查询设备
+     *
      * @return 成功或者失败
      * @throws Exception
      */
@@ -247,7 +241,7 @@ public class MachineController extends BaseController {
     public ResponseEntity<String> getMachineFaces(@RequestParam int page,
                                                   @RequestParam int row,
                                                   @RequestParam String machineTypeCd,
-                                                  @RequestParam(name = "name", required = false) String logId,
+                                                  @RequestParam(name = "name", required = false) String name,
                                                   @RequestParam(name = "machineCode", required = false) String machineCode,
                                                   @RequestParam(name = "machineId", required = false) String machineId,
                                                   @RequestParam(name = "machineName", required = false) String machineName) throws Exception {
@@ -256,6 +250,7 @@ public class MachineController extends BaseController {
         machineFaceDto.setPage(page);
         machineFaceDto.setRow(row);
         machineFaceDto.setMachineId(machineId);
+        machineFaceDto.setName(name);
         machineFaceDto.setMachineCode(machineCode);
         machineFaceDto.setMachineName(machineName);
         machineFaceDto.setMachineTypeCd(machineTypeCd);
@@ -394,9 +389,9 @@ public class MachineController extends BaseController {
      */
     @RequestMapping(path = "/getMachineCmds", method = RequestMethod.GET)
     public ResponseEntity<String> getMachineCmds(@RequestParam int page,
-                                              @RequestParam int row,
-                                              @RequestParam(name = "machineCode", required = false) String machineCode,
-                                              @RequestParam(name = "cmdName", required = false) String cmdName) throws Exception {
+                                                 @RequestParam int row,
+                                                 @RequestParam(name = "machineCode", required = false) String machineCode,
+                                                 @RequestParam(name = "cmdName", required = false) String cmdName) throws Exception {
 
         MachineCmdDto machineCmdDto = new MachineCmdDto();
         machineCmdDto.setPage(page);

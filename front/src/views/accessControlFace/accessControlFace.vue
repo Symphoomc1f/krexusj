@@ -68,6 +68,12 @@
       <el-table-column align="center" label="门禁名称">
         <template slot-scope="scope">{{ scope.row.machineName }}</template>
       </el-table-column>
+      <el-table-column align="center" label="状态">
+        <template slot-scope="scope">{{ getStateName(scope.row.state) }}</template>
+      </el-table-column>
+      <el-table-column align="center" label="描述">
+        <template slot-scope="scope">{{ scope.row.message }}</template>
+      </el-table-column>
       <el-table-column label="门禁编码" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.machineCode }}</span>
@@ -146,6 +152,15 @@ export default {
         this.total = response.total;
         this.listLoading = false;
       });
+    },
+    getStateName(_state){
+      if(_state == 'W'){
+        return '未同步';
+      }else if(_state == 'S'){
+        return '同步成功';
+      }else{
+        return '同步失败';
+      }
     }
   }
 };

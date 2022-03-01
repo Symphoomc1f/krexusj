@@ -4,6 +4,7 @@ import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.MachineFaceDto;
+import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.AccessControlProcessFactory;
 import com.java110.things.factory.ImageFactory;
 import com.java110.things.service.machine.IMachineFaceService;
@@ -30,11 +31,27 @@ public class DeleteFace extends BaseAccessControl {
         ImageFactory.deleteImage(machineDto.getMachineCode() + File.separatorChar + heartbeatTaskDto.getTaskinfo() + ".jpg");
         AccessControlProcessFactory.getAssessControlProcessImpl().deleteFace(machineDto, heartbeatTaskDto);
 
+
         MachineFaceDto machineFaceDto = new MachineFaceDto();
+        machineFaceDto.setUserId(heartbeatTaskDto.getTaskinfo());
+        machineFaceDto.setMachineId(machineDto.getMachineId());
+        machineFaceDto.setState("W");
+        machineFaceDto.setState("删除人脸待同步设备");
+
+        machineFaceService.updateMachineFace(machineFaceDto);
+
+        machineFaceDto = new MachineFaceDto();
         machineFaceDto.setUserId(heartbeatTaskDto.getTaskinfo());
         machineFaceDto.setMachineId(machineDto.getMachineId());
         machineFaceDto.setTaskId(heartbeatTaskDto.getTaskid());
         //machineFaceDto.set
-        machineFaceService.deleteMachineFace(machineFaceDto);
+        ResultDto resultDto = machineFaceService.deleteMachineFace(machineFaceDto);
+
+        machineFaceDto = new MachineFaceDto();
+        machineFaceDto.setUserId(heartbeatTaskDto.getTaskinfo());
+        machineFaceDto.setMachineId(machineDto.getMachineId());
+        machineFaceDto.setState(resultDto.getCode() == ResultDto.SUCCESS ? "S" : "F");
+        machineFaceDto.setState(resultDto.getMsg());
+        machineFaceService.updateMachineFace(machineFaceDto);
     }
 }
