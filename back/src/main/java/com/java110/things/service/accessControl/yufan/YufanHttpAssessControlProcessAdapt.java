@@ -355,7 +355,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_REBOOT;
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type","application/x-www-form-urlencoded");
-        HttpEntity httpEntity = new HttpEntity(postParameters, httpHeaders);
+        HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_REBOOT, postParameters.toString(), responseEntity.getBody());
@@ -365,13 +365,13 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
     @Override
     public void openDoor(MachineDto machineDto) {
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
-        JSONObject param = new JSONObject();
-        param.put("pass", password);
+        MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
+        postParameters.add("pass", password);
         //
         String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_OPEN_DOOR;
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type","application/x-www-form-urlencoded");
-        HttpEntity httpEntity = new HttpEntity(param, httpHeaders);
+        HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_OPEN_DOOR, param.toJSONString(), responseEntity.getBody());
