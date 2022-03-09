@@ -374,7 +374,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_OPEN_DOOR, param.toJSONString(), responseEntity.getBody());
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_OPEN_DOOR, postParameters.toString(), responseEntity.getBody());
     }
 
     @Override
