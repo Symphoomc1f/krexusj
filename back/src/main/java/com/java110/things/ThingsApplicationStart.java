@@ -11,13 +11,17 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @ClassName ThingsApplicationStart
@@ -52,6 +56,9 @@ public class ThingsApplicationStart implements WebMvcConfigurer {
     public RestTemplate restTemplate() {
         StringHttpMessageConverter m = new StringHttpMessageConverter(Charset.forName("UTF-8"));
         RestTemplate restTemplate = new RestTemplateBuilder().additionalMessageConverters(m).build();
+        List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+        converters.add(new MappingJackson2HttpMessageConverter());
+        restTemplate.setMessageConverters(converters);
         return restTemplate;
     }
     public static void main(String[] args) {
