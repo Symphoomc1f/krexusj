@@ -54,11 +54,15 @@ public class ThingsApplicationStart implements WebMvcConfigurer {
     @Bean
     //@LoadBalanced
     public RestTemplate restTemplate() {
-        StringHttpMessageConverter m = new StringHttpMessageConverter(Charset.forName("UTF-8"));
-        RestTemplate restTemplate = new RestTemplateBuilder().additionalMessageConverters(m).build();
-        List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
-        converters.add(new MappingJackson2HttpMessageConverter());
-        restTemplate.setMessageConverters(converters);
+//        StringHttpMessageConverter m = new StringHttpMessageConverter(Charset.forName("UTF-8"));
+//        RestTemplate restTemplate = new RestTemplateBuilder().additionalMessageConverters(m).build();
+//        List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+//        converters.add(new MappingJackson2HttpMessageConverter());
+//        restTemplate.setMessageConverters(converters);
+//        return restTemplate;
+
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.getMessageConverters().add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
         return restTemplate;
     }
     public static void main(String[] args) {
