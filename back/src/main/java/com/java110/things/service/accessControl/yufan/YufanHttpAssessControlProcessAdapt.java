@@ -127,17 +127,17 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
 
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_ADD_FACE_FIND;
-        JSONObject param = new JSONObject();
-        param.put("pass", password);
-        param.put("personId", userFaceDto.getUserId());
+        MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
+        postParameters.add("pass", password);
+        postParameters.add("personId", userFaceDto.getUserId());
 
         //添加人脸
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("Content-Type","application/x-www-form-urlencoded");
-        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+        httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+        HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE_FIND, param.toJSONString(), responseEntity.getBody());
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE_FIND, postParameters.toString(), responseEntity.getBody());
 
 
         if (HttpStatus.OK != responseEntity.getStatusCode()) {
@@ -169,32 +169,32 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
     public ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_ADD_USER;
-
-        JSONObject paramObj = JSONObject.parseObject("{\"person\":{}}");
-        JSONObject param = paramObj.getJSONObject("person");
+        MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
+        postParameters.add("pass", password);
+        JSONObject param = new JSONObject();
         param.put("id", userFaceDto.getUserId());
         param.put("name", userFaceDto.getName());
         param.put("idcardNum", "");
         param.put("iDNumber", userFaceDto.getIdNumber());
-        paramObj.put("pass", password);
+        postParameters.add("person", param);
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("Content-Type","application/x-www-form-urlencoded");
-        HttpEntity httpEntity = new HttpEntity(paramObj.toJSONString(), httpHeaders);
+        httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+        HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, param.toJSONString(), responseEntity.getBody());
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, postParameters.toString(), responseEntity.getBody());
 
         url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_ADD_FACE;
-        param = new JSONObject();
-        param.put("pass", password);
-        param.put("personId", userFaceDto.getUserId());
-        param.put("faceId", userFaceDto.getUserId());
-        param.put("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
-        param.put("base64", userFaceDto.getFaceBase64());
+        postParameters = new LinkedMultiValueMap<>();
+        postParameters.add("pass", password);
+        postParameters.add("personId", userFaceDto.getUserId());
+        postParameters.add("faceId", userFaceDto.getUserId());
+        postParameters.add("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
+        postParameters.add("base64", userFaceDto.getFaceBase64());
         //添加人脸
-        httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+        httpEntity = new HttpEntity(postParameters, httpHeaders);
         responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE, param.toJSONString(), responseEntity.getBody());
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE, postParameters.toString(), responseEntity.getBody());
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             return new ResultDto(ResultDto.ERROR, "调用设备失败");
@@ -211,22 +211,21 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
 
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         String url = "";
-        JSONObject param = new JSONObject();
         url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_ADD_FACE;
-        param = new JSONObject();
-        param.put("pass", password);
-        param.put("personId", userFaceDto.getUserId());
-        param.put("faceId", userFaceDto.getUserId());
-        param.put("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
-        param.put("base64", userFaceDto.getFaceBase64());
+        MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
+        postParameters.add("pass", password);
+        postParameters.add("personId", userFaceDto.getUserId());
+        postParameters.add("faceId", userFaceDto.getUserId());
+        postParameters.add("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
+        postParameters.add("base64", userFaceDto.getFaceBase64());
         //添加人脸
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("Content-Type","application/x-www-form-urlencoded");
+        httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
 
-        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+        HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE, param.toJSONString(), responseEntity.getBody());
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE, postParameters.toString(), responseEntity.getBody());
 
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
@@ -242,26 +241,25 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_DELETE_FACE;
 
-
-        JSONObject param = new JSONObject();
-        param.put("id", heartbeatTaskDto.getTaskid());
-        param.put("pass", password);
+        MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
+        postParameters.add("pass", password);
+        postParameters.add("id", heartbeatTaskDto.getTaskid());
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("Content-Type","application/x-www-form-urlencoded");
-        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+        httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+        HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_DELETE_FACE, param.toJSONString(), responseEntity.getBody());
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_DELETE_FACE, postParameters.toString(), responseEntity.getBody());
 
 
         url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_DELETE_PERSION_FACE;
 
 
-        param = new JSONObject();
-        param.put("personId", heartbeatTaskDto.getTaskid());
-        param.put("pass", password);
-        httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+        postParameters = new LinkedMultiValueMap<>();
+        postParameters.add("personId", heartbeatTaskDto.getTaskid());
+        postParameters.add("pass", password);
+        httpEntity = new HttpEntity(postParameters, httpHeaders);
         responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_DELETE_PERSION_FACE, param.toJSONString(), responseEntity.getBody());
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_DELETE_PERSION_FACE, postParameters.toString(), responseEntity.getBody());
 
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
@@ -276,14 +274,14 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
     public void clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_RESET;
-        JSONObject param = new JSONObject();
-        param.put("delete", false);
-        param.put("pass", password);
+        MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
+        postParameters.add("delete", false);
+        postParameters.add("pass", password);
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("Content-Type","application/x-www-form-urlencoded");
-        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+        httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+        HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_RESET, param.toJSONString(), responseEntity.getBody());
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_RESET, postParameters.toString(), responseEntity.getBody());
 
     }
 
@@ -302,36 +300,36 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         String url = "";
         for (MachineDto machineDto : machineDtos) {
             url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_SET_PASSWORD;
-            JSONObject param = new JSONObject();
-            param.put("oldPass", password);
-            param.put("newPass", password);
+            MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
+            postParameters.add("oldPass", password);
+            postParameters.add("newPass", password);
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("Content-Type","application/x-www-form-urlencoded");
-            HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+            httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+            HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
             ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
-            saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_PASSWORD, param.toJSONString(), responseEntity.getBody());
+            saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_PASSWORD, postParameters.toString(), responseEntity.getBody());
 
             url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_SET_SYSTEMMODE;
-            param = new JSONObject();
-            param.put("pass", password);
-            param.put("systemMode", "2");
+            postParameters = new LinkedMultiValueMap<>();
+            postParameters.add("pass", password);
+            postParameters.add("systemMode", "2");
             httpHeaders = new HttpHeaders();
-            httpHeaders.add("Content-Type","application/x-www-form-urlencoded");
-            httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+            httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+            httpEntity = new HttpEntity(postParameters, httpHeaders);
             responseEntity = restTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
-            saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_SYSTEMMODE, param.toJSONString(), responseEntity.getBody());
+            saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_SYSTEMMODE, postParameters.toString(), responseEntity.getBody());
 
             //设置回调地址
             url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_SET_IDENTIFY_CALLBACK;
-            param = new JSONObject();
-            param.put("pass", password);
-            param.put("callbackUrl", MappingCacheFactory.getValue(MappingCacheFactory.COMMON_DOMAIN, "CJ_CALLBACK_URL"));
-            param.put("base64Enable", "2");
+            postParameters = new LinkedMultiValueMap<>();
+            postParameters.add("pass", password);
+            postParameters.add("callbackUrl", MappingCacheFactory.getValue(MappingCacheFactory.COMMON_DOMAIN, "CJ_CALLBACK_URL"));
+            postParameters.add("base64Enable", "2");
             httpHeaders = new HttpHeaders();
-            httpHeaders.add("Content-Type","application/x-www-form-urlencoded");
-            httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+            httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+            httpEntity = new HttpEntity(postParameters, httpHeaders);
             responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
-            saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_IDENTIFY_CALLBACK, param.toJSONString(), responseEntity.getBody());
+            saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_IDENTIFY_CALLBACK, postParameters.toString(), responseEntity.getBody());
 
         }
         return null;
@@ -347,14 +345,12 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
     @Override
     public void restartMachine(MachineDto machineDto) {
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
-//        JSONObject param = new JSONObject();
-//        param.put("pass", password);
         MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
         postParameters.add("pass", password);
         //
         String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_REBOOT;
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("Content-Type","application/x-www-form-urlencoded");
+        httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
@@ -370,7 +366,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         //
         String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_OPEN_DOOR;
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("Content-Type","application/x-www-form-urlencoded");
+        httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
