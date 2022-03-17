@@ -54,17 +54,25 @@ public class ThingsApplicationStart implements WebMvcConfigurer {
     @Bean
     //@LoadBalanced
     public RestTemplate restTemplate() {
-//        StringHttpMessageConverter m = new StringHttpMessageConverter(Charset.forName("UTF-8"));
-//        RestTemplate restTemplate = new RestTemplateBuilder().additionalMessageConverters(m).build();
-//        List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
-//        converters.add(new MappingJackson2HttpMessageConverter());
-//        restTemplate.setMessageConverters(converters);
-//        return restTemplate;
+        StringHttpMessageConverter m = new StringHttpMessageConverter(Charset.forName("UTF-8"));
+        RestTemplate restTemplate = new RestTemplateBuilder().additionalMessageConverters(m).build();
+        List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+        converters.add(new MappingJackson2HttpMessageConverter());
+        restTemplate.setMessageConverters(converters);
+        return restTemplate;
 
+
+    }
+
+    @Bean
+    //@LoadBalanced
+    public RestTemplate outRestTemplate() {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.getMessageConverters().add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
         return restTemplate;
     }
+
+
     public static void main(String[] args) {
         try {
             ApplicationContext context = SpringApplication.run(ThingsApplicationStart.class, args);

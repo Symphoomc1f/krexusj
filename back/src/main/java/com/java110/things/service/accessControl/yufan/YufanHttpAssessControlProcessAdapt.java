@@ -53,7 +53,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
     private IMachineService machineServiceImpl;
 
     @Autowired
-    private RestTemplate restTemplate;
+    private RestTemplate outRestTemplate;
 
     public static final long START_TIME = new Date().getTime() - 1000 * 60 * 60;
     public static final long END_TIME = new Date().getTime() + 1000 * 60 * 60 * 24 * 365;
@@ -135,7 +135,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
-        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE_FIND, postParameters.toString(), responseEntity.getBody());
 
@@ -180,7 +180,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
-        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, postParameters.toString(), responseEntity.getBody());
 
         url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_ADD_FACE;
@@ -192,7 +192,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         postParameters.add("base64", userFaceDto.getFaceBase64());
         //添加人脸
         httpEntity = new HttpEntity(postParameters, httpHeaders);
-        responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE, postParameters.toString(), responseEntity.getBody());
 
@@ -223,7 +223,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
 
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
-        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
+        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE, postParameters.toString(), responseEntity.getBody());
 
@@ -247,7 +247,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
-        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_DELETE_FACE, postParameters.toString(), responseEntity.getBody());
 
 
@@ -258,7 +258,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         postParameters.add("personId", heartbeatTaskDto.getTaskid());
         postParameters.add("pass", password);
         httpEntity = new HttpEntity(postParameters, httpHeaders);
-        responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_DELETE_PERSION_FACE, postParameters.toString(), responseEntity.getBody());
 
 
@@ -280,7 +280,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
-        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_RESET, postParameters.toString(), responseEntity.getBody());
 
     }
@@ -306,7 +306,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
             HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
-            ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+            ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
             saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_PASSWORD, postParameters.toString(), responseEntity.getBody());
 
             url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_SET_SYSTEMMODE;
@@ -316,7 +316,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
             httpHeaders = new HttpHeaders();
             httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
             httpEntity = new HttpEntity(postParameters, httpHeaders);
-            responseEntity = restTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
+            responseEntity = outRestTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
             saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_SYSTEMMODE, postParameters.toString(), responseEntity.getBody());
 
             //设置回调地址
@@ -328,7 +328,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
             httpHeaders = new HttpHeaders();
             httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
             httpEntity = new HttpEntity(postParameters, httpHeaders);
-            responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+            responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
             saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_IDENTIFY_CALLBACK, postParameters.toString(), responseEntity.getBody());
 
         }
@@ -352,7 +352,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
-        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_REBOOT, postParameters.toString(), responseEntity.getBody());
 
@@ -368,7 +368,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
-        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_OPEN_DOOR, postParameters.toString(), responseEntity.getBody());
     }
