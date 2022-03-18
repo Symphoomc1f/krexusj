@@ -56,9 +56,6 @@ public class ThingsApplicationStart implements WebMvcConfigurer {
     public RestTemplate restTemplate() {
         StringHttpMessageConverter m = new StringHttpMessageConverter(Charset.forName("UTF-8"));
         RestTemplate restTemplate = new RestTemplateBuilder().additionalMessageConverters(m).build();
-        List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
-        converters.add(new MappingJackson2HttpMessageConverter());
-        restTemplate.setMessageConverters(converters);
         return restTemplate;
 
 
