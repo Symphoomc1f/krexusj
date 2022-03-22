@@ -176,7 +176,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         param.put("name", userFaceDto.getName());
         param.put("idcardNum", "");
         param.put("iDNumber", userFaceDto.getIdNumber());
-        postParameters.add("person", param);
+        postParameters.add("person", param.toJSONString());
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
