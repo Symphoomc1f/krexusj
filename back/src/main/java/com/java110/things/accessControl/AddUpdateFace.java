@@ -151,7 +151,7 @@ public class AddUpdateFace extends BaseAccessControl {
         machineFaceDto.setUserId(userFaceDto.getUserId());
         machineFaceDto.setMachineId(machineDto.getMachineId());
         machineFaceDto.setState(resultDto.getCode() == ResultDto.SUCCESS ? "S" : "F");
-        machineFaceDto.setState(resultDto.getMsg());
+        machineFaceDto.setMessage(resultDto.getMsg());
 
         machineFaceService.updateMachineFace(machineFaceDto);
     }

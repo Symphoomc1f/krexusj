@@ -188,7 +188,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
             postParameters.add("pass", password);
             postParameters.add("personId", userFaceDto.getUserId());
             postParameters.add("faceId", userFaceDto.getUserId());
-            postParameters.add("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
+            //postParameters.add("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
             postParameters.add("base64", userFaceDto.getFaceBase64());
             //添加人脸
             httpEntity = new HttpEntity(postParameters, httpHeaders);
