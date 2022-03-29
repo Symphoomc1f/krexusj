@@ -61,7 +61,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
 
     public static final String VERSION = "0.2";
 
-    public static final String CMD_ADD_FACE = "/face"; // 创建人脸
+    public static final String CMD_ADD_FACE = "/face/create"; // 创建人脸
     public static final String CMD_ADD_FACE_FIND = "/face/find"; // 创建人脸
 
     public static final String CMD_OPEN_DOOR = "/device/openDoorControl"; // 开门
@@ -189,7 +189,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
             postParameters.add("personId", userFaceDto.getUserId());
             postParameters.add("faceId", userFaceDto.getUserId());
             //postParameters.add("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
-            postParameters.add("base64", userFaceDto.getFaceBase64());
+            postParameters.add("imgBase64", userFaceDto.getFaceBase64());
             //添加人脸
             httpEntity = new HttpEntity(postParameters, httpHeaders);
             responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
