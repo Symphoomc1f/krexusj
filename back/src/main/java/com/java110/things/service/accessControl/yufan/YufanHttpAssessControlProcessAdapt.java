@@ -62,6 +62,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
     public static final String VERSION = "0.2";
 
     public static final String CMD_ADD_FACE = "/face/create"; // 创建人脸
+    public static final String CMD_UPDATE_FACE = "/face/update"; // 创建人脸
     public static final String CMD_ADD_FACE_FIND = "/face/find"; // 创建人脸
 
     public static final String CMD_OPEN_DOOR = "/device/openDoorControl"; // 开门
@@ -218,19 +219,19 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
 
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         String url = "";
-        url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_ADD_FACE;
+        url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_UPDATE_FACE;
         MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
         postParameters.add("pass", password);
         postParameters.add("personId", userFaceDto.getUserId());
         postParameters.add("faceId", userFaceDto.getUserId());
-        postParameters.add("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
-        postParameters.add("base64", userFaceDto.getFaceBase64());
+        //postParameters.add("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
+        postParameters.add("imgBase64", userFaceDto.getFaceBase64());
         //添加人脸
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
 
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
-        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
+        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE, postParameters.toString(), responseEntity.getBody());
 
