@@ -2,6 +2,7 @@ package com.java110.things.dao;
 
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.OperateLogDto;
+import com.java110.things.entity.machine.SystemExceptionDto;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -45,4 +46,12 @@ public interface IOperateLogServiceDao {
      * @return
      */
     long getOperateLogCount(OperateLogDto operateLogDto);
+
+
+    /**
+     * 保存系统异常
+     * @param systemExceptionDto
+     * @return
+     */
+    int saveSystemException(SystemExceptionDto systemExceptionDto);
 }

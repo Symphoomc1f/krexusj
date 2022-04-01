@@ -17,6 +17,7 @@ import com.java110.things.factory.HttpFactory;
 import com.java110.things.factory.ImageFactory;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.machine.IMachineFaceService;
+import com.java110.things.service.machine.ISystemExceptionService;
 import com.java110.things.util.BeanConvertUtil;
 import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
@@ -48,6 +49,8 @@ public class AddUpdateFace extends BaseAccessControl {
     @Autowired
     private IMachineFaceService machineFaceService;
 
+
+
     public static final String MACHINE_HAS_NOT_FACE = "-1"; // 设备没有人脸
 
 
@@ -77,26 +80,6 @@ public class AddUpdateFace extends BaseAccessControl {
 
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
 
-        //返回报文
-        /**
-         * {
-         *     "code": 0,
-         *     "data": {
-         *         "reserved": "772019121580420009",
-         *         "groupid": "702019120393220007",
-         *         "name": "散散",
-         *         "startTime": 1576387548000,
-         *         "faceBase64": "UQohF+X49QMFqfYH/y8EMhMvFum2NfQbCiMD2y0kmRLczQzlw7G4ANQjBBMpp9Qq+ucyEQL88/Ll4+n6Bg4eDy4HGgMG7h0cEfnEBUITJjcY2hTT+eEFBdUSBzjR8iXzA/Ed1OP/Ibnh+h4B3dU+DOb9/uTj5PzxM/fXNNEgLjIRDBMb2u4JOvAvHQbtK+UcGAX5+rsE+q0k2AFBHDHp3gAt3hPl/ej38wgF1ObBmLsJ5cXE9DcqO9LzC+EE8v3Z4NMUAA==",
-         *         "endTime": 32503651200000,
-         *         "idNumber": "",
-         *         "userid": "772019121580420009",
-         *         "remarks": "HC小区管理系统",
-         *         "group": "杭州月轮家园"
-         *     },
-         *     "message": "success"
-         * }
-         */
-
         if (!paramOut.containsKey("code") || ResponseConstant.SUCCESS != paramOut.getInteger("code")) {
             String msg = paramOut.containsKey("msg") ? paramOut.getString("msg") : ResponseConstant.NO_RESULT;
             throw new HeartbeatCloudException(ExceptionConstant.ERROR, msg);
@@ -121,7 +104,6 @@ public class AddUpdateFace extends BaseAccessControl {
         userFaceDto.setEndTime(DateUtil.getFormatTimeString(endTime, DateUtil.DATE_FORMATE_STRING_A));
 
         userFaceDto.setUserId(data.getString("userid"));
-
 
         //查询 当前用户是否在硬件中存在数据
         String faceId = AccessControlProcessFactory.getAssessControlProcessImpl().getFace(machineDto, userFaceDto);

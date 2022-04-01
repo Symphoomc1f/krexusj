@@ -6,10 +6,14 @@ import com.java110.things.accessControl.ClearAllFace;
 import com.java110.things.car.AddUpdateCar;
 import com.java110.things.car.DeleteCar;
 import com.java110.things.config.Java110Properties;
-import com.java110.things.constant.*;
+import com.java110.things.constant.CarConstant;
+import com.java110.things.constant.ExceptionConstant;
+import com.java110.things.constant.MachineConstant;
+import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.machine.SystemExceptionDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.task.TaskDto;
 import com.java110.things.exception.HeartbeatCloudException;
@@ -21,9 +25,11 @@ import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.quartz.TaskSystemQuartz;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.machine.IMachineService;
+import com.java110.things.service.machine.ISystemExceptionService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
 import com.java110.things.util.DateUtil;
+import com.java110.things.util.ExceptionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -71,6 +77,9 @@ public class CarHeartbeatCloudTemplate extends TaskSystemQuartz {
     @Autowired
     private ClearAllFace clearAllFace;
 
+    @Autowired
+    private ISystemExceptionService systemExceptionService;
+
     @Override
     protected void process(TaskDto taskDto) throws Exception {
 
@@ -97,7 +106,7 @@ public class CarHeartbeatCloudTemplate extends TaskSystemQuartz {
 
 
         //心跳云端是否下发指令
-        heartbeatCloud(machineDtos,communityDtos.get(0));
+        heartbeatCloud(machineDtos, communityDtos.get(0));
     }
 
     /**
@@ -105,7 +114,7 @@ public class CarHeartbeatCloudTemplate extends TaskSystemQuartz {
      *
      * @param communityDto 小区信息
      */
-    private void heartbeatCloud(List<MachineDto> machineDtos,CommunityDto communityDto) {
+    private void heartbeatCloud(List<MachineDto> machineDtos, CommunityDto communityDto) {
         for (MachineDto machineDto : machineDtos) {
             try {
                 doHeartbeatCloud(communityDto, machineDto);
@@ -120,11 +129,9 @@ public class CarHeartbeatCloudTemplate extends TaskSystemQuartz {
      *
      * @param communityDto
      */
-    private void doHeartbeatCloud(CommunityDto communityDto,MachineDto machineDto) throws Exception {
+    private void doHeartbeatCloud(CommunityDto communityDto, MachineDto machineDto) throws Exception {
 
         String url = MappingCacheFactory.getValue("CLOUD_API") + CarConstant.CAR_HEARTBEART;
-
-
 
 
         Map<String, String> headers = new HashMap<>();
@@ -219,7 +226,7 @@ public class CarHeartbeatCloudTemplate extends TaskSystemQuartz {
         JSONArray data = paramOut.getJSONArray("data");
 
         for (int dataIndex = 0; dataIndex < data.size(); dataIndex++) {
-            doHeartbeatCloudResult(machineDto,data.getJSONObject(dataIndex), communityDto);
+            doHeartbeatCloudResult(machineDto, data.getJSONObject(dataIndex), communityDto);
         }
 
     }
@@ -233,28 +240,33 @@ public class CarHeartbeatCloudTemplate extends TaskSystemQuartz {
      *                    "taskId": "ed06d2329c774474a05475ac6f3d623d"  任务ID
      *                    }
      */
-    private void doHeartbeatCloudResult(MachineDto machineDto,JSONObject commandInfo, CommunityDto communityDto) throws Exception {
+    private void doHeartbeatCloudResult(MachineDto machineDto, JSONObject commandInfo, CommunityDto communityDto) throws Exception {
+        try {
+            Assert.hasKeyAndValue(commandInfo, "taskcmd", "云端返回报文格式错误 未 包含指令编码 taskcmd" + commandInfo.toJSONString());
+            Assert.hasKeyAndValue(commandInfo, "taskinfo", "云端返回报文格式错误 未 包含任务内容 taskinfo" + commandInfo.toJSONString());
+            Assert.hasKeyAndValue(commandInfo, "taskid", "云端返回报文格式错误 未 包含任务ID taskid" + commandInfo.toJSONString());
 
-        Assert.hasKeyAndValue(commandInfo, "taskcmd", "云端返回报文格式错误 未 包含指令编码 taskcmd" + commandInfo.toJSONString());
-        Assert.hasKeyAndValue(commandInfo, "taskinfo", "云端返回报文格式错误 未 包含任务内容 taskinfo" + commandInfo.toJSONString());
-        Assert.hasKeyAndValue(commandInfo, "taskid", "云端返回报文格式错误 未 包含任务ID taskid" + commandInfo.toJSONString());
+            HeartbeatTaskDto heartbeatTaskDto = BeanConvertUtil.covertBean(commandInfo, HeartbeatTaskDto.class);
 
-        HeartbeatTaskDto heartbeatTaskDto = BeanConvertUtil.covertBean(commandInfo, HeartbeatTaskDto.class);
-
-        switch (commandInfo.getInteger("taskcmd")) {
-            case CarConstant.CMD_ADD_CAR:
-                addUpdateCar.addUpdateCar(machineDto,heartbeatTaskDto, communityDto,CarConstant.CMD_ADD_CAR);
-                break;
-            case CarConstant.CMD_UPDATE_CAR:
-                addUpdateCar.addUpdateCar(machineDto,heartbeatTaskDto, communityDto,CarConstant.CMD_UPDATE_CAR);
-                break;
-            case CarConstant.CMD_DELETE_CAR:
-                deleteCar.deleteCar(heartbeatTaskDto, communityDto);
-                break;
-            default:
-                logger.error("不支持的指令", commandInfo.getInteger("taskcmd"));
+            switch (commandInfo.getInteger("taskcmd")) {
+                case CarConstant.CMD_ADD_CAR:
+                    addUpdateCar.addUpdateCar(machineDto, heartbeatTaskDto, communityDto, CarConstant.CMD_ADD_CAR);
+                    break;
+                case CarConstant.CMD_UPDATE_CAR:
+                    addUpdateCar.addUpdateCar(machineDto, heartbeatTaskDto, communityDto, CarConstant.CMD_UPDATE_CAR);
+                    break;
+                case CarConstant.CMD_DELETE_CAR:
+                    deleteCar.deleteCar(heartbeatTaskDto, communityDto);
+                    break;
+                default:
+                    logger.error("不支持的指令", commandInfo.getInteger("taskcmd"));
+            }
+        } catch (Exception e) {
+            //记录定时任务同步日志记录
+            systemExceptionService.save(SystemExceptionDto.EXCEPTION_TYPE_CAR, commandInfo.getString("taskId"),
+                    machineDto.getMachineId(), ExceptionUtil.getStackTrace(e));
+            throw e;
         }
-
 
     }
 

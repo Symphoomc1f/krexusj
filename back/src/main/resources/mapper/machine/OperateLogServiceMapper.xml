@@ -5,8 +5,10 @@
 
     <insert id="saveOperateLog" parameterType="com.java110.things.entity.machine.OperateLogDto">
         INSERT INTO
-        operate_log(`log_id`, `machine_id`, `machine_type_cd`, `operate_type`, `user_id`, `user_name`, `req_param`, `res_param`, `state`)
-        VALUES (#{logId}, #{machineId}, #{machineTypeCd}, #{operateType}, #{userId}, #{userName}, #{reqParam}, #{resParam}, #{state})
+        operate_log(`log_id`, `machine_id`, `machine_type_cd`, `operate_type`, `user_id`, `user_name`, `req_param`,
+        `res_param`, `state`)
+        VALUES (#{logId}, #{machineId}, #{machineTypeCd}, #{operateType}, #{userId}, #{userName}, #{reqParam},
+        #{resParam}, #{state})
     </insert>
 
     <!--
@@ -15,31 +17,31 @@
     <select id="getOperateLogs" parameterType="com.java110.things.entity.machine.OperateLogDto"
             resultType="com.java110.things.entity.machine.OperateLogDto">
         SELECT
-            t.log_id logId,
-            t.machine_id machineId,
-            t.machine_type_cd machineTypeCd,
-            t.operate_type operateType,
-            t.user_id userId,
-            t.user_name userName,
-            t.req_param reqParam,
-            t.res_param resParam,
-            t.state,
-            t.create_time createTime,
-            td1.name operateTypeName,
-            m.machine_code machineCode,
-            m.machine_name machineName,
-            m.machine_ip machineIp,
-            td2.`name` stateName
+        t.log_id logId,
+        t.machine_id machineId,
+        t.machine_type_cd machineTypeCd,
+        t.operate_type operateType,
+        t.user_id userId,
+        t.user_name userName,
+        t.req_param reqParam,
+        t.res_param resParam,
+        t.state,
+        t.create_time createTime,
+        td1.name operateTypeName,
+        m.machine_code machineCode,
+        m.machine_name machineName,
+        m.machine_ip machineIp,
+        td2.`name` stateName
         FROM
-            operate_log t
-            INNER JOIN machine m ON t.machine_id = m.machine_id
-            AND m.status_cd = '0'
-            LEFT JOIN t_dict td1 ON t.operate_type = td1.status_cd
-            AND td1.table_name = 'operate_log'
-            AND td1.table_columns = 'operate_type'
-            LEFT JOIN t_dict td2 ON t.state = td2.status_cd
-            AND td2.table_name = 'operate_log'
-            AND td2.table_columns = 'state'
+        operate_log t
+        INNER JOIN machine m ON t.machine_id = m.machine_id
+        AND m.status_cd = '0'
+        LEFT JOIN t_dict td1 ON t.operate_type = td1.status_cd
+        AND td1.table_name = 'operate_log'
+        AND td1.table_columns = 'operate_type'
+        LEFT JOIN t_dict td2 ON t.state = td2.status_cd
+        AND td2.table_name = 'operate_log'
+        AND td2.table_columns = 'state'
         where 1=1
         <if test="logId != null and logId != ''">
             and t.log_id = #{logId}
@@ -129,22 +131,22 @@
         update operate_log t
         <trim prefix="SET" suffixOverrides=",">
             <if test="machineId != null and machineId != ''">
-                 t.machine_id = #{machineId},
+                t.machine_id = #{machineId},
             </if>
-           <!-- <if test="machineTypeCd != null and machineTypeCd != ''">
-                 t.machine_type_cd = #{machineTypeCd},
-            </if>
-            <if test="operateType != null and operateType != ''">
-                 t.operate_type = #{operateType},
-            </if>
-            <if test="userId != null and userId != ''">
-                 t.user_id = #{userId},
-            </if>
-            <if test="userName != null and userName != ''">
-                 t.userName = #{userName},
-            </if>-->
+            <!-- <if test="machineTypeCd != null and machineTypeCd != ''">
+                  t.machine_type_cd = #{machineTypeCd},
+             </if>
+             <if test="operateType != null and operateType != ''">
+                  t.operate_type = #{operateType},
+             </if>
+             <if test="userId != null and userId != ''">
+                  t.user_id = #{userId},
+             </if>
+             <if test="userName != null and userName != ''">
+                  t.userName = #{userName},
+             </if>-->
             <if test="state != null and state != ''">
-                 t.state = #{state},
+                t.state = #{state},
             </if>
             <!--<if test="reqParam != null and reqParam != ''">
                 t.req_param = #{reqParam},
@@ -158,5 +160,12 @@
             and t.log_id = #{logId}
         </if>
     </update>
+
+    <!-- 保存系统异常数据-->
+    <insert id="saveSystemException" parameterType="com.java110.things.entity.machine.SystemExceptionDto">
+        INSERT INTO
+        system_exception(`exception_id`, `exception_type`, `obj_id`, `machine_id`, `err_msg`)
+        VALUES (#{exceptionId}, #{exceptionType}, #{objId}, #{machineId}, #{errMsg})
+    </insert>
 
 </mapper>
