@@ -17,7 +17,6 @@ import com.java110.things.factory.HttpFactory;
 import com.java110.things.factory.ImageFactory;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.machine.IMachineFaceService;
-import com.java110.things.service.machine.ISystemExceptionService;
 import com.java110.things.util.BeanConvertUtil;
 import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
@@ -48,7 +47,6 @@ public class AddUpdateFace extends BaseAccessControl {
 
     @Autowired
     private IMachineFaceService machineFaceService;
-
 
 
     public static final String MACHINE_HAS_NOT_FACE = "-1"; // 设备没有人脸
@@ -150,8 +148,8 @@ public class AddUpdateFace extends BaseAccessControl {
             faceBase = faceBase.substring(faceBase.indexOf("base64,") + 7);
         }
 
-        ImageFactory.GenerateImage(faceBase, machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
-
+        String img = ImageFactory.GenerateImage(faceBase, machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
+        userFaceDto.setFaceBase64(img);
         MachineFaceDto machineFaceDto = BeanConvertUtil.covertBean(userFaceDto, MachineFaceDto.class);
         machineFaceDto.setId(SeqUtil.getId());
         machineFaceDto.setMachineId(machineDto.getMachineId());
@@ -179,8 +177,8 @@ public class AddUpdateFace extends BaseAccessControl {
             faceBase = faceBase.substring(faceBase.indexOf("base64,") + 7);
         }
 
-        ImageFactory.GenerateImage(faceBase, machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
-
+        String img = ImageFactory.GenerateImage(faceBase, machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
+        userFaceDto.setFaceBase64(img);
 
         MachineFaceDto machineFaceDto = new MachineFaceDto();
         machineFaceDto.setUserId(userFaceDto.getUserId());

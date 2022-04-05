@@ -1,10 +1,10 @@
 package com.java110.things.factory;
 
 import com.java110.things.config.Java110Properties;
-import com.java110.things.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * 图片工厂类
@@ -30,18 +29,20 @@ public class ImageFactory {
     private static Logger logger = LoggerFactory.getLogger(ImageFactory.class);
 
     public static void main(String[] args) {
-            String req = "data:image/jpeg;base64,AQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB\nAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEB\nAQEBAQEBAQEBAQEB";
+        String req = "data:image/jpeg;base64,AQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB\nAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEB\nAQEBAQEBAQEBAQEB";
         req = req.substring(req.indexOf("base64,") + 7);
 
         System.out.printf("req" + req);
     }
 
-    public static boolean GenerateImage(String imgStr, String imagePath) {   //对字节数组字符串进行Base64解码并生成图片
-        if (imgStr == null) //图像数据为空
-            return false;
-         imgStr = imgStr.replaceAll("\r|\n", "");
-        System.out.printf("imgStr="+imgStr);
+    public static String GenerateImage(String imgStr, String imagePath) {   //对字节数组字符串进行Base64解码并生成图片
+        if (imgStr == null) { //图像数据为空
+            return "";
+        }
+        imgStr = imgStr.replaceAll("\r|\n", "");
+        System.out.printf("imgStr=" + imgStr);
         BASE64Decoder decoder = new BASE64Decoder();
+        BASE64Encoder encoder = new BASE64Encoder();
         try {
             //Base64解码
             byte[] b = decoder.decodeBuffer(imgStr);
@@ -64,10 +65,10 @@ public class ImageFactory {
             out.write(b);
             out.flush();
             out.close();
-            return true;
+            return encoder.encode(b);
         } catch (Exception e) {
             logger.error("存储人脸失败", e);
-            return false;
+            return imgStr;
         }
     }
 
