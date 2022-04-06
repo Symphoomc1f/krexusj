@@ -31,10 +31,10 @@ public interface ICarProcess {
 
     /**
      * 根据设备编码和 faceId 查询是否有人脸
-     * @param userFaceDto 用户信息
+     * @param carResultDto 用户信息
      * @return 如果有人脸 返回 faceId,没有则返回 null
      */
-    String getCar(UserFaceDto userFaceDto);
+    String getCar(CarResultDto carResultDto);
 
 
     /**

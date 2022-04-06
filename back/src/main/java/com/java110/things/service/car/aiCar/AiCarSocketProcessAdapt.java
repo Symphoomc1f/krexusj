@@ -43,7 +43,7 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
     }
 
     @Override
-    public String getCar(UserFaceDto userFaceDto) {
+    public String getCar(CarResultDto carResultDto) {
         return null;
     }
 
