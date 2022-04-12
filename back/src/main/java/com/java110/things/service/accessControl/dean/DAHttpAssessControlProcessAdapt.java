@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import sun.misc.BASE64Encoder;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,7 +42,7 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
     private static Logger logger = LoggerFactory.getLogger(DAHttpAssessControlProcessAdapt.class);
     //public static Function fun=new Function();
 
-    private static final String DEFAULT_PORT = "8090"; //端口
+    private static final String DEFAULT_PORT = "80"; //端口
 
     @Autowired
     private IMachineService machineServiceImpl;
@@ -60,18 +61,19 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
     public static final String VERSION = "0.2";
 
     public static final String CMD_ADD_FACE = "/face"; // 创建人脸
-    public static final String CMD_ADD_FACE_FIND = "/face/find"; // 创建人脸
+    public static final String CMD_ADD_FACE_FIND = "/action/SearchPerson"; // 名单查询
 
-    public static final String CMD_OPEN_DOOR = "/device/openDoorControl"; // 开门
+    public static final String CMD_OPEN_DOOR = "/action/OpenDoor"; // 开门
 
-    public static final String CMD_REBOOT = "/restartDevice";// 重启设备
+    public static final String CMD_REBOOT = "/action/RebootDevice";// 重启设备
 
-    public static final String CMD_ADD_USER = "/person/create"; // 添加人员
+    public static final String CMD_ADD_USER = "/action/AddPerson"; // 添加人员
+    public static final String CMD_EDIT_USER = "/action/EditPerson"; // 添加人员
 
     public static final String CMD_DELETE_PERSION_FACE = "/face/deletePerson"; //修改人脸
 
-    public static final String CMD_DELETE_FACE = "/person/delete"; //删除人脸
-    public static final String CMD_RESET = "/device/reset"; //设备重置
+    public static final String CMD_DELETE_FACE = "/action/DeletePerson"; //删除人脸
+    public static final String CMD_RESET = "/action/DeleteAllPerson"; //设备重置
 
     public static final String CMD_UI_TITLE = "set_ui_title";// 设置名称
     public static final String CMD_FACE_SEARCH = "face_search";// 搜素设备
@@ -116,17 +118,30 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
         return 0;
     }
 
+    public HttpHeaders getHeaders() {
+        String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
+        String auth = "Basic ";
+        auth += new BASE64Encoder().encode(("admin:" + password).getBytes());
+        //添加人脸
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("Authorization", auth);
+        return httpHeaders;
+    }
+
     @Override
     public String getFace(MachineDto machineDto, UserFaceDto userFaceDto) {
 
-        String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_ADD_FACE_FIND;
         JSONObject param = new JSONObject();
-        param.put("pass", password);
-        param.put("personId", userFaceDto.getUserId());
-        //添加人脸
-        HttpHeaders httpHeaders = new HttpHeaders();
-        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+        param.put("operator", "SearchPerson");
+        JSONObject info = new JSONObject();
+        info.put("DeviceID", machineDto.getMachineCode());
+        info.put("SearchType", 0);
+        info.put("SearchID", userFaceDto.getUserId());
+        info.put("Picture", 1);
+        param.put("info", info);
+
+        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), getHeaders());
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE_FIND, param.toJSONString(), responseEntity.getBody());
@@ -138,17 +153,17 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
 
         JSONObject outParam = JSONObject.parseObject(responseEntity.getBody());
 
-        if (!outParam.containsKey("data")) {
+        if (!outParam.containsKey("picinfo")) {
             return AddUpdateFace.MACHINE_HAS_NOT_FACE;
         }
 
-        JSONArray data = outParam.getJSONArray("data");
+        String picinfo = outParam.getString("picinfo");
 
-        if (data == null || data.size() < 1) {
+        if (StringUtil.isEmpty(picinfo)) {
             return AddUpdateFace.MACHINE_HAS_NOT_FACE;
         }
 
-        String personId = data.getJSONObject(0).getString("personId");
+        String personId = outParam.getJSONObject("info").getString("CustomizeID");
 
         if (StringUtil.isEmpty(personId)) {
             return AddUpdateFace.MACHINE_HAS_NOT_FACE;
@@ -157,121 +172,125 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
         return personId;
     }
 
+    /**
+     * { "
+     * operator": "AddPerson",
+     * "info": {
+     * <p>
+     * },
+     * "picinfo":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQAB......"
+     * }
+     *
+     * @param machineDto  硬件信息
+     * @param userFaceDto 用户人脸信息
+     * @return
+     */
     @Override
     public ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
-        String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_ADD_USER;
 
-        JSONObject paramObj = JSONObject.parseObject("{\"person\":{}}");
-        JSONObject param = paramObj.getJSONObject("person");
-        param.put("id", userFaceDto.getUserId());
-        param.put("name", userFaceDto.getName());
-        param.put("idcardNum", "");
-        param.put("iDNumber", userFaceDto.getIdNumber());
-        paramObj.put("pass", password);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        HttpEntity httpEntity = new HttpEntity(paramObj.toJSONString(), httpHeaders);
+        JSONObject param = new JSONObject();
+        param.put("operator", "AddPerson");
+        JSONObject info = new JSONObject();
+        info.put("DeviceID", machineDto.getMachineCode());
+        info.put("PersonType", 0);
+        info.put("IdType", 0);
+        info.put("CustomizeID", userFaceDto.getUserId());
+        info.put("PersonUUID", userFaceDto.getUserId());
+        info.put("Name", userFaceDto.getName());
+        info.put("CardType", 0);
+        info.put("IdCard", userFaceDto.getIdNumber());
+        info.put("Tempvalid", 0);
+        info.put("isCheckSimilarity", 0);
+        param.put("info", info);
+        //param.put("picinfo", userFaceDto.getFaceBase64());
+        param.put("picURI", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
+
+        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), getHeaders());
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, param.toJSONString(), responseEntity.getBody());
-
-        url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_ADD_FACE;
-        param = new JSONObject();
-        param.put("pass", password);
-        param.put("personId", userFaceDto.getUserId());
-        param.put("faceId", userFaceDto.getUserId());
-        param.put("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
-        param.put("base64", userFaceDto.getFaceBase64());
-        //添加人脸
-        httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
-        responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
-        logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE, param.toJSONString(), responseEntity.getBody());
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             return new ResultDto(ResultDto.ERROR, "调用设备失败");
         }
-
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
-        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("msg"));
+        return new ResultDto(paramOut.getInteger("code") == 200 ? ResultDto.SUCCESS : ResultDto.ERROR, "同步成功");
 
 
     }
 
     @Override
     public ResultDto updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+        String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_EDIT_USER;
 
-        String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
-        String url = "";
         JSONObject param = new JSONObject();
-        url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_ADD_FACE;
-        param = new JSONObject();
-        param.put("pass", password);
-        param.put("personId", userFaceDto.getUserId());
-        param.put("faceId", userFaceDto.getUserId());
-        param.put("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
-        param.put("base64", userFaceDto.getFaceBase64());
-        //添加人脸
-        HttpHeaders httpHeaders = new HttpHeaders();
-        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
-        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
-        logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE, param.toJSONString(), responseEntity.getBody());
+        param.put("operator", "EditPerson");
+        JSONObject info = new JSONObject();
+        info.put("DeviceID", machineDto.getMachineCode());
+        info.put("PersonType", 0);
+        info.put("IdType", 0);
+        info.put("CustomizeID", userFaceDto.getUserId());
+        info.put("PersonUUID", userFaceDto.getUserId());
+        info.put("Name", userFaceDto.getName());
+        info.put("CardType", 0);
+        info.put("IdCard", userFaceDto.getIdNumber());
+        info.put("Tempvalid", 0);
+        info.put("isCheckSimilarity", 0);
+        param.put("info", info);
+        //param.put("picinfo", userFaceDto.getFaceBase64());
+        param.put("picURI", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
 
+
+        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), getHeaders());
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_EDIT_USER, param.toJSONString(), responseEntity.getBody());
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             return new ResultDto(ResultDto.ERROR, "调用设备失败");
         }
 
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
-        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("msg"));
+        return new ResultDto(paramOut.getInteger("code") == 200 ? ResultDto.SUCCESS : ResultDto.ERROR, "同步成功");
     }
 
     @Override
     public ResultDto deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
-        String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_DELETE_FACE;
-
-
+        JSONArray userIds = new JSONArray();
+        userIds.add(heartbeatTaskDto.getTaskid());
         JSONObject param = new JSONObject();
-        param.put("id", heartbeatTaskDto.getTaskid());
-        param.put("pass", password);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+        param.put("operator", "DeletePerson");
+        JSONObject info = new JSONObject();
+        info.put("DeviceID", machineDto.getMachineCode());
+        info.put("TotalNum", 1);
+        info.put("IdType", 0);
+        info.put("CustomizeID", userIds);
+        param.put("info", info);
+
+        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), getHeaders());
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_DELETE_FACE, param.toJSONString(), responseEntity.getBody());
-
-
-        url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_DELETE_PERSION_FACE;
-
-
-        param = new JSONObject();
-        param.put("personId", heartbeatTaskDto.getTaskid());
-        param.put("pass", password);
-        httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
-        responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_DELETE_PERSION_FACE, param.toJSONString(), responseEntity.getBody());
-
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             return new ResultDto(ResultDto.ERROR, "调用设备失败");
         }
 
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
-        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("msg"));
+        return new ResultDto(paramOut.getInteger("code") == 200 ? ResultDto.SUCCESS : ResultDto.ERROR, "同步成功");
     }
 
     @Override
     public void clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
-        String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_RESET;
         JSONObject param = new JSONObject();
-        param.put("delete", false);
-        param.put("pass", password);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+        param.put("operator", "DeleteAllPerson");
+        JSONObject info = new JSONObject();
+        info.put("DeleteAllPersonCheck", 1);
+        param.put("info", info);
+
+        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), getHeaders());
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_RESET, param.toJSONString(), responseEntity.getBody());
-
     }
 
 
@@ -330,13 +349,15 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
 
     @Override
     public void restartMachine(MachineDto machineDto) {
-        String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         JSONObject param = new JSONObject();
-        param.put("pass", password);
+        param.put("operator", "RebootDevice");
+        JSONObject info = new JSONObject();
+        info.put("DeviceID", machineDto.getMachineCode());
+        info.put("IsRebootDevice", 1);
+        param.put("info", info);
         //
         String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_REBOOT;
-        HttpHeaders httpHeaders = new HttpHeaders();
-        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), getHeaders());
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_REBOOT, param.toJSONString(), responseEntity.getBody());
@@ -345,13 +366,18 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
 
     @Override
     public void openDoor(MachineDto machineDto) {
-        String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         JSONObject param = new JSONObject();
-        param.put("pass", password);
+        param.put("operator", "OpenDoor");
+        JSONObject info = new JSONObject();
+        info.put("DeviceID", machineDto.getMachineCode());
+        info.put("Chn", 0);
+        info.put("status", 0);
+        info.put("msg", "请通行");
+        param.put("info", info);
         //
         String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_OPEN_DOOR;
-        HttpHeaders httpHeaders = new HttpHeaders();
-        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+
+        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), getHeaders());
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_OPEN_DOOR, param.toJSONString(), responseEntity.getBody());
@@ -363,8 +389,12 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
         JSONObject resultParam = new JSONObject();
         try {
             JSONObject body = JSONObject.parseObject(data);
+
+            JSONObject info = body.getJSONObject("info");
+
+
             MachineDto machineDto = new MachineDto();
-            machineDto.setMachineIp(body.getString("ip"));
+            machineDto.setMachineCode(info.getString("DeviceID"));
             List<MachineDto> machineDtos = notifyAccessControlService.queryMachines(machineDto);
 
             if (machineDtos.size() < 0) {
@@ -373,7 +403,7 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
                 return resultParam.toJSONString();//未找到设备
             }
 
-            String userId = body.containsKey("personId") ? body.getString("personId") : "";
+            String userId = info.containsKey("PersonUUID") ? info.getString("PersonUUID") : "";
             String userName = "";
             if (!StringUtils.isEmpty(userId)) {
                 MachineFaceDto machineFaceDto = new MachineFaceDto();
@@ -388,14 +418,14 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
 
 
             OpenDoorDto openDoorDto = new OpenDoorDto();
-            openDoorDto.setFace(body.getString("base64"));
+            openDoorDto.setFace(body.getString("SanpPic").replace("data:image/jpeg;base64,", ""));
             openDoorDto.setUserName(userName);
             openDoorDto.setHat("3");
             openDoorDto.setMachineCode(machineDtos.get(0).getMachineCode());
             openDoorDto.setUserId(userId);
             openDoorDto.setOpenId(SeqUtil.getId());
             openDoorDto.setOpenTypeCd(OPEN_TYPE_FACE);
-            openDoorDto.setSimilarity(body.containsKey("identifyType") && "1".equals(body.getString("identifyType")) ? "100" : "0");
+            openDoorDto.setSimilarity(info.getString("Similarity1"));
 
 
             freshOwnerFee(openDoorDto);
