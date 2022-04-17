@@ -12,13 +12,7 @@ import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Iterator;
 
 /**
@@ -43,6 +37,8 @@ public class ImageFactory {
         System.out.printf("imgStr=" + imgStr);
         BASE64Decoder decoder = new BASE64Decoder();
         BASE64Encoder encoder = new BASE64Encoder();
+        OutputStream out = null;
+        InputStream is = null;
         try {
             //Base64解码
             byte[] b = decoder.decodeBuffer(imgStr);
@@ -52,7 +48,7 @@ public class ImageFactory {
                 }
             }
 
-            InputStream is = new ByteArrayInputStream(b);
+            is = new ByteArrayInputStream(b);
             BufferedImage img = ImageIO.read(is);
             b = bufferedImageTobytes(img, 0.8F);
             //生成jpeg图片
@@ -61,14 +57,24 @@ public class ImageFactory {
             if (!file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();
             }
-            OutputStream out = new FileOutputStream(filename);
+            out = new FileOutputStream(filename);
             out.write(b);
             out.flush();
-            out.close();
             return encoder.encode(b);
         } catch (Exception e) {
             logger.error("存储人脸失败", e);
             return imgStr;
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -145,38 +151,56 @@ public class ImageFactory {
         /*if (image == null) {
             return null;
         } */
-        // 得到指定Format图片的writer
-        Iterator<ImageWriter> iter = ImageIO
-                .getImageWritersByFormatName("jpg");// 得到迭代器
-        ImageWriter writer = (ImageWriter) iter.next(); // 得到writer
-
-        // 得到指定writer的输出参数设置(ImageWriteParam )
-        ImageWriteParam iwp = writer.getDefaultWriteParam();
-        iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT); // 设置可否压缩
-        iwp.setCompressionQuality(quality); // 设置压缩质量参数
-
-        iwp.setProgressiveMode(ImageWriteParam.MODE_DISABLED);
-
-        ColorModel colorModel = image.getColorModel();
-        // 指定压缩时使用的色彩模式
-        iwp.setDestinationType(new javax.imageio.ImageTypeSpecifier(colorModel,
-                colorModel.createCompatibleSampleModel(16, 16)));
-
-        // 开始打包图片，写入byte[]
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(); // 取得内存输出流
-        IIOImage iIamge = new IIOImage(image, null, null);
+        byte[] imgByte = null;
+        ByteArrayOutputStream byteArrayOutputStream = null;
         try {
-            // 此处因为ImageWriter中用来接收write信息的output要求必须是ImageOutput
-            // 通过ImageIo中的静态方法，得到byteArrayOutputStream的ImageOutput
-            writer.setOutput(ImageIO
-                    .createImageOutputStream(byteArrayOutputStream));
-            writer.write(null, iIamge, iwp);
+            // 得到指定Format图片的writer
+            Iterator<ImageWriter> iter = ImageIO
+                    .getImageWritersByFormatName("jpg");// 得到迭代器
+            ImageWriter writer = (ImageWriter) iter.next(); // 得到writer
 
-        } catch (IOException e) {
-            System.out.println("write errro");
-            e.printStackTrace();
+            // 得到指定writer的输出参数设置(ImageWriteParam )
+            ImageWriteParam iwp = writer.getDefaultWriteParam();
+            iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT); // 设置可否压缩
+            iwp.setCompressionQuality(quality); // 设置压缩质量参数
+
+            iwp.setProgressiveMode(ImageWriteParam.MODE_DISABLED);
+
+            ColorModel colorModel = image.getColorModel();
+            // 指定压缩时使用的色彩模式
+            iwp.setDestinationType(new javax.imageio.ImageTypeSpecifier(colorModel,
+                    colorModel.createCompatibleSampleModel(16, 16)));
+
+            // 开始打包图片，写入byte[]
+            byteArrayOutputStream = new ByteArrayOutputStream(); // 取得内存输出流
+            IIOImage iIamge = new IIOImage(image, null, null);
+            try {
+                // 此处因为ImageWriter中用来接收write信息的output要求必须是ImageOutput
+                // 通过ImageIo中的静态方法，得到byteArrayOutputStream的ImageOutput
+                writer.setOutput(ImageIO
+                        .createImageOutputStream(byteArrayOutputStream));
+                writer.write(null, iIamge, iwp);
+
+            } catch (IOException e) {
+                System.out.println("write errro");
+                e.printStackTrace();
+            } finally {
+                try {
+                    byteArrayOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            imgByte = byteArrayOutputStream.toByteArray();
+
+            return imgByte;
+        } finally {
+            try {
+                byteArrayOutputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        return byteArrayOutputStream.toByteArray();
     }
 
 

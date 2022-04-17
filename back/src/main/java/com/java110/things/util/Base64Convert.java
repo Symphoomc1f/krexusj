@@ -52,4 +52,6 @@ public class Base64Convert {
         byte[] bytes = new BASE64Decoder().decodeBuffer(strBase64);   //将字符串转换为byte数组
         return bytes;
     }
+
+
 }
