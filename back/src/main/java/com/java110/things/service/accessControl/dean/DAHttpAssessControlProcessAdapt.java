@@ -398,8 +398,8 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
             List<MachineDto> machineDtos = notifyAccessControlService.queryMachines(machineDto);
 
             if (machineDtos.size() < 0) {
-                resultParam.put("result", 1);
-                resultParam.put("success", true);
+                resultParam.put("code", 404);
+                resultParam.put("desc", "设备不存在");
                 return resultParam.toJSONString();//未找到设备
             }
 
@@ -434,9 +434,12 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
 
         } catch (Exception e) {
             logger.error("推送人脸失败", e);
+            resultParam.put("code", 404);
+            resultParam.put("desc", "异常");
+            return resultParam.toJSONString();//未找到设备
         }
-        resultParam.put("result", 1);
-        resultParam.put("success", true);
+        resultParam.put("code", 200);
+        resultParam.put("desc", "OK");
         return resultParam.toJSONString();//未找到设备
 
     }
