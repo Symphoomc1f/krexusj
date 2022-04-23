@@ -3,7 +3,7 @@ package com.java110.things.accessControl;
 import com.alibaba.druid.util.StringUtils;
 import com.java110.things.factory.ApplicationContextFactory;
 import com.java110.things.factory.MappingCacheFactory;
-import com.java110.things.service.accessControl.IAssessControlProcess;
+import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

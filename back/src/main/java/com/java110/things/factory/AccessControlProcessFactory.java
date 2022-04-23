@@ -5,7 +5,7 @@ import com.java110.things.entity.manufacturer.ManufacturerDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.exception.Result;
 import com.java110.things.exception.ThreadException;
-import com.java110.things.service.accessControl.IAssessControlProcess;
+import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import com.java110.things.service.manufacturer.IManufacturerService;
 import com.java110.things.util.Assert;
 

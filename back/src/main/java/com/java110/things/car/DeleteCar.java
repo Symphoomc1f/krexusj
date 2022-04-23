@@ -6,7 +6,7 @@ import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.CarProcessFactory;
-import com.java110.things.service.car.ICarService;
+import com.java110.things.adapt.car.ICarService;
 import com.java110.things.service.machine.IMachineFaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

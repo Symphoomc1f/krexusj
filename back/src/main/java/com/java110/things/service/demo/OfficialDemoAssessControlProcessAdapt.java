@@ -4,7 +4,7 @@ import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
-import com.java110.things.service.accessControl.IAssessControlProcess;
+import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

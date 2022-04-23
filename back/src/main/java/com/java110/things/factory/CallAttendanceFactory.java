@@ -1,7 +1,6 @@
 package com.java110.things.factory;
 
-import com.java110.things.service.accessControl.ICallAccessControlService;
-import com.java110.things.service.attendance.ICallAttendanceService;
+import com.java110.things.adapt.attendance.ICallAttendanceService;
 
 /**
  * @ClassName NotifyAccessControlFactory

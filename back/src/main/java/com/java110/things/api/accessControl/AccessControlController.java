@@ -1,10 +1,8 @@
 package com.java110.things.api.accessControl;
 
 import com.java110.things.Controller.BaseController;
-import com.java110.things.constant.ResponseConstant;
-import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.AccessControlProcessFactory;
-import com.java110.things.service.accessControl.IAssessControlProcess;
+import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

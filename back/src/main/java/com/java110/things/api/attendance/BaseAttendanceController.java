@@ -1,8 +1,6 @@
 package com.java110.things.api.attendance;
 
 import com.java110.things.Controller.BaseController;
-import com.java110.things.factory.AttendanceProcessFactory;
-import com.java110.things.service.attendance.IAttendanceProcess;
 
 /**
  * @ClassName BaseAttendanceController

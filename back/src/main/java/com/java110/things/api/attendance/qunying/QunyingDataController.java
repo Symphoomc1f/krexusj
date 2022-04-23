@@ -9,7 +9,7 @@ import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.exception.ControllerException;
 import com.java110.things.exception.Result;
-import com.java110.things.service.attendance.IAttendanceService;
+import com.java110.things.adapt.attendance.IAttendanceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
