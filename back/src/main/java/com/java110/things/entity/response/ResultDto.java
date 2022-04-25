@@ -1,6 +1,8 @@
 package com.java110.things.entity.response;
 
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.io.Serializable;
 
@@ -57,6 +59,49 @@ public class ResultDto implements Serializable {
         this.data = data;
         this.total = total;
         this.totalPage = totalPage;
+    }
+
+    /**
+     * 创建ResponseEntity对象
+     *
+     * @param data 数据对象
+     * @return
+     */
+    public static ResponseEntity<String> createResponseEntity(Object data) {
+        ResultDto resultVo = new ResultDto(SUCCESS, SUCCESS_MSG, data);
+        ResponseEntity<String> responseEntity = new ResponseEntity<String>(resultVo.toString(), HttpStatus.OK);
+        return responseEntity;
+    }
+
+    /**
+     * 创建ResponseEntity对象
+     *
+     * @param resultVo 数据对象
+     * @return
+     */
+    public static ResponseEntity<String> createResponseEntity(ResultDto resultVo) {
+        ResponseEntity<String> responseEntity = new ResponseEntity<String>(resultVo.toString(), HttpStatus.OK);
+        return responseEntity;
+    }
+
+    /**
+     * 成功通用回复
+     * @return
+     */
+    public static ResponseEntity<String> success() {
+        ResultDto resultVo = new ResultDto(SUCCESS, SUCCESS_MSG);
+        ResponseEntity<String> responseEntity = new ResponseEntity<String>(resultVo.toString(), HttpStatus.OK);
+        return responseEntity;
+    }
+
+    /**
+     * 失败通用回复
+     * @return
+     */
+    public static ResponseEntity<String> error(String msg) {
+        ResultDto resultVo = new ResultDto(ERROR, msg);
+        ResponseEntity<String> responseEntity = new ResponseEntity<String>(resultVo.toString(), HttpStatus.OK);
+        return responseEntity;
     }
 
     public int getCode() {

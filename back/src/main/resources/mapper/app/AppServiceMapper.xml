@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java110.things.dao.IAppServiceDao">
+
+    <select id="get" parameterType="string" resultType="Map">
+        select * from u_user
+    </select>
+
+    
+    <insert id="saveApp" parameterType="com.java110.things.entity.app.AppDto">
+        insert into c_app(app_id,app_secret,app_name,access_token,update_time)
+        values(#{appId},#{appSecret},#{appName},#{accessToken},#{updateTime})
+    </insert>
+
+    <!--
+        查询小区信息
+    -->
+    <select id="getApps" parameterType="com.java110.things.entity.app.AppDto"
+            resultType="com.java110.things.entity.app.AppDto">
+        select
+        t.app_id appId,t.app_secret appSecret,t.app_name appName,t.access_token accessToken,t.update_time updateTime
+        from c_app t
+        where
+        1=1
+        <if test="appId != null and appId != ''">
+            and t.app_id = #{appId}
+        </if>
+        <if test="appSecret != null and appSecret != ''">
+            and t.app_secret = #{appSecret}
+        </if>
+        <if test="accessToken != null and accessToken != ''">
+            and t.access_token = #{accessToken}
+        </if>
+        and t.status_cd = '0'
+    </select>
+
+    <update id="updateApp" parameterType="com.java110.things.entity.app.AppDto">
+        update s_app t
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="accessToken != null and accessToken != ''">
+                 t.access_token = #{accessToken},
+            </if>
+            <if test="updateTime != null ">
+                 t.updateTime = #{updateTime},
+            </if>
+        </trim>
+        where 1=1
+        and t.status_cd = '0'
+        <if test="appId != null and appId != ''">
+            and t.app_id = #{appId}
+        </if>
+    </update>
+
+</mapper>

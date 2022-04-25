@@ -15,17 +15,25 @@
  */
 package com.java110.things.api.token;
 
+import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
-import com.java110.things.factory.AccessControlProcessFactory;
-import com.java110.things.adapt.accessControl.IAssessControlProcess;
+import com.java110.things.entity.app.AppDto;
+import com.java110.things.entity.response.ResultDto;
+import com.java110.things.factory.AuthenticationFactory;
+import com.java110.things.service.app.IAppService;
+import com.java110.things.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @ClassName CommunityController
@@ -41,19 +49,42 @@ public class TokenController extends BaseController {
 
     private static Logger logger = LoggerFactory.getLogger(TokenController.class);
 
+    @Autowired
+    private IAppService appServiceImpl;
+
     /**
-     * 添加设备接口类
+     * 登录
      * <p>
      *
-     * @param param 请求报文 包括设备 前台填写信息
+     * @param appId 请求报文 包括设备 前台填写信息
      * @return 成功或者失败
      * @throws Exception
      */
     @RequestMapping(path = "/getAccessToken", method = RequestMethod.GET)
-    public ResponseEntity<String> getAccessToken(@RequestBody String param) throws Exception {
-        logger.debug("请求报文：" + param);
-        IAssessControlProcess assessControlProcess = AccessControlProcessFactory.getAssessControlProcessImpl();
-        return new ResponseEntity<String>(assessControlProcess.httpFaceResult(param), HttpStatus.OK);
+    public ResponseEntity<String> getAccessToken(@RequestParam(value = "appId") String appId,
+                                                 @RequestParam(value = "appSecure") String appSecure) throws Exception {
+
+        AppDto appDto = new AppDto();
+        appDto.setAppId(appId);
+        appDto.setAppSecret(appSecure);
+        List<AppDto> appDtos = appServiceImpl.getApp(appDto);
+
+        if (appDtos == null || appDtos.size() < 1) {
+            return ResultDto.error("获取accessToken 失败");
+        }
+        Map<String, String> info = new HashMap();
+        info.put("appId", appId);
+        info.put(AuthenticationFactory.LOGIN_USER_ID, appId);
+        String accessToken = AuthenticationFactory.createAndSaveToken(info);
+        appDto.setAccessToken(accessToken);
+        appDto.setUpdateTime(DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
+        appServiceImpl.updateApp(appDto);
+
+        JSONObject paramOut = new JSONObject();
+        paramOut.put("access_token", accessToken);
+        paramOut.put("expires_in", 7200);
+
+        return ResultDto.createResponseEntity(paramOut);
     }
 
 }
