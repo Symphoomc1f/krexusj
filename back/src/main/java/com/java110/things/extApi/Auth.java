@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.java110.things.api.token;
+package com.java110.things.extApi;
 
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
@@ -45,9 +45,9 @@ import java.util.Map;
  **/
 @RestController
 @RequestMapping(path = "/extApi/auth")
-public class TokenController extends BaseController {
+public class Auth extends BaseController {
 
-    private static Logger logger = LoggerFactory.getLogger(TokenController.class);
+    private static Logger logger = LoggerFactory.getLogger(Auth.class);
 
     @Autowired
     private IAppService appServiceImpl;
@@ -62,11 +62,11 @@ public class TokenController extends BaseController {
      */
     @RequestMapping(path = "/getAccessToken", method = RequestMethod.GET)
     public ResponseEntity<String> getAccessToken(@RequestParam(value = "appId") String appId,
-                                                 @RequestParam(value = "appSecure") String appSecure) throws Exception {
+                                                 @RequestParam(value = "appSecret") String appSecret) throws Exception {
 
         AppDto appDto = new AppDto();
         appDto.setAppId(appId);
-        appDto.setAppSecret(appSecure);
+        appDto.setAppSecret(appSecret);
         List<AppDto> appDtos = appServiceImpl.getApp(appDto);
 
         if (appDtos == null || appDtos.size() < 1) {

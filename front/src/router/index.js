@@ -54,7 +54,21 @@ export const constantRoutes = [
       meta: { title: 'HC小区物联网平台', icon: '' }
     }]
   },
-
+  {
+    path: '/community',
+    component: Layout,
+    redirect: '/communitySettings/communitySettings',
+    name: 'Example',
+    meta: { title: '小区管理', icon: 'example' },
+    children: [
+      {
+        path: '/communitySettings',
+        name: '小区信息',
+        component: () => import('@/views/communitySettings/communitySettings'),
+        meta: { title: '小区信息', icon: 'table' }
+      },
+    ]
+  },
   {
     path: '/accessControl',
     component: Layout,
@@ -140,27 +154,6 @@ export const constantRoutes = [
       }
     ]
   },
-  // {
-  //   path: '/monitor',
-  //   component: Layout,
-  //   redirect: '/monitor/monitor',
-  //   name: 'Example',
-  //   meta: { title: '监控管理', icon: 'example' },
-  //   children: [
-  //     {
-  //       path: 'monitor',
-  //       name: '道闸',
-  //       component: () => import('@/views/monitorVedio/monitorVedio'),
-  //       meta: { title: '监控设备', icon: 'table' }
-  //     },
-  //     {
-  //       path: 'camera',
-  //       name: '摄像头',
-  //       component: () => import('@/views/camera/camera'),
-  //       meta: { title: '摄像头', icon: 'table' }
-  //     }
-  //   ]
-  // },
   {
     path: '/attendance',
     component: Layout,
@@ -237,12 +230,7 @@ export const constantRoutes = [
         component: () => import('@/views/machineCmd/machineCmd'),
         meta: { title: '硬件指令', icon: 'table' }
       },
-      {
-        path: '/communitySettings',
-        name: '设置小区',
-        component: () => import('@/views/communitySettings/communitySettings'),
-        meta: { title: '设置小区', icon: 'table' }
-      },
+     
       {
         path: '/userManager',
         name: '系统用户',

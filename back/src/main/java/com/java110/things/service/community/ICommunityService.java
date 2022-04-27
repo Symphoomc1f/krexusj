@@ -14,13 +14,21 @@ import com.java110.things.entity.response.ResultDto;
 public interface ICommunityService {
 
     /**
-     * 保存设备信息
+     * 保存小区信息
      *
      * @param communityDto 设备信息
      * @return
      * @throws Exception
      */
     ResultDto saveCommunity(CommunityDto communityDto) throws Exception;
+    /**
+     * 修改小区信息
+     *
+     * @param communityDto 设备信息
+     * @return
+     * @throws Exception
+     */
+    ResultDto updateCommunity(CommunityDto communityDto) throws Exception;
 
     /**
      * 获取设备信息

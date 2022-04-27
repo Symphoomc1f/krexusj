@@ -29,6 +29,10 @@
 
 	4、运行main方法
 
+### 第三方云平台对接协议
+
+[对接协议](back/docs/api.md)
+
 ### 相关视频
 
 [https://www.bilibili.com/video/BV1pK4y1t7re](https://www.bilibili.com/video/BV1pK4y1t7re)
@@ -61,7 +65,7 @@
 
 2、监控对接
 
-3、考勤设备对接（目前正在对接中）
+3、考勤设备对接
 
 
 ### 演示
