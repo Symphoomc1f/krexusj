@@ -111,7 +111,7 @@
 }
 ```
 
-### 1.1 修改小区
+### 1.2 修改小区
 
 请求方式： POST
 
@@ -145,7 +145,7 @@
 }
 ```
 
-### 1.1 删除小区
+### 1.3 删除小区
 
 请求方式： POST
 
@@ -172,6 +172,52 @@
     "data":""
 }
 ```
+
+## 2.设备资源操作
+
+### 2.1 新增设备
+
+请求方式： POST
+
+请求地址：/extApi/machine/addMachine
+
+请求参数：
+
+| 名称 | 类型 | 是否必填 | 示例值 | 描述 |
+| :----:| :----: | :----: | :----: | :----: |
+| machineCode | String | 是 | 101010 | 设备编码 |
+| machineVersion | String | 否 | v1.0 | 设备版本 |
+| machineName | String | 是 | HC门禁 | 设备名称 |
+| machineTypeCd | String | 是 | 9999 | 设备类型 门禁9999 |
+| machineIp | String | 否 | 192.168.1.1 | 设备IP |
+| machineMac | String | 否 | 11:1:11:1 | 设备mac |
+| extMachineId | String | 是 | 702020042194860037 | 外部设备编码 |
+| extCommunityId | String | 是 | 702020042194860039 | 外部小区编码 |
+| hmId | String | 是 | 1 | 设备协议 HC物联网系统提供 |
+
+
+请求示例：
+```json
+{
+    "machineCode": "101010",
+    "machineName": "HC门禁",
+    "machineTypeCd": "9999",
+    "extMachineId": "702020042194860037",
+    "extCommunityId": "702020042194860039",
+    "hmId": "702020042194860039"
+}
+```
+
+返回示例：
+```json
+{
+    "code":0,
+    "msg":"成功",
+    "data":""
+}
+```
+
+
 
 
 

@@ -44,24 +44,6 @@ public class MachineServiceImpl implements IMachineService {
     private ICommunityService communityServiceImpl;
 
     /**
-     * 添加设备信息
-     *
-     * @param machineDto 设备对象
-     * @return
-     */
-    @Override
-    public ResultDto saveMachine(MachineDto machineDto) throws Exception {
-        int count = machineServiceDao.saveMachine(machineDto);
-        ResultDto resultDto = null;
-        if (count < 1) {
-            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
-        } else {
-            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
-        }
-        return resultDto;
-    }
-
-    /**
      * 查询设备信息
      *
      * @param machineDto 设备信息
@@ -84,6 +66,36 @@ public class MachineServiceImpl implements IMachineService {
             machineDtoList = new ArrayList<>();
         }
         ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, count, totalPage, machineDtoList);
+        return resultDto;
+    }
+
+    @Override
+    public ResultDto saveMachine(MachineDto machineDto) throws Exception {
+        int count = machineServiceDao.saveMachine(machineDto);
+        ResultDto resultDto = null;
+        if (count < 1) {
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+        } else {
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+        }
+        return resultDto;
+    }
+
+    /**
+     * 修改设备信息
+     *
+     * @param machineDto 设备对象
+     * @return
+     */
+    @Override
+    public ResultDto updateMachine(MachineDto machineDto) throws Exception {
+        int count = machineServiceDao.updateMachine(machineDto);
+        ResultDto resultDto = null;
+        if (count < 1) {
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+        } else {
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+        }
         return resultDto;
     }
 

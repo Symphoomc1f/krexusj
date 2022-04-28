@@ -8,9 +8,10 @@
 
     <insert id="saveMachine" parameterType="com.java110.things.entity.machine.MachineDto">
         INSERT INTO
-        machine (machine_id, machine_code, machine_version, machine_name, machine_type_cd, machine_ip, machine_mac,oem)
+        machine (machine_id, machine_code, machine_version, machine_name, machine_type_cd, machine_ip,
+        machine_mac,oem,ext_machine_id,community_id,hm_id)
         VALUES (#{machineId}, #{machineCode}, #{machineVersion}, #{machineName}, #{machineTypeCd}, #{machineIp},
-        #{machineMac},#{oem})
+        #{machineMac},#{oem},#{extMachineId},#{communityId},#{hmId})
     </insert>
 
     <!--
@@ -26,7 +27,10 @@
         t.machine_type_cd machineTypeCd,
         t.machine_ip machineIp,
         t.machine_mac machineMac,
-        t.oem
+        t.oem,
+        t.ext_machine_id extMachineId,
+        t.community_id communityId,
+        t.hm_id hmId
         from machine t
         where 1=1
         <if test="machineId != null and machineId != ''">
@@ -52,6 +56,15 @@
         </if>
         <if test="oem != null and oem != ''">
             and t.oem = #{oem}
+        </if>
+        <if test="extMachineId != null and extMachineId != ''">
+            and t.ext_machine_id = #{extMachineId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="hmId != null and hmId != ''">
+            and t.hm_id = #{hmId}
         </if>
         and t.status_cd = '0'
         order by t.create_time desc
@@ -90,6 +103,15 @@
         <if test="oem != null and oem != ''">
             and t.oem = #{oem}
         </if>
+        <if test="extMachineId != null and extMachineId != ''">
+            and t.ext_machine_id = #{extMachineId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="hmId != null and hmId != ''">
+            and t.hm_id = #{hmId}
+        </if>
         and t.status_cd = '0'
         order by t.create_time desc
 
@@ -99,25 +121,25 @@
         update machine t
         <trim prefix="SET" suffixOverrides=",">
             <if test="machineId != null and machineId != ''">
-                 t.machine_id = #{machineId},
+                t.machine_id = #{machineId},
             </if>
             <if test="machineCode != null and machineCode != ''">
-                 t.machine_code = #{machineCode},
+                t.machine_code = #{machineCode},
             </if>
             <if test="machineVersion != null and machineVersion != ''">
-                 t.machine_version = #{machineVersion},
+                t.machine_version = #{machineVersion},
             </if>
             <if test="machineName != null and machineName != ''">
-                 t.machine_name = #{machineName},
+                t.machine_name = #{machineName},
             </if>
             <if test="machineTypeCd != null and machineTypeCd != ''">
-                 t.machine_type_cd = #{machineTypeCd},
+                t.machine_type_cd = #{machineTypeCd},
             </if>
             <if test="machineIp != null and machineIp != ''">
-                 t.machine_ip = #{machineIp},
+                t.machine_ip = #{machineIp},
             </if>
             <if test="machineMac != null and machineMac != ''">
-                 t.machine_mac = #{machineMac},
+                t.machine_mac = #{machineMac},
             </if>
             <if test="statusCd != null and statusCd != ''">
                 t.status_cd = #{statusCd},
@@ -125,11 +147,20 @@
             <if test="oem != null and oem != ''">
                 t.oem = #{oem},
             </if>
+            <if test="extMachineId != null and extMachineId != ''">
+                t.ext_machine_id = #{extMachineId},
+            </if>
+            <if test="hmId != null and hmId != ''">
+                t.hm_id = #{hmId},
+            </if>
         </trim>
         where 1=1
         and t.status_cd = '0'
         <if test="machineId != null and machineId != ''">
             and t.machine_id = #{machineId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
         </if>
     </update>
 

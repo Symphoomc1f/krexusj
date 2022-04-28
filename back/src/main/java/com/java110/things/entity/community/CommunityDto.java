@@ -29,6 +29,7 @@ public class CommunityDto implements Serializable {
     private String provName;
 
     private String statusCd;
+    private String extCommunityId;
 
     public String getCommunityId() {
         return communityId;
@@ -100,5 +101,13 @@ public class CommunityDto implements Serializable {
 
     public void setProvName(String provName) {
         this.provName = provName;
+    }
+
+    public String getExtCommunityId() {
+        return extCommunityId;
+    }
+
+    public void setExtCommunityId(String extCommunityId) {
+        this.extCommunityId = extCommunityId;
     }
 }

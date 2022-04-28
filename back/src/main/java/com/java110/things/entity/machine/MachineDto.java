@@ -26,6 +26,8 @@ public class MachineDto extends PageDto implements Serializable {
     private String machineIp;
     private String statusCd;
     private String oem;
+    private String extMachineId;
+    private String hmId;
 
 
     public String getMachineMac() {
@@ -127,5 +129,21 @@ public class MachineDto extends PageDto implements Serializable {
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);
+    }
+
+    public String getExtMachineId() {
+        return extMachineId;
+    }
+
+    public void setExtMachineId(String extMachineId) {
+        this.extMachineId = extMachineId;
+    }
+
+    public String getHmId() {
+        return hmId;
+    }
+
+    public void setHmId(String hmId) {
+        this.hmId = hmId;
     }
 }
