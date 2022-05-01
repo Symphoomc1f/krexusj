@@ -69,7 +69,7 @@ public class MachineExtController extends BaseController {
      * @return 成功或者失败
      * @throws Exception
      */
-    @RequestMapping(path = "/addMachine", method = RequestMethod.GET)
+    @RequestMapping(path = "/addMachine", method = RequestMethod.POST)
     public ResponseEntity<String> addMachine(@RequestBody String reqParam) throws Exception {
 
         JSONObject reqJson = JSONObject.parseObject(reqParam);
@@ -116,7 +116,7 @@ public class MachineExtController extends BaseController {
      * @return 成功或者失败
      * @throws Exception
      */
-    @RequestMapping(path = "/updateMachine", method = RequestMethod.GET)
+    @RequestMapping(path = "/updateMachine", method = RequestMethod.POST)
     public ResponseEntity<String> updateMachine(@RequestBody String reqParam) throws Exception {
 
         JSONObject reqJson = JSONObject.parseObject(reqParam);
@@ -139,15 +139,61 @@ public class MachineExtController extends BaseController {
      * @return 成功或者失败
      * @throws Exception
      */
-    @RequestMapping(path = "/deleteMachine", method = RequestMethod.GET)
+    @RequestMapping(path = "/deleteMachine", method = RequestMethod.POST)
     public ResponseEntity<String> deleteMachine(@RequestBody String reqParam) throws Exception {
 
         JSONObject reqJson = JSONObject.parseObject(reqParam);
 
-        Assert.hasKeyAndValue(reqJson, "extMachineId", "未包含外部小区编码");
+        Assert.hasKeyAndValue(reqJson, "extMachineId", "未包含外部设备编码");
 
         MachineDto machineDto = BeanConvertUtil.covertBean(reqJson, MachineDto.class);
         ResultDto result = machineServiceImpl.deleteMachine(machineDto);
+
+        return ResultDto.createResponseEntity(result);
+    }
+
+    /**
+     * 远程开门
+     * <p>
+     *
+     * @param reqParam {
+     *                 "extMachineId": "702020042194860039"
+     *                 }
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/openDoor", method = RequestMethod.GET)
+    public ResponseEntity<String> openDoor(@RequestBody String reqParam) throws Exception {
+
+        JSONObject reqJson = JSONObject.parseObject(reqParam);
+
+        Assert.hasKeyAndValue(reqJson, "machineCode", "未包含外部设备编码");
+
+        MachineDto machineDto = BeanConvertUtil.covertBean(reqJson, MachineDto.class);
+        ResultDto result = machineServiceImpl.openDoor(machineDto);
+
+        return ResultDto.createResponseEntity(result);
+    }
+
+    /**
+     * 重启设备
+     * <p>
+     *
+     * @param reqParam {
+     *                 "extMachineId": "702020042194860039"
+     *                 }
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/restartMachine", method = RequestMethod.GET)
+    public ResponseEntity<String> restartMachine(@RequestBody String reqParam) throws Exception {
+
+        JSONObject reqJson = JSONObject.parseObject(reqParam);
+
+        Assert.hasKeyAndValue(reqJson, "machineCode", "未包含外部设备编码");
+
+        MachineDto machineDto = BeanConvertUtil.covertBean(reqJson, MachineDto.class);
+        ResultDto result = machineServiceImpl.restartMachine(machineDto);
 
         return ResultDto.createResponseEntity(result);
     }
