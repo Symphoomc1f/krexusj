@@ -1,11 +1,11 @@
 package com.java110.things.factory;
 
+import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.manufacturer.ManufacturerDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.exception.Result;
 import com.java110.things.exception.ThreadException;
-import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import com.java110.things.service.manufacturer.IManufacturerService;
 import com.java110.things.util.Assert;
 
@@ -25,19 +25,20 @@ public class AccessControlProcessFactory {
      * 访问硬件接口
      */
     private static IAssessControlProcess assessControlProcessImpl;
+
     /**
      * 获取硬件接口对象
      *
      * @return
      */
-    public static IAssessControlProcess getAssessControlProcessImpl() throws Exception {
+    public static IAssessControlProcess getAssessControlProcessImpl(String hmId) throws Exception {
         if (assessControlProcessImpl != null) {
             return assessControlProcessImpl;
         }
         IManufacturerService manufacturerServiceImpl = ApplicationContextFactory.getBean("manufacturerServiceImpl", IManufacturerService.class);
         ManufacturerDto tmpManufacturerDto = new ManufacturerDto();
         tmpManufacturerDto.setHmType("1001");
-        tmpManufacturerDto.setDefaultProtocol("T");
+        tmpManufacturerDto.setHmId(hmId);
         ResultDto resultDto = manufacturerServiceImpl.getManufacturer(tmpManufacturerDto);
 
         if (resultDto.getCode() != ResponseConstant.SUCCESS) {

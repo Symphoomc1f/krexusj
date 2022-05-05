@@ -13,11 +13,7 @@ import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.MachineFaceDto;
 import com.java110.things.exception.HeartbeatCloudException;
 import com.java110.things.service.machine.IMachineFaceService;
-import com.java110.things.util.Assert;
-import com.java110.things.util.BeanConvertUtil;
-import com.java110.things.util.DateUtil;
-import com.java110.things.util.SeqUtil;
-import com.java110.things.util.StringUtil;
+import com.java110.things.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
@@ -26,11 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @ClassName GetCloudFaceFactory
@@ -65,7 +57,7 @@ public class GetCloudFaceFactory {
         paramIn.put("ip", machineDto.getMachineIp());
         paramIn.put("mac", machineDto.getMachineMac());
         paramIn.put("remarks", "");
-        paramIn.put("faceNum", AccessControlProcessFactory.getAssessControlProcessImpl().getFaceNum(machineDto));
+        paramIn.put("faceNum", AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).getFaceNum(machineDto));
         paramIn.put("lastOnTime", DateUtil.getTime());
         paramIn.put("statCode", "");
         paramIn.put("deviceType", machineDto.getMachineTypeCd());
@@ -192,7 +184,7 @@ public class GetCloudFaceFactory {
 
 
         //查询 当前用户是否在硬件中存在数据
-        String faceId = AccessControlProcessFactory.getAssessControlProcessImpl().getFace(machineDto, userFaceDto);
+        String faceId = AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).getFace(machineDto, userFaceDto);
 
         if (faceId == null) {
             // 从本地磁盘中检查是否有人脸存在
@@ -267,7 +259,7 @@ public class GetCloudFaceFactory {
         IMachineFaceService machineFaceService = ApplicationContextFactory.getBean("machineFaceServiceImpl", IMachineFaceService.class);
 
         ImageFactory.deleteImage(machineDto.getMachineCode() + File.separatorChar + heartbeatTaskDto.getTaskinfo() + ".jpg");
-        AccessControlProcessFactory.getAssessControlProcessImpl().deleteFace(machineDto, heartbeatTaskDto);
+        AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).deleteFace(machineDto, heartbeatTaskDto);
 
         MachineFaceDto machineFaceDto = new MachineFaceDto();
         machineFaceDto.setUserId(heartbeatTaskDto.getTaskinfo());
@@ -288,7 +280,7 @@ public class GetCloudFaceFactory {
         //清空硬件下的人脸
         ImageFactory.clearImage(machineDto.getMachineCode());
 
-        AccessControlProcessFactory.getAssessControlProcessImpl().clearFace(machineDto, heartbeatTaskDto);
+        AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).clearFace(machineDto, heartbeatTaskDto);
 
         MachineFaceDto machineFaceDto = new MachineFaceDto();
         //machineFaceDto.setUserId(heartbeatTaskDto.getTaskinfo());

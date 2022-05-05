@@ -84,7 +84,7 @@ public class CarHeartbeatCloudTemplate extends TaskSystemQuartz {
     protected void process(TaskDto taskDto) throws Exception {
 
         if (INIT_MACHINE_STATE) {
-            AccessControlProcessFactory.getAssessControlProcessImpl().initAssessControlProcess();
+            AccessControlProcessFactory.getAssessControlProcessImpl("").initAssessControlProcess();
             INIT_MACHINE_STATE = false;
         }
         //查询设备信息
@@ -164,7 +164,7 @@ public class CarHeartbeatCloudTemplate extends TaskSystemQuartz {
         paramIn.put("ip", machineDto.getMachineIp());
         paramIn.put("mac", machineDto.getMachineMac());
         paramIn.put("remarks", "");
-        paramIn.put("faceNum", AccessControlProcessFactory.getAssessControlProcessImpl().getFaceNum(machineDto));
+        paramIn.put("faceNum", AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).getFaceNum(machineDto));
         paramIn.put("lastOnTime", DateUtil.getTime());
         paramIn.put("statCode", "");
         paramIn.put("deviceType", machineDto.getMachineTypeCd());

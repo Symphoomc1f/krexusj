@@ -39,7 +39,7 @@ public class MqttPushCallback implements MqttCallback {
         try {
             log.info("Topic: " + topic);
             log.info("Message: " + new String(message.getPayload()));
-            AccessControlProcessFactory.getAssessControlProcessImpl().mqttMessageArrived(topic, new String(message.getPayload()));
+            AccessControlProcessFactory.getAssessControlProcessImpl("").mqttMessageArrived(topic, new String(message.getPayload()));
         } catch (Exception e) {
             log.error("处理订阅消息失败", e);
         }

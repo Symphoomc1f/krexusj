@@ -3,6 +3,7 @@ package com.java110.things.accessControl;
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import com.java110.things.config.Java110Properties;
 import com.java110.things.constant.AccessControlConstant;
 import com.java110.things.constant.ExceptionConstant;
@@ -15,11 +16,10 @@ import com.java110.things.entity.response.ResultDto;
 import com.java110.things.exception.HeartbeatCloudException;
 import com.java110.things.exception.Result;
 import com.java110.things.exception.ThreadException;
-import com.java110.things.factory.ApplicationContextFactory;
 import com.java110.things.factory.AccessControlProcessFactory;
+import com.java110.things.factory.ApplicationContextFactory;
 import com.java110.things.factory.HttpFactory;
 import com.java110.things.factory.MappingCacheFactory;
-import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.Assert;
@@ -103,7 +103,7 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
      */
     private void executeTask() throws Exception {
         if (INIT_MACHINE_STATE) {
-            AccessControlProcessFactory.getAssessControlProcessImpl().initAssessControlProcess();
+            AccessControlProcessFactory.getAssessControlProcessImpl("").initAssessControlProcess();
             INIT_MACHINE_STATE = false;
         }
         //查询设备信息
@@ -189,7 +189,7 @@ public class HeartbeatCloudApiThread extends BaseAccessControl implements Runnab
         paramIn.put("ip", machineDto.getMachineIp());
         paramIn.put("mac", machineDto.getMachineMac());
         paramIn.put("remarks", "");
-        paramIn.put("faceNum", AccessControlProcessFactory.getAssessControlProcessImpl().getFaceNum(machineDto));
+        paramIn.put("faceNum", AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).getFaceNum(machineDto));
         paramIn.put("lastOnTime", DateUtil.getTime());
         paramIn.put("statCode", "");
         paramIn.put("deviceType", machineDto.getMachineTypeCd());

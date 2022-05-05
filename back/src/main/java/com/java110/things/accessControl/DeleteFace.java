@@ -29,7 +29,7 @@ public class DeleteFace extends BaseAccessControl {
      */
     public void deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto, CommunityDto communityDto) throws Exception {
         ImageFactory.deleteImage(machineDto.getMachineCode() + File.separatorChar + heartbeatTaskDto.getTaskinfo() + ".jpg");
-        AccessControlProcessFactory.getAssessControlProcessImpl().deleteFace(machineDto, heartbeatTaskDto);
+        AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).deleteFace(machineDto, heartbeatTaskDto);
 
 
         MachineFaceDto machineFaceDto = new MachineFaceDto();

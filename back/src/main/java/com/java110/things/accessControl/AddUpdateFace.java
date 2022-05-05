@@ -104,7 +104,7 @@ public class AddUpdateFace extends BaseAccessControl {
         userFaceDto.setUserId(data.getString("userid"));
 
         //查询 当前用户是否在硬件中存在数据
-        String faceId = AccessControlProcessFactory.getAssessControlProcessImpl().getFace(machineDto, userFaceDto);
+        String faceId = AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).getFace(machineDto, userFaceDto);
 
         if (faceId == null) {
             // 从本地磁盘中检查是否有人脸存在
@@ -117,10 +117,10 @@ public class AddUpdateFace extends BaseAccessControl {
         if (StringUtil.isEmpty(faceId) || MACHINE_HAS_NOT_FACE.equals(faceId)) {
             //存储人脸
             saveFace(machineDto, userFaceDto);
-            resultDto = AccessControlProcessFactory.getAssessControlProcessImpl().addFace(machineDto, userFaceDto);
+            resultDto = AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).addFace(machineDto, userFaceDto);
         } else { //调用更新人脸接口
             updateFace(machineDto, userFaceDto);
-            resultDto = AccessControlProcessFactory.getAssessControlProcessImpl().updateFace(machineDto, userFaceDto);
+            resultDto = AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).updateFace(machineDto, userFaceDto);
         }
 
         if (resultDto == null) {

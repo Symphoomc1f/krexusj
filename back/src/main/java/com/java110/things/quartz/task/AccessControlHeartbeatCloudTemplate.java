@@ -85,7 +85,7 @@ public class AccessControlHeartbeatCloudTemplate extends TaskSystemQuartz {
     protected void process(TaskDto taskDto) throws Exception {
 
         if (INIT_MACHINE_STATE) {
-            AccessControlProcessFactory.getAssessControlProcessImpl().initAssessControlProcess();
+            AccessControlProcessFactory.getAssessControlProcessImpl("").initAssessControlProcess();
             INIT_MACHINE_STATE = false;
         }
         //查询设备信息
@@ -155,7 +155,7 @@ public class AccessControlHeartbeatCloudTemplate extends TaskSystemQuartz {
         paramIn.put("ip", machineDto.getMachineIp());
         paramIn.put("mac", machineDto.getMachineMac());
         paramIn.put("remarks", "");
-        paramIn.put("faceNum", AccessControlProcessFactory.getAssessControlProcessImpl().getFaceNum(machineDto));
+        paramIn.put("faceNum", AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).getFaceNum(machineDto));
         paramIn.put("lastOnTime", DateUtil.getTime());
         paramIn.put("statCode", "");
         paramIn.put("deviceType", machineDto.getMachineTypeCd());
@@ -214,7 +214,7 @@ public class AccessControlHeartbeatCloudTemplate extends TaskSystemQuartz {
             }
         } catch (Exception e) {
             //记录定时任务同步日志记录
-            systemExceptionService.save(SystemExceptionDto.EXCEPTION_TYPE_ACCESS_CONTROL,commandInfo.getString("taskId"),
+            systemExceptionService.save(SystemExceptionDto.EXCEPTION_TYPE_ACCESS_CONTROL, commandInfo.getString("taskId"),
                     machineDto.getMachineId(), ExceptionUtil.getStackTrace(e));
             throw e;
         }

@@ -28,7 +28,7 @@ public class ClearAllFace extends BaseAccessControl {
         //清空硬件下的人脸
         ImageFactory.clearImage(machineDto.getMachineCode());
 
-        AccessControlProcessFactory.getAssessControlProcessImpl().clearFace(machineDto, heartbeatTaskDto);
+        AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).clearFace(machineDto, heartbeatTaskDto);
 
         MachineFaceDto machineFaceDto = new MachineFaceDto();
         //machineFaceDto.setUserId(heartbeatTaskDto.getTaskinfo());

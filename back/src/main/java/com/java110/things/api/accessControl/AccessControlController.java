@@ -1,8 +1,8 @@
 package com.java110.things.api.accessControl;
 
 import com.java110.things.Controller.BaseController;
-import com.java110.things.factory.AccessControlProcessFactory;
 import com.java110.things.adapt.accessControl.IAssessControlProcess;
+import com.java110.things.factory.AccessControlProcessFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -30,7 +30,6 @@ public class AccessControlController extends BaseController {
      * 添加设备接口类
      * <p>
      *
-     *
      * @param param 请求报文 包括设备 前台填写信息
      * @return 成功或者失败
      * @throws Exception
@@ -38,9 +37,9 @@ public class AccessControlController extends BaseController {
     @RequestMapping(path = "/faceResult", method = RequestMethod.POST)
     public ResponseEntity<String> faceResult(@RequestBody String param) throws Exception {
         logger.debug("请求报文：" + param);
-        IAssessControlProcess assessControlProcess = AccessControlProcessFactory.getAssessControlProcessImpl();
+        IAssessControlProcess assessControlProcess = AccessControlProcessFactory.getAssessControlProcessImpl("");
 
-        return  new ResponseEntity<String>(assessControlProcess.httpFaceResult(param), HttpStatus.OK);
+        return new ResponseEntity<String>(assessControlProcess.httpFaceResult(param), HttpStatus.OK);
 
 //        if (save) {
 //            return super.createResponseEntity(new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG));
