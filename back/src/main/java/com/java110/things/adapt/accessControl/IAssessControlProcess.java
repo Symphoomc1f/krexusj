@@ -65,7 +65,7 @@ public interface IAssessControlProcess {
      * 清空人脸
      * @param machineDto 硬件信息
      */
-    void clearFace(MachineDto machineDto,HeartbeatTaskDto heartbeatTaskDto);
+    ResultDto clearFace(MachineDto machineDto,HeartbeatTaskDto heartbeatTaskDto);
 
 
     /**

@@ -1,10 +1,10 @@
 package com.java110.things.service.demo;
 
+import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
-import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -59,8 +59,8 @@ public class OfficialDemoAssessControlProcessAdapt implements IAssessControlProc
     }
 
     @Override
-    public void clearFace(MachineDto machineDto,HeartbeatTaskDto heartbeatTaskDto) {
-
+    public ResultDto clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
+        return null;
     }
 
     @Override
@@ -84,7 +84,7 @@ public class OfficialDemoAssessControlProcessAdapt implements IAssessControlProc
     }
 
     @Override
-    public String  httpFaceResult(String data) {
+    public String httpFaceResult(String data) {
         return "";
     }
 }

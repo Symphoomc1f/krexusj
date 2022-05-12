@@ -1,6 +1,8 @@
 package com.java110.things.adapt.accessControl.yldComet;
 
 import com.alibaba.fastjson.JSONObject;
+import com.java110.things.adapt.accessControl.IAssessControlProcess;
+import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.constant.DEL_PERSON_MODE;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
@@ -14,8 +16,6 @@ import com.java110.things.entity.room.RoomDto;
 import com.java110.things.factory.CometFactory;
 import com.java110.things.factory.MqttFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
-import com.java110.things.adapt.accessControl.IAssessControlProcess;
-import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.SeqUtil;
 import org.slf4j.Logger;
@@ -175,7 +175,7 @@ public class YldCometAssessControlProcessAdapt implements IAssessControlProcess 
     }
 
     @Override
-    public void clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
+    public ResultDto clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
         String cmdId = SeqUtil.getId();
 
         JSONObject param = new JSONObject();
@@ -186,6 +186,7 @@ public class YldCometAssessControlProcessAdapt implements IAssessControlProcess 
         CometFactory.publish(CHANNELNAME, param.toJSONString());
         saveLog(cmdId, machineDto.getMachineId(), CMD_DELETE_FACE, param.toJSONString(), "");
 
+        return null;
     }
 
     /**

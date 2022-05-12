@@ -142,6 +142,29 @@ public class UserFaceServiceImpl implements IUserFaceService {
         return resultDto;
     }
 
+    /**
+     * 清空人脸信息
+     *
+     * @param machineDto
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public ResultDto clearUserFace(MachineDto machineDto) throws Exception {
+        //清空硬件下的人脸
+        ImageFactory.clearImage(machineDto.getMachineCode());
+
+        HeartbeatTaskDto heartbeatTaskDto = new HeartbeatTaskDto();
+
+        ResultDto resultDto = AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).clearFace(machineDto, heartbeatTaskDto);
+
+        MachineFaceDto machineFaceDto = new MachineFaceDto();
+        machineFaceDto.setMachineCode(machineDto.getMachineCode());
+        machineFaceService.deleteMachineFace(machineFaceDto);
+
+        return resultDto;
+    }
+
 
     /**
      * 本地存储人脸

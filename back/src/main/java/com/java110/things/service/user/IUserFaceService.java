@@ -28,4 +28,14 @@ public interface IUserFaceService {
     public ResultDto updateUserFace(MachineDto machineDto, UserFaceDto userFaceDto) throws Exception;
 
     public ResultDto deleteUserFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) throws Exception;
+
+
+    /**
+     * 清空用户信息
+     *
+     * @param machineDto
+     * @return
+     * @throws Exception
+     */
+    public ResultDto clearUserFace(MachineDto machineDto) throws Exception;
 }

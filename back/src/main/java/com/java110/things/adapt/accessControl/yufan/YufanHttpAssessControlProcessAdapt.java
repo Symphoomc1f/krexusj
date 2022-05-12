@@ -3,6 +3,8 @@ package com.java110.things.adapt.accessControl.yufan;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.accessControl.AddUpdateFace;
+import com.java110.things.adapt.accessControl.IAssessControlProcess;
+import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.fee.FeeDto;
@@ -15,8 +17,6 @@ import com.java110.things.entity.room.RoomDto;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.MqttFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
-import com.java110.things.adapt.accessControl.IAssessControlProcess;
-import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.SeqUtil;
 import com.java110.things.util.StringUtil;
@@ -279,7 +279,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
     }
 
     @Override
-    public void clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
+    public ResultDto clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_RESET;
         MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
@@ -291,6 +291,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_RESET, postParameters.toString(), responseEntity.getBody());
 
+        return null;
     }
 
 

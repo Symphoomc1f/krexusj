@@ -178,7 +178,7 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
     }
 
     @Override
-    public void clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
+    public ResultDto clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
         JSONObject param = new JSONObject();
         param.put("client_id", machineDto.getMachineCode());
         param.put("cmd_id", heartbeatTaskDto.getTaskid());
@@ -187,7 +187,7 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
         param.put("type", 4);
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
         saveLog(param.getString("cmd_id"), machineDto.getMachineId(), CMD_DELETE_FACE, param.toJSONString(), "");
-
+        return null;
     }
 
     /**

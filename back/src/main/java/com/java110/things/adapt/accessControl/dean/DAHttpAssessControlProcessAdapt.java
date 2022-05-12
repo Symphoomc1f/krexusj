@@ -3,6 +3,8 @@ package com.java110.things.adapt.accessControl.dean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.accessControl.AddUpdateFace;
+import com.java110.things.adapt.accessControl.IAssessControlProcess;
+import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.fee.FeeDto;
@@ -15,8 +17,6 @@ import com.java110.things.entity.room.RoomDto;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.MqttFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
-import com.java110.things.adapt.accessControl.IAssessControlProcess;
-import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.SeqUtil;
 import com.java110.things.util.StringUtil;
@@ -280,7 +280,7 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
     }
 
     @Override
-    public void clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
+    public ResultDto clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
         String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_RESET;
         JSONObject param = new JSONObject();
         param.put("operator", "DeleteAllPerson");
@@ -291,6 +291,8 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
         HttpEntity httpEntity = new HttpEntity(param.toJSONString(), getHeaders());
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_RESET, param.toJSONString(), responseEntity.getBody());
+        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+        return new ResultDto(paramOut.getInteger("code") == 200 ? ResultDto.SUCCESS : ResultDto.ERROR, "同步成功");
     }
 
 

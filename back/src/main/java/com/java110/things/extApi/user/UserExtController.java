@@ -126,13 +126,40 @@ public class UserExtController extends BaseController {
      * <p>
      *
      * @param reqParam {
-     *                 "userId": "702020042194860039"
+     *                 "userId": "702020042194860037",
+     *                 "machineCode": "101010"
      *                 }
      * @return 成功或者失败
      * @throws Exception
      */
     @RequestMapping(path = "/deleteUser", method = RequestMethod.POST)
     public ResponseEntity<String> deleteUser(@RequestBody String reqParam) throws Exception {
+
+        JSONObject reqJson = JSONObject.parseObject(reqParam);
+        Assert.hasKeyAndValue(reqJson, "userId", "未包含用户ID");
+        Assert.hasKeyAndValue(reqJson, "machineCode", "未包含设备编码");
+
+        MachineDto machineDto = new MachineDto();
+        machineDto.setMachineCode(reqJson.getString("machineCode"));
+
+        HeartbeatTaskDto heartbeatTaskDto = new HeartbeatTaskDto();
+        heartbeatTaskDto.setTaskid(reqJson.getString("userId"));
+        ResultDto result = userFaceServiceImpl.deleteUserFace(machineDto, heartbeatTaskDto);
+        return ResultDto.createResponseEntity(result);
+    }
+
+    /**
+     * 清空用户信息
+     * <p>
+     *
+     * @param reqParam {
+     *                 "machineCode": "101010"
+     *                 }
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/clearUser", method = RequestMethod.POST)
+    public ResponseEntity<String> clearUser(@RequestBody String reqParam) throws Exception {
 
         JSONObject reqJson = JSONObject.parseObject(reqParam);
         Assert.hasKeyAndValue(reqJson, "userId", "未包含用户ID");
