@@ -38,8 +38,8 @@
 
 ### 授权认证-获取access_token
 
-根据 appId+appSecret 换取 access_token。access_token 是平台全局接口的唯一凭证，调用其他接口均需携带 access_token
-参数。
+根据 appId+appSecret 换取 access_token。access_token 是平台全局接口的唯一凭证，调用其他接口均需传 access_token
+参数到Http header 中 如 access_token 12312312。
 
 请求方式：GET
 
