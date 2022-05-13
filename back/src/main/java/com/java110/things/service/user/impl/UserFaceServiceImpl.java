@@ -109,6 +109,10 @@ public class UserFaceServiceImpl implements IUserFaceService {
 
     @Override
     public ResultDto deleteUserFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) throws Exception {
+        List<MachineDto> machineDtos = machineServiceDaoImpl.getMachines(machineDto);
+        Assert.listOnlyOne(machineDtos, "设备编码错误，不存在该设备");
+        machineDto = machineDtos.get(0);
+
         ImageFactory.deleteImage(machineDto.getMachineCode() + File.separatorChar + heartbeatTaskDto.getTaskid() + ".jpg");
         ResultDto resultDto = AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).deleteFace(machineDto, heartbeatTaskDto);
 
@@ -151,6 +155,10 @@ public class UserFaceServiceImpl implements IUserFaceService {
      */
     @Override
     public ResultDto clearUserFace(MachineDto machineDto) throws Exception {
+
+        List<MachineDto> machineDtos = machineServiceDaoImpl.getMachines(machineDto);
+        Assert.listOnlyOne(machineDtos, "设备编码错误，不存在该设备");
+        machineDto = machineDtos.get(0);
         //清空硬件下的人脸
         ImageFactory.clearImage(machineDto.getMachineCode());
 
