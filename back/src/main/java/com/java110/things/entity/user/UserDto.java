@@ -13,7 +13,7 @@ import java.io.Serializable;
  * @Version 1.0
  * add by wuxw 2020/5/10
  **/
-public class UserDto  extends PageDto implements Serializable {
+public class UserDto extends PageDto implements Serializable {
     private String id;
 
     private String userId;
@@ -37,6 +37,8 @@ public class UserDto  extends PageDto implements Serializable {
     private int sex;
 
     private String createTime;
+
+    private String appId;
 
     public String getCreateTime() {
         return createTime;
@@ -126,12 +128,25 @@ public class UserDto  extends PageDto implements Serializable {
         this.tel = tel;
     }
 
-    public String getLevelCd() {return levelCd;}
+    public String getLevelCd() {
+        return levelCd;
+    }
 
-    public void setLevelCd(String levelCd) { this.levelCd = levelCd;}
+    public void setLevelCd(String levelCd) {
+        this.levelCd = levelCd;
+    }
 
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);
+    }
+
+
+    public String getAppId() {
+        return appId;
+    }
+
+    public void setAppId(String appId) {
+        this.appId = appId;
     }
 }

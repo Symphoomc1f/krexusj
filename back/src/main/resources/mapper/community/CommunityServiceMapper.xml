@@ -6,11 +6,11 @@
         select * from u_user
     </select>
 
-    
+    <!-- 保存小区 -->
     <insert id="saveCommunity" parameterType="com.java110.things.entity.community.CommunityDto">
         INSERT INTO
-        s_community (community_id, name, address, city_code)
-        VALUES (#{communityId}, #{name}, #{address}, #{cityCode})
+        s_community (community_id, name, address, city_code,ext_community_id,app_id)
+        VALUES (#{communityId}, #{name}, #{address}, #{cityCode},#{extCommunityId},#{appId})
     </insert>
 
     <!--
@@ -19,14 +19,16 @@
     <select id="getCommunitys" parameterType="com.java110.things.entity.community.CommunityDto"
             resultType="com.java110.things.entity.community.CommunityDto">
         select
-            t.community_id communityId,
-            t.name ,
-            t.address,
-            t.city_code cityCode,
-            t.create_time createTime,
-            ca.area_name areaName,
-            ca.parent_area_name cityName,
-            ca1.parent_area_name provName
+        t.community_id communityId,
+        t.name ,
+        t.address,
+        t.city_code cityCode,
+        t.create_time createTime,
+        t.ext_community_id extCommunityId,
+        t.app_id appId,
+        ca.area_name areaName,
+        ca.parent_area_name cityName,
+        ca1.parent_area_name provName
         from s_community t
         left join city_area ca on t.city_code = ca.area_code and ca.status_cd = '0'
         left join city_area ca1 on ca1.area_code = ca.parent_area_code and ca.status_cd = '0'
@@ -40,6 +42,12 @@
         <if test="cityCode != null and cityCode != ''">
             and t.city_code = #{cityCode}
         </if>
+        <if test="extCommunityId != null and extCommunityId != ''">
+            and t.ext_community_id = #{extCommunityId}
+        </if>
+        <if test="appId != null and appId != ''">
+            and t.app_id = #{appId}
+        </if>
         and t.status_cd = '0'
     </select>
 
@@ -47,16 +55,16 @@
         update s_community t
         <trim prefix="SET" suffixOverrides=",">
             <if test="communityId != null and communityId != ''">
-                 t.community_id = #{communityId},
+                t.community_id = #{communityId},
             </if>
             <if test="name != null and name != ''">
-                 t.name = #{name},
+                t.name = #{name},
             </if>
             <if test="address != null and address != ''">
-                 t.address = #{address},
+                t.address = #{address},
             </if>
             <if test="cityCode != null and cityCode != ''">
-                 t.city_code = #{cityCode},
+                t.city_code = #{cityCode},
             </if>
             <if test="statusCd != null and statusCd != ''">
                 t.status_cd = #{statusCd},
@@ -69,6 +77,9 @@
         </if>
         <if test="extCommunityId != null and extCommunityId != ''">
             and t.ext_community_id = #{extCommunityId}
+        </if>
+        <if test="appId != null and appId != ''">
+            and t.app_id = #{appId}
         </if>
     </update>
 

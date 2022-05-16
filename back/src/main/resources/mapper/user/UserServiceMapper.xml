@@ -18,7 +18,8 @@
             u.level_cd levelCd,
             u.create_time createTime,
             u.sex,
-            u.age
+            u.age,
+            u.app_id appId
         FROM
             u_user u
         WHERE
@@ -34,6 +35,9 @@
         </if>
         <if test="tel != null and tel != ''">
             and u.tel = #{tel}
+        </if>
+        <if test="appId != null and appId != ''">
+            and u.app_id = #{appId}
         </if>
         and u.status_cd = '0'
         limit 1
@@ -51,7 +55,8 @@
         u.level_cd levelCd,
         u.create_time createTime,
         u.sex,
-        u.age
+        u.age,
+        u.app_id appId
         FROM
         u_user u
         WHERE
@@ -67,6 +72,9 @@
         </if>
         <if test="tel != null and tel != ''">
             and u.tel = #{tel}
+        </if>
+        <if test="appId != null and appId != ''">
+            and u.app_id = #{appId}
         </if>
         and u.status_cd = '0' and u.name != 'admin'
         <if test="page != -1 and page != null ">
@@ -93,6 +101,9 @@
         <if test="tel != null and tel != ''">
             and u.tel = #{tel}
         </if>
+        <if test="appId != null and appId != ''">
+            and u.app_id = #{appId}
+        </if>
         and u.status_cd = '0' and u.name != 'admin'
     </select>
 
@@ -106,6 +117,9 @@
         </if>
         <if test="userId != null and userId != ''">
             AND u.user_id = #{userId}
+        </if>
+        <if test="appId != null and appId != ''">
+            and u.app_id = #{appId}
         </if>
     </update>
 
@@ -122,7 +136,8 @@
         `tel`,
         `level_cd`,
         `create_time`,
-        `status_cd`
+        `status_cd`,
+        app_id
         )
         values
         (
@@ -136,7 +151,8 @@
         #{tel},
         #{levelCd},
         #{createTime},
-        #{statusCd}
+        #{statusCd},
+        #{appId}
         )
     </insert>
 

@@ -31,6 +31,8 @@ public class CommunityDto implements Serializable {
     private String statusCd;
     private String extCommunityId;
 
+    private String appId;
+
     public String getCommunityId() {
         return communityId;
     }
@@ -109,5 +111,13 @@ public class CommunityDto implements Serializable {
 
     public void setExtCommunityId(String extCommunityId) {
         this.extCommunityId = extCommunityId;
+    }
+
+    public String getAppId() {
+        return appId;
+    }
+
+    public void setAppId(String appId) {
+        this.appId = appId;
     }
 }
