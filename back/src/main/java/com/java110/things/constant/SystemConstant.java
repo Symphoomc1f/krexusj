@@ -31,6 +31,11 @@ public class SystemConstant {
      */
     public final static String LOGIN_USER_ID = "userId";
 
+    /**
+     * 应用ID
+     */
+    public final static String LOGIN_APP_ID = "appId";
+
     public final static String LOGIN_USER_NAME = "userName";
 
     public static final String COOKIE_AUTH_TOKEN = "_java110_token_";

@@ -9,11 +9,9 @@ import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @ClassName CommunityController
@@ -38,16 +36,16 @@ public class CommunityController extends BaseController {
      * @throws Exception
      */
     @RequestMapping(path = "/saveCommunity", method = RequestMethod.POST)
-    public ResponseEntity<String> saveCommunity(@RequestBody String param) throws Exception {
+    public ResponseEntity<String> saveCommunity(@RequestBody String param, HttpServletRequest request) throws Exception {
 
         JSONObject paramObj = super.getParamJson(param);
 
         Assert.hasKeyAndValue(paramObj, "communityId", "请求报文中未包含小区编码");
 
         Assert.hasKeyAndValue(paramObj, "name", "请求报文中未包含小区名称");
-
-
-        ResultDto resultDto = communityServiceImpl.saveCommunity(BeanConvertUtil.covertBean(paramObj, CommunityDto.class));
+        CommunityDto communityDto = BeanConvertUtil.covertBean(paramObj, CommunityDto.class);
+        communityDto.setAppId(super.getAppId(request));
+        ResultDto resultDto = communityServiceImpl.saveCommunity(communityDto);
         return super.createResponseEntity(resultDto);
     }
 

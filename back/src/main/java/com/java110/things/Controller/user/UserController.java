@@ -11,11 +11,7 @@ import com.java110.things.util.BeanConvertUtil;
 import com.java110.things.util.SeqUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -125,13 +121,12 @@ public class UserController extends BaseController {
      * @throws Exception
      */
     @RequestMapping(path = "/insertUser", method = RequestMethod.POST)
-    public ResponseEntity<String> insertUser(@RequestBody String param) throws Exception {
+    public ResponseEntity<String> insertUser(@RequestBody String param, HttpServletRequest request) throws Exception {
         JSONObject paramObj = super.getParamJson(param);
-//        Assert.hasKeyAndValue(paramObj, "userId", "请求报文中未包含用户ID");
         Assert.hasKeyAndValue(paramObj, "username", "请求报文中未包含用户账户名称");
         Assert.hasKeyAndValue(paramObj, "tel", "请求报文中未包电话");
         paramObj.put("userId", SeqUtil.getId());
-        // Assert.hasKeyAndValue(paramObj, "password", "请求报文中未包密码");
+        paramObj.put("appId", super.getAppId(request));
         ResultDto resultDto = userServiceImpl.insertUser(BeanConvertUtil.covertBean(paramObj, UserDto.class));
         return super.createResponseEntity(resultDto);
     }

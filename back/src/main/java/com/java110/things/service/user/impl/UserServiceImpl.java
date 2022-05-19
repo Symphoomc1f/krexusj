@@ -57,6 +57,8 @@ public class UserServiceImpl implements IUserService {
         Map userMap = new HashMap();
         userMap.put(SystemConstant.LOGIN_USER_ID, tmpUserDto.getUserId());
         userMap.put(SystemConstant.LOGIN_USER_NAME, tmpUserDto.getUsername());
+        userMap.put(SystemConstant.LOGIN_APP_ID, tmpUserDto.getAppId());
+
         String token = AuthenticationFactory.createAndSaveToken(userMap);
 
         JSONObject jsonObject = new JSONObject();
@@ -69,6 +71,7 @@ public class UserServiceImpl implements IUserService {
 
     /**
      * 查询用户信息
+     *
      * @param userDto 用户信息
      * @return
      * @throws Exception
@@ -84,12 +87,13 @@ public class UserServiceImpl implements IUserService {
 
     /**
      * 退出登录
+     *
      * @param token token信息
      * @return
      * @throws Exception
      */
     @Override
-    public ResultDto loginOut(String token) throws Exception{
+    public ResultDto loginOut(String token) throws Exception {
         AuthenticationFactory.deleteToken(token);
         ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
         return resultDto;
@@ -97,14 +101,15 @@ public class UserServiceImpl implements IUserService {
 
     /**
      * 修改密码
-     * @param uid 用户id
+     *
+     * @param uid    用户id
      * @param oldpwd 旧密码
      * @param newpwd 新密码
      * @return
      * @throws Exception
      */
     @Override
-    public ResultDto changePassword(String uid,String oldpwd,String newpwd) throws Exception {
+    public ResultDto changePassword(String uid, String oldpwd, String newpwd) throws Exception {
         UserDto userDto = new UserDto();
         userDto.setUserId(uid);
         UserDto tmpUserDto = userServiceDao.getUser(userDto);
@@ -176,6 +181,7 @@ public class UserServiceImpl implements IUserService {
 
     /**
      * 更新用户信息
+     *
      * @param userDto 用户信息
      * @return
      */
@@ -193,12 +199,13 @@ public class UserServiceImpl implements IUserService {
 
     /**
      * 删除用户
+     *
      * @param userDto
      * @return
      * @throws Exception
      */
     @Override
-    public ResultDto deleteUser(UserDto userDto)  throws Exception {
+    public ResultDto deleteUser(UserDto userDto) throws Exception {
         int count = userServiceDao.delete(userDto.getUserId());
         ResultDto resultDto = null;
         if (count < 1) {

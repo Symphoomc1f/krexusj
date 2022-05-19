@@ -42,6 +42,7 @@ public class BaseController {
 
     /**
      * 从会话中获取用户信息
+     *
      * @param request 请求对象
      * @return
      */
@@ -52,5 +53,20 @@ public class BaseController {
         }
 
         return userIdObj.toString();
+    }
+
+    /**
+     * 从会话中获取用户信息
+     *
+     * @param request 请求对象
+     * @return
+     */
+    public String getAppId(HttpServletRequest request) {
+        Object appIdObj = request.getAttribute(SystemConstant.LOGIN_APP_ID);
+        if (StringUtil.isNullOrNone(appIdObj)) {
+            return null;
+        }
+
+        return appIdObj.toString();
     }
 }

@@ -27,7 +27,6 @@
         type="primary"
         icon="el-icon-edit"
         @click="addCommunity"
-        v-if="list.length == 0"
       >添加小区</el-button>
     </div>
     <el-table

@@ -1,22 +1,13 @@
 package com.java110.things.aop;
 
-import com.alibaba.fastjson.JSONObject;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.exception.FilterException;
 import com.java110.things.exception.NoAuthorityException;
-import com.java110.things.exception.Result;
-import com.java110.things.exception.ServiceException;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.After;
-import org.aspectj.lang.annotation.AfterReturning;
-import org.aspectj.lang.annotation.AfterThrowing;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -70,8 +61,10 @@ public class PageProcessAspect {
             if (userInfo.containsKey(SystemConstant.LOGIN_USER_ID)) {
                 userId = userInfo.get(SystemConstant.LOGIN_USER_ID);
                 userName = userInfo.get(SystemConstant.LOGIN_USER_NAME);
+                appId = userInfo.get(SystemConstant.LOGIN_APP_ID);
                 request.setAttribute(SystemConstant.LOGIN_USER_ID, userId);
                 request.setAttribute(SystemConstant.LOGIN_USER_NAME, userName);
+                request.setAttribute(SystemConstant.LOGIN_APP_ID, appId);
             }
         }
     }
