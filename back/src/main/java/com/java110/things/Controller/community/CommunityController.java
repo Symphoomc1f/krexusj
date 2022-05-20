@@ -58,10 +58,14 @@ public class CommunityController extends BaseController {
      * @throws Exception
      */
     @RequestMapping(path = "/getCommunitys", method = RequestMethod.GET)
-    public ResponseEntity<String> getCommunitys(@RequestParam String communityId) throws Exception {
+    public ResponseEntity<String> getCommunitys(@RequestParam String communityId,HttpServletRequest request) throws Exception {
 
         CommunityDto communityDto = new CommunityDto();
         communityDto.setCommunityId(communityId);
+
+        String appId = super.getAppId(request);
+
+        communityDto.setAppId(appId);
 
         ResultDto resultDto = communityServiceImpl.getCommunity(communityDto);
         return super.createResponseEntity(resultDto);
