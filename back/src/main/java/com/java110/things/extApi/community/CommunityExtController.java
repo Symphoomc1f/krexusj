@@ -30,6 +30,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * 小区对外 控制类
  * <p>
@@ -58,7 +60,7 @@ public class CommunityExtController extends BaseController {
      * @throws Exception
      */
     @RequestMapping(path = "/addCommunity", method = RequestMethod.GET)
-    public ResponseEntity<String> addCommunity(@RequestBody String reqParam) throws Exception {
+    public ResponseEntity<String> addCommunity(@RequestBody String reqParam, HttpServletRequest request) throws Exception {
 
         JSONObject reqJson = JSONObject.parseObject(reqParam);
 
@@ -69,6 +71,7 @@ public class CommunityExtController extends BaseController {
 
         CommunityDto communityDto = BeanConvertUtil.covertBean(reqJson, CommunityDto.class);
         communityDto.setCommunityId(SeqUtil.getId());
+        communityDto.setAppId(super.getAppId(request));
         ResultDto result = communityServiceImpl.saveCommunity(communityDto);
 
         return ResultDto.createResponseEntity(result);
