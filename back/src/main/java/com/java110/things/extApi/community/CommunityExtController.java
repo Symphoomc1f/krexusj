@@ -72,6 +72,7 @@ public class CommunityExtController extends BaseController {
         CommunityDto communityDto = BeanConvertUtil.covertBean(reqJson, CommunityDto.class);
         communityDto.setCommunityId(SeqUtil.getId());
         communityDto.setAppId(super.getAppId(request));
+        communityDto.setCommunityId(SeqUtil.getId());
         ResultDto result = communityServiceImpl.saveCommunity(communityDto);
 
         return ResultDto.createResponseEntity(result);

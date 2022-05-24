@@ -7,6 +7,7 @@ import com.java110.things.entity.response.ResultDto;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
+import com.java110.things.util.SeqUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +46,8 @@ public class CommunityController extends BaseController {
         Assert.hasKeyAndValue(paramObj, "name", "请求报文中未包含小区名称");
         CommunityDto communityDto = BeanConvertUtil.covertBean(paramObj, CommunityDto.class);
         communityDto.setAppId(super.getAppId(request));
+        communityDto.setCommunityId(SeqUtil.getId());
+
         ResultDto resultDto = communityServiceImpl.saveCommunity(communityDto);
         return super.createResponseEntity(resultDto);
     }
