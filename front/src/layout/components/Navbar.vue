@@ -1,21 +1,27 @@
 <template>
   <div class="navbar">
-    <hamburger :is-active="sidebar.opened" class="hamburger-container" @toggleClick="toggleSideBar" />
+    <hamburger
+      :is-active="sidebar.opened"
+      class="hamburger-container"
+      @toggleClick="toggleSideBar"
+    />
 
     <breadcrumb class="breadcrumb-container" />
 
     <div class="right-menu">
-      
+       <div class="avatar-wrapper">
+          {{communityInfo.name}}
+        </div>
       <el-dropdown class="avatar-container" trigger="click">
-  
+       
         <div class="avatar-wrapper">
-         HC小区物联网管理平台欢迎您！ 吴学文<i class="el-icon-arrow-down el-icon--right"></i>
+          HC物联网管理平台欢迎您！ 吴学文<i
+            class="el-icon-arrow-down el-icon--right"
+          ></i>
         </div>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
           <router-link to="/">
-            <el-dropdown-item>
-              首页
-            </el-dropdown-item>
+            <el-dropdown-item> 首页 </el-dropdown-item>
           </router-link>
           <a target="_blank" href="https://hc.demo.winqi.cn/">
             <el-dropdown-item>HC云端</el-dropdown-item>
@@ -24,7 +30,7 @@
             <el-dropdown-item>HC官网</el-dropdown-item>
           </a>
           <el-dropdown-item divided @click.native="logout">
-            <span style="display:block;">退出</span>
+            <span style="display: block">退出</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -33,31 +39,59 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import Breadcrumb from '@/components/Breadcrumb'
-import Hamburger from '@/components/Hamburger'
+import { mapGetters } from "vuex";
+import Breadcrumb from "@/components/Breadcrumb";
+import Hamburger from "@/components/Hamburger";
 
 export default {
   components: {
     Breadcrumb,
-    Hamburger
+    Hamburger,
+  },
+   data() {
+    return {
+      communityInfo: {},
+    };
   },
   computed: {
-    ...mapGetters([
-      'sidebar',
-      'avatar'
-    ])
+    ...mapGetters(["sidebar", "avatar"]),
+  },
+  created() {
+    let _currentCommunity = window.localStorage.getItem("curCommunity");
+
+    if (_currentCommunity == null || _currentCommunity == undefined) {
+      this._loadDefaultCommunity();
+    }else{
+      this.communityInfo = _currentCommunity;
+    }
   },
   methods: {
     toggleSideBar() {
-      this.$store.dispatch('app/toggleSideBar')
+      this.$store.dispatch("app/toggleSideBar");
     },
     async logout() {
-      await this.$store.dispatch('user/logout')
-      this.$router.push(`/login?redirect=${this.$route.fullPath}`)
-    }
-  }
-}
+      await this.$store.dispatch("user/logout");
+      this.$router.push(`/login?redirect=${this.$route.fullPath}`);
+    },
+    _loadDefaultCommunity: function () {
+      let _that = this;
+      getCommunitys({})
+        .then((res) => {
+          let _communitys = res.data;
+
+          return _communitys;
+        })
+        .then((_communitys) => {
+          if (_communitys.lenth < 1) {
+            return;
+          }
+          _that.communityInfo = _communitys[0];
+          //存储默认小区信息
+          window.localStorage.setItem("curCommunity", _communitys[0]);
+        });
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>
@@ -66,18 +100,18 @@ export default {
   overflow: hidden;
   position: relative;
   background: #fff;
-  box-shadow: 0 1px 4px rgba(0,21,41,.08);
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
 
   .hamburger-container {
     line-height: 46px;
     height: 100%;
     float: left;
     cursor: pointer;
-    transition: background .3s;
-    -webkit-tap-highlight-color:transparent;
+    transition: background 0.3s;
+    -webkit-tap-highlight-color: transparent;
 
     &:hover {
-      background: rgba(0, 0, 0, .025)
+      background: rgba(0, 0, 0, 0.025);
     }
   }
 
@@ -104,10 +138,10 @@ export default {
 
       &.hover-effect {
         cursor: pointer;
-        transition: background .3s;
+        transition: background 0.3s;
 
         &:hover {
-          background: rgba(0, 0, 0, .025)
+          background: rgba(0, 0, 0, 0.025);
         }
       }
     }

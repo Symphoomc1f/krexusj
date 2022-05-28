@@ -5,16 +5,20 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters } from "vuex";
 
+import { getCommunitys } from "@/api/community";
 export default {
-  name: 'HC物联网',
+  name: "HC物联网",
   computed: {
-    ...mapGetters([
-      'name'
-    ])
+    ...mapGetters(["name"]),
+  },
+ 
+  
+  methods: {
+    
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>

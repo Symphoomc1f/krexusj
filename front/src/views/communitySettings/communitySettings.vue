@@ -81,11 +81,15 @@
         label-width="70px"
         style="width: 400px; margin-left:50px;"
       >
-        <el-form-item label="小区编码" prop="type">
-          <el-input v-model="temp.communityId" placeholder="请输入小区编码" />
-        </el-form-item>
+       
         <el-form-item label="小区名称" prop="type">
           <el-input v-model="temp.name" placeholder="请输入小区名称" />
+        </el-form-item>
+        <el-form-item label="小区地址" prop="type">
+          <el-input v-model="temp.adderss" placeholder="请输入小区地址" />
+        </el-form-item>
+         <el-form-item label="外部小区编码" prop="type">
+          <el-input v-model="temp.extCommunityId" placeholder="请输入小区编码" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
