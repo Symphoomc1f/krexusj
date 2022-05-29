@@ -1,16 +1,16 @@
 <template>
   <div class="app-container">
-    <div class="filter-container" style="margin-bottom:10px">
+    <div class="filter-container" style="margin-bottom: 10px">
       <el-input
         v-model="listQuery.communityId"
         placeholder="请输入小区编码"
-        style="width: 200px;"
+        style="width: 200px"
         class="filter-item"
       />
       <el-input
         v-model="listQuery.name"
         placeholder="请输入小区名称"
-        style="width: 200px;"
+        style="width: 200px"
         class="filter-item"
       />
 
@@ -20,14 +20,16 @@
         type="primary"
         icon="el-icon-search"
         @click="queryCommunity"
-      >查询小区</el-button>
+        >查询小区</el-button
+      >
       <el-button
         class="filter-item"
-        style="margin-left: 10px;"
+        style="margin-left: 10px"
         type="primary"
         icon="el-icon-edit"
         @click="addCommunity"
-      >添加小区</el-button>
+        >添加小区</el-button
+      >
     </div>
     <el-table
       v-loading="listLoading"
@@ -66,8 +68,13 @@
         </template>
       </el-table-column>
       <el-table-column class-name="status-col" label="操作" align="right">
-        <template slot-scope="{row,$index}">
-          <el-button size="mini" type="danger" @click="deleteCommunity(row,$index)">删除</el-button>
+        <template slot-scope="{ row, $index }">
+          <el-button
+            size="mini"
+            type="danger"
+            @click="deleteCommunity(row, $index)"
+            >删除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -79,17 +86,68 @@
         :model="temp"
         label-position="left"
         label-width="70px"
-        style="width: 400px; margin-left:50px;"
+        style="width: 60%; margin-left: 50px"
       >
-       
         <el-form-item label="小区名称" prop="type">
           <el-input v-model="temp.name" placeholder="请输入小区名称" />
         </el-form-item>
         <el-form-item label="小区地址" prop="type">
           <el-input v-model="temp.adderss" placeholder="请输入小区地址" />
         </el-form-item>
-         <el-form-item label="外部小区编码" prop="type">
-          <el-input v-model="temp.extCommunityId" placeholder="请输入小区编码" />
+        <el-form-item label="小区地区" prop="type">
+          <el-row>
+            <el-col :span="8">
+              <el-select v-model="value1" multiple placeholder="请选择省份">
+                <el-option
+                  v-for="item in options"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                >
+                </el-option>
+              </el-select>
+            </el-col>
+            <el-col :span="8">
+              <el-select
+                v-model="value2"
+                multiple
+                collapse-tags
+                style="margin-left: 20px"
+                placeholder="请选择城市"
+              >
+                <el-option
+                  v-for="item in options"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                >
+                </el-option>
+              </el-select>
+            </el-col>
+            <el-col :span="8">
+              <el-select
+                v-model="value2"
+                multiple
+                collapse-tags
+                style="margin-left: 20px"
+                placeholder="请选择区县"
+              >
+                <el-option
+                  v-for="item in options"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                >
+                </el-option>
+              </el-select>
+            </el-col>
+          </el-row>
+        </el-form-item>
+        <el-form-item label="外部编码" prop="type">
+          <el-input
+            v-model="temp.extCommunityId"
+            placeholder="请输入外部小区编码"
+          />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -106,7 +164,9 @@
     >
       <span>您确定删除当前小区吗？</span>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="deleteCommunityDailogVisible = false">取 消</el-button>
+        <el-button @click="deleteCommunityDailogVisible = false"
+          >取 消</el-button
+        >
         <el-button type="primary" @click="doDeleteCommunity">确 定</el-button>
       </span>
     </el-dialog>
@@ -118,7 +178,7 @@ import {
   getCommunitys,
   getCommunitysByCondition,
   deleteCommunitys,
-  saveCommunitys
+  saveCommunitys,
 } from "@/api/community";
 import { parseTime } from "@/utils";
 
@@ -128,10 +188,10 @@ export default {
       const statusMap = {
         published: "success",
         draft: "gray",
-        deleted: "danger"
+        deleted: "danger",
       };
       return statusMap[status];
-    }
+    },
   },
   components: {},
   data() {
@@ -140,7 +200,7 @@ export default {
         page: 1,
         row: 10,
         communityId: "",
-        name: ""
+        name: "",
       },
       list: null,
       listLoading: true,
@@ -149,20 +209,21 @@ export default {
       curCommunity: {},
       temp: {
         communityId: "",
-        name: ""
+        name: "",
+        extCommunityId: "",
       },
-      rules: {}
+      rules: {},
     };
   },
   watch: {
-    dialogFormVisible: function(val) {
+    dialogFormVisible: function (val) {
       if (val == false) {
         this.temp = {
           communityId: "",
-          name: ""
+          name: "",
         };
       }
-    }
+    },
   },
   created() {
     this.fetchData();
@@ -170,14 +231,14 @@ export default {
   methods: {
     fetchData() {
       this.listLoading = true;
-      getCommunitys().then(response => {
+      getCommunitys().then((response) => {
         this.list = response.data;
         this.listLoading = false;
       });
     },
     queryCommunity() {
       this.listLoading = true;
-      getCommunitysByCondition(this.listQuery).then(response => {
+      getCommunitysByCondition(this.listQuery).then((response) => {
         this.list = response.data;
         this.listLoading = false;
       });
@@ -191,11 +252,11 @@ export default {
     },
     doDeleteCommunity() {
       this.listLoading = true;
-      deleteCommunitys(this.curCommunity).then(response => {
+      deleteCommunitys(this.curCommunity).then((response) => {
         this.listLoading = false;
         this.$message({
           type: "info",
-          message: response.msg
+          message: response.msg,
         });
         this.deleteCommunityDailogVisible = false;
         this.queryCommunity();
@@ -203,13 +264,13 @@ export default {
     },
     saveCommunityInfo() {
       this.listLoading = true;
-      saveCommunitys(this.temp).then(response => {
+      saveCommunitys(this.temp).then((response) => {
         this.listLoading = false;
         this.dialogFormVisible = false;
         this.queryCommunity();
       });
     },
-    restartCommunity(_row) {}
-  }
+    restartCommunity(_row) {},
+  },
 };
 </script>

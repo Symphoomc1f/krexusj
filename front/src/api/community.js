@@ -35,3 +35,11 @@ export function saveCommunitys(params) {
         data:params
     })
 }
+
+export function getCityArea(){
+    return request({
+        url: '/api/community/saveCommunity',
+        method: 'get',
+        params
+    })
+}
