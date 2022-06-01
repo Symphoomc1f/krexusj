@@ -36,9 +36,9 @@ export function saveCommunitys(params) {
     })
 }
 
-export function getCityArea(){
+export function getCityArea(params){
     return request({
-        url: '/api/community/saveCommunity',
+        url: '/api/cityArea/getCityAreas',
         method: 'get',
         params
     })

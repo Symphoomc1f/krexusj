@@ -9,12 +9,8 @@
     <breadcrumb class="breadcrumb-container" />
 
     <div class="right-menu">
-       <div class="avatar-wrapper">
-          {{communityInfo.name}}
-        </div>
-      <el-dropdown class="avatar-container" trigger="click">
-       
-        <div class="avatar-wrapper">
+      <el-dropdown class="avatar-container"  trigger="click">
+        <div class="avatar-wrapper" style="margin-top:0px">
           HC物联网管理平台欢迎您！ 吴学文<i
             class="el-icon-arrow-down el-icon--right"
           ></i>
@@ -35,6 +31,9 @@
         </el-dropdown-menu>
       </el-dropdown>
     </div>
+    <div style="line-height: 50px; float: right;margin-right:30px;color: #606266;font-size: 14px;">
+     当前小区：{{ communityInfo.name }}
+    </div>
   </div>
 </template>
 
@@ -42,13 +41,14 @@
 import { mapGetters } from "vuex";
 import Breadcrumb from "@/components/Breadcrumb";
 import Hamburger from "@/components/Hamburger";
+import { getCommunitys } from "@/api/community";
 
 export default {
   components: {
     Breadcrumb,
     Hamburger,
   },
-   data() {
+  data() {
     return {
       communityInfo: {},
     };
@@ -57,11 +57,13 @@ export default {
     ...mapGetters(["sidebar", "avatar"]),
   },
   created() {
-    let _currentCommunity = window.localStorage.getItem("curCommunity");
+    let _currentCommunity = JSON.parse(
+      window.localStorage.getItem("curCommunity")
+    );
 
     if (_currentCommunity == null || _currentCommunity == undefined) {
       this._loadDefaultCommunity();
-    }else{
+    } else {
       this.communityInfo = _currentCommunity;
     }
   },
@@ -87,7 +89,10 @@ export default {
           }
           _that.communityInfo = _communitys[0];
           //存储默认小区信息
-          window.localStorage.setItem("curCommunity", _communitys[0]);
+          window.localStorage.setItem(
+            "curCommunity",
+            JSON.stringify(_communitys[0])
+          );
         });
     },
   },

@@ -97,12 +97,12 @@
         <el-form-item label="小区地区" prop="type">
           <el-row>
             <el-col :span="8">
-              <el-select v-model="value1" multiple placeholder="请选择省份">
+              <el-select v-model="provCode" multiple placeholder="请选择省份" @change="changeProv">
                 <el-option
-                  v-for="item in options"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
+                  v-for="item in provs"
+                  :key="item.areaCode"
+                  :label="item.areaName"
+                  :value="item.areaCode"
                 >
                 </el-option>
               </el-select>
@@ -179,8 +179,10 @@ import {
   getCommunitysByCondition,
   deleteCommunitys,
   saveCommunitys,
+  getCityArea
 } from "@/api/community";
 import { parseTime } from "@/utils";
+import func from 'vue-temp/vue-editor-bridge';
 
 export default {
   filters: {
@@ -213,6 +215,12 @@ export default {
         extCommunityId: "",
       },
       rules: {},
+      provs:[],
+      citys:[],
+      areas:[],
+      provCode:'',
+      cityCode:'',
+      areaCode:''
     };
   },
   watch: {
@@ -235,6 +243,20 @@ export default {
         this.list = response.data;
         this.listLoading = false;
       });
+
+      getCityArea({
+        areaLevel:'101'
+      }).then((res)=>{
+        this.provs = res.data
+      })
+    },
+    changeProv(){
+       getCityArea({
+        areaLevel:'101',
+        parentAreaCode:this.provCode
+      }).then((res)=>{
+        this.citys = res.data
+      })
     },
     queryCommunity() {
       this.listLoading = true;
