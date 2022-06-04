@@ -1,18 +1,31 @@
 import request from '@/utils/request'
 
 export function getMachineCmds(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+    let communityId = '-1'
+    if(_currCommunity != null && _currCommunity != undefined){
+        communityId = _currCommunity.communityId;
+    }
     return request({
         url: '/api/machine/getMachineCmds',
         method: 'get',
         params: {
             page: 1,
             row: 10,
-            machineTypeCd: '9999'
+            machineTypeCd: '9999',
+            communityId:communityId
         }
     })
 }
 
 export function getMachineCmdsByCondition(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+
+    if(_currCommunity != null && _currCommunity != undefined){
+        params.communityId = _currCommunity.communityId;
+    }else{
+        params.communityId = "-1";
+    }
     return request({
         url: '/api/machine/getMachineCmds',
         method: 'get',
@@ -29,6 +42,13 @@ export function deleteMachineCmd(params) {
 }
 
 export function saveMachineCmd(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+
+    if(_currCommunity != null && _currCommunity != undefined){
+        params.communityId = _currCommunity.communityId;
+    }else{
+        params.communityId = "-1";
+    }
     return request({
         url: '/api/machine/saveBarrierGateCmd',
         method: 'post',
@@ -37,18 +57,31 @@ export function saveMachineCmd(params) {
 }
 
 export function getAccessControls(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+    let communityId = '-1'
+    if(_currCommunity != null && _currCommunity != undefined){
+        communityId = _currCommunity.communityId;
+    }
     return request({
         url: '/api/machine/getMachines',
         method: 'get',
         params: {
             page: 1,
             row: 10,
-            machineTypeCd: '9999'
+            machineTypeCd: '9999',
+            communityId:communityId
         }
     })
 }
 
 export function getMachineCodes(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+
+    if(_currCommunity != null && _currCommunity != undefined){
+        params.communityId = _currCommunity.communityId;
+    }else{
+        params.communityId = "-1";
+    }
     return request({
         url: '/api/machine/getMachineCodes',
         method: 'get',
@@ -56,6 +89,13 @@ export function getMachineCodes(params) {
     })
 }
 export function getAccessControlsByCondition(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+
+    if(_currCommunity != null && _currCommunity != undefined){
+        params.communityId = _currCommunity.communityId;
+    }else{
+        params.communityId = "-1";
+    }
     return request({
         url: '/api/machine/getMachines',
         method: 'get',
@@ -72,6 +112,13 @@ export function deleteAccessControls(params) {
 }
 
 export function saveAccessControls(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+
+    if(_currCommunity != null && _currCommunity != undefined){
+        params.communityId = _currCommunity.communityId;
+    }else{
+        params.communityId = "-1";
+    }
     return request({
         url: '/api/machine/saveBarrierGate',
         method: 'post',
@@ -88,6 +135,13 @@ export function restartAccessControls(params) {
 }
 
 export function getAccessControlsLog(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+
+    if(_currCommunity != null && _currCommunity != undefined){
+        params.communityId = _currCommunity.communityId;
+    }else{
+        params.communityId = "-1";
+    }
     return request({
         url: '/api/machine/getMachineLogs',
         method: 'get',
@@ -96,6 +150,13 @@ export function getAccessControlsLog(params) {
 }
 
 export function getAccessControlFace(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+
+    if(_currCommunity != null && _currCommunity != undefined){
+        params.communityId = _currCommunity.communityId;
+    }else{
+        params.communityId = "-1";
+    }
     return request({
         url: '/api/machine/getMachineFaces',
         method: 'get',
@@ -104,6 +165,13 @@ export function getAccessControlFace(params) {
 }
 
 export function getMachineOpenDoors(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+
+    if(_currCommunity != null && _currCommunity != undefined){
+        params.communityId = _currCommunity.communityId;
+    }else{
+        params.communityId = "-1";
+    }
     return request({
         url: '/api/machine/getMachineOpenDoors',
         method: 'get',
@@ -112,6 +180,13 @@ export function getMachineOpenDoors(params) {
 }
 
 export function getTranLog(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+
+    if(_currCommunity != null && _currCommunity != undefined){
+        params.communityId = _currCommunity.communityId;
+    }else{
+        params.communityId = "-1";
+    }
     return request({
         url: '/api/machine/getTranLogs',
         method: 'get',

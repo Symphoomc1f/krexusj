@@ -3,7 +3,6 @@ package com.java110.things.entity.machine;
 import com.java110.things.entity.PageDto;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * @ClassName OperateLogDto
@@ -30,6 +29,7 @@ public class OperateLogDto extends PageDto implements Serializable {
     private String machineName;
     private String machineIp;
     private String createTime;
+    private String communityId;
 
     public String getLogId() {
         return logId;
@@ -149,5 +149,13 @@ public class OperateLogDto extends PageDto implements Serializable {
 
     public void setCreateTime(String createTime) {
         this.createTime = createTime;
+    }
+
+    public String getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(String communityId) {
+        this.communityId = communityId;
     }
 }

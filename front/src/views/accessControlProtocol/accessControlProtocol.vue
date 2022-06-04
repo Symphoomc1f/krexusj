@@ -58,12 +58,6 @@
           <el-button size="mini" type="primary" @click="viewLicense(row,$index)">查看</el-button>
         </template>
       </el-table-column>
-      <el-table-column class-name="status-col" label="操作" align="right">
-        <template slot-scope="{row,$index}">
-          <el-button  v-if= "row.defaultProtocol == 'T'" size="mini" type="danger" disabled="disabled">已经启用</el-button>
-          <el-button v-else size="mini" type="primary" @click="startProtocol(row,$index)">启用</el-button>
-        </template>
-      </el-table-column>
     </el-table>
     <pagination
       v-show="total>0"

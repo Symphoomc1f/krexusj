@@ -1,6 +1,13 @@
 import request from '@/utils/request'
 
 export function getMachineCmds(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+
+    if(_currCommunity != null && _currCommunity != undefined){
+        params.communityId = _currCommunity.communityId;
+    }else{
+        params.communityId = "-1";
+    }
     return request({
         url: '/api/machine/getMachineCmds',
         method: 'get',
@@ -167,6 +174,13 @@ export function getAccessControlFace(params) {
 }
 
 export function getMachineOpenDoors(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+
+    if(_currCommunity != null && _currCommunity != undefined){
+        params.communityId = _currCommunity.communityId;
+    }else{
+        params.communityId = "-1";
+    }
     return request({
         url: '/api/machine/getMachineOpenDoors',
         method: 'get',
@@ -175,6 +189,13 @@ export function getMachineOpenDoors(params) {
 }
 
 export function getTranLog(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+
+    if(_currCommunity != null && _currCommunity != undefined){
+        params.communityId = _currCommunity.communityId;
+    }else{
+        params.communityId = "-1";
+    }
     return request({
         url: '/api/machine/getTranLogs',
         method: 'get',

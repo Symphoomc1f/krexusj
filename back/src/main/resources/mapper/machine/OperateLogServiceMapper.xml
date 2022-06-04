@@ -58,6 +58,9 @@
         <if test="machineName != null and machineName != ''">
             and m.machine_name = #{machineName}
         </if>
+        <if test="communityId != null and communityId != ''">
+            and m.community_id = #{communityId}
+        </if>
         <if test="machineTypeCd != null and machineTypeCd != ''">
             and t.machine_type_cd = #{machineTypeCd}
         </if>
@@ -108,6 +111,9 @@
         </if>
         <if test="machineName != null and machineName != ''">
             and m.machine_name = #{machineName}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and m.community_id = #{communityId}
         </if>
         <if test="machineTypeCd != null and machineTypeCd != ''">
             and t.machine_type_cd = #{machineTypeCd}

@@ -214,6 +214,7 @@ public class MachineController extends BaseController {
     public ResponseEntity<String> getMachineLogs(@RequestParam int page,
                                                  @RequestParam int row,
                                                  @RequestParam String machineTypeCd,
+                                                 @RequestParam String communityId,
                                                  @RequestParam(name = "logId", required = false) String logId,
                                                  @RequestParam(name = "machineCode", required = false) String machineCode,
                                                  @RequestParam(name = "machineName", required = false) String machineName) throws Exception {
@@ -226,6 +227,7 @@ public class MachineController extends BaseController {
         operateLogDto.setLogId(logId);
         operateLogDto.setMachineCode(machineCode);
         operateLogDto.setMachineName(machineName);
+        operateLogDto.setCommunityId(communityId);
 
         ResultDto resultDto = operateLogServiceImpl.getOperateLogs(operateLogDto);
         return super.createResponseEntity(resultDto);
@@ -276,6 +278,7 @@ public class MachineController extends BaseController {
                                                       @RequestParam(name = "machineCode", required = false) String machineCode,
                                                       @RequestParam(name = "machineId", required = false) String machineId,
                                                       @RequestParam(name = "machineName", required = false) String machineName,
+                                                      @RequestParam(name = "communityId") String communityId,
                                                       @RequestParam(name = "userName", required = false) String userName) throws Exception {
 
         OpenDoorDto openDoorDto = new OpenDoorDto();
@@ -285,6 +288,7 @@ public class MachineController extends BaseController {
         openDoorDto.setMachineCode(machineCode);
         openDoorDto.setMachineName(machineName);
         openDoorDto.setUserName(userName);
+        openDoorDto.setCommunityId(communityId);
 
         ResultDto resultDto = openDoorService.getOpenDoor(openDoorDto);
         return super.createResponseEntity(resultDto);

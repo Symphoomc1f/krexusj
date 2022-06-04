@@ -1,18 +1,31 @@
 import request from '@/utils/request'
 
 export function getAttendances(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+    let communityId = '-1'
+    if(_currCommunity != null && _currCommunity != undefined){
+        communityId = _currCommunity.communityId;
+    }
     return request({
         url: '/api/machine/getMachines',
         method: 'get',
         params: {
             page: 1,
             row: 10,
-            machineTypeCd: '9997'
+            machineTypeCd: '9997',
+            communityId:communityId
         }
     })
 }
 
 export function getAttendancesByCondition(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+
+    if(_currCommunity != null && _currCommunity != undefined){
+        params.communityId = _currCommunity.communityId;
+    }else{
+        params.communityId = "-1";
+    }
     return request({
         url: '/api/machine/getMachines',
         method: 'get',
@@ -37,6 +50,13 @@ export function restartAttendances(params) {
 }
 
 export function getAttendanceFace(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+
+    if(_currCommunity != null && _currCommunity != undefined){
+        params.communityId = _currCommunity.communityId;
+    }else{
+        params.communityId = "-1";
+    }
     return request({
         url: '/api/machine/getMachineFaces',
         method: 'get',
@@ -45,6 +65,13 @@ export function getAttendanceFace(params) {
 }
 
 export function getAttendanceClasses(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+
+    if(_currCommunity != null && _currCommunity != undefined){
+        params.communityId = _currCommunity.communityId;
+    }else{
+        params.communityId = "-1";
+    }
     return request({
         url: '/api/attendance/getClasses',
         method: 'get',
@@ -56,6 +83,13 @@ export function getAttendanceClasses(params) {
 }
 
 export function getClasses(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+
+    if(_currCommunity != null && _currCommunity != undefined){
+        params.communityId = _currCommunity.communityId;
+    }else{
+        params.communityId = "-1";
+    }
     return request({
         url: '/api/attendance/getClasses',
         method: 'get',
@@ -75,6 +109,13 @@ export function getAttendanceClassesAttr(classId) {
 
 
 export function getDepartment(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+
+    if(_currCommunity != null && _currCommunity != undefined){
+        params.communityId = _currCommunity.communityId;
+    }else{
+        params.communityId = "-1";
+    }
     return request({
         url: '/api/attendance/getDepartments',
         method: 'get',
@@ -83,6 +124,7 @@ export function getDepartment(params) {
 }
 
 export function getStaffs(params) {
+   
     return request({
         url: '/api/attendance/getStaffs',
         method: 'get',
