@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java110.things.dao.ICommunityPersonServiceDao">
+
+    <!--
+        小区人员 db  完成增删改查 简单工作
+
+        add by 吴学文 2020-12-23
+
+        协议：http://www.homecommunity.cn
+    -->
+
+    <insert id="saveCommunityPerson" parameterType="com.java110.things.entity.user.CommunityPersonDto">
+        INSERT INTO `s_community_person` (`person_id`, `community_id`, `name`, `tel`, `id_number`, `person_type`,
+        `face_path`, `ext_person_id`)
+        VALUES (#{personId}, #{communityId}, #{name}, #{tel}, #{idNumber}, #{personType}, #{facePath}, #{extPersonId})
+    </insert>
+
+    <!--
+        查询人员信息
+    -->
+    <select id="getCommunityPersons" parameterType="com.java110.things.entity.user.CommunityPersonDto"
+            resultType="com.java110.things.entity.user.CommunityPersonDto">
+        select
+        t.`person_id` personId, t.`community_id` communityId, t.`name`, t.`tel`, t.`id_number` idNumber,
+        t.`person_type` personType, t.`face_path` facePath, t.`ext_person_id` extPersonId
+        from s_community_person t
+        where 1=1
+        <if test="personId != null and personId != ''">
+            and t.person_id = #{personId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="name != null and name != ''">
+            and t.name = #{name}
+        </if>
+        <if test="tel != null and tel != ''">
+            and t.tel = #{tel}
+        </if>
+        <if test="idNumber != null and idNumber != ''">
+            and t.id_number = #{idNumber}
+        </if>
+        <if test="personType != null and personType != ''">
+            and t.person_type = #{personType}
+        </if>
+        <if test="facePath != null and facePath != ''">
+            and t.face_path = #{facePath}
+        </if>
+        <if test="extPersonId != null and extPersonId != ''">
+            and t.ext_person_id = #{extPersonId}
+        </if>
+        and t.status_cd = '0'
+        order by t.create_time desc
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+
+    </select>
+
+    <select id="getCommunityPersonCount" parameterType="com.java110.things.entity.user.CommunityPersonDto"
+            resultType="long">
+        select
+        count(1) count
+        from s_community_person t
+        where 1=1
+        <if test="personId != null and personId != ''">
+            and t.person_id = #{personId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="name != null and name != ''">
+            and t.name = #{name}
+        </if>
+        <if test="tel != null and tel != ''">
+            and t.tel = #{tel}
+        </if>
+        <if test="idNumber != null and idNumber != ''">
+            and t.id_number = #{idNumber}
+        </if>
+        <if test="personType != null and personType != ''">
+            and t.person_type = #{personType}
+        </if>
+        <if test="facePath != null and facePath != ''">
+            and t.face_path = #{facePath}
+        </if>
+        <if test="extPersonId != null and extPersonId != ''">
+            and t.ext_person_id = #{extPersonId}
+        </if>
+        and t.status_cd = '0'
+        order by t.create_time desc
+
+    </select>
+
+    <update id="updateCommunityPerson" parameterType="com.java110.things.entity.user.CommunityPersonDto">
+        update s_community_person t
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">
+                t.name = #{name},
+            </if>
+            <if test="tel != null and tel != ''">
+                t.tel = #{tel},
+            </if>
+            <if test="idNumber != null and idNumber != ''">
+                t.id_number = #{idNumber},
+            </if>
+            <if test="facePath != null and facePath != ''">
+                t.face_path = #{facePath},
+            </if>
+            <if test="extPersonId != null and extPersonId != ''">
+                t.ext_person_id = #{extPersonId}
+            </if>
+        </trim>
+        where 1=1
+        and t.status_cd = '0'
+        <if test="personId != null and personId != ''">
+            and t.person_id = #{personId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="personType != null and personType != ''">
+            and t.person_type = #{personType}
+        </if>
+        <if test="extPersonId != null and extPersonId != ''">
+            and t.ext_person_id = #{extPersonId}
+        </if>
+    </update>
+
+</mapper>
