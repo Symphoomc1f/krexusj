@@ -41,7 +41,8 @@ public class CommunityController extends BaseController {
 
         JSONObject paramObj = super.getParamJson(param);
 
-        Assert.hasKeyAndValue(paramObj, "communityId", "请求报文中未包含小区编码");
+        Assert.hasKeyAndValue(paramObj, "address", "请求报文中未包含地址");
+        Assert.hasKeyAndValue(paramObj, "cityCode", "请求报文中未包含城市地区");
 
         Assert.hasKeyAndValue(paramObj, "name", "请求报文中未包含小区名称");
         CommunityDto communityDto = BeanConvertUtil.covertBean(paramObj, CommunityDto.class);

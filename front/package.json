@@ -61,5 +61,10 @@
   "browserslist": [
     "> 1%",
     "last 2 versions"
-  ]
+  ],
+  "main": ".eslintrc.js",
+  "directories": {
+    "test": "tests"
+  },
+  "keywords": []
 }

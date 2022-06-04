@@ -119,13 +119,15 @@ public class MachineController extends BaseController {
     @RequestMapping(path = "/getMachines", method = RequestMethod.GET)
     public ResponseEntity<String> getMachines(@RequestParam int page,
                                               @RequestParam int row,
-                                              @RequestParam String machineTypeCd) throws Exception {
+                                              @RequestParam String machineTypeCd,
+                                              @RequestParam String communityId) throws Exception {
 
         Assert.hasText(machineTypeCd, "请求报文中未包含设备类型");
         MachineDto machineDto = new MachineDto();
         machineDto.setPage(page);
         machineDto.setRow(row);
         machineDto.setMachineTypeCd(machineTypeCd);
+        machineDto.setCommunityId(communityId);
 
         ResultDto resultDto = machineServiceImpl.getMachine(machineDto);
         return super.createResponseEntity(resultDto);

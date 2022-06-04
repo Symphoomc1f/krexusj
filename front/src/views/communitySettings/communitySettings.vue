@@ -71,6 +71,13 @@
         <template slot-scope="{ row, $index }">
           <el-button
             size="mini"
+            type="success"
+            v-if="curCommunity.communityId != row.communityId"
+            @click="changeCommunity(row, $index)"
+            >切换小区</el-button
+          >
+          <el-button
+            size="mini"
             type="danger"
             @click="deleteCommunity(row, $index)"
             >删除</el-button
@@ -91,13 +98,15 @@
         <el-form-item label="小区名称" prop="type">
           <el-input v-model="temp.name" placeholder="请输入小区名称" />
         </el-form-item>
-        <el-form-item label="小区地址" prop="type">
-          <el-input v-model="temp.adderss" placeholder="请输入小区地址" />
-        </el-form-item>
+
         <el-form-item label="小区地区" prop="type">
           <el-row>
             <el-col :span="8">
-              <el-select v-model="provCode" multiple placeholder="请选择省份" @change="changeProv">
+              <el-select
+                v-model="provCode"
+                placeholder="请选择省份"
+                @change="changeProv"
+              >
                 <el-option
                   v-for="item in provs"
                   :key="item.areaCode"
@@ -109,39 +118,41 @@
             </el-col>
             <el-col :span="8">
               <el-select
-                v-model="value2"
-                multiple
+                v-model="cityCode"
+                @change="changeCity"
                 collapse-tags
                 style="margin-left: 20px"
                 placeholder="请选择城市"
               >
                 <el-option
-                  v-for="item in options"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
+                  v-for="item in citys"
+                  :key="item.areaCode"
+                  :label="item.areaName"
+                  :value="item.areaCode"
                 >
                 </el-option>
               </el-select>
             </el-col>
             <el-col :span="8">
               <el-select
-                v-model="value2"
-                multiple
+                v-model="temp.cityCode"
                 collapse-tags
                 style="margin-left: 20px"
                 placeholder="请选择区县"
               >
                 <el-option
-                  v-for="item in options"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
+                  v-for="item in areas"
+                  :key="item.areaCode"
+                  :label="item.areaName"
+                  :value="item.areaCode"
                 >
                 </el-option>
               </el-select>
             </el-col>
           </el-row>
+        </el-form-item>
+        <el-form-item label="小区地址" prop="type">
+          <el-input v-model="temp.address" placeholder="请输入小区地址" />
         </el-form-item>
         <el-form-item label="外部编码" prop="type">
           <el-input
@@ -179,10 +190,9 @@ import {
   getCommunitysByCondition,
   deleteCommunitys,
   saveCommunitys,
-  getCityArea
+  getCityArea,
 } from "@/api/community";
 import { parseTime } from "@/utils";
-import func from 'vue-temp/vue-editor-bridge';
 
 export default {
   filters: {
@@ -213,14 +223,15 @@ export default {
         communityId: "",
         name: "",
         extCommunityId: "",
+        cityCode: "",
+        address: "",
       },
       rules: {},
-      provs:[],
-      citys:[],
-      areas:[],
-      provCode:'',
-      cityCode:'',
-      areaCode:''
+      provs: [],
+      citys: [],
+      areas: [],
+      provCode: "",
+      cityCode: "",
     };
   },
   watch: {
@@ -229,6 +240,9 @@ export default {
         this.temp = {
           communityId: "",
           name: "",
+          extCommunityId: "",
+          cityCode: "",
+          address: "",
         };
       }
     },
@@ -245,18 +259,33 @@ export default {
       });
 
       getCityArea({
-        areaLevel:'101'
-      }).then((res)=>{
-        this.provs = res.data
-      })
+        areaLevel: "101",
+      }).then((res) => {
+        this.provs = res.data;
+      });
+
+      let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+
+      if(_currCommunity != null && _currCommunity != undefined){
+        this.curCommunity = _currCommunity;
+      }
+   
     },
-    changeProv(){
-       getCityArea({
-        areaLevel:'101',
-        parentAreaCode:this.provCode
-      }).then((res)=>{
-        this.citys = res.data
-      })
+    changeProv() {
+      getCityArea({
+        areaLevel: "202",
+        parentAreaCode: this.provCode,
+      }).then((res) => {
+        this.citys = res.data;
+      });
+    },
+    changeCity() {
+      getCityArea({
+        areaLevel: "303",
+        parentAreaCode: this.cityCode,
+      }).then((res) => {
+        this.areas = res.data;
+      });
     },
     queryCommunity() {
       this.listLoading = true;
@@ -292,7 +321,15 @@ export default {
         this.queryCommunity();
       });
     },
-    restartCommunity(_row) {},
+    changeCommunity(_row) {
+      //存储默认小区信息
+          window.localStorage.setItem(
+            "curCommunity",
+            JSON.stringify(_row)
+          );
+          location.reload();
+
+    },
   },
 };
 </script>

@@ -26,6 +26,8 @@ public class MachineFaceDto extends UserFaceDto implements Serializable {
     private String state;
     private String message;
 
+    private String communityId;
+
     public String getId() {
         return id;
     }
@@ -82,5 +84,13 @@ public class MachineFaceDto extends UserFaceDto implements Serializable {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(String communityId) {
+        this.communityId = communityId;
     }
 }

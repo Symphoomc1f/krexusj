@@ -148,16 +148,6 @@ import Pagination from "@/components/Pagination";
 import { parseTime } from "@/utils";
 
 export default {
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        published: "success",
-        draft: "gray",
-        deleted: "danger"
-      };
-      return statusMap[status];
-    }
-  },
   components: { Pagination },
   data() {
     return {
@@ -182,22 +172,6 @@ export default {
         machineName: "",
         machineIp: "",
         oem: ""
-      },
-      rules: {
-        type: [
-          { required: true, message: "type is required", trigger: "change" }
-        ],
-        timestamp: [
-          {
-            type: "date",
-            required: true,
-            message: "timestamp is required",
-            trigger: "change"
-          }
-        ],
-        title: [
-          { required: true, message: "title is required", trigger: "blur" }
-        ]
       }
     };
   },
