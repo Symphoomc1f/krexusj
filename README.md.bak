@@ -29,17 +29,19 @@
 
 	4、运行main方法
 
-### 第三方云平台对接协议
+## 第三方云平台对接协议
 
-[对接协议](back/docs/api.md)
+[第三方云平台对接协议](back/docs/api.md)
 
-### 相关视频
+
+
+## 相关视频
 
 [https://www.bilibili.com/video/BV1pK4y1t7re](https://www.bilibili.com/video/BV1pK4y1t7re)
 
-### 功能列表
+## 功能列表
 
-#### 已完成功能
+### 已完成功能
 
 1、设备门禁管理，开门和重启
 
@@ -59,16 +61,12 @@
 
 9、云端交互日志记录，实时查看和云端HC小区管理系统通信是否正常
 
-#### 计划功能
+### 计划功能
 
-1、道闸对接
-
-2、监控对接
-
-3、考勤设备对接
+1、监控对接
 
 
-### 演示
+## 演示
 
 	以下效果图
 
@@ -76,3 +74,8 @@
 ![image](docs/img/menjing.png)
 ![image](docs/img/menjingxiyi.png)
 ![image](docs/img/settings.png)
+
+
+## 更新日志
+
+[HC物联网系统更新日志](back/ChangeLog.md)
