@@ -68,6 +68,8 @@
 
 ## 6. 演示
 
+[http://iot.homecommunity.cn/](http://iot.homecommunity.cn/)
+
 	以下效果图
 
 ![image](docs/img/login.png)
