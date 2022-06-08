@@ -7,6 +7,7 @@ import com.java110.things.dao.ICommunityPersonServiceDao;
 import com.java110.things.entity.PageDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.CommunityPersonDto;
+import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.user.ICommunityPersonService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,11 +53,25 @@ public class CommunityPersonServiceImpl implements ICommunityPersonService {
         List<CommunityPersonDto> communityPersonDtoList = null;
         if (count > 0) {
             communityPersonDtoList = communityPersonServiceDao.getCommunityPersons(communityPersonDto);
+            freshUserFace(communityPersonDtoList);
         } else {
             communityPersonDtoList = new ArrayList<>();
         }
         ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, count, totalPage, communityPersonDtoList);
         return resultDto;
+    }
+
+    /**
+     * 刷新人脸地址
+     *
+     * @param communityPersonDtos
+     */
+    private void freshUserFace(List<CommunityPersonDto> communityPersonDtos) {
+        String faceUrl = MappingCacheFactory.getValue("ACCESS_CONTROL_FACE_URL");
+
+        for (CommunityPersonDto communityPersonDto : communityPersonDtos) {
+            communityPersonDto.setFacePath(faceUrl + communityPersonDto.getFacePath());
+        }
     }
 
     /**

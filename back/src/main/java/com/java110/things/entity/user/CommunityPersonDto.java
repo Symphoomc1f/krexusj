@@ -22,6 +22,7 @@ public class CommunityPersonDto extends PageDto implements Serializable {
     private String facePath;
     private String extPersonId;
     private String createTime;
+    private String personTypeName;
     private String statusCd = "0";
 
     public String getPersonId() {
@@ -102,5 +103,13 @@ public class CommunityPersonDto extends PageDto implements Serializable {
 
     public void setStatusCd(String statusCd) {
         this.statusCd = statusCd;
+    }
+
+    public String getPersonTypeName() {
+        return personTypeName;
+    }
+
+    public void setPersonTypeName(String personTypeName) {
+        this.personTypeName = personTypeName;
     }
 }

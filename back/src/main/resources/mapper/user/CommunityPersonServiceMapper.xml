@@ -23,8 +23,10 @@
             resultType="com.java110.things.entity.user.CommunityPersonDto">
         select
         t.`person_id` personId, t.`community_id` communityId, t.`name`, t.`tel`, t.`id_number` idNumber,
-        t.`person_type` personType, t.`face_path` facePath, t.`ext_person_id` extPersonId
+        t.`person_type` personType, t.`face_path` facePath, t.`ext_person_id` extPersonId,td.name personTypeName,
+        t.create_time createTime
         from s_community_person t
+        left join t_dict td on t.person_type = td.status_cd and td.table_name = 's_community_person' and td.table_columns = 'person_type'
         where 1=1
         <if test="personId != null and personId != ''">
             and t.person_id = #{personId}

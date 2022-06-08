@@ -67,6 +67,12 @@ export const constantRoutes = [
         component: () => import('@/views/communitySettings/communitySettings'),
         meta: { title: '小区信息', icon: 'table' }
       },
+      {
+        path: '/communityPerson',
+        name: '小区人员',
+        component: () => import('@/views/communityPerson/communityPerson'),
+        meta: { title: '小区人员', icon: 'table' }
+      }
     ]
   },
   {
@@ -212,6 +218,28 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/org',
+    component: Layout,
+    redirect: '/userManager/userManager',
+    name: 'Example',
+    meta: { title: '组织信息', icon: 'example' },
+    children: [
+     
+      {
+        path: '/userManager',
+        name: '账号信息',
+        component: () => import('@/views/userManager/userManager'),
+        meta: { title: '账号信息', icon: 'table' }
+      },
+      {
+        path: '/changepwd',
+        name: '修改密码',
+        component: () => import('@/views/changepwd/changepwd'),
+        meta: { title: '修改密码', icon: 'table' }
+      }
+    ]
+  },
+  {
     path: '/settings',
     component: Layout,
     redirect: '/settings/settings',
@@ -229,19 +257,6 @@ export const constantRoutes = [
         name: '硬件指令',
         component: () => import('@/views/machineCmd/machineCmd'),
         meta: { title: '硬件指令', icon: 'table' }
-      },
-     
-      {
-        path: '/userManager',
-        name: '系统用户',
-        component: () => import('@/views/userManager/userManager'),
-        meta: { title: '系统用户', icon: 'table' }
-      },
-      {
-        path: '/changepwd',
-        name: '修改密码',
-        component: () => import('@/views/changepwd/changepwd'),
-        meta: { title: '修改密码', icon: 'table' }
       },
       {
         path: '/task',

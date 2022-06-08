@@ -19,6 +19,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.CommunityPersonDto;
+import com.java110.things.factory.ImageFactory;
 import com.java110.things.service.user.ICommunityPersonService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.util.UUID;
 
 /**
@@ -62,9 +64,17 @@ public class CommunityPersonController extends BaseController {
         Assert.hasKeyAndValue(paramObj, "personType", "请求报文中未包含人员类型");
 
         paramObj.put("personId", UUID.randomUUID().toString());
+        CommunityPersonDto communityPersonDto = BeanConvertUtil.covertBean(paramObj, CommunityPersonDto.class);
+        if (paramObj.containsKey("photo")) {
+            String faceBase = paramObj.getString("photo");
+            if (faceBase.contains("base64,")) {
+                faceBase = faceBase.substring(faceBase.indexOf("base64,") + 7);
+            }
+            ImageFactory.GenerateImage(faceBase, paramObj.getString("communityId") + File.separatorChar + paramObj.getString("personId") + ".jpg");
+            communityPersonDto.setFacePath("/" + paramObj.getString("communityId") + "/" + paramObj.getString("personId") + ".jpg");
+        }
 
-
-        int count = communityPersonServiceImpl.saveCommunityPerson(BeanConvertUtil.covertBean(paramObj, CommunityPersonDto.class));
+        int count = communityPersonServiceImpl.saveCommunityPerson(communityPersonDto);
 
         if (count < 1) {
             return ResultDto.error("保存失败");
@@ -107,10 +117,10 @@ public class CommunityPersonController extends BaseController {
     @RequestMapping(path = "/getCommunityPersons", method = RequestMethod.GET)
     public ResponseEntity<String> getCommunityPersons(@RequestParam int page,
                                                       @RequestParam int row,
-                                                      @RequestParam String personType,
+                                                      @RequestParam(value = "personType", required = false) String personType,
                                                       @RequestParam String communityId) throws Exception {
 
-        Assert.hasText(personType, "请求报文中未包含小区人员类型");
+        //Assert.hasText(personType, "请求报文中未包含小区人员类型");
         CommunityPersonDto communityPersonDto = new CommunityPersonDto();
         communityPersonDto.setPage(page);
         communityPersonDto.setRow(row);
@@ -133,7 +143,7 @@ public class CommunityPersonController extends BaseController {
     public ResponseEntity<String> deleteCommunityPerson(@RequestBody String paramIn) throws Exception {
         JSONObject paramObj = super.getParamJson(paramIn);
 
-        Assert.hasKeyAndValue(paramObj, "communityPersonId", "请求报文中未包含硬件ID");
+        Assert.hasKeyAndValue(paramObj, "personId", "请求报文中未包含人员ID");
         int count = communityPersonServiceImpl.deleteCommunityPerson(BeanConvertUtil.covertBean(paramObj, CommunityPersonDto.class));
         if (count < 1) {
             return ResultDto.error("保存失败");
