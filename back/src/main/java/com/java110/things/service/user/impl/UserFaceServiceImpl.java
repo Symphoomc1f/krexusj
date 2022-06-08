@@ -21,9 +21,11 @@ import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.MachineFaceDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.entity.user.CommunityPersonDto;
 import com.java110.things.factory.AccessControlProcessFactory;
 import com.java110.things.factory.ImageFactory;
 import com.java110.things.service.machine.IMachineFaceService;
+import com.java110.things.service.user.ICommunityPersonService;
 import com.java110.things.service.user.IUserFaceService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
@@ -55,6 +57,9 @@ public class UserFaceServiceImpl implements IUserFaceService {
 
     @Autowired
     private IMachineServiceDao machineServiceDaoImpl;
+
+    @Autowired
+    private ICommunityPersonService communityPersonServiceImpl;
 
     @Autowired
     private IMachineFaceService machineFaceService;
@@ -143,6 +148,14 @@ public class UserFaceServiceImpl implements IUserFaceService {
         machineFaceDto.setState(resultDto.getMsg());
         machineFaceService.updateMachineFace(machineFaceDto);
 
+        //删除 小区人员
+        CommunityPersonDto communityPersonDto = new CommunityPersonDto();
+        communityPersonDto.setExtPersonId(heartbeatTaskDto.getTaskid());
+        communityPersonDto.setCommunityId(machineDto.getCommunityId());
+        List<CommunityPersonDto> communityPersonDtos = communityPersonServiceImpl.queryCommunityPerson(communityPersonDto);
+        if (communityPersonDtos != null && communityPersonDtos.size() > 0) {
+            communityPersonServiceImpl.deleteCommunityPerson(communityPersonDto);
+        }
         return resultDto;
     }
 
@@ -199,6 +212,24 @@ public class UserFaceServiceImpl implements IUserFaceService {
 
         //machineFaceDto.set
         machineFaceService.saveMachineFace(machineFaceDto);
+
+        //保存 小区人员
+        CommunityPersonDto communityPersonDto = new CommunityPersonDto();
+        communityPersonDto.setExtPersonId(userFaceDto.getUserId());
+        communityPersonDto.setCommunityId(machineDto.getCommunityId());
+        List<CommunityPersonDto> communityPersonDtos = communityPersonServiceImpl.queryCommunityPerson(communityPersonDto);
+        communityPersonDto.setPersonType(StringUtil.isEmpty(userFaceDto.getPersonType()) ? "2002" : userFaceDto.getPersonType());
+        communityPersonDto.setFacePath("/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + ".jpg");
+        communityPersonDto.setName(userFaceDto.getName());
+        communityPersonDto.setIdNumber(userFaceDto.getIdNumber());
+        communityPersonDto.setExtPersonId(userFaceDto.getUserId());
+        if (communityPersonDtos == null || communityPersonDtos.size() < 1) {
+            communityPersonDto.setPersonId(SeqUtil.getId());
+            communityPersonServiceImpl.saveCommunityPerson(communityPersonDto);
+        } else {
+            communityPersonDto.setPersonId(communityPersonDtos.get(0).getPersonId());
+            communityPersonServiceImpl.updateCommunityPerson(communityPersonDto);
+        }
     }
 
 
@@ -226,6 +257,25 @@ public class UserFaceServiceImpl implements IUserFaceService {
         machineFaceDto.setState("更新人脸待同步设备");
 
         machineFaceService.updateMachineFace(machineFaceDto);
+
+
+        //保存 小区人员
+        CommunityPersonDto communityPersonDto = new CommunityPersonDto();
+        communityPersonDto.setExtPersonId(userFaceDto.getUserId());
+        communityPersonDto.setCommunityId(machineDto.getCommunityId());
+        List<CommunityPersonDto> communityPersonDtos = communityPersonServiceImpl.queryCommunityPerson(communityPersonDto);
+        communityPersonDto.setPersonType(StringUtil.isEmpty(userFaceDto.getPersonType()) ? "2002" : userFaceDto.getPersonType());
+        communityPersonDto.setFacePath("/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + ".jpg");
+        communityPersonDto.setName(userFaceDto.getName());
+        communityPersonDto.setIdNumber(userFaceDto.getIdNumber());
+        communityPersonDto.setExtPersonId(userFaceDto.getUserId());
+        if (communityPersonDtos == null || communityPersonDtos.size() < 1) {
+            communityPersonDto.setPersonId(SeqUtil.getId());
+            communityPersonServiceImpl.saveCommunityPerson(communityPersonDto);
+        } else {
+            communityPersonDto.setPersonId(communityPersonDtos.get(0).getPersonId());
+            communityPersonServiceImpl.updateCommunityPerson(communityPersonDto);
+        }
 
     }
 
