@@ -78,7 +78,7 @@ public class UserFaceServiceImpl implements IUserFaceService {
 
         if (faceId == null) {
             // 从本地磁盘中检查是否有人脸存在
-            boolean exists = ImageFactory.existsImage(machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
+            boolean exists = ImageFactory.existsImage( machineDto.getCommunityId() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
             faceId = exists ? userFaceDto.getUserId() : null;
         }
 
@@ -118,7 +118,7 @@ public class UserFaceServiceImpl implements IUserFaceService {
         Assert.listOnlyOne(machineDtos, "设备编码错误，不存在该设备");
         machineDto = machineDtos.get(0);
 
-        ImageFactory.deleteImage(machineDto.getMachineCode() + File.separatorChar + heartbeatTaskDto.getTaskid() + ".jpg");
+        ImageFactory.deleteImage(machineDto.getCommunityId() + File.separatorChar + heartbeatTaskDto.getTaskid() + ".jpg");
         ResultDto resultDto = AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).deleteFace(machineDto, heartbeatTaskDto);
 
         if (resultDto == null || resultDto.getCode() != ResultDto.SUCCESS) {
@@ -199,12 +199,12 @@ public class UserFaceServiceImpl implements IUserFaceService {
             faceBase = faceBase.substring(faceBase.indexOf("base64,") + 7);
         }
 
-        String img = ImageFactory.GenerateImage(faceBase, machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
+        String img = ImageFactory.GenerateImage(faceBase,  machineDto.getCommunityId() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
         userFaceDto.setFaceBase64(img);
         MachineFaceDto machineFaceDto = BeanConvertUtil.covertBean(userFaceDto, MachineFaceDto.class);
         machineFaceDto.setId(SeqUtil.getId());
         machineFaceDto.setMachineId(machineDto.getMachineId());
-        machineFaceDto.setFacePath("/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + ".jpg");
+        machineFaceDto.setFacePath("/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + ".jpg");
         machineFaceDto.setState("W");
         machineFaceDto.setState("新增人脸待同步设备");
         machineFaceDto.setCommunityId(machineDto.getCommunityId());
@@ -219,7 +219,7 @@ public class UserFaceServiceImpl implements IUserFaceService {
         communityPersonDto.setCommunityId(machineDto.getCommunityId());
         List<CommunityPersonDto> communityPersonDtos = communityPersonServiceImpl.queryCommunityPerson(communityPersonDto);
         communityPersonDto.setPersonType(StringUtil.isEmpty(userFaceDto.getPersonType()) ? "2002" : userFaceDto.getPersonType());
-        communityPersonDto.setFacePath("/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + ".jpg");
+        communityPersonDto.setFacePath("/" +  machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + ".jpg");
         communityPersonDto.setName(userFaceDto.getName());
         communityPersonDto.setIdNumber(userFaceDto.getIdNumber());
         communityPersonDto.setExtPersonId(userFaceDto.getUserId());
@@ -247,7 +247,7 @@ public class UserFaceServiceImpl implements IUserFaceService {
             faceBase = faceBase.substring(faceBase.indexOf("base64,") + 7);
         }
 
-        String img = ImageFactory.GenerateImage(faceBase, machineDto.getMachineCode() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
+        String img = ImageFactory.GenerateImage(faceBase,  machineDto.getCommunityId() + File.separatorChar + userFaceDto.getUserId() + ".jpg");
         userFaceDto.setFaceBase64(img);
 
         MachineFaceDto machineFaceDto = new MachineFaceDto();
@@ -265,7 +265,7 @@ public class UserFaceServiceImpl implements IUserFaceService {
         communityPersonDto.setCommunityId(machineDto.getCommunityId());
         List<CommunityPersonDto> communityPersonDtos = communityPersonServiceImpl.queryCommunityPerson(communityPersonDto);
         communityPersonDto.setPersonType(StringUtil.isEmpty(userFaceDto.getPersonType()) ? "2002" : userFaceDto.getPersonType());
-        communityPersonDto.setFacePath("/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + ".jpg");
+        communityPersonDto.setFacePath("/" +  machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + ".jpg");
         communityPersonDto.setName(userFaceDto.getName());
         communityPersonDto.setIdNumber(userFaceDto.getIdNumber());
         communityPersonDto.setExtPersonId(userFaceDto.getUserId());
