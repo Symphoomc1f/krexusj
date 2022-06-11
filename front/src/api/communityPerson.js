@@ -54,5 +54,20 @@ export function getBase64(file) {
         resolve(imgResult);
       };
     });
-  }
+}
+
+export function personToMachine(params) {
+    let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+
+    if(_currCommunity != null && _currCommunity != undefined){
+        params.communityId = _currCommunity.communityId;
+    }else{
+        params.communityId = "-1";
+    }
+    return request({
+        url: '/api/communityPerson/personToMachine',
+        method: 'post',
+        data:params
+    })
+}
 

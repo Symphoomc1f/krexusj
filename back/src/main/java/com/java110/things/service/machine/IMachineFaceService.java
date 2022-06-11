@@ -3,6 +3,8 @@ package com.java110.things.service.machine;
 import com.java110.things.entity.machine.MachineFaceDto;
 import com.java110.things.entity.response.ResultDto;
 
+import java.util.List;
+
 /**
  * @ClassName IUserService
  * @Description TODO
@@ -39,6 +41,16 @@ public interface IMachineFaceService {
      * @throws Exception
      */
     ResultDto getMachineFace(MachineFaceDto machineFaceDto) throws Exception;
+
+    /**
+     * 获取设备信息
+     *
+     * @param machineFaceDto 设备信息
+     * @return
+     * @throws Exception
+     */
+    List<MachineFaceDto> queryMachineFace(MachineFaceDto machineFaceDto) throws Exception;
+
 
     /**
      * 删除设备

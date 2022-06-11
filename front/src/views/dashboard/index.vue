@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard-container">
-    <div class="dashboard-text">欢迎访问HC小区物联网平台</div>
+    <div class="dashboard-text">欢迎访问HC物联网平台</div>
   </div>
 </template>
 

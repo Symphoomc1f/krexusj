@@ -92,7 +92,7 @@
             <el-button
               size="mini"
               type="success"
-              @click="deleteCommunityPerson(row, $index)"
+              @click="openToMachine(row, $index)"
               >同步门禁</el-button
             >
             <el-button
@@ -169,6 +169,36 @@
       </div>
     </el-dialog>
 
+    <el-dialog title="同步人脸" :visible.sync="dialogFormToMachineVisible">
+      <el-form
+        ref="dataForm"
+        :rules="rules"
+        :model="temp"
+        label-position="left"
+        label-width="70px"
+        style="width: 400px; margin-left: 50px"
+      >
+        <el-form-item label="门禁" prop="type">
+          <el-select
+            v-model="toMachinePerson.machineId"
+            class="filter-item"
+            placeholder="请选择门禁"
+          >
+            <el-option
+              v-for="item in machines"
+              :key="item.machineId"
+              :label="item.name"
+              :value="item.machineId"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormToMachineVisible = false">取消</el-button>
+        <el-button type="primary" @click="doToMachine()">提交</el-button>
+      </div>
+    </el-dialog>
+
     <el-dialog
       title="温馨提示"
       :visible.sync="deleteCommunityPersonDailogVisible"
@@ -194,6 +224,7 @@ import {
   deleteCommunityPersons,
   saveCommunityPersons,
   getBase64,
+  personToMachine,
 } from "@/api/communityPerson";
 import Pagination from "@/components/Pagination";
 import { parseTime } from "@/utils";
@@ -210,6 +241,7 @@ export default {
       list: null,
       listLoading: true,
       deleteCommunityPersonDailogVisible: false,
+      dialogFormToMachineVisible: false,
       dialogFormVisible: false,
       curCommunityPerson: {},
       total: 0,
@@ -220,6 +252,11 @@ export default {
         personType: "",
         extPersonId: "",
         photo: "",
+      },
+      machines: [],
+      toMachinePerson: {
+        personId: "",
+        machineId: "",
       },
     };
   },
@@ -263,26 +300,6 @@ export default {
         this.queryCommunityPerson();
       });
     },
-    restartCommunityPerson(_row, _index) {
-      this.listLoading = true;
-      restartCommunityPersons(_row).then((response) => {
-        this.listLoading = false;
-        this.$message({
-          type: "info",
-          message: "已发送成功指令",
-        });
-      });
-    },
-    openDoor(_row, _index) {
-      this.listLoading = true;
-      openDoor(_row).then((response) => {
-        this.listLoading = false;
-        this.$message({
-          type: "info",
-          message: "已发送成功指令",
-        });
-      });
-    },
     viewFace(_row, _index) {
       this.$router.push({
         path: "/CommunityPerson/CommunityPersonFace",
@@ -296,6 +313,17 @@ export default {
       let _that = this;
       getBase64(file.raw).then((res) => {
         _that.temp.photo = res;
+      });
+    },
+    openToMachine(_row) {
+      this.toMachinePerson.personId = _row.personId;
+      this.dialogFormToMachineVisible = true;
+    },
+    doToMachine() {
+      this.listLoading = true;
+      personToMachine(this.temp).then((response) => {
+        this.listLoading = false;
+        this.dialogFormToMachineVisible = false;
       });
     },
   },

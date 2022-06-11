@@ -106,6 +106,8 @@ public class CommunityPersonController extends BaseController {
         return ResultDto.success();
     }
 
+
+
     /**
      * 添加小区人员接口类
      *
@@ -149,6 +151,32 @@ public class CommunityPersonController extends BaseController {
             return ResultDto.error("保存失败");
         }
         return ResultDto.success();
+    }
+
+
+    /**
+     * 人员同步设备
+     *
+     * @param param 请求报文 包括小区人员 前台填写信息
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/personToMachine", method = RequestMethod.POST)
+    public ResponseEntity<String> personToMachine(@RequestBody String param) throws Exception {
+
+        JSONObject paramObj = super.getParamJson(param);
+
+        Assert.hasKeyAndValue(paramObj, "personId", "请求报文中未包含硬件人员信息");
+
+        Assert.hasKeyAndValue(paramObj, "communityId", "请求报文中未包含小区信息");
+        Assert.hasKeyAndValue(paramObj, "machineId", "请求报文中未包含设备信息");
+        Assert.hasKeyAndValue(paramObj, "startTime", "请求报文中未包含开始时间");
+        Assert.hasKeyAndValue(paramObj, "endTime", "请求报文中未包含结束时间");
+
+        ResultDto resultDto = communityPersonServiceImpl.personToMachine(paramObj.getString("personId"),
+                paramObj.getString("machineId"), paramObj.getString("startTime"),paramObj.getString("endTime"));
+
+        return ResultDto.createResponseEntity(resultDto);
     }
 
 }

@@ -44,7 +44,7 @@ public interface ICommunityPersonService {
     int saveCommunityPerson(CommunityPersonDto communityPersonDto) throws Exception;
 
     /**
-     * 保存小区人员信息
+     * 修改小区人员信息
      *
      * @param communityPersonDto 小区人员信息
      * @return
@@ -78,6 +78,17 @@ public interface ICommunityPersonService {
      * @throws Exception
      */
     int deleteCommunityPerson(CommunityPersonDto communityPersonDto) throws Exception;
+
+
+    /**
+     * 人脸同步设备
+     *
+     * 前台手工处理 ，手工将人脸同步设备
+     * @param personId 人员ID
+     * @param machineId 设备ID
+     * @return
+     */
+    ResultDto personToMachine(String personId,String machineId,String startTime,String endTime) throws Exception ;
 
 
 }
