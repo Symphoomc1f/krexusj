@@ -1,6 +1,7 @@
 package com.java110.things.factory;
 
 import com.java110.things.config.Java110Properties;
+import com.java110.things.util.Base64Convert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.misc.BASE64Decoder;
@@ -10,9 +11,12 @@ import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.io.*;
+import java.net.URL;
 import java.util.Iterator;
 
 /**
@@ -203,5 +207,60 @@ public class ImageFactory {
         }
     }
 
+    public static String getBase64ByImgUrl(String url) {
+        String suffix = url.substring(url.lastIndexOf(".") + 1);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        BASE64Encoder encoder = new BASE64Encoder();
+        try {
+            URL urls = new URL(url);
+
+            Image image = Toolkit.getDefaultToolkit().getImage(urls);
+            BufferedImage biOut = toBufferedImage(image);
+            ImageIO.write(biOut, suffix, baos);
+            String base64Str = encoder.encode(baos.toByteArray());
+            return base64Str;
+        } catch (Exception e) {
+            return "";
+        }finally {
+            try {
+                baos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    public static BufferedImage toBufferedImage(Image image) {
+        if (image instanceof BufferedImage) {
+            return (BufferedImage) image;
+        }
+        // This code ensures that all the pixels in the image are loaded
+        image = new ImageIcon(image).getImage();
+        BufferedImage bimage = null;
+        GraphicsEnvironment ge = GraphicsEnvironment
+                .getLocalGraphicsEnvironment();
+        try {
+            int transparency = Transparency.OPAQUE;
+            GraphicsDevice gs = ge.getDefaultScreenDevice();
+            GraphicsConfiguration gc = gs.getDefaultConfiguration();
+            bimage = gc.createCompatibleImage(image.getWidth(null),
+                    image.getHeight(null), transparency);
+        } catch (HeadlessException e) {
+            // The system does not have a screen
+        }
+        if (bimage == null) {
+            // Create a buffered image using the default color model
+            int type = BufferedImage.TYPE_INT_RGB;
+            bimage = new BufferedImage(image.getWidth(null),
+                    image.getHeight(null), type);
+        }
+        // Copy image to buffered image
+        Graphics g = bimage.createGraphics();
+        // Paint the image onto the buffered image
+        g.drawImage(image, 0, 0, null);
+        g.dispose();
+        return bimage;
+    }
 
 }

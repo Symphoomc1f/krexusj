@@ -173,10 +173,9 @@ public class CommunityPersonController extends BaseController {
         Assert.hasKeyAndValue(paramObj, "startTime", "请求报文中未包含开始时间");
         Assert.hasKeyAndValue(paramObj, "endTime", "请求报文中未包含结束时间");
 
-        ResultDto resultDto = communityPersonServiceImpl.personToMachine(paramObj.getString("personId"),
+        return  communityPersonServiceImpl.personToMachine(paramObj.getString("personId"),
                 paramObj.getString("machineId"), paramObj.getString("startTime"),paramObj.getString("endTime"));
 
-        return ResultDto.createResponseEntity(resultDto);
     }
 
 }

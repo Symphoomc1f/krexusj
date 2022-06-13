@@ -17,6 +17,7 @@ package com.java110.things.service.user;
 
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.CommunityPersonDto;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -88,7 +89,7 @@ public interface ICommunityPersonService {
      * @param machineId 设备ID
      * @return
      */
-    ResultDto personToMachine(String personId,String machineId,String startTime,String endTime) throws Exception ;
+    ResponseEntity<String> personToMachine(String personId, String machineId, String startTime, String endTime) throws Exception ;
 
 
 }

@@ -16,16 +16,15 @@ import com.java110.things.factory.ImageFactory;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.machine.IMachineFaceService;
-import com.java110.things.service.machine.IMachineService;
 import com.java110.things.service.user.ICommunityPersonService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
 import com.java110.things.util.SeqUtil;
-import com.java110.things.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -140,7 +139,7 @@ public class CommunityPersonServiceImpl implements ICommunityPersonService {
     }
 
     @Override
-    public ResultDto personToMachine(String personId, String machineId,String startTime,String endTime) throws Exception{
+    public ResponseEntity<String> personToMachine(String personId, String machineId, String startTime, String endTime) throws Exception {
         MachineDto machineDto = new MachineDto();
         machineDto.setMachineId(machineId);
         List<MachineDto> machineDtos = machineServiceDaoImpl.getMachines(machineDto);
@@ -156,16 +155,20 @@ public class CommunityPersonServiceImpl implements ICommunityPersonService {
 
         Assert.listOnlyOne(communityPersonDtos, "人员不存在");
 
+        if (StringUtils.isEmpty(communityPersonDtos.get(0).getFacePath())) {
+            return ResultDto.error("人员人脸不存在");
+        }
+
 
         MachineFaceDto machineFaceDto = new MachineFaceDto();
         machineFaceDto.setUserId(communityPersonDtos.get(0).getExtPersonId());
         machineFaceDto.setMachineId(machineId);
         List<MachineFaceDto> machineFaceDtos = machineFaceServiceImpl.queryMachineFace(machineFaceDto);
 
-
+        String faceUrl = MappingCacheFactory.getValue("ACCESS_CONTROL_FACE_URL");
         UserFaceDto userFaceDto = new UserFaceDto();
         userFaceDto.setUserId(communityPersonDtos.get(0).getExtPersonId());
-        userFaceDto.setFaceBase64("");
+        userFaceDto.setFaceBase64(ImageFactory.getBase64ByImgUrl(faceUrl + communityPersonDtos.get(0).getFacePath()));
         userFaceDto.setEndTime(endTime);
         userFaceDto.setStartTime(startTime);
         userFaceDto.setFacePath(communityPersonDtos.get(0).getFacePath());
@@ -187,17 +190,17 @@ public class CommunityPersonServiceImpl implements ICommunityPersonService {
         }
 
         if (resultDto == null) {
-            return resultDto;
+            return ResultDto.success();
         }
 
-         machineFaceDto = new MachineFaceDto();
+        machineFaceDto = new MachineFaceDto();
         machineFaceDto.setUserId(userFaceDto.getUserId());
         machineFaceDto.setMachineId(machineDto.getMachineId());
         machineFaceDto.setState(resultDto.getCode() == ResultDto.SUCCESS ? "S" : "F");
         machineFaceDto.setMessage(resultDto.getMsg());
 
         machineFaceServiceImpl.updateMachineFace(machineFaceDto);
-        return resultDto;
+        return ResultDto.success();
     }
 
     /**
