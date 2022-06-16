@@ -29,6 +29,11 @@
 
 第三方平台对接 HC物联网平台 时请按照 [HC 物联网系统对接协议](docs/api.md) 对接
 
+
+### 如何对接自己的门禁设备
+
+对接自己的门禁设备请参考 文档[对接自己的门禁设备](docs/accessControlInterface.md)
+
 ### 更新日志
 
 [HC 物联网系统更新日志](ChangeLog.md)
