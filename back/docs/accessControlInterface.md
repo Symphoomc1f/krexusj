@@ -50,3 +50,34 @@ openDoor方法。
 
 当人员通信时，设备需要将人脸信息上报给HC物联网系统，供HC物联网系统查看  对应于 IAssessControlProcess.java 接口类 的
 httpFaceResult方法。
+
+
+## 如何对接
+
+门禁对接只需要关注 后端代码下的 src\main\java\com\java110\things\adapt\accessControl 目录就可以
+
+如果对接新的门禁可以建一个目录例如yufan 对接宇泛的门禁。
+
+在accessControl目录下存在 如下的java类：
+
+ICallAccessControlService 提供给适配器调用的接口 提供如查询设备信息等方法
+
+IAssessControlProcess 门禁适配器需要实现的接口类 里面包含了需要实现的方法 如 添加人脸，修改人脸等接口
+对接新的门禁需要实现该接口 实现每个方法即可
+
+IAssessControlProcess 方法 入参和出参介绍
+
+## getFace 方法
+
+入参： MachineDto machineDto, UserFaceDto userFaceDto
+
+machineDto 对象包含了设备相关信息，可以根据这个对象获取设备名称 编码 ip mac 等相关信息
+
+userFaceDto 对象包含了人员 人脸相关信息 人员名称 人脸base64 等
+
+方法说明： 该方法中只需要完成 根据门禁的协议 查询当前的人员是否在门禁中如果在返回人员ID，如果不在 返回-1
+
+返回参数：字符串类型 如果有人员返回人员ID 没有返回 -1
+
+
+
