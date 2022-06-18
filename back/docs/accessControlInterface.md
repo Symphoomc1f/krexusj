@@ -69,6 +69,8 @@ IAssessControlProcess 方法 入参和出参介绍
 
 ## getFace 方法
 
+描述： 从设备中获取人脸信息
+
 入参： MachineDto machineDto, UserFaceDto userFaceDto
 
 machineDto 对象包含了设备相关信息，可以根据这个对象获取设备名称 编码 ip mac 等相关信息
@@ -79,5 +81,203 @@ userFaceDto 对象包含了人员 人脸相关信息 人员名称 人脸base64 �
 
 返回参数：字符串类型 如果有人员返回人员ID 没有返回 -1
 
+举例：
+```java
+
+    public String getFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+        String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_ADD_FACE_FIND;
+        
+        //准备参数 json格式参数
+        JSONObject param = new JSONObject();
+        param.put("operator", "SearchPerson");
+        JSONObject info = new JSONObject();
+        info.put("DeviceID", machineDto.getMachineCode());
+        info.put("SearchType", 0);
+        info.put("SearchID", userFaceDto.getUserId());
+        info.put("Picture", 1);
+        param.put("info", info);
+        
+        // 调用门禁设备同步人脸信息
+        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), getHeaders());
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE_FIND, param.toJSONString(), responseEntity.getBody());
+
+        //返回参数解析
+        if (HttpStatus.OK != responseEntity.getStatusCode()) {
+            return AddUpdateFace.MACHINE_HAS_NOT_FACE;
+        }
+
+        JSONObject outParam = JSONObject.parseObject(responseEntity.getBody());
+
+        if (!outParam.containsKey("picinfo")) {
+            return AddUpdateFace.MACHINE_HAS_NOT_FACE;
+        }
+
+        String picinfo = outParam.getString("picinfo");
+
+        if (StringUtil.isEmpty(picinfo)) {
+            return AddUpdateFace.MACHINE_HAS_NOT_FACE;
+        }
+
+        String personId = outParam.getJSONObject("info").getString("CustomizeID");
+
+        if (StringUtil.isEmpty(personId)) {
+            return AddUpdateFace.MACHINE_HAS_NOT_FACE;
+        }
+
+        return personId;
+    }
+```
+
+## addFace 方法
+
+描述： 添加人脸至门禁设备
+
+入参：MachineDto machineDto, UserFaceDto userFaceDto
+
+machineDto 对象包含了设备相关信息，可以根据这个对象获取设备名称 编码 ip mac 等相关信息
+
+userFaceDto 对象包含了人员 人脸相关信息 人员名称 人脸base64 等
+
+方法说明： 该方法中只需要完成 根据门禁的协议 将人员信息和人脸信息长传至门禁设备即可
+
+返回参数：ResultDto 对象 成功code填写为0 失败填写为-1 并填写msg 失败原因
+
+举例：
+
+```java
+
+public ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+        String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_ADD_USER;
+        //根据门禁协议准备参数
+        JSONObject param = new JSONObject();
+        param.put("operator", "AddPerson");
+        JSONObject info = new JSONObject();
+        info.put("DeviceID", machineDto.getMachineCode());
+        info.put("PersonType", 0);
+        info.put("IdType", 0);
+        info.put("CustomizeID", userFaceDto.getUserId());
+        info.put("PersonUUID", userFaceDto.getUserId());
+        info.put("Name", userFaceDto.getName());
+        info.put("CardType", 0);
+        info.put("IdCard", userFaceDto.getIdNumber());
+        info.put("Tempvalid", 0);
+        info.put("isCheckSimilarity", 0);
+        param.put("info", info);
+        //param.put("picinfo", userFaceDto.getFaceBase64()); // 人脸base64
+        //或者时 图片下载地址
+        param.put("picURI", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
+        
+        //同步门禁设备
+        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), getHeaders());
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, param.toJSONString(), responseEntity.getBody());
+
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            return new ResultDto(ResultDto.ERROR, "调用设备失败");
+        }
+        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+        return new ResultDto(paramOut.getInteger("code") == 200 ? ResultDto.SUCCESS : ResultDto.ERROR, "同步成功");
+
+    }
+```
+
+## updateFace 方法
+
+描述： 将门禁中的人员人脸信息修改
+
+入参：MachineDto machineDto, UserFaceDto userFaceDto
+
+machineDto 对象包含了设备相关信息，可以根据这个对象获取设备名称 编码 ip mac 等相关信息
+
+userFaceDto 对象包含了人员 人脸相关信息 人员名称 人脸base64 等
+
+方法说明： 该方法中只需要完成 根据门禁的协议 将人员信息和人脸信息更新门禁设备即可
+
+返回参数：ResultDto 对象 成功code填写为0 失败填写为-1 并填写msg 失败原因
+
+举例：
+
+```java
+
+public ResultDto updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+        String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_EDIT_USER;
+        //根据门禁协议准备参数
+        JSONObject param = new JSONObject();
+        param.put("operator", "EditPerson");
+        JSONObject info = new JSONObject();
+        info.put("DeviceID", machineDto.getMachineCode());
+        info.put("PersonType", 0);
+        info.put("IdType", 0);
+        info.put("CustomizeID", userFaceDto.getUserId());
+        info.put("PersonUUID", userFaceDto.getUserId());
+        info.put("Name", userFaceDto.getName());
+        info.put("CardType", 0);
+        info.put("IdCard", userFaceDto.getIdNumber());
+        info.put("Tempvalid", 0);
+        info.put("isCheckSimilarity", 0);
+        param.put("info", info);
+        //param.put("picinfo", userFaceDto.getFaceBase64());
+        param.put("picURI", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
+
+        //同步门禁设备
+        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), getHeaders());
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_EDIT_USER, param.toJSONString(), responseEntity.getBody());
+
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            return new ResultDto(ResultDto.ERROR, "调用设备失败");
+        }
+
+        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+        return new ResultDto(paramOut.getInteger("code") == 200 ? ResultDto.SUCCESS : ResultDto.ERROR, "同步成功");
+    }
+```
+
+
+## deleteFace 方法
+
+描述： 将门禁中的人员人脸信息删除
+
+入参：MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto
+
+machineDto 对象包含了设备相关信息，可以根据这个对象获取设备名称 编码 ip mac 等相关信息
+
+heartbeatTaskDto 对象包含了人员ID信息 id 为此对象的taskId
+
+方法说明： 该方法中只需要完成 根据门禁的协议 将人员信息和人脸信息从门禁中删除
+
+返回参数：ResultDto 对象 成功code填写为0 失败填写为-1 并填写msg 失败原因
+
+举例：
+
+```java
+public ResultDto deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
+        String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_DELETE_FACE;
+        //根据门禁协议准备参数
+        JSONArray userIds = new JSONArray();
+        userIds.add(heartbeatTaskDto.getTaskid());
+        JSONObject param = new JSONObject();
+        param.put("operator", "DeletePerson");
+        JSONObject info = new JSONObject();
+        info.put("DeviceID", machineDto.getMachineCode());
+        info.put("TotalNum", 1);
+        info.put("IdType", 0);
+        info.put("CustomizeID", userIds);
+        param.put("info", info);
+        //同步门禁设备
+        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), getHeaders());
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_DELETE_FACE, param.toJSONString(), responseEntity.getBody());
+
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            return new ResultDto(ResultDto.ERROR, "调用设备失败");
+        }
+
+        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+        return new ResultDto(paramOut.getInteger("code") == 200 ? ResultDto.SUCCESS : ResultDto.ERROR, "同步成功");
+    }
+```
 
 
