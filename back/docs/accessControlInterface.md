@@ -280,4 +280,182 @@ public ResultDto deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTas
     }
 ```
 
+## clearFace 方法
+
+描述： 将门禁中的人员人脸信息全部删除
+
+入参：MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto
+
+machineDto 对象包含了设备相关信息，可以根据这个对象获取设备名称 编码 ip mac 等相关信息
+
+heartbeatTaskDto 在这个方法中这个对象其实没有任何用处
+
+方法说明： 该方法中只需要完成 根据门禁的协议 将人员信息和人脸信息从门禁中全部删除
+
+返回参数：ResultDto 对象 成功code填写为0 失败填写为-1 并填写msg 失败原因
+
+举例：
+
+```java
+public ResultDto clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
+        String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_RESET;
+        //根据门禁协议准备参数
+        JSONObject param = new JSONObject();
+        param.put("operator", "DeleteAllPerson");
+        JSONObject info = new JSONObject();
+        info.put("DeleteAllPersonCheck", 1);
+        param.put("info", info);
+        //同步门禁设备
+        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), getHeaders());
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_RESET, param.toJSONString(), responseEntity.getBody());
+        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+        return new ResultDto(paramOut.getInteger("code") == 200 ? ResultDto.SUCCESS : ResultDto.ERROR, "同步成功");
+    }
+```
+
+## restartMachine 方法
+
+描述： 远程重启设备
+
+入参：MachineDto machineDto
+
+machineDto 对象包含了设备相关信息，可以根据这个对象获取设备名称 编码 ip mac 等相关信息
+
+方法说明： 该方法中只需要完成 根据门禁的协议 调用 重启设备
+
+返回参数：ResultDto 对象 成功code填写为0 失败填写为-1 并填写msg 失败原因
+
+举例：
+
+```java
+public void restartMachine(MachineDto machineDto) {
+        //组装门禁协议
+        JSONObject param = new JSONObject();
+        param.put("operator", "RebootDevice");
+        JSONObject info = new JSONObject();
+        info.put("DeviceID", machineDto.getMachineCode());
+        info.put("IsRebootDevice", 1);
+        param.put("info", info);
+        //同步门禁设备
+        String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_REBOOT;
+        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), getHeaders());
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_REBOOT, param.toJSONString(), responseEntity.getBody());
+
+    }
+```
+
+
+## openDoor 方法
+
+描述： 远程开门接口，在小程序 或者 web端 远程开门
+
+入参：MachineDto machineDto
+
+machineDto 对象包含了设备相关信息，可以根据这个对象获取设备名称 编码 ip mac 等相关信息
+
+方法说明： 该方法中只需要完成 根据门禁的协议 调用 远程开门
+
+返回参数：ResultDto 对象 成功code填写为0 失败填写为-1 并填写msg 失败原因
+
+举例：
+
+```java
+public void openDoor(MachineDto machineDto) {
+        //组装远程开门 协议
+        JSONObject param = new JSONObject();
+        param.put("operator", "OpenDoor");
+        JSONObject info = new JSONObject();
+        info.put("DeviceID", machineDto.getMachineCode());
+        info.put("Chn", 0);
+        info.put("status", 0);
+        info.put("msg", "请通行");
+        param.put("info", info);
+        
+        String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_OPEN_DOOR;
+        // 调用 门禁远程开门
+        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), getHeaders());
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_OPEN_DOOR, param.toJSONString(), responseEntity.getBody());
+    }
+```
+
+## httpFaceResult 方法
+
+描述： 门禁开门人脸推送
+
+入参：String data
+
+data 为具体门禁上报时的协议
+
+方法说明： 该方法中只需要完成 根据门禁的协议 将数据保存至开门记录表即可
+
+返回参数：String 根据门禁要求返回即可
+
+举例：
+
+```java
+public String httpFaceResult(String data) {
+        //获取上报接口类
+        ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
+        JSONObject resultParam = new JSONObject();
+        try {
+            JSONObject body = JSONObject.parseObject(data);
+
+            JSONObject info = body.getJSONObject("info");
+
+
+            MachineDto machineDto = new MachineDto();
+            machineDto.setMachineCode(info.getString("DeviceID"));
+            List<MachineDto> machineDtos = notifyAccessControlService.queryMachines(machineDto);
+
+            if (machineDtos.size() < 0) {
+                resultParam.put("code", 404);
+                resultParam.put("desc", "设备不存在");
+                return resultParam.toJSONString();//未找到设备
+            }
+
+            String userId = info.containsKey("PersonUUID") ? info.getString("PersonUUID") : "";
+            String userName = "";
+            if (!StringUtils.isEmpty(userId)) {
+                MachineFaceDto machineFaceDto = new MachineFaceDto();
+                machineFaceDto.setUserId(userId);
+                machineFaceDto.setMachineId(machineDtos.get(0).getMachineId());
+                List<MachineFaceDto> machineFaceDtos = notifyAccessControlService.queryMachineFaces(machineFaceDto);
+                if (machineFaceDtos != null && machineFaceDtos.size() > 0) {
+                    userName = machineFaceDtos.get(0).getName();
+                }
+
+            }
+
+            //组装开门 对象
+            OpenDoorDto openDoorDto = new OpenDoorDto();
+            openDoorDto.setFace(body.getString("SanpPic").replace("data:image/jpeg;base64,", ""));
+            openDoorDto.setUserName(userName);
+            openDoorDto.setHat("3");
+            openDoorDto.setMachineCode(machineDtos.get(0).getMachineCode());
+            openDoorDto.setUserId(userId);
+            openDoorDto.setOpenId(SeqUtil.getId());
+            openDoorDto.setOpenTypeCd(OPEN_TYPE_FACE);
+            openDoorDto.setSimilarity(info.getString("Similarity1"));
+            //保存数据
+            notifyAccessControlService.saveFaceResult(openDoorDto);
+
+        } catch (Exception e) {
+            logger.error("推送人脸失败", e);
+            resultParam.put("code", 404);
+            resultParam.put("desc", "异常");
+            return resultParam.toJSONString();//未找到设备
+        }
+        resultParam.put("code", 200);
+        resultParam.put("desc", "OK");
+        return resultParam.toJSONString();//未找到设备
+
+    }
+```
+
+
 
