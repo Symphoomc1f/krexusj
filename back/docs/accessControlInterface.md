@@ -458,4 +458,16 @@ public String httpFaceResult(String data) {
 ```
 
 
+## 门禁上报地址配置
+
+官方通用的上报地址为 http://ip:port/api/accessControl/faceResult
+
+接口类型为http POST
+
+协议为 String类型
+
+具体java为：src\main\java\com\java110\things\api\accessControl\AccessControlController.java
+
+注意：如果 门禁特殊 通用方法无法实现可以自己写接口类供 门禁使用
+
 
