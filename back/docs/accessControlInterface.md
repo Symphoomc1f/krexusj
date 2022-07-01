@@ -67,7 +67,7 @@ IAssessControlProcess 门禁适配器需要实现的接口类 里面包含了需
 
 IAssessControlProcess 方法 入参和出参介绍
 
-## getFace 方法
+### getFace 方法
 
 描述： 从设备中获取人脸信息
 
@@ -130,7 +130,7 @@ userFaceDto 对象包含了人员 人脸相关信息 人员名称 人脸base64 �
     }
 ```
 
-## addFace 方法
+### addFace 方法
 
 描述： 添加人脸至门禁设备
 
@@ -183,7 +183,7 @@ public ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
     }
 ```
 
-## updateFace 方法
+### updateFace 方法
 
 描述： 将门禁中的人员人脸信息修改
 
@@ -236,7 +236,7 @@ public ResultDto updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
 ```
 
 
-## deleteFace 方法
+### deleteFace 方法
 
 描述： 将门禁中的人员人脸信息删除
 
@@ -280,7 +280,7 @@ public ResultDto deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTas
     }
 ```
 
-## clearFace 方法
+### clearFace 方法
 
 描述： 将门禁中的人员人脸信息全部删除
 
@@ -314,7 +314,7 @@ public ResultDto clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTask
     }
 ```
 
-## restartMachine 方法
+### restartMachine 方法
 
 描述： 远程重启设备
 
@@ -348,7 +348,7 @@ public void restartMachine(MachineDto machineDto) {
 ```
 
 
-## openDoor 方法
+### openDoor 方法
 
 描述： 远程开门接口，在小程序 或者 web端 远程开门
 
@@ -383,7 +383,7 @@ public void openDoor(MachineDto machineDto) {
     }
 ```
 
-## httpFaceResult 方法
+### httpFaceResult 方法
 
 描述： 门禁开门人脸推送
 
@@ -458,7 +458,7 @@ public String httpFaceResult(String data) {
 ```
 
 
-## 门禁上报地址配置
+### 门禁上报地址配置
 
 官方通用的上报地址为 http://ip:port/api/accessControl/faceResult
 
@@ -469,5 +469,24 @@ public String httpFaceResult(String data) {
 具体java为：src\main\java\com\java110\things\api\accessControl\AccessControlController.java
 
 注意：如果 门禁特殊 通用方法无法实现可以自己写接口类供 门禁使用
+
+
+### 添加至协议表 hardware_manufacturer
+
+```roomsql
+
+
+INSERT INTO `hardware_manufacturer` (`hm_id`, `hm_name`, `version`, `protocol_impl`, `create_time`, `status_cd`, `hm_type`, `author`, `link`, `license`, `prod_url`, `default_protocol`) VALUES ('4', '宇泛协议', 'v1.0', 'cjHttpAssessControlProcessAdapt', '2020-12-20 12:36:28', '0', '1001', '吴学文', '17797173942', '官方暂无说明', 'http://www.baidu.com', 'F');
+
+
+```
+
+hm_id 协议ID自增
+
+hm_name 协议名称
+
+protocol_impl：协议实现了 是您写了那个协议适配器类的spring bean name
+
+hm_type 门禁写1001
 
 
