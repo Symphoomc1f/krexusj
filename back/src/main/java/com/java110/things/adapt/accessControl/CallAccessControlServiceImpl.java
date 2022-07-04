@@ -198,7 +198,7 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
             operateLogDto.setState("10001"); // 默认设置为请求
         }
 
-        operateLogDto.setMachineTypeCd("9998");
+        operateLogDto.setMachineTypeCd("9999");
 
 
         operateLogServiceImpl.saveOperateLog(operateLogDto);

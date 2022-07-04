@@ -14,7 +14,7 @@ export function getMachineCmds(params) {
         params: {
             page: 1,
             row: 10,
-            machineTypeCd: '9998'
+            machineTypeCd: '9999'
         }
     })
 }
@@ -69,7 +69,7 @@ export function getAccessControls(params) {
         params: {
             page: 1,
             row: 10,
-            machineTypeCd: '9998',
+            machineTypeCd: '9999',
             communityId:communityId
         }
     })

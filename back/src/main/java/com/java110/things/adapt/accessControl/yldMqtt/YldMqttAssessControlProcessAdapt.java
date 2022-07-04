@@ -241,7 +241,7 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
             ResultDto resultDto = null;
             MachineDto machineDto = new MachineDto();
             machineDto.setMachineCode(param.getString("sn"));
-            machineDto.setMachineTypeCd("9998"); // 标识门禁 以防万一和道闸之类冲突
+            machineDto.setMachineTypeCd("9999"); // 标识门禁 以防万一和道闸之类冲突
             try {
                 resultDto = machineServiceImpl.getMachine(machineDto);
                 if (resultDto != null && resultDto.getCode() == ResponseConstant.SUCCESS) {

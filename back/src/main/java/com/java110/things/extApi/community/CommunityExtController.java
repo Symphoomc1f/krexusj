@@ -59,7 +59,7 @@ public class CommunityExtController extends BaseController {
      * @return 成功或者失败
      * @throws Exception
      */
-    @RequestMapping(path = "/addCommunity", method = RequestMethod.GET)
+    @RequestMapping(path = "/addCommunity", method = RequestMethod.POST)
     public ResponseEntity<String> addCommunity(@RequestBody String reqParam, HttpServletRequest request) throws Exception {
 
         JSONObject reqJson = JSONObject.parseObject(reqParam);
@@ -92,7 +92,7 @@ public class CommunityExtController extends BaseController {
      * @return 成功或者失败
      * @throws Exception
      */
-    @RequestMapping(path = "/updateCommunity", method = RequestMethod.GET)
+    @RequestMapping(path = "/updateCommunity", method = RequestMethod.POST)
     public ResponseEntity<String> updateCommunity(@RequestBody String reqParam) throws Exception {
 
         JSONObject reqJson = JSONObject.parseObject(reqParam);
@@ -118,7 +118,7 @@ public class CommunityExtController extends BaseController {
      * @return 成功或者失败
      * @throws Exception
      */
-    @RequestMapping(path = "/deleteCommunity", method = RequestMethod.GET)
+    @RequestMapping(path = "/deleteCommunity", method = RequestMethod.POST)
     public ResponseEntity<String> deleteCommunity(@RequestBody String reqParam) throws Exception {
 
         JSONObject reqJson = JSONObject.parseObject(reqParam);

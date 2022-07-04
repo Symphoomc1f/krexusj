@@ -35,13 +35,13 @@
     </select>
 
     <update id="updateApp" parameterType="com.java110.things.entity.app.AppDto">
-        update s_app t
+        update c_app t
         <trim prefix="SET" suffixOverrides=",">
             <if test="accessToken != null and accessToken != ''">
                  t.access_token = #{accessToken},
             </if>
             <if test="updateTime != null ">
-                 t.updateTime = #{updateTime},
+                 t.update_time = #{updateTime},
             </if>
         </trim>
         where 1=1

@@ -1,5 +1,6 @@
 package com.java110.things.aop;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.exception.NoAuthorityException;
@@ -85,7 +86,11 @@ public class ExtApiAop {
         } catch (NoAuthorityException e) {
             //response.sendRedirect("/flow/login");
             logger.error("请求发生异常", e);
-            resultDto = new ResultDto(ResponseConstant.ERROR, e.getMessage());
+            resultDto = new ResultDto(ResponseConstant.NO_AUTHORITY_ERROR, e.getMessage());
+        } catch (JWTVerificationException e) {
+            //response.sendRedirect("/flow/login");
+            logger.error("请求发生异常", e);
+            resultDto = new ResultDto(ResponseConstant.NO_AUTHORITY_ERROR, "无效的access_token");
         } catch (Exception e) {
             logger.error("请求发生异常", e);
             resultDto = new ResultDto(ResponseConstant.ERROR, e.getMessage());

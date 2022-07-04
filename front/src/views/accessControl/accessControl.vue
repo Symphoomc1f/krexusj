@@ -154,7 +154,7 @@ export default {
       listQuery: {
         page: 1,
         row: 10,
-        machineTypeCd: "9998",
+        machineTypeCd: "9999",
         machineCode: "",
         machineIp: "",
         machineMac: ""

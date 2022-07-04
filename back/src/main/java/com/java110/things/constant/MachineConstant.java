@@ -11,10 +11,10 @@ package com.java110.things.constant;
 public class MachineConstant {
 
     // 门禁
-    public static  final String MACHINE_TYPE_ACCESS_CONTROL = "9998";
+    public static  final String MACHINE_TYPE_ACCESS_CONTROL = "9999";
 
     // 道闸
-    public static  final String MACHINE_TYPE_BARRIER_GATE = "9999";
+    public static  final String MACHINE_TYPE_BARRIER_GATE = "9996";
 
     // 考勤机
     public static  final String MACHINE_TYPE_ATTENDANCE = "9997";

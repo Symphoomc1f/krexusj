@@ -202,10 +202,10 @@ export default {
       curCmdControl: {},
       total: 0,
       machineTypeCds: [
-         { value: "9998", label: "门禁" },
-         { value: "9996", label: "摄像头" },
+         { value: "9999", label: "门禁" },
+         { value: "9998", label: "摄像头" },
          { value: "9997", label: "考勤机" },
-         { value: "9999", label: "道闸" }
+         { value: "9996", label: "道闸" }
       ],
       cmdCodess: [
          { value: "1", label: "开机" },

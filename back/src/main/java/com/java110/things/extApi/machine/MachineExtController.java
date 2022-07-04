@@ -95,7 +95,7 @@ public class MachineExtController extends BaseController {
             machineDto.setMachineVersion("v1.0");
         }
         if (!reqJson.containsKey("machineIp")) {
-            machineDto.setMachineVersion("192.168.1.1");
+            machineDto.setMachineIp("192.168.1.1");
         }
         ResultDto result = machineServiceImpl.saveMachine(machineDto);
 
