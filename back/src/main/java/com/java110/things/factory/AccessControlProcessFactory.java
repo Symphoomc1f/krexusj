@@ -21,10 +21,6 @@ import java.util.List;
  **/
 public class AccessControlProcessFactory {
 
-    /**
-     * 访问硬件接口
-     */
-    private static IAssessControlProcess assessControlProcessImpl;
 
     /**
      * 获取硬件接口对象
@@ -32,9 +28,7 @@ public class AccessControlProcessFactory {
      * @return
      */
     public static IAssessControlProcess getAssessControlProcessImpl(String hmId) throws Exception {
-        if (assessControlProcessImpl != null) {
-            return assessControlProcessImpl;
-        }
+
         IManufacturerService manufacturerServiceImpl = ApplicationContextFactory.getBean("manufacturerServiceImpl", IManufacturerService.class);
         ManufacturerDto tmpManufacturerDto = new ManufacturerDto();
         tmpManufacturerDto.setHmType("1001");
@@ -48,7 +42,7 @@ public class AccessControlProcessFactory {
         List<ManufacturerDto> manufacturerDtos = (List<ManufacturerDto>) resultDto.getData();
 
         Assert.listOnlyOne(manufacturerDtos, "当前有多个默认协议或者一个都没有");
-        assessControlProcessImpl = ApplicationContextFactory.getBean(manufacturerDtos.get(0).getProtocolImpl(), IAssessControlProcess.class);
+        IAssessControlProcess assessControlProcessImpl = ApplicationContextFactory.getBean(manufacturerDtos.get(0).getProtocolImpl(), IAssessControlProcess.class);
         return assessControlProcessImpl;
     }
 

@@ -12,6 +12,7 @@ import com.java110.things.factory.AccessControlProcessFactory;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.machine.IMachineCmdService;
 import com.java110.things.service.machine.IMachineService;
+import com.java110.things.util.Assert;
 import com.java110.things.util.SeqUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -111,8 +112,9 @@ public class MachineServiceImpl implements IMachineService {
 
     @Override
     public ResultDto restartMachine(MachineDto machineDto) throws Exception {
-
-
+        List<MachineDto> machineDtoList = machineServiceDao.getMachines(machineDto);
+        Assert.listOnlyOne(machineDtoList,"设备不存在");
+        machineDto = machineDtoList.get(0);
         if (MachineConstant.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
             AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).restartMachine(machineDto);
         } else if (MachineConstant.MACHINE_TYPE_ATTENDANCE.equals(machineDto.getMachineTypeCd())) {
@@ -134,6 +136,9 @@ public class MachineServiceImpl implements IMachineService {
 
     @Override
     public ResultDto openDoor(MachineDto machineDto) throws Exception {
+        List<MachineDto> machineDtoList = machineServiceDao.getMachines(machineDto);
+        Assert.listOnlyOne(machineDtoList,"设备不存在");
+        machineDto = machineDtoList.get(0);
         AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).openDoor(machineDto);
         return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
     }

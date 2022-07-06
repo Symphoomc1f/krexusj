@@ -162,7 +162,7 @@ public class MachineExtController extends BaseController {
      * @return 成功或者失败
      * @throws Exception
      */
-    @RequestMapping(path = "/openDoor", method = RequestMethod.GET)
+    @RequestMapping(path = "/openDoor", method = RequestMethod.POST)
     public ResponseEntity<String> openDoor(@RequestBody String reqParam) throws Exception {
 
         JSONObject reqJson = JSONObject.parseObject(reqParam);
@@ -185,7 +185,7 @@ public class MachineExtController extends BaseController {
      * @return 成功或者失败
      * @throws Exception
      */
-    @RequestMapping(path = "/restartMachine", method = RequestMethod.GET)
+    @RequestMapping(path = "/restartMachine", method = RequestMethod.POST)
     public ResponseEntity<String> restartMachine(@RequestBody String reqParam) throws Exception {
 
         JSONObject reqJson = JSONObject.parseObject(reqParam);

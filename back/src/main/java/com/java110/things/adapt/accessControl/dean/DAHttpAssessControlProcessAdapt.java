@@ -119,7 +119,7 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
     }
 
     public HttpHeaders getHeaders() {
-        String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
+        String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "DA_ASSESS_PASSWORD");
         String auth = "Basic ";
         auth += new BASE64Encoder().encode(("admin:" + password).getBytes());
         //添加人脸
@@ -204,7 +204,7 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
         info.put("isCheckSimilarity", 0);
         param.put("info", info);
         //param.put("picinfo", userFaceDto.getFaceBase64());
-        param.put("picURI", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
+        param.put("picURI", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
 
         HttpEntity httpEntity = new HttpEntity(param.toJSONString(), getHeaders());
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
@@ -238,7 +238,7 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
         info.put("isCheckSimilarity", 0);
         param.put("info", info);
         //param.put("picinfo", userFaceDto.getFaceBase64());
-        param.put("picURI", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
+        param.put("picURI", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
 
 
         HttpEntity httpEntity = new HttpEntity(param.toJSONString(), getHeaders());
@@ -306,7 +306,7 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
 
         ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
         List<MachineDto> machineDtos = notifyAccessControlService.queryMachines();
-        String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
+        String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "DA_ASSESS_PASSWORD");
         String url = "";
         for (MachineDto machineDto : machineDtos) {
             url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_SET_PASSWORD;

@@ -162,6 +162,9 @@
         <if test="communityId != null and communityId != ''">
             and t.community_id = #{communityId}
         </if>
+        <if test="extMachineId != null and extMachineId != ''">
+            and t.ext_machine_id = #{extMachineId}
+        </if>
     </update>
 
 </mapper>

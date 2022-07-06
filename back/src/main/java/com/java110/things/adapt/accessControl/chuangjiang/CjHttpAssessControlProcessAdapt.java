@@ -179,7 +179,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         param.put("pass", password);
         param.put("personId", userFaceDto.getUserId());
         param.put("faceId", userFaceDto.getUserId());
-        param.put("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
+        param.put("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
         param.put("base64", userFaceDto.getFaceBase64());
         //添加人脸
         httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
@@ -208,7 +208,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         param.put("pass", password);
         param.put("personId", userFaceDto.getUserId());
         param.put("faceId", userFaceDto.getUserId());
-        param.put("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
+        param.put("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
         param.put("base64", userFaceDto.getFaceBase64());
         //添加人脸
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -312,7 +312,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
             url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_SET_IDENTIFY_CALLBACK;
             param = new JSONObject();
             param.put("pass", password);
-            param.put("callbackUrl", MappingCacheFactory.getValue(MappingCacheFactory.COMMON_DOMAIN, "CJ_CALLBACK_URL"));
+            param.put("callbackUrl", MappingCacheFactory.getValue(MappingCacheFactory.COMMON_DOMAIN, "CJ_CALLBACK_URL") +"?machineCode="+machineDto.getMachineCode());
             param.put("base64Enable", "2");
             httpHeaders = new HttpHeaders();
             httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
