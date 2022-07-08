@@ -3,6 +3,8 @@ package com.java110.things.adapt.accessControl.chuangjiang;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.accessControl.AddUpdateFace;
+import com.java110.things.adapt.accessControl.IAssessControlProcess;
+import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.fee.FeeDto;
@@ -15,8 +17,6 @@ import com.java110.things.entity.room.RoomDto;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.MqttFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
-import com.java110.things.adapt.accessControl.IAssessControlProcess;
-import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.SeqUtil;
 import com.java110.things.util.StringUtil;
@@ -223,7 +223,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         }
 
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
-        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("msg"));
+        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("code") + paramOut.getString("msg"));
     }
 
     @Override
@@ -257,7 +257,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         }
 
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
-        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("msg"));
+        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("code") + paramOut.getString("msg"));
     }
 
     @Override
@@ -272,7 +272,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_RESET, param.toJSONString(), responseEntity.getBody());
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
-        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("msg"));
+        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("code") + paramOut.getString("msg"));
 
     }
 
@@ -312,7 +312,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
             url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_SET_IDENTIFY_CALLBACK;
             param = new JSONObject();
             param.put("pass", password);
-            param.put("callbackUrl", MappingCacheFactory.getValue(MappingCacheFactory.COMMON_DOMAIN, "CJ_CALLBACK_URL") +"?machineCode="+machineDto.getMachineCode());
+            param.put("callbackUrl", MappingCacheFactory.getValue(MappingCacheFactory.COMMON_DOMAIN, "CJ_CALLBACK_URL") + "?machineCode=" + machineDto.getMachineCode());
             param.put("base64Enable", "2");
             httpHeaders = new HttpHeaders();
             httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);

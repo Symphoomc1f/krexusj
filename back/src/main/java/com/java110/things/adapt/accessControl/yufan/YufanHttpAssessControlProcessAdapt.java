@@ -189,7 +189,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
             postParameters.add("pass", password);
             postParameters.add("personId", userFaceDto.getUserId());
             postParameters.add("faceId", userFaceDto.getUserId());
-            //postParameters.add("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
+            //postParameters.add("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
             postParameters.add("imgBase64", userFaceDto.getFaceBase64());
             //添加人脸
             httpEntity = new HttpEntity(postParameters, httpHeaders);
@@ -224,7 +224,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         postParameters.add("pass", password);
         postParameters.add("personId", userFaceDto.getUserId());
         postParameters.add("faceId", userFaceDto.getUserId());
-        //postParameters.add("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
+        //postParameters.add("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
         postParameters.add("imgBase64", userFaceDto.getFaceBase64());
         //添加人脸
         HttpHeaders httpHeaders = new HttpHeaders();
