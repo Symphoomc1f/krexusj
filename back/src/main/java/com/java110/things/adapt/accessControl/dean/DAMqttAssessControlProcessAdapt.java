@@ -1,12 +1,16 @@
-package com.java110.things.adapt.accessControl.yldMqtt;
+package com.java110.things.adapt.accessControl.dean;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.java110.things.accessControl.AddUpdateFace;
+import com.java110.things.adapt.accessControl.IAssessControlProcess;
+import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
-import com.java110.things.entity.cloud.MachineCmdResultDto;
 import com.java110.things.entity.fee.FeeDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.machine.MachineFaceDto;
 import com.java110.things.entity.machine.OperateLogDto;
 import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.response.ResultDto;
@@ -14,31 +18,38 @@ import com.java110.things.entity.room.RoomDto;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.MqttFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
-import com.java110.things.adapt.accessControl.IAssessControlProcess;
-import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.SeqUtil;
+import com.java110.things.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import sun.misc.BASE64Encoder;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * 伊兰度 门禁设备 Mqtt 方式
  */
-@Service("yldMqttAssessControlProcessAdapt")
-public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
+@Service("daMqttAssessControlProcessAdapt")
+public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
 
-    private static Logger logger = LoggerFactory.getLogger(YldMqttAssessControlProcessAdapt.class);
+    private static Logger logger = LoggerFactory.getLogger(DAMqttAssessControlProcessAdapt.class);
     //public static Function fun=new Function();
+
+    private static final String DEFAULT_PORT = "80"; //端口
 
     @Autowired
     private IMachineService machineServiceImpl;
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     public static final long START_TIME = new Date().getTime() - 1000 * 60 * 60;
     public static final long END_TIME = new Date().getTime() + 1000 * 60 * 60 * 24 * 365;
@@ -46,25 +57,34 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
     public static final String OPEN_TYPE_FACE = "1000"; // 人脸开门
 
     //平台名称
-    public static final String MANUFACTURER = "YLD_";
+    public static final String MANUFACTURER = "CJ_";
 
     public static final String VERSION = "0.2";
 
-    public static final String CMD_ADD_FACE = "create_face"; // 创建人脸
+    public static final String CMD_ADD_FACE = "/face"; // 创建人脸
+    public static final String CMD_ADD_FACE_FIND = "/action/SearchPerson"; // 名单查询
 
-    public static final String CMD_OPEN_DOOR = "gpio control"; // 开门
+    public static final String CMD_OPEN_DOOR = "/action/OpenDoor"; // 开门
 
-    public static final String CMD_REBOOT = "reboot_cam";// 重启设备
+    public static final String CMD_REBOOT = "/action/RebootDevice";// 重启设备
 
-    public static final String CMD_UPDATE_FACE = "update_face"; //修改人脸
+    public static final String CMD_ADD_USER = "/action/AddPerson"; // 添加人员
+    public static final String CMD_EDIT_USER = "/action/EditPerson"; // 添加人员
 
-    public static final String CMD_DELETE_FACE = "delete_face"; //删除人脸
+    public static final String CMD_DELETE_PERSION_FACE = "/face/deletePerson"; //修改人脸
+
+    public static final String CMD_DELETE_FACE = "/action/DeletePerson"; //删除人脸
+    public static final String CMD_RESET = "/action/DeleteAllPerson"; //设备重置
 
     public static final String CMD_UI_TITLE = "set_ui_title";// 设置名称
     public static final String CMD_FACE_SEARCH = "face_search";// 搜素设备
+    public static final String CMD_SET_PASSWORD = "/setPassWord";// 设置密码
+    public static final String CMD_SET_SYSTEMMODE = "/device/systemMode";// 设置模式
+    public static final String CMD_SET_IDENTIFY_CALLBACK = "/setIdentifyCallBack";// 设置回调地址
+
 
     //单设备处理
-    public static final String TOPIC_FACE_SN_REQUEST = "face.{sn}.request";
+    public static final String TOPIC_FACE_SN_REQUEST = "mqtt/face/ID";
 
     //多设备处理
     public static final String TOPIC_FACE_REQUEST = "face.request";
@@ -78,7 +98,7 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
     //硬件上线上报
     public static final String TOPIC_ONLINE_RESPONSE = "online/response";
 
-    public static final String SN = "{sn}";
+    public static final String SN = "ID";
 
     public static final String FACE_URL = "ACCESS_CONTROL_FACE_URL";
 
@@ -91,11 +111,7 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
     public void initAssessControlProcess() {
         logger.debug("初始化是配置器");
 
-        //注册设备上线 topic
-        MqttFactory.subscribe("online.response");
 
-        //推送人脸识别结果
-        MqttFactory.subscribe("face.response");
     }
 
     @Override
@@ -108,92 +124,169 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
         return 0;
     }
 
-    @Override
-    public String getFace(MachineDto machineDto, UserFaceDto userFaceDto) {
-
-
-        return null;
+    public HttpHeaders getHeaders() {
+        String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "DA_ASSESS_PASSWORD");
+        String auth = "Basic ";
+        auth += new BASE64Encoder().encode(("admin:" + password).getBytes());
+        //添加人脸
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("Authorization", auth);
+        return httpHeaders;
     }
 
     @Override
-    public ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
-        String cmdId = SeqUtil.getId();
+    public String getFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+
+        String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_ADD_FACE_FIND;
         JSONObject param = new JSONObject();
-        param.put("client_id", machineDto.getMachineCode());
-        param.put("cmd_id", userFaceDto.getTaskId());
-        param.put("version", VERSION);
-        param.put("cmd", CMD_ADD_FACE);
-        param.put("per_id", userFaceDto.getUserId());
-        param.put("face_id", userFaceDto.getUserId());
-        param.put("per_name", userFaceDto.getName());
-        param.put("idcardNum", userFaceDto.getIdNumber());
-        param.put("img_url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
-        param.put("idcardper", userFaceDto.getIdNumber());
-        param.put("s_time", START_TIME);
-        param.put("e_time", END_TIME);
-        param.put("per_type", 0);
-        param.put("usr_type", 0);
+        param.put("operator", "SearchPerson");
+        JSONObject info = new JSONObject();
+        info.put("DeviceID", machineDto.getMachineCode());
+        info.put("SearchType", 0);
+        info.put("SearchID", userFaceDto.getUserId());
+        info.put("Picture", 1);
+        param.put("info", info);
+
+        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), getHeaders());
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE_FIND, param.toJSONString(), responseEntity.getBody());
+
+
+        if (HttpStatus.OK != responseEntity.getStatusCode()) {
+            return AddUpdateFace.MACHINE_HAS_NOT_FACE;
+        }
+
+        JSONObject outParam = JSONObject.parseObject(responseEntity.getBody());
+
+        if (!outParam.containsKey("picinfo")) {
+            return AddUpdateFace.MACHINE_HAS_NOT_FACE;
+        }
+
+        String picinfo = outParam.getString("picinfo");
+
+        if (StringUtil.isEmpty(picinfo)) {
+            return AddUpdateFace.MACHINE_HAS_NOT_FACE;
+        }
+
+        String personId = outParam.getJSONObject("info").getString("CustomizeID");
+
+        if (StringUtil.isEmpty(personId)) {
+            return AddUpdateFace.MACHINE_HAS_NOT_FACE;
+        }
+
+        return personId;
+    }
+
+    /**
+     * { "
+     * operator": "AddPerson",
+     * "info": {
+     * <p>
+     * },
+     * "picinfo":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQAB......"
+     * }
+     *
+     * @param machineDto  硬件信息
+     * @param userFaceDto 用户人脸信息
+     * @return
+     */
+    @Override
+    public ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+
+        JSONObject param = new JSONObject();
+        param.put("messageId", userFaceDto.getTaskId());
+        param.put("operator", "EditPerson");
+        JSONObject info = new JSONObject();
+        info.put("DeviceID", machineDto.getMachineCode());
+        info.put("PersonType", 0);
+        info.put("IdType", 0);
+        info.put("CustomizeID", userFaceDto.getUserId());
+        info.put("PersonUUID", userFaceDto.getUserId());
+        info.put("Name", userFaceDto.getName());
+        info.put("CardType", 0);
+        info.put("IdCard", userFaceDto.getIdNumber());
+        info.put("Tempvalid", 0);
+        info.put("isCheckSimilarity", 0);
+        param.put("info", info);
+        //param.put("picinfo", userFaceDto.getFaceBase64());
+        param.put("picURI", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
 
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, param.toJSONString(), "");
 
-        saveLog(cmdId, machineDto.getMachineId(), CMD_ADD_FACE, param.toJSONString(), "", "", userFaceDto.getUserId(), userFaceDto.getName());
+        String msg = "同步成功";
 
-        return null;
+        return new ResultDto(ResultDto.SUCCESS, "上传mqtt成功");
+
+
     }
 
     @Override
     public ResultDto updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
-        String cmdId = SeqUtil.getId();
 
-        //CMD_UPDATE_FACE
         JSONObject param = new JSONObject();
-        param.put("client_id", machineDto.getMachineCode());
-        param.put("cmd_id", userFaceDto.getTaskId());
-        param.put("version", VERSION);
-        param.put("cmd", CMD_UPDATE_FACE);
-        param.put("per_id", userFaceDto.getUserId());
-        param.put("face_id", userFaceDto.getUserId());
-        param.put("per_name", userFaceDto.getName());
-        param.put("idcardNum", userFaceDto.getIdNumber());
-        param.put("img_url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
-        param.put("idcardper", userFaceDto.getIdNumber());
-        param.put("s_time", START_TIME);
-        param.put("e_time", END_TIME);
-        param.put("per_type", 0);
-        param.put("usr_type", 0);
+        param.put("messageId", userFaceDto.getTaskId());
+        param.put("operator", "EditPerson");
+        JSONObject info = new JSONObject();
+        info.put("DeviceID", machineDto.getMachineCode());
+        info.put("PersonType", 0);
+        info.put("IdType", 0);
+        info.put("CustomizeID", userFaceDto.getUserId());
+        info.put("PersonUUID", userFaceDto.getUserId());
+        info.put("Name", userFaceDto.getName());
+        info.put("CardType", 0);
+        info.put("IdCard", userFaceDto.getIdNumber());
+        info.put("Tempvalid", 0);
+        info.put("isCheckSimilarity", 0);
+        param.put("info", info);
+        //param.put("picinfo", userFaceDto.getFaceBase64());
+        param.put("picURI", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
+
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
-        saveLog(cmdId, machineDto.getMachineId(), CMD_UPDATE_FACE, param.toJSONString(), "", "", userFaceDto.getUserId(), userFaceDto.getName());
-        return null;
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_EDIT_USER, param.toJSONString(), "");
+        return new ResultDto(ResultDto.SUCCESS, "上传mqtt成功");
     }
 
     @Override
     public ResultDto deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
-        String cmdId = SeqUtil.getId();
-
+        String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_DELETE_FACE;
+        JSONArray userIds = new JSONArray();
+        userIds.add(heartbeatTaskDto.getTaskid());
         JSONObject param = new JSONObject();
-        param.put("client_id", machineDto.getMachineCode());
-        param.put("cmd_id", heartbeatTaskDto.getTaskid());
-        param.put("version", VERSION);
-        param.put("cmd", CMD_DELETE_FACE);
-        param.put("type", 0);
-        param.put("per_id", heartbeatTaskDto.getTaskinfo());
+        param.put("messageId", heartbeatTaskDto.getTaskid());
+        param.put("operator", "DelPerson");
+        JSONObject info = new JSONObject();
+        info.put("DeviceID", machineDto.getMachineCode());
+        info.put("TotalNum", 1);
+        info.put("IdType", 0);
+        info.put("CustomizeID", userIds);
+        param.put("info", info);
+
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
-        saveLog(cmdId, machineDto.getMachineId(), CMD_DELETE_FACE, param.toJSONString(), "", "", heartbeatTaskDto.getTaskinfo(), "");
-        return null;
+
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_DELETE_FACE, param.toJSONString(), "");
+
+        return new ResultDto(ResultDto.SUCCESS, "上传mqtt成功");
+
     }
 
     @Override
     public ResultDto clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
+        String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_RESET;
         JSONObject param = new JSONObject();
-        param.put("client_id", machineDto.getMachineCode());
-        param.put("cmd_id", heartbeatTaskDto.getTaskid());
-        param.put("version", VERSION);
-        param.put("cmd", CMD_DELETE_FACE);
-        param.put("type", 4);
+        param.put("operator", "DeleteAllPerson");
+        param.put("messageId", heartbeatTaskDto.getTaskid());
+        JSONObject info = new JSONObject();
+        info.put("deleteall", "1");
+        param.put("info", info);
+
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
-        saveLog(param.getString("cmd_id"), machineDto.getMachineId(), CMD_DELETE_FACE, param.toJSONString(), "");
-        return null;
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_RESET, param.toJSONString(), "");
+
+        return new ResultDto(ResultDto.SUCCESS, "上传mqtt成功");
     }
+
 
     /**
      * 扫描设备
@@ -203,26 +296,12 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
     @Override
     public List<MachineDto> scanMachine() throws Exception {
 
-        MachineDto machineDto = new MachineDto();
 
-        ResultDto resultDto = machineServiceImpl.getMachine(machineDto);
-
-        if (resultDto == null || resultDto.getCode() != ResponseConstant.SUCCESS) {
-            logger.error("查询设备信息失败" + machineDto.toString());
-            return null;
-        }
-
-        List<MachineDto> machineDtos = (List<MachineDto>) resultDto.getData();
-        JSONObject param = null;
-        for (MachineDto tmpMachineDto : machineDtos) {
-            setUiTitle(tmpMachineDto);
-        }
         return null;
     }
 
     @Override
     public void mqttMessageArrived(String topic, String data) {
-
         JSONObject param = JSONObject.parseObject(data);
 
         switch (topic) {
@@ -271,108 +350,94 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
             return;
         }
         String cmd = resultCmd.getString("cmd");
-        switch (cmd) {
-            case CMD_ADD_FACE:
-                doCmdResultCloud(resultCmd);
-                break;
-            case CMD_UPDATE_FACE:
-                break;
-            case CMD_DELETE_FACE:
-                break;
-            default:
-                break;
-        }
+//        switch (cmd) {
+//            case CMD_ADD_FACE:
+//                doCmdResultCloud(resultCmd);
+//                break;
+//            case CMD_UPDATE_FACE:
+//                break;
+//            case CMD_DELETE_FACE:
+//                break;
+//            default:
+//                break;
+//        }
     }
 
-    private void doCmdResultCloud(JSONObject resultCmd) {
-        try {
-            String taskId = resultCmd.getString("cmd_id");
-            String machineCode = resultCmd.getString("sn");
-            int code = -1;
-            if (!resultCmd.containsKey("code")) {
-                code = -1;
-            } else {
-                code = resultCmd.getIntValue("code") != 0 ? -1 : 0;
-            }
-            String msg = resultCmd.containsKey("reply") ? resultCmd.getString("reply") : "";
-            ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
-            MachineCmdResultDto machineCmdResultDto = new MachineCmdResultDto(code, msg, taskId, machineCode);
-            notifyAccessControlService.machineCmdResult(machineCmdResultDto);
-        } catch (Exception e) {
-            logger.error("上报执行命令失败", e);
-        }
-    }
 
     @Override
     public void restartMachine(MachineDto machineDto) {
         JSONObject param = new JSONObject();
-        param.put("client_id", machineDto.getMachineCode());
-        param.put("cmd_id", SeqUtil.getId());
-        param.put("version", VERSION);
-        param.put("cmd", CMD_REBOOT);
+        param.put("operator", "RebootDevice");
+        param.put("messageId", SeqUtil.getId());
+        JSONObject info = new JSONObject();
+        param.put("info", info);
+        //
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
-        saveLog(param.getString("cmd_id"), machineDto.getMachineId(), CMD_REBOOT, param.toJSONString(), "");
+
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_REBOOT, param.toJSONString(), "");
 
     }
 
     @Override
     public void openDoor(MachineDto machineDto) {
         JSONObject param = new JSONObject();
-        param.put("client_id", machineDto.getMachineCode());
-        param.put("cmd_id", SeqUtil.getId());
-        param.put("version", VERSION);
-        param.put("cmd", CMD_OPEN_DOOR);
-        param.put("ctrl_type", "on");
-        MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
-        saveLog(param.getString("cmd_id"), machineDto.getMachineId(), CMD_OPEN_DOOR, param.toJSONString(), "");
+        param.put("operator", "Unlock");
+        param.put("messageId", SeqUtil.getId());
 
+        JSONObject info = new JSONObject();
+        info.put("DeviceID", machineDto.getMachineCode());
+        info.put("Chn", 0);
+        info.put("status", 0);
+        info.put("msg", "请通行");
+        param.put("info", info);
+        MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
+
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_OPEN_DOOR, param.toJSONString(), "");
     }
 
-    /**
-     * {
-     * "body" : {
-     * "code" : 101,
-     * "face_imgdata" : "/9j/4AAQSkZJRghDk+tAH/2Q==",
-     * "face_imgsize" : 27178,
-     * "hat" : 1,
-     * "matched" : 91,
-     * "model_imgdata" : "/9j/4AAQSkZJRgABAQAAKDKUT/2Q==",
-     * "model_imgsize" : 6001,
-     * "name" : "吴学文",
-     * "per_id" : "772020051963050001",
-     * "pic_name" : "9f15b229-0422fd6b_1590397611_91_101.jpg",
-     * "role" : 0,
-     * "sec" : 1590397611,
-     * "sequence" : 2085,
-     * "sn" : "9f15b229-0422fd6b",
-     * "usec" : 778083
-     * },
-     * "type" : "face_result"
-     * }
-     *
-     * @param data 这个为设备人脸推送协议，请参考设备协议文档
-     * @return
-     */
     @Override
     public String httpFaceResult(String data) {
         ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
+        JSONObject resultParam = new JSONObject();
         try {
-            JSONObject param = JSONObject.parseObject(data);
+            JSONObject body = JSONObject.parseObject(data);
 
-            if (param.containsKey("type") && !FACE_RESULT.equals(param.getString("type"))) {
-                return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG).toString();
+            JSONObject info = body.getJSONObject("info");
+
+
+            MachineDto machineDto = new MachineDto();
+            machineDto.setMachineCode(info.getString("DeviceID"));
+            List<MachineDto> machineDtos = notifyAccessControlService.queryMachines(machineDto);
+
+            if (machineDtos.size() < 0) {
+                resultParam.put("code", 404);
+                resultParam.put("desc", "设备不存在");
+                return resultParam.toJSONString();//未找到设备
             }
 
-            JSONObject body = param.getJSONObject("body");
+            String userId = info.containsKey("PersonUUID") ? info.getString("PersonUUID") : "";
+            String userName = "";
+            if (!StringUtils.isEmpty(userId)) {
+                MachineFaceDto machineFaceDto = new MachineFaceDto();
+                machineFaceDto.setUserId(userId);
+                machineFaceDto.setMachineId(machineDtos.get(0).getMachineId());
+                List<MachineFaceDto> machineFaceDtos = notifyAccessControlService.queryMachineFaces(machineFaceDto);
+                if (machineFaceDtos != null && machineFaceDtos.size() > 0) {
+                    userName = machineFaceDtos.get(0).getName();
+                }
+
+            }
+
+
             OpenDoorDto openDoorDto = new OpenDoorDto();
-            openDoorDto.setFace(body.getString("face_imgdata"));
-            openDoorDto.setUserName(body.containsKey("name") ? body.getString("name") : "");
-            openDoorDto.setHat(body.getString("hat"));
-            openDoorDto.setMachineCode(body.getString("sn"));
-            openDoorDto.setUserId(body.containsKey("per_id") ? body.getString("per_id") : "");
+            openDoorDto.setFace(body.getString("SanpPic").replace("data:image/jpeg;base64,", ""));
+            openDoorDto.setUserName(userName);
+            openDoorDto.setHat("3");
+            openDoorDto.setMachineCode(machineDtos.get(0).getMachineCode());
+            openDoorDto.setUserId(userId);
             openDoorDto.setOpenId(SeqUtil.getId());
             openDoorDto.setOpenTypeCd(OPEN_TYPE_FACE);
-            openDoorDto.setSimilarity(body.containsKey("matched") ? body.getString("matched") : "0");
+            openDoorDto.setSimilarity(info.getString("Similarity1"));
 
 
             freshOwnerFee(openDoorDto);
@@ -381,8 +446,14 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
 
         } catch (Exception e) {
             logger.error("推送人脸失败", e);
+            resultParam.put("code", 404);
+            resultParam.put("desc", "异常");
+            return resultParam.toJSONString();//未找到设备
         }
-        return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG).toString();
+        resultParam.put("code", 200);
+        resultParam.put("desc", "OK");
+        return resultParam.toJSONString();//未找到设备
+
     }
 
     /**
@@ -428,27 +499,7 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
         openDoorDto.setAmountOwed(own + "");
     }
 
-    /**
-     * 开门记录
-     *
-     * @param data 设备推送结果
-     *             {
-     *             "type" : "face_result" ,
-     *             "body" : {
-     *             "e_imgurl" : "http://jupiter-1251895221.cos.ap-guangzhou.myqcloud.
-     *             com/20190907/8080078b-c30d4f7b_1567816001_95_101.jpg",
-     *             //人脸图url（若识别后不存在全图数据以及上传img_data失败，不推送此字段）
-     *             "e_imgsize" : 159792, //人脸图大小
-     *             "hat" : 255,
-     *             "matched" : 95, //比对结果(100分制)，0：未比对。-1：比对失败。大于0的取值
-     *             "name" : "k", //人员姓名
-     *             "per_id" : "20190906135824899",
-     *             "role" : 1, //人员角色，0：普通人员。 1：白名单人员。 2：黑名单人员
-     *             "usec" : 1567816001,
-     *             "sn" : "ffffffff" //设备的SN信息
-     *             }
-     *             }
-     */
+
     private void openDoorResult(String data) {
 
 
@@ -464,52 +515,6 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
      *             }
      */
     private void machineOnline(String data) {
-        JSONObject param = JSONObject.parseObject(data);
-
-        String machineCode = param.getString("sn");
-        MachineDto machineDto = new MachineDto();
-        machineDto.setMachineCode(machineCode);
-        machineDto.setMachineMac(machineCode);
-        ResultDto resultDto = null;
-        MqttFactory.subscribe(TOPIC_FACE_SN_RESPONSE.replace(SN, machineDto.getMachineCode()));
-
-        try {
-            resultDto = machineServiceImpl.getMachine(machineDto);
-        } catch (Exception e) {
-            logger.error("查询设备失败", machineDto);
-        }
-
-        if (resultDto == null || resultDto.getCode() != ResponseConstant.SUCCESS) {
-            logger.error("查询设备信息失败" + machineDto.toString());
-            return;
-        }
-
-        List<MachineDto> machineDtos = (List<MachineDto>) resultDto.getData();
-
-        if (machineDtos.size() > 0) {
-            logger.debug("门禁已经注册过，无需再次注册");
-            setUiTitle(machineDtos.get(0));
-            return;
-        }
-        String machineName = MANUFACTURER + SeqUtil.getMachineSeq();
-
-        try {
-            //设备上报
-            ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
-            machineDto = new MachineDto();
-            machineDto.setMachineId(UUID.randomUUID().toString());
-            machineDto.setMachineIp("设备未上报");
-            machineDto.setMachineMac(machineCode);
-            machineDto.setMachineCode(machineCode);
-            machineDto.setMachineName(machineName);
-            machineDto.setMachineVersion("v1.0");
-            machineDto.setOem("伊兰度");
-            notifyAccessControlService.uploadMachine(machineDto);
-            //上报标题
-            setUiTitle(machineDto);
-        } catch (Exception e) {
-            logger.error("上报设备失败", e);
-        }
 
 
     }

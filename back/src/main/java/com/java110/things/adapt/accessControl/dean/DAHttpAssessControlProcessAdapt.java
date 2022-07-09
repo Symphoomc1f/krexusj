@@ -114,6 +114,11 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
     }
 
     @Override
+    public ResultDto initAssessControlProcess(MachineDto machineDto) {
+        return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG);
+    }
+
+    @Override
     public int getFaceNum(MachineDto machineDto) {
         return 0;
     }
@@ -215,7 +220,7 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
         }
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
         String msg = "同步成功";
-        if(paramOut.getInteger("code") != 200){
+        if (paramOut.getInteger("code") != 200) {
             msg = paramOut.getJSONObject("info").getString("Detail");
         }
         return new ResultDto(paramOut.getInteger("code") == 200 ? ResultDto.SUCCESS : ResultDto.ERROR, msg);
@@ -255,7 +260,7 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
 
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
         String msg = "同步成功";
-        if(paramOut.getInteger("code") != 200){
+        if (paramOut.getInteger("code") != 200) {
             msg = paramOut.getJSONObject("info").getString("Detail");
         }
         return new ResultDto(paramOut.getInteger("code") == 200 ? ResultDto.SUCCESS : ResultDto.ERROR, msg);
@@ -285,7 +290,7 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
 
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
         String msg = "同步成功";
-        if(paramOut.getInteger("code") != 200){
+        if (paramOut.getInteger("code") != 200) {
             msg = paramOut.getJSONObject("info").getString("Detail");
         }
         return new ResultDto(paramOut.getInteger("code") == 200 ? ResultDto.SUCCESS : ResultDto.ERROR, msg);
@@ -305,7 +310,7 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_RESET, param.toJSONString(), responseEntity.getBody());
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
         String msg = "同步成功";
-        if(paramOut.getInteger("code") != 200){
+        if (paramOut.getInteger("code") != 200) {
             msg = paramOut.getJSONObject("info").getString("Detail");
         }
         return new ResultDto(paramOut.getInteger("code") == 200 ? ResultDto.SUCCESS : ResultDto.ERROR, msg);

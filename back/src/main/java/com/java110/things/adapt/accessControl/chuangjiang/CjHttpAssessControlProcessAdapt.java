@@ -112,6 +112,37 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
     }
 
     @Override
+    public ResultDto initAssessControlProcess(MachineDto machineDto) {
+        String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
+        String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_SET_SYSTEMMODE;
+        JSONObject param = new JSONObject();
+        param.put("pass", password);
+        param.put("systemMode", "2");
+        HttpHeaders httpHeaders = new HttpHeaders();
+        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_SYSTEMMODE, param.toJSONString(), responseEntity.getBody());
+
+        //设置回调地址
+        url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_SET_IDENTIFY_CALLBACK;
+        param = new JSONObject();
+        param.put("pass", password);
+        param.put("callbackUrl", MappingCacheFactory.getValue(MappingCacheFactory.COMMON_DOMAIN, "CJ_CALLBACK_URL") + "?machineCode=" + machineDto.getMachineCode());
+        param.put("base64Enable", "2");
+        httpHeaders = new HttpHeaders();
+        httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+        responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_IDENTIFY_CALLBACK, param.toJSONString(), responseEntity.getBody());
+
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            return new ResultDto(ResultDto.ERROR, "初始化设备失败");
+        }
+
+        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("code") + paramOut.getString("msg"));
+    }
+
+    @Override
     public int getFaceNum(MachineDto machineDto) {
         return 0;
     }
@@ -192,7 +223,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         }
 
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
-        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("msg"));
+        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("code") + paramOut.getString("msg"));
 
 
     }
@@ -239,22 +270,6 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_DELETE_FACE, param.toJSONString(), responseEntity.getBody());
-
-
-        url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_DELETE_PERSION_FACE;
-
-
-        param = new JSONObject();
-        param.put("personId", heartbeatTaskDto.getTaskid());
-        param.put("pass", password);
-        httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
-        responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_DELETE_PERSION_FACE, param.toJSONString(), responseEntity.getBody());
-
-
-        if (responseEntity.getStatusCode() != HttpStatus.OK) {
-            return new ResultDto(ResultDto.ERROR, "调用设备失败");
-        }
 
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
         return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("code") + paramOut.getString("msg"));

@@ -4,6 +4,8 @@ import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.UserDto;
 
+import java.util.List;
+
 /**
  * @ClassName IUserService
  * @Description TODO
@@ -36,6 +38,14 @@ public interface IMachineService {
      * @throws Exception
      */
      ResultDto getMachine(MachineDto machineDto) throws Exception;
+
+    /**
+     * 获取设备信息
+     * @param machineDto 设备信息
+     * @return
+     * @throws Exception
+     */
+    List<MachineDto> queryMachines(MachineDto machineDto) throws Exception;
 
     /**
      * 删除设备

@@ -49,6 +49,25 @@ public class MachineServiceImpl implements IMachineService {
      * @throws Exception
      */
     @Override
+    public List<MachineDto> queryMachines(MachineDto machineDto) throws Exception {
+        int page = machineDto.getPage();
+
+        if (page != PageDto.DEFAULT_PAGE) {
+            machineDto.setPage((page - 1) * machineDto.getRow());
+        }
+        List<MachineDto> machineDtoList = null;
+        machineDtoList = machineServiceDao.getMachines(machineDto);
+        return machineDtoList;
+    }
+
+    /**
+     * 查询设备信息
+     *
+     * @param machineDto 设备信息
+     * @return
+     * @throws Exception
+     */
+    @Override
     public ResultDto getMachine(MachineDto machineDto) throws Exception {
         int page = machineDto.getPage();
 
@@ -67,8 +86,11 @@ public class MachineServiceImpl implements IMachineService {
         return resultDto;
     }
 
+
     @Override
     public ResultDto saveMachine(MachineDto machineDto) throws Exception {
+        //初始化设备信息
+        AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).initAssessControlProcess(machineDto);
         int count = machineServiceDao.saveMachine(machineDto);
         ResultDto resultDto = null;
         if (count < 1) {
@@ -113,7 +135,7 @@ public class MachineServiceImpl implements IMachineService {
     @Override
     public ResultDto restartMachine(MachineDto machineDto) throws Exception {
         List<MachineDto> machineDtoList = machineServiceDao.getMachines(machineDto);
-        Assert.listOnlyOne(machineDtoList,"设备不存在");
+        Assert.listOnlyOne(machineDtoList, "设备不存在");
         machineDto = machineDtoList.get(0);
         if (MachineConstant.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
             AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).restartMachine(machineDto);
@@ -137,7 +159,7 @@ public class MachineServiceImpl implements IMachineService {
     @Override
     public ResultDto openDoor(MachineDto machineDto) throws Exception {
         List<MachineDto> machineDtoList = machineServiceDao.getMachines(machineDto);
-        Assert.listOnlyOne(machineDtoList,"设备不存在");
+        Assert.listOnlyOne(machineDtoList, "设备不存在");
         machineDto = machineDtoList.get(0);
         AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).openDoor(machineDto);
         return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);

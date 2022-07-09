@@ -15,10 +15,12 @@ import java.util.List;
  */
 public interface IAssessControlProcess {
 
+    void initAssessControlProcess();
+
     /**
      * 初始化方法
      */
-    void initAssessControlProcess();
+    ResultDto initAssessControlProcess(MachineDto machineDto);
 
     /**
      * 查询设备中 人脸数量
@@ -30,7 +32,8 @@ public interface IAssessControlProcess {
 
     /**
      * 根据设备编码和 faceId 查询是否有人脸
-     * @param machineDto 设备信息
+     *
+     * @param machineDto  设备信息
      * @param userFaceDto 用户信息
      * @return 如果有人脸 返回 faceId,没有则返回 null
      */
@@ -39,7 +42,8 @@ public interface IAssessControlProcess {
 
     /**
      * 添加人脸
-     * @param machineDto 硬件信息
+     *
+     * @param machineDto  硬件信息
      * @param userFaceDto 用户人脸信息
      */
     ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto);
@@ -47,29 +51,33 @@ public interface IAssessControlProcess {
 
     /**
      * 更新人脸
-     * @param machineDto 硬件信息
+     *
+     * @param machineDto  硬件信息
      * @param userFaceDto 用户人脸信息
      */
-    ResultDto updateFace(MachineDto machineDto,UserFaceDto userFaceDto);
+    ResultDto updateFace(MachineDto machineDto, UserFaceDto userFaceDto);
 
 
     /**
      * 删除人脸
-     * @param machineDto 硬件信息
+     *
+     * @param machineDto       硬件信息
      * @param heartbeatTaskDto 任务ID
      */
-    ResultDto deleteFace(MachineDto machineDto,HeartbeatTaskDto heartbeatTaskDto);
+    ResultDto deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto);
 
 
     /**
      * 清空人脸
+     *
      * @param machineDto 硬件信息
      */
-    ResultDto clearFace(MachineDto machineDto,HeartbeatTaskDto heartbeatTaskDto);
+    ResultDto clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto);
 
 
     /**
      * 扫描门禁信息
+     *
      * @return
      */
     List<MachineDto> scanMachine() throws Exception;
@@ -77,31 +85,34 @@ public interface IAssessControlProcess {
 
     /**
      * 接收订阅mqtt 消息，如果不是mqtt 协议对接硬件可以空
+     *
      * @param topic 主题
-     * @param data 消息内容
+     * @param data  消息内容
      */
     void mqttMessageArrived(String topic, String data);
 
 
     /**
      * 重启设备
+     *
      * @param machineDto 硬件信息
      */
     void restartMachine(MachineDto machineDto);
 
     /**
      * 开门
-     * @param machineDto  硬件信息
+     *
+     * @param machineDto 硬件信息
      */
     void openDoor(MachineDto machineDto);
 
     /**
      * 人脸推送结果
+     *
      * @param data 这个为设备人脸推送协议，请参考设备协议文档
      * @return 处理成功时返回 true 失败时返回false
      */
     String httpFaceResult(String data);
-
 
 
 }

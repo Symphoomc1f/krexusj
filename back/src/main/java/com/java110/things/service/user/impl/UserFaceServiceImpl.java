@@ -126,27 +126,13 @@ public class UserFaceServiceImpl implements IUserFaceService {
         }
 
 
-        MachineFaceDto machineFaceDto = new MachineFaceDto();
-        machineFaceDto.setUserId(heartbeatTaskDto.getTaskinfo());
-        machineFaceDto.setMachineId(machineDto.getMachineId());
-        machineFaceDto.setState("W");
-        machineFaceDto.setState("删除人脸待同步设备");
-
-        machineFaceService.updateMachineFace(machineFaceDto);
-
+        MachineFaceDto machineFaceDto = null;
         machineFaceDto = new MachineFaceDto();
         machineFaceDto.setUserId(heartbeatTaskDto.getTaskinfo());
         machineFaceDto.setMachineId(machineDto.getMachineId());
-        machineFaceDto.setTaskId(heartbeatTaskDto.getTaskid());
+        machineFaceDto.setUserId(heartbeatTaskDto.getTaskid());
         //machineFaceDto.set
         machineFaceService.deleteMachineFace(machineFaceDto);
-
-        machineFaceDto = new MachineFaceDto();
-        machineFaceDto.setUserId(heartbeatTaskDto.getTaskinfo());
-        machineFaceDto.setMachineId(machineDto.getMachineId());
-        machineFaceDto.setState(resultDto.getCode() == ResultDto.SUCCESS ? "S" : "F");
-        machineFaceDto.setState(resultDto.getMsg());
-        machineFaceService.updateMachineFace(machineFaceDto);
 
         //删除 小区人员
         CommunityPersonDto communityPersonDto = new CommunityPersonDto();

@@ -98,6 +98,11 @@ public class YldCometAssessControlProcessAdapt implements IAssessControlProcess 
     }
 
     @Override
+    public ResultDto initAssessControlProcess(MachineDto machineDto) {
+        return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG);
+    }
+
+    @Override
     public int getFaceNum(MachineDto machineDto) {
         return 0;
     }

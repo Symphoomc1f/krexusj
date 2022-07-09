@@ -29,6 +29,10 @@ public class OfficialDemoAssessControlProcessAdapt implements IAssessControlProc
 
         logger.debug("这里初始化硬件，如连接相机等工作");
     }
+    @Override
+    public ResultDto initAssessControlProcess(MachineDto machineDto) {
+        return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG);
+    }
 
     @Override
     public int getFaceNum(MachineDto machineDto) {
