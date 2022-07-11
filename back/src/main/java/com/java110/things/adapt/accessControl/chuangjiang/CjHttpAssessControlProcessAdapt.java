@@ -127,7 +127,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_SET_IDENTIFY_CALLBACK;
         param = new JSONObject();
         param.put("pass", password);
-        param.put("callbackUrl", MappingCacheFactory.getValue(MappingCacheFactory.COMMON_DOMAIN, "CJ_CALLBACK_URL") + "?machineCode=" + machineDto.getMachineCode());
+        param.put("callbackUrl", MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "IOT_URL") + "/api/accessControl/faceResult/" + machineDto.getMachineCode());
         param.put("base64Enable", "2");
         httpHeaders = new HttpHeaders();
         httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);

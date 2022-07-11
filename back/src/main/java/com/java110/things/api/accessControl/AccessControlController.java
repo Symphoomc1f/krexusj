@@ -35,13 +35,14 @@ public class AccessControlController extends BaseController {
     /**
      * 添加设备接口类
      * <p>
+     *     门禁配置地址为：/api/accessControl/faceResult/设备编码
      *
      * @param param 请求报文 包括设备 前台填写信息
      * @return 成功或者失败
      * @throws Exception
      */
-    @RequestMapping(path = "/faceResult", method = RequestMethod.POST)
-    public ResponseEntity<String> faceResult(@RequestBody String param, @RequestParam(value = "machineCode",required = false) String machineCode) throws Exception {
+    @RequestMapping(path = "/faceResult/{machineCode}", method = RequestMethod.POST)
+    public ResponseEntity<String> faceResult(@RequestBody String param, @PathVariable(value = "machineCode") String machineCode) throws Exception {
 
         MachineDto machineDto = new MachineDto();
         machineDto.setMachineCode(machineCode);

@@ -16,7 +16,8 @@ public class ServiceConfiguration {
         exclusions.append("/api/user/login,");
         exclusions.append("/api/data/*,");
         exclusions.append("/api/car/*,");
-        exclusions.append("/api/accessControl/faceResult");
+        exclusions.append("/api/accessControl/faceResult,");
+        exclusions.append("/api/accessControl/faceResult/*");
         final FilterRegistrationBean registrationBean = new FilterRegistrationBean();
         registrationBean.setFilter(new JwtFilter());
         //registrationBean.addUrlPatterns("/");

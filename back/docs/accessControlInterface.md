@@ -460,7 +460,7 @@ public String httpFaceResult(String data) {
 
 ### 门禁上报地址配置
 
-官方通用的上报地址为 http://ip:port/api/accessControl/faceResult
+官方通用的上报地址为 http://ip:port/api/accessControl/faceResult/设备编码
 
 接口类型为http POST
 
