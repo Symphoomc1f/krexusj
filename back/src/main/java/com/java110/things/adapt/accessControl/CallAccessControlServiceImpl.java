@@ -207,13 +207,14 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
     @Override
     public void saveFaceResult(OpenDoorDto openDoorDto) throws Exception {
 
+
+
         String faceBase = openDoorDto.getFace();
         String facePath = "/" + openDoorDto.getMachineCode() + FACE_RESULT + "/" + openDoorDto.getUserId() + "-" + openDoorDto.getOpenId() + ".jpg";
-        String modelFacePath = "/" + openDoorDto.getMachineCode() + "/" + openDoorDto.getUserId() + ".jpg";
+
         ImageFactory.GenerateImage(faceBase, facePath);
 
         openDoorDto.setFace(facePath);
-        openDoorDto.setModelFace(modelFacePath);
         MachineDto tmpMachineDto = new MachineDto();
         tmpMachineDto.setMachineCode(openDoorDto.getMachineCode());
 
@@ -226,6 +227,9 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
         openDoorDto.setMachineId(machineDtos.get(0).getMachineId());
         openDoorDto.setMachineName(machineDtos.get(0).getMachineName());
         openDoorDto.setMachineIp(machineDtos.get(0).getMachineIp());
+
+        String modelFacePath = "/" + machineDtos.get(0).getCommunityId() + "/" + openDoorDto.getUserId() + ".jpg";
+        openDoorDto.setModelFace(modelFacePath);
 
         //保存 抓拍照片
         ResultDto resultDto = openDoorServiceImpl.saveOpenDoor(openDoorDto);
