@@ -6,11 +6,13 @@
         select * from u_user
     </select>
 
-    
+
     <insert id="saveApp" parameterType="com.java110.things.entity.app.AppDto">
         insert into c_app(app_id,app_secret,app_name,access_token,update_time)
         values(#{appId},#{appSecret},#{appName},#{accessToken},#{updateTime})
     </insert>
+
+
 
     <!--
         查询小区信息
@@ -38,10 +40,10 @@
         update c_app t
         <trim prefix="SET" suffixOverrides=",">
             <if test="accessToken != null and accessToken != ''">
-                 t.access_token = #{accessToken},
+                t.access_token = #{accessToken},
             </if>
             <if test="updateTime != null ">
-                 t.update_time = #{updateTime},
+                t.update_time = #{updateTime},
             </if>
         </trim>
         where 1=1
@@ -50,5 +52,40 @@
             and t.app_id = #{appId}
         </if>
     </update>
+
+
+
+    <insert id="saveAppAttr" parameterType="com.java110.things.entity.app.AppDto">
+        insert into c_app_attr(attr_id,app_id,spec_cd,value)
+        values(#{attId},#{appId},#{specCd},#{value})
+    </insert>
+
+    <!--
+        查询小区信息
+    -->
+    <select id="getAppAttrs" parameterType="com.java110.things.entity.app.AppAttrDto"
+            resultType="com.java110.things.entity.app.AppAttrDto">
+        select
+        t.app_id appId,t.attr_id attrId,t.spec_cd specCd,t.value
+        from c_app_attr t
+        where
+        1=1
+        <if test="appId != null and appId != ''">
+            and t.app_id = #{appId}
+        </if>
+        <if test="appIds != null ">
+            and t.app_id in
+            <foreach collection="appIds" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="specCd != null and specCd != ''">
+            and t.spec_cd = #{specCd}
+        </if>
+        <if test="attId != null and attId != ''">
+            and t.attr_id = #{attId}
+        </if>
+        and t.status_cd = '0'
+    </select>
 
 </mapper>

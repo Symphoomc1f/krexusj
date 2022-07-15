@@ -1,5 +1,6 @@
 package com.java110.things.dao;
 
+import com.java110.things.entity.app.AppAttrDto;
 import com.java110.things.entity.app.AppDto;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -26,6 +27,7 @@ public interface IAppServiceDao {
 
     /**
      * 查询设备信息
+     *
      * @param appDto 设备信息
      * @return
      */
@@ -39,5 +41,22 @@ public interface IAppServiceDao {
      * @return 返回影响记录数
      */
     int updateApp(AppDto appDto);
+
+
+    /**
+     * 保存应用属性
+     *
+     * @param appDto 应用属性
+     * @return 返回影响记录数
+     */
+    int saveAppAttr(AppAttrDto appDto);
+
+    /**
+     * 查询应用属性
+     *
+     * @param appDto 应用属性
+     * @return
+     */
+    List<AppAttrDto> getAppAttrs(AppAttrDto appDto);
 
 }

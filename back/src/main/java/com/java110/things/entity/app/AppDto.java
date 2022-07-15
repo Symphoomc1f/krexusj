@@ -3,6 +3,7 @@ package com.java110.things.entity.app;
 import com.java110.things.entity.PageDto;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 应用对象
@@ -21,6 +22,8 @@ public class AppDto extends PageDto implements Serializable {
     private String accessToken;
     private String updateTime;
     private String createTime;
+
+    List<AppAttrDto> appAttrs;
 
     public String getAppId() {
         return appId;
@@ -68,5 +71,13 @@ public class AppDto extends PageDto implements Serializable {
 
     public void setCreateTime(String createTime) {
         this.createTime = createTime;
+    }
+
+    public List<AppAttrDto> getAppAttrs() {
+        return appAttrs;
+    }
+
+    public void setAppAttrs(List<AppAttrDto> appAttrs) {
+        this.appAttrs = appAttrs;
     }
 }
