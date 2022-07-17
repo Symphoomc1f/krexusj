@@ -87,7 +87,7 @@ public interface ICallAccessControlService {
      * @param machineUploadFaceDto 要求信息
      * @throws Exception
      */
-    void machineUploadFace(MachineUploadFaceDto machineUploadFaceDto) throws Exception;
+    void machineUploadFace(MachineUploadFaceDto machineUploadFaceDto,String path) throws Exception;
 
     void machineCmdResult(MachineCmdResultDto machineCmdResultDto) throws Exception;
 

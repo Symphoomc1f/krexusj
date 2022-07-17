@@ -77,6 +77,21 @@ public class AppDto extends PageDto implements Serializable {
         return appAttrs;
     }
 
+    public AppAttrDto getAppAttr(String specCd) {
+        if (this.appAttrs == null || this.appAttrs.size() < 1) {
+            return null;
+        }
+
+        for (AppAttrDto appAttrDto : appAttrs) {
+            if (specCd.equals(appAttrDto.getSpecCd())) {
+                return appAttrDto;
+            }
+        }
+
+        return null;
+
+    }
+
     public void setAppAttrs(List<AppAttrDto> appAttrs) {
         this.appAttrs = appAttrs;
     }

@@ -57,7 +57,8 @@ public class CommunityServiceImpl implements ICommunityService {
         } else {
             resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
         }
-        return resultDto;    }
+        return resultDto;
+    }
 
     /**
      * 查询小区信息
@@ -81,6 +82,19 @@ public class CommunityServiceImpl implements ICommunityService {
 
         ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, count, totalPage, communityDtoList);
         return resultDto;
+    }
+
+    /**
+     * 查询小区
+     *
+     * @param communityDto 小区信息
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public List<CommunityDto> queryCommunitys(CommunityDto communityDto) throws Exception {
+        List<CommunityDto> communityDtoList = communityServiceDao.getCommunitys(communityDto);
+        return communityDtoList;
     }
 
     @Override

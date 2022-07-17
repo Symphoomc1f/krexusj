@@ -8,6 +8,8 @@ import com.java110.things.constant.ResponseConstant;
 import com.java110.things.dao.IMachineFaceServiceDao;
 import com.java110.things.dao.IMachineServiceDao;
 import com.java110.things.entity.accessControl.UserFaceDto;
+import com.java110.things.entity.app.AppAttrDto;
+import com.java110.things.entity.app.AppDto;
 import com.java110.things.entity.cloud.MachineCmdResultDto;
 import com.java110.things.entity.cloud.MachineUploadFaceDto;
 import com.java110.things.entity.community.CommunityDto;
@@ -24,9 +26,11 @@ import com.java110.things.exception.ThreadException;
 import com.java110.things.factory.HttpFactory;
 import com.java110.things.factory.ImageFactory;
 import com.java110.things.factory.MappingCacheFactory;
+import com.java110.things.service.app.IAppService;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.machine.IOperateLogService;
 import com.java110.things.service.openDoor.IOpenDoorService;
+import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
 import com.java110.things.util.DateUtil;
 import com.java110.things.util.StringUtil;
@@ -73,6 +77,9 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
 
     @Autowired
     private IMachineFaceServiceDao machineFaceServiceDaoImpl;
+
+    @Autowired
+    private IAppService appServiceImpl;
 
     /**
      * 查询设备信息
@@ -207,8 +214,6 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
     @Override
     public void saveFaceResult(OpenDoorDto openDoorDto) throws Exception {
 
-
-
         String faceBase = openDoorDto.getFace();
         String facePath = "/" + openDoorDto.getMachineCode() + FACE_RESULT + "/" + openDoorDto.getUserId() + "-" + openDoorDto.getOpenId() + ".jpg";
 
@@ -245,24 +250,26 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
 
         OpenDoorMonitorWebSocketServer.sendInfo(JSONObject.toJSONString(openDoorDto), machineDtos.get(0).getMachineId());
 
-        //人脸不上报云端
-        if (!"ON".equals(MappingCacheFactory.getValue("MACHINE_UPLOAD_FACE"))) {
+        CommunityDto communityDto = new CommunityDto();
+        communityDto.setCommunityId(machineDtos.get(0).getCommunityId());
+        communityDto.setStatusCd("0");
+        List<CommunityDto> communityDtos = communityServiceImpl.queryCommunitys(communityDto);
+
+        Assert.listOnlyOne(communityDtos, "未包含小区信息");
+
+        AppDto appDto = new AppDto();
+        appDto.setAppId(communityDtos.get(0).getAppId());
+        List<AppDto> appDtos = appServiceImpl.getApp(appDto);
+
+        Assert.listOnlyOne(appDtos, "未找到应用信息");
+        AppAttrDto appAttrDto = appDtos.get(0).getAppAttr(AppAttrDto.SPEC_CD_UPLOAD_FACE_URL);
+
+        if (appAttrDto == null) {
             return;
         }
 
-        //查询 小区信息
-        CommunityDto communityDto = new CommunityDto();
-        resultDto = communityServiceImpl.getCommunity(communityDto);
+        String value = appAttrDto.getValue();
 
-        if (resultDto.getCode() != ResponseConstant.SUCCESS) {
-            throw new ThreadException(Result.SYS_ERROR, "查询小区信息失败");
-        }
-
-        List<CommunityDto> communityDtos = (List<CommunityDto>) resultDto.getData();
-
-        if (communityDtos == null || communityDtos.size() < 1) {
-            throw new ThreadException(Result.SYS_ERROR, "当前还没有设置小区，请先设置小区");
-        }
 
         //上报云端
         MachineUploadFaceDto machineUploadFaceDto = new MachineUploadFaceDto();
@@ -274,8 +281,8 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
         machineUploadFaceDto.setSimilar(openDoorDto.getSimilarity());
         machineUploadFaceDto.setUserId(openDoorDto.getUserId());
         machineUploadFaceDto.setRecordTypeCd(StringUtil.isEmpty(openDoorDto.getUserId()) ? "6666" : "8888");
-        machineUploadFaceDto.setCommunityId(communityDtos.get(0).getCommunityId());
-        machineUploadFace(machineUploadFaceDto);
+        machineUploadFaceDto.setCommunityId(machineDtos.get(0).getCommunityId());
+        machineUploadFace(machineUploadFaceDto, value);
 
     }
 
@@ -395,13 +402,9 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
      * @throws Exception
      */
     @Override
-    public void machineUploadFace(MachineUploadFaceDto machineUploadFaceDto) throws Exception {
-        String url = MappingCacheFactory.getValue("CLOUD_API") + "/api/machineTranslate.machineUploadFaceLog";
+    public void machineUploadFace(MachineUploadFaceDto machineUploadFaceDto, String url) throws Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put("machineCode", machineUploadFaceDto.getMachineCode());
-        headers.put("communityId", machineUploadFaceDto.getCommunityId());
         ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, url, machineUploadFaceDto.toString(), headers, HttpMethod.POST);
-
         if (tmpResponseEntity.getStatusCode() != HttpStatus.OK) {
             throw new ServiceException(Result.SYS_ERROR, "人脸上报失败" + tmpResponseEntity.getBody());
         }

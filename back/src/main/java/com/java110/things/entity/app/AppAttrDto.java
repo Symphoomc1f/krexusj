@@ -15,6 +15,9 @@ import java.io.Serializable;
  * add by wuxw 2020/5/10
  **/
 public class AppAttrDto extends PageDto implements Serializable {
+
+    //人脸上报 地址
+    public static final String SPEC_CD_UPLOAD_FACE_URL="3001001";
     private String attrId;
     private String appId;
     private String[] appIds;

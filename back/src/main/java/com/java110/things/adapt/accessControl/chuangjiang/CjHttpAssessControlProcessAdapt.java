@@ -426,6 +426,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         resultParam.put("success", true);
         return resultParam.toJSONString();//未找到设备
 
+
     }
 
     /**

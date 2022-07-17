@@ -35,7 +35,7 @@ public class AccessControlController extends BaseController {
     /**
      * 添加设备接口类
      * <p>
-     *     门禁配置地址为：/api/accessControl/faceResult/设备编码
+     * 门禁配置地址为：/api/accessControl/faceResult/设备编码
      *
      * @param param 请求报文 包括设备 前台填写信息
      * @return 成功或者失败
@@ -54,11 +54,6 @@ public class AccessControlController extends BaseController {
 
         return new ResponseEntity<String>(assessControlProcess.httpFaceResult(param), HttpStatus.OK);
 
-//        if (save) {
-//            return super.createResponseEntity(new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG));
-//        }
-//
-//        return super.createResponseEntity(new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG));
     }
 
 }

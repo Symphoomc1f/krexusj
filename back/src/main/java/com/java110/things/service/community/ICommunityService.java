@@ -3,6 +3,8 @@ package com.java110.things.service.community;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.response.ResultDto;
 
+import java.util.List;
+
 /**
  * @ClassName ICommunityService
  * @Description TODO 小区服务接口类
@@ -24,7 +26,7 @@ public interface ICommunityService {
     /**
      * 修改小区信息
      *
-     * @param communityDto 设备信息
+     * @param communityDto 小区信息
      * @return
      * @throws Exception
      */
@@ -33,16 +35,25 @@ public interface ICommunityService {
     /**
      * 获取设备信息
      *
-     * @param communityDto 设备信息
+     * @param communityDto 小区信息
      * @return
      * @throws Exception
      */
     ResultDto getCommunity(CommunityDto communityDto) throws Exception;
 
     /**
+     * 获取设备信息
+     *
+     * @param communityDto 小区信息
+     * @return
+     * @throws Exception
+     */
+    List<CommunityDto> queryCommunitys(CommunityDto communityDto) throws Exception;
+
+    /**
      * 删除设备
      *
-     * @param communityDto 设备信息
+     * @param communityDto 小区信息
      * @return
      * @throws Exception
      */
