@@ -277,7 +277,6 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
         machineUploadFaceDto.setMachineCode(machineDtos.get(0).getMachineCode());
         machineUploadFaceDto.setOpenTypeCd("1000");
         machineUploadFaceDto.setPhoto(faceBase);
-        machineUploadFaceDto.setScreenId("1");
         machineUploadFaceDto.setSimilar(openDoorDto.getSimilarity());
         machineUploadFaceDto.setUserId(openDoorDto.getUserId());
         machineUploadFaceDto.setRecordTypeCd(StringUtil.isEmpty(openDoorDto.getUserId()) ? "6666" : "8888");

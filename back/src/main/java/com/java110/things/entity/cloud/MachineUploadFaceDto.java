@@ -16,11 +16,11 @@ public class MachineUploadFaceDto implements Serializable {
 
     private String userId; //用户信息
 
+    private String userName; // 用户名称
+
     private String machineCode; //设备编码
 
     private String openTypeCd;//开门方式 1000 人脸开门 2000 钥匙开门
-
-    private String screenId;//屏幕ID，可以不传
 
     private String similar;//相似度
 
@@ -31,7 +31,6 @@ public class MachineUploadFaceDto implements Serializable {
     private String communityId;// 小区信息
 
     private String recordTypeCd; //记录类型，8888 开门记录 6666 访客留影
-
 
     public String getUserId() {
         return userId;
@@ -55,14 +54,6 @@ public class MachineUploadFaceDto implements Serializable {
 
     public void setOpenTypeCd(String openTypeCd) {
         this.openTypeCd = openTypeCd;
-    }
-
-    public String getScreenId() {
-        return screenId;
-    }
-
-    public void setScreenId(String screenId) {
-        this.screenId = screenId;
     }
 
     public String getSimilar() {
@@ -108,5 +99,13 @@ public class MachineUploadFaceDto implements Serializable {
 
     public void setRecordTypeCd(String recordTypeCd) {
         this.recordTypeCd = recordTypeCd;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }
