@@ -77,6 +77,7 @@ public class UserExtController extends BaseController {
         Assert.hasKeyAndValue(reqJson, "endTime", "未包含结束时间");
         Assert.hasKeyAndValue(reqJson, "name", "未包含用户名称");
         Assert.hasKeyAndValue(reqJson, "machineCode", "未包含设备编码");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
 
         MachineDto machineDto = new MachineDto();
         machineDto.setMachineCode(reqJson.getString("machineCode"));
@@ -113,6 +114,7 @@ public class UserExtController extends BaseController {
         Assert.hasKeyAndValue(reqJson, "endTime", "未包含结束时间");
         Assert.hasKeyAndValue(reqJson, "name", "未包含用户名称");
         Assert.hasKeyAndValue(reqJson, "machineCode", "未包含设备编码");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
 
         MachineDto machineDto = new MachineDto();
         machineDto.setMachineCode(reqJson.getString("machineCode"));
@@ -138,12 +140,13 @@ public class UserExtController extends BaseController {
         JSONObject reqJson = JSONObject.parseObject(reqParam);
         Assert.hasKeyAndValue(reqJson, "userId", "未包含用户ID");
         Assert.hasKeyAndValue(reqJson, "machineCode", "未包含设备编码");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
 
         MachineDto machineDto = new MachineDto();
         machineDto.setMachineCode(reqJson.getString("machineCode"));
 
         HeartbeatTaskDto heartbeatTaskDto = new HeartbeatTaskDto();
-        heartbeatTaskDto.setTaskid(reqJson.getString("userId"));
+        heartbeatTaskDto.setTaskinfo(reqJson.getString("userId"));
         ResultDto result = userFaceServiceImpl.deleteUserFace(machineDto, heartbeatTaskDto);
         return ResultDto.createResponseEntity(result);
     }
@@ -164,6 +167,7 @@ public class UserExtController extends BaseController {
         JSONObject reqJson = JSONObject.parseObject(reqParam);
         Assert.hasKeyAndValue(reqJson, "userId", "未包含用户ID");
         Assert.hasKeyAndValue(reqJson, "machineCode", "未包含设备编码");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
 
         MachineDto machineDto = new MachineDto();
         machineDto.setMachineCode(reqJson.getString("machineCode"));

@@ -256,7 +256,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
 
         MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
         postParameters.add("pass", password);
-        postParameters.add("id", heartbeatTaskDto.getTaskid());
+        postParameters.add("id", heartbeatTaskDto.getTaskinfo());
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
@@ -268,7 +268,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
 
 
         postParameters = new LinkedMultiValueMap<>();
-        postParameters.add("personId", heartbeatTaskDto.getTaskid());
+        postParameters.add("personId", heartbeatTaskDto.getTaskinfo());
         postParameters.add("pass", password);
         httpEntity = new HttpEntity(postParameters, httpHeaders);
         responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);

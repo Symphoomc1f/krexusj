@@ -68,6 +68,7 @@ public class CommunityExtController extends BaseController {
         Assert.hasKeyAndValue(reqJson, "address", "未包含小区地址");
         Assert.hasKeyAndValue(reqJson, "cityCode", "未包含城市编码");
         Assert.hasKeyAndValue(reqJson, "extCommunityId", "未包含外部小区编码");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
 
         CommunityDto communityDto = BeanConvertUtil.covertBean(reqJson, CommunityDto.class);
         communityDto.setCommunityId(SeqUtil.getId());
@@ -101,6 +102,7 @@ public class CommunityExtController extends BaseController {
         Assert.hasKeyAndValue(reqJson, "address", "未包含小区地址");
         Assert.hasKeyAndValue(reqJson, "cityCode", "未包含城市编码");
         Assert.hasKeyAndValue(reqJson, "extCommunityId", "未包含外部小区编码");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
 
         CommunityDto communityDto = BeanConvertUtil.covertBean(reqJson, CommunityDto.class);
         ResultDto result = communityServiceImpl.updateCommunity(communityDto);
@@ -124,6 +126,7 @@ public class CommunityExtController extends BaseController {
         JSONObject reqJson = JSONObject.parseObject(reqParam);
 
         Assert.hasKeyAndValue(reqJson, "extCommunityId", "未包含外部小区编码");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
 
         CommunityDto communityDto = BeanConvertUtil.covertBean(reqJson, CommunityDto.class);
         ResultDto result = communityServiceImpl.deleteCommunity(communityDto);

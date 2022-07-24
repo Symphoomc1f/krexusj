@@ -270,7 +270,7 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
     public ResultDto deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
         String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_DELETE_FACE;
         JSONArray userIds = new JSONArray();
-        userIds.add(heartbeatTaskDto.getTaskid());
+        userIds.add(heartbeatTaskDto.getTaskinfo());
         JSONObject param = new JSONObject();
         param.put("operator", "DeletePerson");
         JSONObject info = new JSONObject();

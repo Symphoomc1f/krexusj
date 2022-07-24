@@ -264,7 +264,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
 
 
         JSONObject param = new JSONObject();
-        param.put("id", heartbeatTaskDto.getTaskid());
+        param.put("id", heartbeatTaskDto.getTaskinfo());
         param.put("pass", password);
         HttpHeaders httpHeaders = new HttpHeaders();
         HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);

@@ -79,6 +79,7 @@ public class MachineExtController extends BaseController {
         Assert.hasKeyAndValue(reqJson, "machineTypeCd", "未包含设备类型");
         Assert.hasKeyAndValue(reqJson, "extMachineId", "未包含外部设备编码");
         Assert.hasKeyAndValue(reqJson, "extCommunityId", "未包含外部小区编码");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
 
         CommunityDto communityDto = new CommunityDto();
         communityDto.setExtCommunityId(reqJson.getString("extCommunityId"));
@@ -121,6 +122,8 @@ public class MachineExtController extends BaseController {
 
         JSONObject reqJson = JSONObject.parseObject(reqParam);
         Assert.hasKeyAndValue(reqJson, "extMachineId", "未包含外部设备编码");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
+
         MachineDto machineDto = BeanConvertUtil.covertBean(reqJson, MachineDto.class);
 
 
@@ -145,6 +148,7 @@ public class MachineExtController extends BaseController {
         JSONObject reqJson = JSONObject.parseObject(reqParam);
 
         Assert.hasKeyAndValue(reqJson, "extMachineId", "未包含外部设备编码");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
 
         MachineDto machineDto = BeanConvertUtil.covertBean(reqJson, MachineDto.class);
         ResultDto result = machineServiceImpl.deleteMachine(machineDto);
@@ -168,6 +172,7 @@ public class MachineExtController extends BaseController {
         JSONObject reqJson = JSONObject.parseObject(reqParam);
 
         Assert.hasKeyAndValue(reqJson, "machineCode", "未包含外部设备编码");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
 
         MachineDto machineDto = BeanConvertUtil.covertBean(reqJson, MachineDto.class);
         ResultDto result = machineServiceImpl.openDoor(machineDto);
@@ -191,6 +196,7 @@ public class MachineExtController extends BaseController {
         JSONObject reqJson = JSONObject.parseObject(reqParam);
 
         Assert.hasKeyAndValue(reqJson, "machineCode", "未包含外部设备编码");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
 
         MachineDto machineDto = BeanConvertUtil.covertBean(reqJson, MachineDto.class);
         ResultDto result = machineServiceImpl.restartMachine(machineDto);
