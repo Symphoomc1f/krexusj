@@ -25,6 +25,7 @@ import com.java110.things.service.machine.IMachineService;
 import com.java110.things.service.user.IUserFaceService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
+import com.java110.things.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -83,6 +84,16 @@ public class UserExtController extends BaseController {
         machineDto.setMachineCode(reqJson.getString("machineCode"));
         UserFaceDto userFaceDto = BeanConvertUtil.covertBean(reqJson, UserFaceDto.class);
         ResultDto result = userFaceServiceImpl.saveUserFace(machineDto, userFaceDto);
+        if(result.getData() == null){
+            JSONObject data = new JSONObject();
+            data.put("taskId", reqJson.getString("taskId"));
+            result.setData(data);
+        }else if(result.getData() instanceof JSONObject){
+            JSONObject newData = (JSONObject)result.getData();
+            newData.put("taskId",reqJson.getString("taskId"));
+            result.setData(newData);
+        }
+
         return ResultDto.createResponseEntity(result);
     }
 
@@ -120,6 +131,15 @@ public class UserExtController extends BaseController {
         machineDto.setMachineCode(reqJson.getString("machineCode"));
         UserFaceDto userFaceDto = BeanConvertUtil.covertBean(reqJson, UserFaceDto.class);
         ResultDto result = userFaceServiceImpl.updateUserFace(machineDto, userFaceDto);
+        if(result.getData() == null){
+            JSONObject data = new JSONObject();
+            data.put("taskId", reqJson.getString("taskId"));
+            result.setData(data);
+        }else if(result.getData() instanceof JSONObject){
+            JSONObject newData = (JSONObject)result.getData();
+            newData.put("taskId",reqJson.getString("taskId"));
+            result.setData(newData);
+        }
         return ResultDto.createResponseEntity(result);
     }
 
@@ -148,6 +168,15 @@ public class UserExtController extends BaseController {
         HeartbeatTaskDto heartbeatTaskDto = new HeartbeatTaskDto();
         heartbeatTaskDto.setTaskinfo(reqJson.getString("userId"));
         ResultDto result = userFaceServiceImpl.deleteUserFace(machineDto, heartbeatTaskDto);
+        if(result.getData() == null){
+            JSONObject data = new JSONObject();
+            data.put("taskId", reqJson.getString("taskId"));
+            result.setData(data);
+        }else if(result.getData() instanceof JSONObject){
+            JSONObject newData = (JSONObject)result.getData();
+            newData.put("taskId",reqJson.getString("taskId"));
+            result.setData(newData);
+        }
         return ResultDto.createResponseEntity(result);
     }
 
@@ -175,6 +204,15 @@ public class UserExtController extends BaseController {
         HeartbeatTaskDto heartbeatTaskDto = new HeartbeatTaskDto();
         heartbeatTaskDto.setTaskid(reqJson.getString("userId"));
         ResultDto result = userFaceServiceImpl.deleteUserFace(machineDto, heartbeatTaskDto);
+        if(result.getData() == null){
+            JSONObject data = new JSONObject();
+            data.put("taskId", reqJson.getString("taskId"));
+            result.setData(data);
+        }else if(result.getData() instanceof JSONObject){
+            JSONObject newData = (JSONObject)result.getData();
+            newData.put("taskId",reqJson.getString("taskId"));
+            result.setData(newData);
+        }
         return ResultDto.createResponseEntity(result);
     }
 }

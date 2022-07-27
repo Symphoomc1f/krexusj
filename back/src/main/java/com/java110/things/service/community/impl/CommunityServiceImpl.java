@@ -1,11 +1,13 @@
 package com.java110.things.service.community.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.dao.ICommunityServiceDao;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.service.community.ICommunityService;
+import com.java110.things.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -40,10 +42,14 @@ public class CommunityServiceImpl implements ICommunityService {
     public ResultDto saveCommunity(CommunityDto communityDto) throws Exception {
         int count = communityServiceDao.saveCommunity(communityDto);
         ResultDto resultDto = null;
+        JSONObject data = new JSONObject();
+        if (StringUtil.isEmpty(communityDto.getTaskId())) {
+            data.put("taskId", communityDto.getTaskId());
+        }
         if (count < 1) {
-            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG, data);
         } else {
-            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, data);
         }
         return resultDto;
     }
@@ -51,11 +57,15 @@ public class CommunityServiceImpl implements ICommunityService {
     @Override
     public ResultDto updateCommunity(CommunityDto communityDto) throws Exception {
         int count = communityServiceDao.updateCommunity(communityDto);
+        JSONObject data = new JSONObject();
+        if (StringUtil.isEmpty(communityDto.getTaskId())) {
+            data.put("taskId", communityDto.getTaskId());
+        }
         ResultDto resultDto = null;
         if (count < 1) {
-            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG, data);
         } else {
-            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, data);
         }
         return resultDto;
     }
@@ -101,11 +111,15 @@ public class CommunityServiceImpl implements ICommunityService {
     public ResultDto deleteCommunity(CommunityDto communityDto) throws Exception {
         communityDto.setStatusCd(SystemConstant.STATUS_INVALID);
         int count = communityServiceDao.updateCommunity(communityDto);
+        JSONObject data = new JSONObject();
+        if (StringUtil.isEmpty(communityDto.getTaskId())) {
+            data.put("taskId", communityDto.getTaskId());
+        }
         ResultDto resultDto = null;
         if (count < 1) {
-            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG, data);
         } else {
-            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, data);
         }
         return resultDto;
     }

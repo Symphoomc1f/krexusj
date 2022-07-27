@@ -1,5 +1,6 @@
 package com.java110.things.service.machine.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.java110.things.constant.MachineConstant;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
@@ -14,6 +15,7 @@ import com.java110.things.service.machine.IMachineCmdService;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.SeqUtil;
+import com.java110.things.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -93,10 +95,14 @@ public class MachineServiceImpl implements IMachineService {
         AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).initAssessControlProcess(machineDto);
         int count = machineServiceDao.saveMachine(machineDto);
         ResultDto resultDto = null;
+        JSONObject data = new JSONObject();
+        if (StringUtil.isEmpty(machineDto.getTaskId())) {
+            data.put("taskId", machineDto.getTaskId());
+        }
         if (count < 1) {
-            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG, data);
         } else {
-            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, data);
         }
         return resultDto;
     }
@@ -111,10 +117,14 @@ public class MachineServiceImpl implements IMachineService {
     public ResultDto updateMachine(MachineDto machineDto) throws Exception {
         int count = machineServiceDao.updateMachine(machineDto);
         ResultDto resultDto = null;
+        JSONObject data = new JSONObject();
+        if (StringUtil.isEmpty(machineDto.getTaskId())) {
+            data.put("taskId", machineDto.getTaskId());
+        }
         if (count < 1) {
-            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG, data);
         } else {
-            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, data);
         }
         return resultDto;
     }
@@ -124,10 +134,14 @@ public class MachineServiceImpl implements IMachineService {
         machineDto.setStatusCd(SystemConstant.STATUS_INVALID);
         int count = machineServiceDao.updateMachine(machineDto);
         ResultDto resultDto = null;
+        JSONObject data = new JSONObject();
+        if (StringUtil.isEmpty(machineDto.getTaskId())) {
+            data.put("taskId", machineDto.getTaskId());
+        }
         if (count < 1) {
-            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG, data);
         } else {
-            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, data);
         }
         return resultDto;
     }
@@ -153,7 +167,11 @@ public class MachineServiceImpl implements IMachineService {
             machineCmdDto.setObjTypeValue("-1");
             machineCmdServiceImpl.saveMachineCmd(machineCmdDto);
         }
-        return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+        JSONObject data = new JSONObject();
+        if (StringUtil.isEmpty(machineDto.getTaskId())) {
+            data.put("taskId", machineDto.getTaskId());
+        }
+        return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, data);
     }
 
     @Override
@@ -162,7 +180,11 @@ public class MachineServiceImpl implements IMachineService {
         Assert.listOnlyOne(machineDtoList, "设备不存在");
         machineDto = machineDtoList.get(0);
         AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).openDoor(machineDto);
-        return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+        JSONObject data = new JSONObject();
+        if (StringUtil.isEmpty(machineDto.getTaskId())) {
+            data.put("taskId", machineDto.getTaskId());
+        }
+        return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, data);
     }
 
 

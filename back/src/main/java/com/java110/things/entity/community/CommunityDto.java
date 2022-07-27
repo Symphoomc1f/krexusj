@@ -14,6 +14,8 @@ public class CommunityDto implements Serializable {
 
     private String communityId;
 
+    private String taskId;
+
     private String name;
 
     private String address;
@@ -119,5 +121,13 @@ public class CommunityDto implements Serializable {
 
     public void setAppId(String appId) {
         this.appId = appId;
+    }
+
+    public String getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
     }
 }

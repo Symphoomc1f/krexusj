@@ -28,6 +28,7 @@ public class MachineDto extends PageDto implements Serializable {
     private String oem;
     private String extMachineId;
     private String hmId;
+    private String taskId;
 
 
     public String getMachineMac() {
@@ -145,5 +146,13 @@ public class MachineDto extends PageDto implements Serializable {
 
     public void setHmId(String hmId) {
         this.hmId = hmId;
+    }
+
+    public String getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
     }
 }
