@@ -75,6 +75,39 @@
     }
 ```
 
+参考代码：
+```java
+    //@Java110Synchronized 为分布式全局锁 根据 实际替换为自己的全局锁代码
+    @Java110Synchronized(value = "hc_get_token")
+    public static String get(RestTemplate restTemplate,boolean refreshAccessToken) {
+        //先从缓存中获取是否存在access_token
+        String token = CommonCache.getValue(IotConstant.HC_TOKEN);
+        if (!StringUtil.isEmpty(token) && !refreshAccessToken) {
+            return token;
+        }
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity httpEntity = new HttpEntity(headers);
+        String url = IotConstant.getUrl(IotConstant.GET_TOKEN_URL.replace("APP_ID", IotConstant.getAppId()).replace("APP_SECRET", IotConstant.getAppSecret()));
+        ResponseEntity<String> tokenRes = restTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
+
+        if (tokenRes.getStatusCode() != HttpStatus.OK) {
+            throw new IllegalArgumentException("获取token失败" + tokenRes.getBody());
+        }
+        JSONObject tokenObj = JSONObject.parseObject(tokenRes.getBody());
+
+        if (!tokenObj.containsKey("code") || ResultVo.CODE_OK != tokenObj.getInteger("code")) {
+            throw new IllegalArgumentException("获取token失败" + tokenRes.getBody());
+        }
+
+        token = tokenObj.getJSONObject("data").getString("access_token");
+        int expiresIn = tokenObj.getJSONObject("data").getInteger("expires_in");
+
+        CommonCache.setValue(IotConstant.HC_TOKEN, token, expiresIn - 200);
+
+        return token;
+    }
+```
+
 ## 1.小区资源操作
 
 ### 1.1 新增小区
