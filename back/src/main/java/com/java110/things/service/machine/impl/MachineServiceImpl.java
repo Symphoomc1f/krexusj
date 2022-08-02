@@ -10,6 +10,7 @@ import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.AccessControlProcessFactory;
+import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.machine.IMachineCmdService;
 import com.java110.things.service.machine.IMachineService;
@@ -115,6 +116,12 @@ public class MachineServiceImpl implements IMachineService {
      */
     @Override
     public ResultDto updateMachine(MachineDto machineDto) throws Exception {
+        //重新初始化设备信息
+        String reInitSwitch = MappingCacheFactory.getValue("ACCESS_CONTROL_REINIT_SWITCH");
+        if ("ON".equals(reInitSwitch)) {
+            AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).initAssessControlProcess(machineDto);
+        }
+
         int count = machineServiceDao.updateMachine(machineDto);
         ResultDto resultDto = null;
         JSONObject data = new JSONObject();

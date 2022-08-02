@@ -82,8 +82,8 @@
         <if test="specCd != null and specCd != ''">
             and t.spec_cd = #{specCd}
         </if>
-        <if test="attId != null and attId != ''">
-            and t.attr_id = #{attId}
+        <if test="attrId != null and attrId != ''">
+            and t.attr_id = #{attrId}
         </if>
         and t.status_cd = '0'
     </select>

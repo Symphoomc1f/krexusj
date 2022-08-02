@@ -3,6 +3,8 @@ package com.java110.things.service.machine;
 import com.java110.things.entity.machine.OperateLogDto;
 import com.java110.things.entity.response.ResultDto;
 
+import java.util.List;
+
 /**
  * @ClassName IOperateLogService
  * @Description TODO 硬件操作日志记录类
@@ -26,4 +28,11 @@ public interface IOperateLogService {
      * @return
      */
     ResultDto getOperateLogs(OperateLogDto operateLogDto);
+
+    /**
+     * 查询操作日志
+     * @param operateLogDto 操作日志对象
+     * @return
+     */
+    List<OperateLogDto> queryOperateLogs(OperateLogDto operateLogDto);
 }

@@ -31,7 +31,7 @@ import org.springframework.messaging.MessagingException;
  @IntegrationComponentScan
  * add by wuxw 2020/5/20
  **/
-//@Configuration
+@Configuration
 public class MqttConfig {
 
     @Value("${spring.mqtt.username}")
@@ -56,7 +56,7 @@ public class MqttConfig {
     private int keepalive;
 
 
-    //@Bean
+    @Bean
     public MqttClient mqttClient() {
         MqttClient client = null;
         try {

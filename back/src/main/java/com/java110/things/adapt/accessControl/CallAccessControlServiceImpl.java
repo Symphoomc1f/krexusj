@@ -28,6 +28,7 @@ import com.java110.things.factory.ImageFactory;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.app.IAppService;
 import com.java110.things.service.community.ICommunityService;
+import com.java110.things.service.machine.IMachineFaceService;
 import com.java110.things.service.machine.IOperateLogService;
 import com.java110.things.service.openDoor.IOpenDoorService;
 import com.java110.things.util.Assert;
@@ -80,6 +81,9 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
 
     @Autowired
     private IAppService appServiceImpl;
+
+    @Autowired
+    private IMachineFaceService machineFaceService;
 
     /**
      * 查询设备信息
@@ -190,16 +194,16 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
             throw new ServiceException(Result.SYS_ERROR, "未包含日志ID，一般为 和设备交互请求返回的唯一编码 如流水");
         }
 
-        if (StringUtil.isEmpty(operateLogDto.getMachineId())) {
-            throw new ServiceException(Result.SYS_ERROR, "设备ID，可以从machineDto 对象中获取，如果没有可以用machineCode 查一下库");
-        }
+//        if (StringUtil.isEmpty(operateLogDto.getMachineId())) {
+//            throw new ServiceException(Result.SYS_ERROR, "设备ID，可以从machineDto 对象中获取，如果没有可以用machineCode 查一下库");
+//        }
 //        if(StringUtil.isEmpty(operateLogDto.getState())){
 //            throw new ServiceException(Result.SYS_ERROR, "日志状态，请求成功 10001,返回成功10002,操作失败 10003");
 //        }
 
-        if (StringUtil.isEmpty(operateLogDto.getOperateType())) {
-            throw new ServiceException(Result.SYS_ERROR, "操作类型，可以查看t_dict 表");
-        }
+//        if (StringUtil.isEmpty(operateLogDto.getOperateType())) {
+//            throw new ServiceException(Result.SYS_ERROR, "操作类型，可以查看t_dict 表");
+//        }
 
         if (StringUtil.isEmpty(operateLogDto.getState())) {
             operateLogDto.setState("10001"); // 默认设置为请求
@@ -414,26 +418,57 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
     @Override
     public void machineCmdResult(MachineCmdResultDto machineCmdResultDto) throws Exception {
 
-        //查询 小区信息
+        OperateLogDto operateLogDto = new OperateLogDto();
+        operateLogDto.setLogId(machineCmdResultDto.getTaskid());
+        List<OperateLogDto> operateLogDtos = operateLogServiceImpl.queryOperateLogs(operateLogDto);
+
+        Assert.listOnlyOne(operateLogDtos, "未包含操作日志记录");
+
+        //刷 操作日志记录
+        OperateLogDto tmpOperateLogDto = new OperateLogDto();
+        tmpOperateLogDto.setLogId(machineCmdResultDto.getTaskid());
+        tmpOperateLogDto.setState(machineCmdResultDto.getCode() == 0 ? "10002" : "10003");
+        tmpOperateLogDto.setResParam(machineCmdResultDto.getResJson());
+
+        //修改操作日志
+        operateLogServiceImpl.saveOperateLog(tmpOperateLogDto);
+        MachineDto machineDto = new MachineDto();
+        machineDto.setMachineId(operateLogDtos.get(0).getMachineId());
+        List<MachineDto> machineDtos = queryMachines(machineDto);
+
+        Assert.listOnlyOne(machineDtos, "设备不存在");
+
+        //刷新人脸信息
+        if (!StringUtil.isEmpty(operateLogDtos.get(0).getUserId())) {
+            MachineFaceDto machineFaceDto = new MachineFaceDto();
+            machineFaceDto.setUserId(operateLogDtos.get(0).getUserId());
+            machineFaceDto.setMachineId(machineDtos.get(0).getMachineId());
+            machineFaceDto.setState(machineCmdResultDto.getCode() == 0 ? "10002" : "10003");
+            machineFaceDto.setMessage(machineCmdResultDto.getMsg());
+            machineFaceService.updateMachineFace(machineFaceDto);
+        }
+
         CommunityDto communityDto = new CommunityDto();
-        ResultDto resultDto = communityServiceImpl.getCommunity(communityDto);
+        communityDto.setCommunityId(machineDtos.get(0).getCommunityId());
+        communityDto.setStatusCd("0");
+        List<CommunityDto> communityDtos = communityServiceImpl.queryCommunitys(communityDto);
 
-        if (resultDto.getCode() != ResponseConstant.SUCCESS) {
-            throw new ThreadException(Result.SYS_ERROR, "查询小区信息失败");
+        Assert.listOnlyOne(communityDtos, "未包含小区信息");
+
+        AppDto appDto = new AppDto();
+        appDto.setAppId(communityDtos.get(0).getAppId());
+        List<AppDto> appDtos = appServiceImpl.getApp(appDto);
+
+        Assert.listOnlyOne(appDtos, "未找到应用信息");
+        AppAttrDto appAttrDto = appDtos.get(0).getAppAttr(AppAttrDto.SPEC_CD_UPLOAD_CMD_URL);
+
+        if (appAttrDto == null) {
+            return;
         }
 
-        List<CommunityDto> communityDtos = (List<CommunityDto>) resultDto.getData();
-
-        if (communityDtos == null || communityDtos.size() < 1) {
-            throw new ThreadException(Result.SYS_ERROR, "当前还没有设置小区，请先设置小区");
-        }
-        String url = MappingCacheFactory.getValue("CLOUD_API") + "/api/machineTranslate.machineCmdResult";
+        String value = appAttrDto.getValue();
         Map<String, String> headers = new HashMap<>();
-        headers.put("machineCode", machineCmdResultDto.getMachineCode());
-        headers.put("communityId", communityDtos.get(0).getCommunityId());
-
-        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, url, machineCmdResultDto.toString(), headers, HttpMethod.POST);
-
+        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, value, machineCmdResultDto.toString(), headers, HttpMethod.POST);
         if (tmpResponseEntity.getStatusCode() != HttpStatus.OK) {
             logger.error("执行结果失败" + tmpResponseEntity.getBody());
         }

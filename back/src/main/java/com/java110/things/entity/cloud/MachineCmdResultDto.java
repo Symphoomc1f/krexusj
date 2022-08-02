@@ -24,13 +24,15 @@ public class MachineCmdResultDto implements Serializable {
     private String taskid;
 
     private String machineCode;
+    private String resJson;
 
 
-    public MachineCmdResultDto(int code, String msg, String taskid,  String machineCode) {
+    public MachineCmdResultDto(int code, String msg, String taskid, String machineCode, String resJson) {
         this.code = code;
         this.msg = msg;
         this.taskid = taskid;
         this.machineCode = machineCode;
+        this.resJson = resJson;
     }
 
     public int getCode() {
@@ -68,5 +70,13 @@ public class MachineCmdResultDto implements Serializable {
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);
+    }
+
+    public String getResJson() {
+        return resJson;
+    }
+
+    public void setResJson(String resJson) {
+        this.resJson = resJson;
     }
 }

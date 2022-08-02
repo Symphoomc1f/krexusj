@@ -2,12 +2,12 @@ package com.java110.things.adapt.accessControl.dean;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.java110.things.accessControl.AddUpdateFace;
 import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
+import com.java110.things.entity.cloud.MachineCmdResultDto;
 import com.java110.things.entity.fee.FeeDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.MachineFaceDto;
@@ -20,12 +20,11 @@ import com.java110.things.factory.MqttFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.SeqUtil;
-import com.java110.things.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import sun.misc.BASE64Encoder;
@@ -90,10 +89,10 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
     public static final String TOPIC_FACE_REQUEST = "face.request";
 
     //接收设备处理
-    public static final String TOPIC_FACE_SN_RESPONSE = "face.{sn}.response";
+    public static final String TOPIC_FACE_SN_RESPONSE = "mqtt/face/ID/Ack";
 
     //识别结果上报
-    public static final String TOPIC_FACE_RESPONSE = "face.response";
+    public static final String TOPIC_FACE_RESPONSE = "mqtt/face/ID/Rec";
 
     //硬件上线上报
     public static final String TOPIC_ONLINE_RESPONSE = "online/response";
@@ -116,6 +115,9 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
 
     @Override
     public ResultDto initAssessControlProcess(MachineDto machineDto) {
+        //推送人脸识别结果
+        MqttFactory.subscribe(TOPIC_FACE_SN_RESPONSE.replace(SN, machineDto.getMachineCode()));
+        MqttFactory.subscribe(TOPIC_FACE_RESPONSE.replace(SN, machineDto.getMachineCode()));
         return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG);
     }
 
@@ -137,55 +139,31 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
     @Override
     public String getFace(MachineDto machineDto, UserFaceDto userFaceDto) {
 
-        String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_ADD_FACE_FIND;
-        JSONObject param = new JSONObject();
-        param.put("operator", "SearchPerson");
-        JSONObject info = new JSONObject();
-        info.put("DeviceID", machineDto.getMachineCode());
-        info.put("SearchType", 0);
-        info.put("SearchID", userFaceDto.getUserId());
-        info.put("Picture", 1);
-        param.put("info", info);
-
-        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), getHeaders());
-        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
-        logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE_FIND, param.toJSONString(), responseEntity.getBody());
-
-
-        if (HttpStatus.OK != responseEntity.getStatusCode()) {
-            return AddUpdateFace.MACHINE_HAS_NOT_FACE;
-        }
-
-        JSONObject outParam = JSONObject.parseObject(responseEntity.getBody());
-
-        if (!outParam.containsKey("picinfo")) {
-            return AddUpdateFace.MACHINE_HAS_NOT_FACE;
-        }
-
-        String picinfo = outParam.getString("picinfo");
-
-        if (StringUtil.isEmpty(picinfo)) {
-            return AddUpdateFace.MACHINE_HAS_NOT_FACE;
-        }
-
-        String personId = outParam.getJSONObject("info").getString("CustomizeID");
-
-        if (StringUtil.isEmpty(personId)) {
-            return AddUpdateFace.MACHINE_HAS_NOT_FACE;
-        }
-
-        return personId;
+        return "-1";
     }
 
     /**
-     * { "
-     * operator": "AddPerson",
-     * "info": {
-     * <p>
-     * },
-     * "picinfo":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQAB......"
-     * }
+     * { "messageId":"ID:localhost-637050272518414388:79346:87:5",
+     * "operator":"EditPerson",
+     * "info": { "personId":"",
+     * "customId":"772020122840610978",
+     * "name":"王工",
+     * "nation":1,
+     * "gender":0,
+     * "birthday":"1995-06-12",
+     * "address":"",
+     * "idCard":"632126199109163355",
+     * "tempCardType":0,
+     * "EffectNumber":3,
+     * "cardValidBegin":"2019-10-10 10:00:00",
+     * "cardValidEnd":"2021-10-10 16:00:00",
+     * "telnum1":"18888888888",
+     * "native":"广东深圳",
+     * "cardType2":0,
+     * "cardNum2":"",
+     * "notes":"",
+     * "personType":0,
+     * "cardType":0, "dwidentity":0, "picURI":"http://proxy.homecommunity.cn:9006/face/e01c90be-f923-4afe-831a-5b2e1051c987/772020122840610978.jpg"} }
      *
      * @param machineDto  硬件信息
      * @param userFaceDto 用户人脸信息
@@ -198,22 +176,33 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
         param.put("messageId", userFaceDto.getTaskId());
         param.put("operator", "EditPerson");
         JSONObject info = new JSONObject();
-        info.put("DeviceID", machineDto.getMachineCode());
-        info.put("PersonType", 0);
-        info.put("IdType", 0);
-        info.put("CustomizeID", userFaceDto.getUserId());
-        info.put("PersonUUID", userFaceDto.getUserId());
-        info.put("Name", userFaceDto.getName());
-        info.put("CardType", 0);
+        info.put("personId", "");
+        info.put("customId", userFaceDto.getUserId());
+        info.put("name", userFaceDto.getName());
+        info.put("nation", 1);
+        info.put("gender", 0);
+        info.put("birthday", "1995-06-12");
+        info.put("address", "");
         info.put("IdCard", userFaceDto.getIdNumber());
-        info.put("Tempvalid", 0);
-        info.put("isCheckSimilarity", 0);
+        info.put("tempCardType", 0);
+        info.put("EffectNumber", 3);
+        info.put("cardValidBegin", userFaceDto.getStartTime());
+        info.put("cardValidEnd", userFaceDto.getEndTime());
+        info.put("telnum1", "18888888888");
+        info.put("native", "广东深圳");
+        info.put("cardType2", 0);
+        info.put("cardNum2", "");
+        info.put("notes", "");
+        info.put("personType", 0);
+        info.put("cardType", 0);
+        info.put("dwidentity", 0);
+        info.put("picURI", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
         param.put("info", info);
         //param.put("picinfo", userFaceDto.getFaceBase64());
-        param.put("picURI", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
+
 
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, param.toJSONString(), "");
+        saveLog(userFaceDto.getTaskId(), machineDto.getMachineId(), CMD_ADD_USER, param.toJSONString(), "");
 
         String msg = "同步成功";
 
@@ -229,22 +218,31 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
         param.put("messageId", userFaceDto.getTaskId());
         param.put("operator", "EditPerson");
         JSONObject info = new JSONObject();
-        info.put("DeviceID", machineDto.getMachineCode());
-        info.put("PersonType", 0);
-        info.put("IdType", 0);
-        info.put("CustomizeID", userFaceDto.getUserId());
-        info.put("PersonUUID", userFaceDto.getUserId());
-        info.put("Name", userFaceDto.getName());
-        info.put("CardType", 0);
+        info.put("personId", "");
+        info.put("customId", userFaceDto.getUserId());
+        info.put("name", userFaceDto.getName());
+        info.put("nation", 1);
+        info.put("gender", 0);
+        info.put("birthday", "1995-06-12");
+        info.put("address", "");
         info.put("IdCard", userFaceDto.getIdNumber());
-        info.put("Tempvalid", 0);
-        info.put("isCheckSimilarity", 0);
+        info.put("tempCardType", 0);
+        info.put("EffectNumber", 3);
+        info.put("cardValidBegin", userFaceDto.getStartTime());
+        info.put("cardValidEnd", userFaceDto.getEndTime());
+        info.put("telnum1", "18888888888");
+        info.put("native", "广东深圳");
+        info.put("cardType2", 0);
+        info.put("cardNum2", "");
+        info.put("notes", "");
+        info.put("personType", 0);
+        info.put("cardType", 0);
+        info.put("dwidentity", 0);
+        info.put("picURI", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
         param.put("info", info);
-        //param.put("picinfo", userFaceDto.getFaceBase64());
-        param.put("picURI", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
 
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_EDIT_USER, param.toJSONString(), "");
+        saveLog(userFaceDto.getTaskId(), machineDto.getMachineId(), CMD_EDIT_USER, param.toJSONString(), "");
         return new ResultDto(ResultDto.SUCCESS, "上传mqtt成功");
     }
 
@@ -265,7 +263,7 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
 
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
 
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_DELETE_FACE, param.toJSONString(), "");
+        saveLog(heartbeatTaskDto.getTaskid(), machineDto.getMachineId(), CMD_DELETE_FACE, param.toJSONString(), "");
 
         return new ResultDto(ResultDto.SUCCESS, "上传mqtt成功");
 
@@ -282,7 +280,7 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
         param.put("info", info);
 
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_RESET, param.toJSONString(), "");
+        saveLog(heartbeatTaskDto.getTaskid(), machineDto.getMachineId(), CMD_RESET, param.toJSONString(), "");
 
         return new ResultDto(ResultDto.SUCCESS, "上传mqtt成功");
     }
@@ -304,16 +302,10 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
     public void mqttMessageArrived(String topic, String data) {
         JSONObject param = JSONObject.parseObject(data);
 
-        switch (topic) {
-            case TOPIC_FACE_RESPONSE:
-                openDoorResult(data);
-                break;
-            case TOPIC_ONLINE_RESPONSE: //硬件上线
-                machineOnline(data);
-                break;
-            default:
-                machineCmdResult(data);
-                break;
+        if (topic.contains("Ack")) {
+            machineCmdResult(data);
+        } else if (topic.contains("Rec")) {
+            openDoorResult(data);
         }
 
         if (!param.containsKey("cmd_id")) {
@@ -346,21 +338,41 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
 
     private void machineCmdResult(String data) {
         JSONObject resultCmd = JSONObject.parseObject(data);
-        if (!resultCmd.containsKey("cmd")) {
+        if (!resultCmd.containsKey("messageId")) {
             return;
         }
-        String cmd = resultCmd.getString("cmd");
-//        switch (cmd) {
-//            case CMD_ADD_FACE:
-//                doCmdResultCloud(resultCmd);
-//                break;
-//            case CMD_UPDATE_FACE:
-//                break;
-//            case CMD_DELETE_FACE:
-//                break;
-//            default:
-//                break;
-//        }
+        String operator = resultCmd.getString("operator");
+        switch (operator) {
+            case "EditPerson-Ack":
+                doCmdResultCloud(resultCmd);
+                break;
+            case "DelPerson-Ack":
+                break;
+            case CMD_DELETE_FACE:
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void doCmdResultCloud(JSONObject resultCmd) {
+        try {
+            String taskId = resultCmd.getString("messageId");
+
+            JSONObject info = resultCmd.getJSONObject("info");
+            int code = -1;
+            if (!info.containsKey("result")) {
+                code = -1;
+            } else {
+                code = info.getString("result") != "ok" ? -1 : 0;
+            }
+            String msg = info.containsKey("detail") ? resultCmd.getString("detail") : "未知";
+            ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
+            MachineCmdResultDto machineCmdResultDto = new MachineCmdResultDto(code, msg, taskId, "", resultCmd.toJSONString());
+            notifyAccessControlService.machineCmdResult(machineCmdResultDto);
+        } catch (Exception e) {
+            logger.error("上报执行命令失败", e);
+        }
     }
 
 
@@ -590,6 +602,22 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
         operateLogDto.setState(state);
         operateLogDto.setUserId(userId);
         operateLogDto.setUserName(userName);
+        notifyAccessControlService.saveOrUpdateOperateLog(operateLogDto);
+    }
+
+    /**
+     * 存储日志
+     *
+     * @param logId    日志ID
+     * @param resParam 返回报文
+     * @param state    状态
+     */
+    private void updateLog(String logId, String resParam, String state) {
+        ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
+        OperateLogDto operateLogDto = new OperateLogDto();
+        operateLogDto.setLogId(logId);
+        operateLogDto.setResParam(resParam);
+        operateLogDto.setState(state);
         notifyAccessControlService.saveOrUpdateOperateLog(operateLogDto);
     }
 

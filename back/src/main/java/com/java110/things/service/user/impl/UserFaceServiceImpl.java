@@ -24,6 +24,7 @@ import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.CommunityPersonDto;
 import com.java110.things.factory.AccessControlProcessFactory;
 import com.java110.things.factory.ImageFactory;
+import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.machine.IMachineFaceService;
 import com.java110.things.service.user.ICommunityPersonService;
 import com.java110.things.service.user.IUserFaceService;
@@ -73,6 +74,12 @@ public class UserFaceServiceImpl implements IUserFaceService {
 
         machineDto = machineDtos.get(0);
 
+        String reInitSwitch = MappingCacheFactory.getValue("ACCESS_CONTROL_REINIT_SWITCH");
+
+        if("ON".equals(reInitSwitch)){
+            AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).initAssessControlProcess(machineDto);
+        }
+
         //查询 当前用户是否在硬件中存在数据
         String faceId = AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).getFace(machineDto, userFaceDto);
 
@@ -117,6 +124,12 @@ public class UserFaceServiceImpl implements IUserFaceService {
         List<MachineDto> machineDtos = machineServiceDaoImpl.getMachines(machineDto);
         Assert.listOnlyOne(machineDtos, "设备编码错误，不存在该设备");
         machineDto = machineDtos.get(0);
+
+        //重新初始化设备信息
+        String reInitSwitch = MappingCacheFactory.getValue("ACCESS_CONTROL_REINIT_SWITCH");
+        if("ON".equals(reInitSwitch)){
+            AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).initAssessControlProcess(machineDto);
+        }
 
         ImageFactory.deleteImage(machineDto.getCommunityId() + File.separatorChar + heartbeatTaskDto.getTaskinfo() + ".jpg");
         ResultDto resultDto = AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).deleteFace(machineDto, heartbeatTaskDto);

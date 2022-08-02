@@ -3,7 +3,6 @@ package com.java110.things.service.machine.impl;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.dao.IOperateLogServiceDao;
 import com.java110.things.entity.PageDto;
-import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.OperateLogDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.service.machine.IOperateLogService;
@@ -33,9 +32,9 @@ public class OperateLogServiceImpl implements IOperateLogService {
         tmpOperateLogDto.setLogId(operateLogDto.getLogId());
         long cnt = operateLogServiceDao.getOperateLogCount(tmpOperateLogDto);
         int count = 0;
-        if(cnt> 0){
+        if (cnt > 0) {
             count = operateLogServiceDao.updateOperateLog(operateLogDto);
-        }else {
+        } else {
             count = operateLogServiceDao.saveOperateLog(operateLogDto);
         }
         ResultDto resultDto = null;
@@ -64,5 +63,17 @@ public class OperateLogServiceImpl implements IOperateLogService {
         }
         ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, count, totalPage, operateLogDtoList);
         return resultDto;
+    }
+
+    @Override
+    public List<OperateLogDto> queryOperateLogs(OperateLogDto operateLogDto) {
+        int page = operateLogDto.getPage();
+
+        if (page != PageDto.DEFAULT_PAGE) {
+            operateLogDto.setPage((page - 1) * operateLogDto.getRow());
+        }
+        List<OperateLogDto> operateLogDtoList = null;
+        operateLogDtoList = operateLogServiceDao.getOperateLogs(operateLogDto);
+        return operateLogDtoList;
     }
 }

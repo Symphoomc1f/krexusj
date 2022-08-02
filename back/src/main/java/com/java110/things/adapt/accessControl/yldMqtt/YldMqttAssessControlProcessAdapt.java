@@ -296,7 +296,7 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
             }
             String msg = resultCmd.containsKey("reply") ? resultCmd.getString("reply") : "";
             ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
-            MachineCmdResultDto machineCmdResultDto = new MachineCmdResultDto(code, msg, taskId, machineCode);
+            MachineCmdResultDto machineCmdResultDto = new MachineCmdResultDto(code, msg, taskId, machineCode,resultCmd.toJSONString());
             notifyAccessControlService.machineCmdResult(machineCmdResultDto);
         } catch (Exception e) {
             logger.error("上报执行命令失败", e);

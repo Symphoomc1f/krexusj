@@ -65,8 +65,8 @@ spring :
     completionTimeout: 3000
     default:
       topic: topic
-    password: admin
-    url: tcp://192.168.1.4:1883
+    password: password
+    url: tcp://101.37.174.37:61613
     username: admin
     keepalive: 10
 
