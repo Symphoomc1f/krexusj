@@ -176,14 +176,14 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
         param.put("messageId", userFaceDto.getTaskId());
         param.put("operator", "EditPerson");
         JSONObject info = new JSONObject();
-        info.put("personId", "");
+        //info.put("personId", "");
         info.put("customId", userFaceDto.getUserId());
         info.put("name", userFaceDto.getName());
         info.put("nation", 1);
         info.put("gender", 0);
         info.put("birthday", "1995-06-12");
         info.put("address", "");
-        info.put("IdCard", userFaceDto.getIdNumber());
+        info.put("idCard", userFaceDto.getIdNumber());
         info.put("tempCardType", 0);
         info.put("EffectNumber", 3);
         info.put("cardValidBegin", userFaceDto.getStartTime());
@@ -218,14 +218,14 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
         param.put("messageId", userFaceDto.getTaskId());
         param.put("operator", "EditPerson");
         JSONObject info = new JSONObject();
-        info.put("personId", "");
+        //info.put("personId", "");
         info.put("customId", userFaceDto.getUserId());
         info.put("name", userFaceDto.getName());
         info.put("nation", 1);
         info.put("gender", 0);
         info.put("birthday", "1995-06-12");
         info.put("address", "");
-        info.put("IdCard", userFaceDto.getIdNumber());
+        info.put("idCard", userFaceDto.getIdNumber());
         info.put("tempCardType", 0);
         info.put("EffectNumber", 3);
         info.put("cardValidBegin", userFaceDto.getStartTime());
@@ -248,17 +248,12 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
 
     @Override
     public ResultDto deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
-        String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_DELETE_FACE;
-        JSONArray userIds = new JSONArray();
-        userIds.add(heartbeatTaskDto.getTaskinfo());
+
         JSONObject param = new JSONObject();
         param.put("messageId", heartbeatTaskDto.getTaskid());
         param.put("operator", "DelPerson");
         JSONObject info = new JSONObject();
-        info.put("DeviceID", machineDto.getMachineCode());
-        info.put("TotalNum", 1);
-        info.put("IdType", 0);
-        info.put("CustomizeID", userIds);
+        info.put("customId", heartbeatTaskDto.getTaskinfo());
         param.put("info", info);
 
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
