@@ -21,6 +21,7 @@ public class OpenDoorDto extends PageDto implements Serializable {
     private String openTypeCdName;
     private String userId;
     private String userName;
+    private String idNumber;
     private String machineIp;
 
     private String hat;
@@ -36,6 +37,7 @@ public class OpenDoorDto extends PageDto implements Serializable {
 
     private String createTime;
     private String communityId;
+    private String tel;
 
     public String getOpenId() {
         return openId;
@@ -172,5 +174,21 @@ public class OpenDoorDto extends PageDto implements Serializable {
 
     public void setCommunityId(String communityId) {
         this.communityId = communityId;
+    }
+
+    public String getIdNumber() {
+        return idNumber;
+    }
+
+    public void setIdNumber(String idNumber) {
+        this.idNumber = idNumber;
+    }
+
+    public String getTel() {
+        return tel;
+    }
+
+    public void setTel(String tel) {
+        this.tel = tel;
     }
 }

@@ -30,7 +30,11 @@ public class MachineUploadFaceDto implements Serializable {
 
     private String communityId;// 小区信息
 
+    private String extCommunityId;
+
     private String recordTypeCd; //记录类型，8888 开门记录 6666 访客留影
+
+    private String idNumber;
 
     public String getUserId() {
         return userId;
@@ -107,5 +111,21 @@ public class MachineUploadFaceDto implements Serializable {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public String getExtCommunityId() {
+        return extCommunityId;
+    }
+
+    public void setExtCommunityId(String extCommunityId) {
+        this.extCommunityId = extCommunityId;
+    }
+
+    public String getIdNumber() {
+        return idNumber;
+    }
+
+    public void setIdNumber(String idNumber) {
+        this.idNumber = idNumber;
     }
 }

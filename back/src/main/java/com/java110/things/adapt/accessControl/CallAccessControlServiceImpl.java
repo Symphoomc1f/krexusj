@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.accessControl.OpenDoorMonitorWebSocketServer;
 import com.java110.things.constant.MachineConstant;
 import com.java110.things.constant.ResponseConstant;
+import com.java110.things.constant.SystemConstant;
 import com.java110.things.dao.IMachineFaceServiceDao;
 import com.java110.things.dao.IMachineServiceDao;
 import com.java110.things.entity.accessControl.UserFaceDto;
@@ -273,6 +274,19 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
         }
 
         String value = appAttrDto.getValue();
+        String upLoadAppId = "";
+        String securityCode = "";
+
+        appAttrDto = appDtos.get(0).getAppAttr(AppAttrDto.SPEC_CD_APP_ID);
+
+        if (appAttrDto != null) {
+            upLoadAppId = appAttrDto.getValue();
+        }
+
+        appAttrDto = appDtos.get(0).getAppAttr(AppAttrDto.SPEC_CD_SECURITY_CODE);
+        if (appAttrDto != null) {
+            securityCode = appAttrDto.getValue();
+        }
 
 
         //上报云端
@@ -285,8 +299,9 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
         machineUploadFaceDto.setUserId(openDoorDto.getUserId());
         machineUploadFaceDto.setUserName(openDoorDto.getUserName());
         machineUploadFaceDto.setRecordTypeCd(StringUtil.isEmpty(openDoorDto.getUserId()) ? "6666" : "8888");
-        machineUploadFaceDto.setCommunityId(machineDtos.get(0).getCommunityId());
-        machineUploadFace(machineUploadFaceDto, value);
+        machineUploadFaceDto.setExtCommunityId(communityDtos.get(0).getExtCommunityId());
+        machineUploadFaceDto.setIdNumber(openDoorDto.getIdNumber());
+        machineUploadFace(machineUploadFaceDto, value, upLoadAppId, securityCode);
 
     }
 
@@ -407,8 +422,21 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
      */
     @Override
     public void machineUploadFace(MachineUploadFaceDto machineUploadFaceDto, String url) throws Exception {
+        machineUploadFace(machineUploadFaceDto, url, "", "");
+
+    }
+
+
+    /**
+     * 人脸上报实现
+     *
+     * @param machineUploadFaceDto 要求信息
+     * @throws Exception
+     */
+    public void machineUploadFace(MachineUploadFaceDto machineUploadFaceDto, String url, String appId, String securityCode) throws Exception {
         Map<String, String> headers = new HashMap<>();
-        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, url, machineUploadFaceDto.toString(), headers, HttpMethod.POST);
+        headers.put(SystemConstant.HTTP_APP_ID, appId);
+        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, url, machineUploadFaceDto.toString(), headers, HttpMethod.POST, securityCode);
         if (tmpResponseEntity.getStatusCode() != HttpStatus.OK) {
             throw new ServiceException(Result.SYS_ERROR, "人脸上报失败" + tmpResponseEntity.getBody());
         }

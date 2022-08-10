@@ -16,17 +16,10 @@ import javax.crypto.Cipher;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.security.InvalidParameterException;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -103,15 +96,24 @@ public class AuthenticationFactory {
      * @param transactionId
      * @return
      */
-    public static String generatorSign(String transactionId, String requestTime, String param) throws NoAuthorityException {
+    public static String generatorSign(String transactionId, String requestTime, String param, String securityCode) throws NoAuthorityException {
 
         if ("ON".equals(MappingCacheFactory.getValue("SIGN_FLAG"))) {
-            String reqInfo = transactionId + requestTime + MappingCacheFactory.getValue("APP_ID") + param + MappingCacheFactory.getValue("SECURITY_CODE");
+            String reqInfo = transactionId + requestTime + MappingCacheFactory.getValue("APP_ID") + param + securityCode;
             return md5(reqInfo);
         }
         return "";
     }
 
+    /**
+     * 生成签名
+     *
+     * @param transactionId
+     * @return
+     */
+    public static String generatorSign(String transactionId, String requestTime, String param) throws NoAuthorityException {
+        return generatorSign(transactionId, requestTime, param, MappingCacheFactory.getValue("SECURITY_CODE"));
+    }
 
 
     /**
@@ -368,7 +370,7 @@ public class AuthenticationFactory {
         String reqInfo = tranId + reqTime + "992020051967020024" + param + "g3kE9ggkM4Jqrs576rJS0CYg7dbtMXPz";
         String sign = md5(reqInfo);
 
-        System.out.printf("sign"+sign);
+        System.out.printf("sign" + sign);
 
     }
 }

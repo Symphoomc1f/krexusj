@@ -20,6 +20,8 @@ public class AppAttrDto extends PageDto implements Serializable {
     public static final String SPEC_CD_UPLOAD_FACE_URL = "3001001";
     //异步执行结果上报
     public static final String SPEC_CD_UPLOAD_CMD_URL = "3002001";
+    public static final String SPEC_CD_APP_ID = "3003001";
+    public static final String SPEC_CD_SECURITY_CODE = "3004001";
     private String attrId;
     private String appId;
     private String[] appIds;

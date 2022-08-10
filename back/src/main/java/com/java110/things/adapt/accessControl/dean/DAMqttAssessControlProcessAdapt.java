@@ -1,6 +1,5 @@
 package com.java110.things.adapt.accessControl.dean;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import com.java110.things.adapt.accessControl.ICallAccessControlService;
@@ -20,6 +19,7 @@ import com.java110.things.factory.MqttFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.SeqUtil;
+import com.java110.things.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -509,6 +509,67 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
 
     private void openDoorResult(String data) {
 
+
+        ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
+        JSONObject resultParam = new JSONObject();
+        try {
+            JSONObject info = JSONObject.parseObject(data).getJSONObject("info");
+            MachineDto machineDto = new MachineDto();
+            machineDto.setMachineCode(info.getString("facesluiceId"));
+            List<MachineDto> machineDtos = notifyAccessControlService.queryMachines(machineDto);
+
+            if (machineDtos.size() < 0) {
+                return;//未找到设备
+            }
+
+            if (!info.containsKey("pic") || StringUtil.isEmpty(info.getString("pic"))) {
+                JSONObject param = new JSONObject();
+                param.put("operator", "PushAck");
+                param.put("messageId", SeqUtil.getId());
+
+                JSONObject result = new JSONObject();
+                result.put("PushAckType", "2");
+                result.put("SnapOrRecordID", info.getString("RecordID"));
+                param.put("info", result);
+                MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
+
+                return;
+            }
+
+            String userId = info.containsKey("customId") ? info.getString("customId") : "";
+            String userName = info.containsKey("persionName") ? info.getString("persionName") : "";
+
+
+            OpenDoorDto openDoorDto = new OpenDoorDto();
+            openDoorDto.setFace(info.getString("pic").replace("data:image/jpeg;base64,", ""));
+            openDoorDto.setUserName(userName);
+            openDoorDto.setHat("3");
+            openDoorDto.setSimilarity(info.getString("similarity1"));
+            openDoorDto.setMachineCode(machineDtos.get(0).getMachineCode());
+            openDoorDto.setUserId(userId);
+            openDoorDto.setOpenId(SeqUtil.getId());
+            openDoorDto.setIdNumber(info.getString("idCard"));
+            openDoorDto.setTel(info.getString("tel"));
+            openDoorDto.setOpenTypeCd(OPEN_TYPE_FACE);
+
+
+            freshOwnerFee(openDoorDto);
+
+            notifyAccessControlService.saveFaceResult(openDoorDto);
+
+            JSONObject param = new JSONObject();
+            param.put("operator", "PushAck");
+            param.put("messageId", SeqUtil.getId());
+
+            JSONObject result = new JSONObject();
+            result.put("PushAckType", "2");
+            result.put("SnapOrRecordID", info.getString("RecordID"));
+            param.put("info", result);
+            MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
+
+        } catch (Exception e) {
+            logger.error("推送人脸失败", e);
+        }
 
     }
 

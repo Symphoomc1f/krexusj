@@ -1,7 +1,6 @@
 package com.java110.things.factory;
 
 import com.alibaba.fastjson.JSONObject;
-import com.java110.things.accessControl.HeartbeatCloudApiThread;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.entity.machine.TransactionLogDto;
 import com.java110.things.service.machine.ITransactionLogService;
@@ -10,16 +9,11 @@ import com.java110.things.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
@@ -83,7 +77,33 @@ public class HttpFactory {
      * @return 返回 ResponseEntity
      */
     public static ResponseEntity<String> exchange(RestTemplate restTemplate, String url, String param, HttpMethod httpMethod) throws UnsupportedEncodingException {
-        return exchange(restTemplate, url, param, null, httpMethod);
+        return exchange(restTemplate, url, param, null, httpMethod, MappingCacheFactory.getValue("SECURITY_CODE"));
+    }
+
+    /**
+     * http 调用接口
+     *
+     * @param restTemplate 请求模板
+     * @param url          请求地址
+     * @param param        请求参数
+     * @param httpMethod   请求方法
+     * @return 返回 ResponseEntity
+     */
+    public static ResponseEntity<String> exchange(RestTemplate restTemplate, String url, String param, HttpMethod httpMethod, String securityCode) throws UnsupportedEncodingException {
+        return exchange(restTemplate, url, param, null, httpMethod, securityCode);
+    }
+
+    /**
+     * http 调用接口
+     *
+     * @param restTemplate 请求模板
+     * @param url          请求地址
+     * @param param        请求参数
+     * @param httpMethod   请求方法
+     * @return 返回 ResponseEntity
+     */
+    public static ResponseEntity<String> exchange(RestTemplate restTemplate, String url, String param, Map<String, String> headers, HttpMethod httpMethod) throws UnsupportedEncodingException {
+        return exchange(restTemplate, url, param, null, httpMethod, MappingCacheFactory.getValue("SECURITY_CODE"));
     }
 
     /**
@@ -96,12 +116,17 @@ public class HttpFactory {
      * @param httpMethod   请求方法
      * @return 返回 ResponseEntity
      */
-    public static ResponseEntity<String> exchange(RestTemplate restTemplate, String url, String param, Map<String, String> headers, HttpMethod httpMethod) throws UnsupportedEncodingException {
+    public static ResponseEntity<String> exchange(RestTemplate restTemplate, String url, String param, Map<String, String> headers, HttpMethod httpMethod, String securityCode) throws UnsupportedEncodingException {
         HttpHeaders httpHeaders = getHeader();
         Date startTime = DateUtil.getCurrentDate();
         if (headers != null && !headers.isEmpty()) {
             for (String key : headers.keySet()) {
-                httpHeaders.add(key, headers.get(key));
+                if (SystemConstant.HTTP_APP_ID.toLowerCase().equals(key.toLowerCase())) {
+                    httpHeaders.remove(key.toLowerCase());
+                    httpHeaders.add(key.toLowerCase(), headers.get(key));
+                } else {
+                    httpHeaders.add(key, headers.get(key));
+                }
             }
         }
         String tempGetParam = "";
@@ -113,7 +138,7 @@ public class HttpFactory {
         // 生成sign
         String sign = AuthenticationFactory.generatorSign(httpHeaders.get(SystemConstant.HTTP_TRANSACTION_ID).get(0),
                 httpHeaders.get(SystemConstant.HTTP_REQ_TIME).get(0),
-                paramIn);
+                paramIn, securityCode);
         httpHeaders.remove(SystemConstant.HTTP_SIGN);
         httpHeaders.add(SystemConstant.HTTP_SIGN, sign);
         HttpEntity<String> httpEntity = new HttpEntity<String>(param, httpHeaders);
@@ -138,9 +163,9 @@ public class HttpFactory {
             if (!"ON".equals(tranLogSwitch)) {
                 return;
             }
-            String machineCode = reqHeader !=null && reqHeader.containsKey("machinecode") ? reqHeader.get("machinecode").toString() : "";
+            String machineCode = reqHeader != null && reqHeader.containsKey("machinecode") ? reqHeader.get("machinecode").toString() : "";
             if (StringUtil.isEmpty(machineCode)) {
-                machineCode = reqHeader !=null &&  reqHeader.containsKey("machineCode") ? reqHeader.get("machineCode").toString() : "";
+                machineCode = reqHeader != null && reqHeader.containsKey("machineCode") ? reqHeader.get("machineCode").toString() : "";
             }
             ITransactionLogService transactionLogServiceImpl = ApplicationContextFactory.getBean("transactionLogServiceImpl", ITransactionLogService.class);
             TransactionLogDto transactionLogDto = new TransactionLogDto();
