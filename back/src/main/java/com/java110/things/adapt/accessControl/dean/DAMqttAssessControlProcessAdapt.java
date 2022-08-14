@@ -342,6 +342,7 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
                 doCmdResultCloud(resultCmd);
                 break;
             case "DelPerson-Ack":
+                doCmdResultCloud(resultCmd);
                 break;
             case CMD_DELETE_FACE:
                 break;
