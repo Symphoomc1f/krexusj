@@ -301,6 +301,8 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
             machineCmdResult(data);
         } else if (topic.contains("Rec")) {
             openDoorResult(data);
+        } else if ("mqtt/face/heartbeat".equals(topic)) { //心跳处理
+            doHeartbeatMachine(data);
         }
 
         if (!param.containsKey("cmd_id")) {
@@ -328,6 +330,21 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
 
         }
         saveLog(param.getString("cmd_id"), marchineId, topic, "", data, state);
+
+    }
+
+    /**
+     * 心跳 处理
+     *
+     * @param data
+     */
+    private void doHeartbeatMachine(String data) {
+        JSONObject info = JSONObject.parseObject(data).getJSONObject("info");
+
+        //设备ID
+        String machineCode = info.getString("facesluiceId");
+        String heartBeatTime = info.getString("time");
+
 
     }
 

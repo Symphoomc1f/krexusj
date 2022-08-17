@@ -118,6 +118,10 @@ public class MqttPushCallback implements MqttCallback {
      */
     private String getHmIdByDean(String topic) {
         String hmId = "";
+        //判断是否为德安心跳
+        if ("mqtt/face/heartbeat".equals(topic)) {
+            return "6";//德安协议 非常抱歉 topic中不带设备编号 神也没办法用设备编码去查协议了，只能写死了 尴尬的一B
+        }
         if (!topic.endsWith("Rec") && !topic.endsWith("Snap") && !topic.endsWith("QRCode") && !topic.endsWith("Ack")) {
             return hmId;
         }
