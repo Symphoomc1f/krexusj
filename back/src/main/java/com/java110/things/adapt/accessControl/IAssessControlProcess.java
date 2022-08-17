@@ -89,7 +89,7 @@ public interface IAssessControlProcess {
      * @param topic 主题
      * @param data  消息内容
      */
-    void mqttMessageArrived(String topic, String data);
+    void mqttMessageArrived(String topic, String data) throws Exception;
 
 
     /**
@@ -113,6 +113,17 @@ public interface IAssessControlProcess {
      * @return 处理成功时返回 true 失败时返回false
      */
     String httpFaceResult(String data);
+
+
+    /**
+     * 设备心跳
+     *
+     * @param data 这个为设备人脸推送协议，请参考设备协议文档
+     * @return 处理成功时返回 true 失败时返回false
+     */
+    String heartbeat(String data,String machineCode) throws Exception;
+
+
 
 
 }

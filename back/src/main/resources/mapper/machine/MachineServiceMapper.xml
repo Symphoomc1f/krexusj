@@ -30,7 +30,8 @@
         t.oem,
         t.ext_machine_id extMachineId,
         t.community_id communityId,
-        t.hm_id hmId
+        t.hm_id hmId,
+        t.heartbeat_time heartbeatTime
         from machine t
         where 1=1
         <if test="machineId != null and machineId != ''">
@@ -152,6 +153,9 @@
             </if>
             <if test="hmId != null and hmId != ''">
                 t.hm_id = #{hmId},
+            </if>
+            <if test="heartbeatTime != null and heartbeatTime != ''">
+                t.heartbeat_time = #{heartbeatTime},
             </if>
         </trim>
         where 1=1

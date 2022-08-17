@@ -29,6 +29,7 @@ public class MachineDto extends PageDto implements Serializable {
     private String extMachineId;
     private String hmId;
     private String taskId;
+    private String heartbeatTime;
 
 
     public String getMachineMac() {
@@ -154,5 +155,13 @@ public class MachineDto extends PageDto implements Serializable {
 
     public void setTaskId(String taskId) {
         this.taskId = taskId;
+    }
+
+    public String getHeartbeatTime() {
+        return heartbeatTime;
+    }
+
+    public void setHeartbeatTime(String heartbeatTime) {
+        this.heartbeatTime = heartbeatTime;
     }
 }

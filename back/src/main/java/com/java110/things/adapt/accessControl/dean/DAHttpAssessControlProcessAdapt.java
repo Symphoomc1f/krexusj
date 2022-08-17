@@ -7,6 +7,7 @@ import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
+import com.java110.things.entity.cloud.MachineHeartbeatDto;
 import com.java110.things.entity.fee.FeeDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.MachineFaceDto;
@@ -18,6 +19,7 @@ import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.MqttFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
 import com.java110.things.service.machine.IMachineService;
+import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
 import com.java110.things.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -465,6 +467,19 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
         resultParam.put("desc", "OK");
         return resultParam.toJSONString();//未找到设备
 
+    }
+
+    @Override
+    public String heartbeat(String data, String machineCode) throws Exception {
+        JSONObject resultParam = new JSONObject();
+        String heartBeatTime = null;
+        heartBeatTime = DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A);
+        MachineHeartbeatDto machineHeartbeatDto = new MachineHeartbeatDto(machineCode, heartBeatTime);
+        ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
+        notifyAccessControlService.machineHeartbeat(machineHeartbeatDto);
+        resultParam.put("code", 200);
+        resultParam.put("desc", "OK");
+        return resultParam.toJSONString();//未找到设备
     }
 
     /**

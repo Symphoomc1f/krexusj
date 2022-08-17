@@ -7,6 +7,7 @@ import com.java110.things.constant.DEL_PERSON_MODE;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
+import com.java110.things.entity.cloud.MachineHeartbeatDto;
 import com.java110.things.entity.fee.FeeDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.OperateLogDto;
@@ -17,6 +18,7 @@ import com.java110.things.factory.CometFactory;
 import com.java110.things.factory.MqttFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
 import com.java110.things.service.machine.IMachineService;
+import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -339,6 +341,16 @@ public class YldCometAssessControlProcessAdapt implements IAssessControlProcess 
         } catch (Exception e) {
             logger.error("推送人脸失败", e);
         }
+        return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG).toString();
+    }
+
+    @Override
+    public String heartbeat(String data, String machineCode) throws Exception {
+        String heartBeatTime = null;
+        heartBeatTime = DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A);
+        MachineHeartbeatDto machineHeartbeatDto = new MachineHeartbeatDto(machineCode, heartBeatTime);
+        ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
+        notifyAccessControlService.machineHeartbeat(machineHeartbeatDto);
         return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG).toString();
     }
 

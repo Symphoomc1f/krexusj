@@ -385,6 +385,11 @@ public class YldMqttAssessControlProcessAdapt implements IAssessControlProcess {
         return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG).toString();
     }
 
+    @Override
+    public String heartbeat(String data, String machineCode) throws Exception {
+        return null;
+    }
+
     /**
      * 查询费用信息
      *

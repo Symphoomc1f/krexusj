@@ -7,6 +7,7 @@ import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.cloud.MachineCmdResultDto;
+import com.java110.things.entity.cloud.MachineHeartbeatDto;
 import com.java110.things.entity.fee.FeeDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.MachineFaceDto;
@@ -118,6 +119,7 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
         //推送人脸识别结果
         MqttFactory.subscribe(TOPIC_FACE_SN_RESPONSE.replace(SN, machineDto.getMachineCode()));
         MqttFactory.subscribe(TOPIC_FACE_RESPONSE.replace(SN, machineDto.getMachineCode()));
+        MqttFactory.subscribe("mqtt/face/heartbeat");
         return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG);
     }
 
@@ -294,7 +296,7 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
     }
 
     @Override
-    public void mqttMessageArrived(String topic, String data) {
+    public void mqttMessageArrived(String topic, String data) throws Exception {
         JSONObject param = JSONObject.parseObject(data);
 
         if (topic.contains("Ack")) {
@@ -302,7 +304,7 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
         } else if (topic.contains("Rec")) {
             openDoorResult(data);
         } else if ("mqtt/face/heartbeat".equals(topic)) { //心跳处理
-            doHeartbeatMachine(data);
+            heartbeat(data, "");
         }
 
         if (!param.containsKey("cmd_id")) {
@@ -333,20 +335,6 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
 
     }
 
-    /**
-     * 心跳 处理
-     *
-     * @param data
-     */
-    private void doHeartbeatMachine(String data) {
-        JSONObject info = JSONObject.parseObject(data).getJSONObject("info");
-
-        //设备ID
-        String machineCode = info.getString("facesluiceId");
-        String heartBeatTime = info.getString("time");
-
-
-    }
 
     private void machineCmdResult(String data) {
         JSONObject resultCmd = JSONObject.parseObject(data);
@@ -377,9 +365,9 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
             if (!info.containsKey("result")) {
                 code = -1;
             } else {
-                code = info.getString("result") != "ok" ? -1 : 0;
+                code = !"ok".equals(info.getString("result")) ? -1 : 0;
             }
-            String msg = info.containsKey("detail") ? resultCmd.getString("detail") : "未知";
+            String msg = info.containsKey("result") ? info.getString("result") : "未知";
             ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
             MachineCmdResultDto machineCmdResultDto = new MachineCmdResultDto(code, msg, taskId, "", resultCmd.toJSONString());
             notifyAccessControlService.machineCmdResult(machineCmdResultDto);
@@ -479,6 +467,20 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
         resultParam.put("desc", "OK");
         return resultParam.toJSONString();//未找到设备
 
+    }
+
+    @Override
+    public String heartbeat(String data, String machineCode) throws Exception {
+        JSONObject info = JSONObject.parseObject(data).getJSONObject("info");
+
+        //设备ID
+        machineCode = info.getString("facesluiceId");
+        String heartBeatTime = null;
+        heartBeatTime = info.getString("time");
+        MachineHeartbeatDto machineHeartbeatDto = new MachineHeartbeatDto(machineCode, heartBeatTime);
+        ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
+        notifyAccessControlService.machineHeartbeat(machineHeartbeatDto);
+        return null;
     }
 
     /**

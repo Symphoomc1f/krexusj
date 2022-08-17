@@ -21,16 +21,16 @@ public class MachineCmdResultDto implements Serializable {
 
     private String msg;
 
-    private String taskid;
+    private String taskId;
 
     private String machineCode;
     private String resJson;
 
 
-    public MachineCmdResultDto(int code, String msg, String taskid, String machineCode, String resJson) {
+    public MachineCmdResultDto(int code, String msg, String taskId, String machineCode, String resJson) {
         this.code = code;
         this.msg = msg;
-        this.taskid = taskid;
+        this.taskId = taskId;
         this.machineCode = machineCode;
         this.resJson = resJson;
     }
@@ -51,12 +51,12 @@ public class MachineCmdResultDto implements Serializable {
         this.msg = msg;
     }
 
-    public String getTaskid() {
-        return taskid;
+    public String getTaskId() {
+        return taskId;
     }
 
-    public void setTaskid(String taskid) {
-        this.taskid = taskid;
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
     }
 
     public String getMachineCode() {

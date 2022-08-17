@@ -53,7 +53,29 @@ public class AccessControlController extends BaseController {
         IAssessControlProcess assessControlProcess = AccessControlProcessFactory.getAssessControlProcessImpl(machineDtos.get(0).getHmId());
 
         return new ResponseEntity<String>(assessControlProcess.httpFaceResult(param), HttpStatus.OK);
+    }
 
+    /**
+     * 设备心跳
+     * <p>
+     * 门禁配置地址为：/api/accessControl/heartBeat/设备编码
+     *
+     * @param param 请求报文 包括设备 前台填写信息
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/heartBeat/{machineCode}", method = RequestMethod.POST)
+    public ResponseEntity<String> heartBeat(@RequestBody String param, @PathVariable(value = "machineCode") String machineCode) throws Exception {
+
+        MachineDto machineDto = new MachineDto();
+        machineDto.setMachineCode(machineCode);
+        List<MachineDto> machineDtos = machineServiceImpl.queryMachines(machineDto);
+
+        Assert.listOnlyOne(machineDtos, "未包含该设备");
+        logger.debug("请求报文：" + param);
+        IAssessControlProcess assessControlProcess = AccessControlProcessFactory.getAssessControlProcessImpl(machineDtos.get(0).getHmId());
+
+        return new ResponseEntity<String>(assessControlProcess.heartbeat(param, machineCode), HttpStatus.OK);
     }
 
 }

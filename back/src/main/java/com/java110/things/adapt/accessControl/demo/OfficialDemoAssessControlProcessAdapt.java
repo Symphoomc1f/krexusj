@@ -1,4 +1,4 @@
-package com.java110.things.service.demo;
+package com.java110.things.adapt.accessControl.demo;
 
 import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
@@ -90,5 +90,10 @@ public class OfficialDemoAssessControlProcessAdapt implements IAssessControlProc
     @Override
     public String httpFaceResult(String data) {
         return "";
+    }
+
+    @Override
+    public String heartbeat(String data, String machineCode) throws Exception {
+        return null;
     }
 }

@@ -12,6 +12,7 @@ import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.app.AppAttrDto;
 import com.java110.things.entity.app.AppDto;
 import com.java110.things.entity.cloud.MachineCmdResultDto;
+import com.java110.things.entity.cloud.MachineHeartbeatDto;
 import com.java110.things.entity.cloud.MachineUploadFaceDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.fee.FeeDto;
@@ -32,10 +33,7 @@ import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.machine.IMachineFaceService;
 import com.java110.things.service.machine.IOperateLogService;
 import com.java110.things.service.openDoor.IOpenDoorService;
-import com.java110.things.util.Assert;
-import com.java110.things.util.BeanConvertUtil;
-import com.java110.things.util.DateUtil;
-import com.java110.things.util.StringUtil;
+import com.java110.things.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -443,18 +441,19 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
 
     }
 
+
     @Override
     public void machineCmdResult(MachineCmdResultDto machineCmdResultDto) throws Exception {
 
         OperateLogDto operateLogDto = new OperateLogDto();
-        operateLogDto.setLogId(machineCmdResultDto.getTaskid());
+        operateLogDto.setLogId(machineCmdResultDto.getTaskId());
         List<OperateLogDto> operateLogDtos = operateLogServiceImpl.queryOperateLogs(operateLogDto);
 
         Assert.listOnlyOne(operateLogDtos, "未包含操作日志记录");
 
         //刷 操作日志记录
         OperateLogDto tmpOperateLogDto = new OperateLogDto();
-        tmpOperateLogDto.setLogId(machineCmdResultDto.getTaskid());
+        tmpOperateLogDto.setLogId(machineCmdResultDto.getTaskId());
         tmpOperateLogDto.setState(machineCmdResultDto.getCode() == 0 ? "10002" : "10003");
         tmpOperateLogDto.setResParam(machineCmdResultDto.getResJson());
 
@@ -495,8 +494,88 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
         }
 
         String value = appAttrDto.getValue();
+
+        String upLoadAppId  ="";
+        String securityCode  ="";
+        appAttrDto = appDtos.get(0).getAppAttr(AppAttrDto.SPEC_CD_APP_ID);
+
+        if (appAttrDto != null) {
+            upLoadAppId = appAttrDto.getValue();
+        }
+
+        appAttrDto = appDtos.get(0).getAppAttr(AppAttrDto.SPEC_CD_SECURITY_CODE);
+        if (appAttrDto != null) {
+            securityCode = appAttrDto.getValue();
+        }
+
         Map<String, String> headers = new HashMap<>();
-        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, value, machineCmdResultDto.toString(), headers, HttpMethod.POST);
+        headers.put(SystemConstant.HTTP_APP_ID, upLoadAppId);
+
+        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, value, machineCmdResultDto.toString(), headers, HttpMethod.POST,securityCode);
+        if (tmpResponseEntity.getStatusCode() != HttpStatus.OK) {
+            logger.error("执行结果失败" + tmpResponseEntity.getBody());
+        }
+    }
+
+    @Override
+    public void machineHeartbeat(MachineHeartbeatDto machineHeartbeatDto) throws Exception {
+
+        Assert.hasLength(machineHeartbeatDto.getMachineCode(), "未包含设备信息");
+        if (machineHeartbeatDto.getHeartbeatTime() == null) {
+            machineHeartbeatDto.setHeartbeatTime(DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
+        }
+
+        //检查设备师傅存在
+        MachineDto machineDto = new MachineDto();
+        machineDto.setMachineCode(machineHeartbeatDto.getMachineCode());
+        List<MachineDto> machineDtos = machineServiceDao.getMachines(machineDto);
+
+        Assert.listOnlyOne(machineDtos, "设备不存在");
+        CommunityDto communityDto = new CommunityDto();
+        communityDto.setCommunityId(machineDtos.get(0).getCommunityId());
+        List<CommunityDto> communityDtos = communityServiceImpl.queryCommunitys(communityDto);
+        Assert.listOnlyOne(communityDtos, "小区不存在");
+
+        machineHeartbeatDto.setExtCommunityId(communityDtos.get(0).getExtCommunityId());
+
+        machineHeartbeatDto.setTaskId(SeqUtil.getId());
+
+        //修改 设备心跳
+        MachineDto tmpMachineDto = new MachineDto();
+        tmpMachineDto.setMachineId(machineDtos.get(0).getMachineId());
+        tmpMachineDto.setHeartbeatTime(machineHeartbeatDto.getHeartbeatTime());
+        machineServiceDao.updateMachine(tmpMachineDto);
+
+        //上报第三方系统
+
+        AppDto appDto = new AppDto();
+        appDto.setAppId(communityDtos.get(0).getAppId());
+        List<AppDto> appDtos = appServiceImpl.getApp(appDto);
+
+        Assert.listOnlyOne(appDtos, "未找到应用信息");
+        AppAttrDto appAttrDto = appDtos.get(0).getAppAttr(AppAttrDto.SPEC_CD_UPLOAD_HEARTBEAT);
+
+        if (appAttrDto == null) {
+            return;
+        }
+        String value = appAttrDto.getValue();
+        String upLoadAppId  ="";
+        String securityCode  ="";
+        appAttrDto = appDtos.get(0).getAppAttr(AppAttrDto.SPEC_CD_APP_ID);
+
+        if (appAttrDto != null) {
+            upLoadAppId = appAttrDto.getValue();
+        }
+
+        appAttrDto = appDtos.get(0).getAppAttr(AppAttrDto.SPEC_CD_SECURITY_CODE);
+        if (appAttrDto != null) {
+            securityCode = appAttrDto.getValue();
+        }
+
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put(SystemConstant.HTTP_APP_ID, upLoadAppId);
+        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, value, JSONObject.toJSONString(machineHeartbeatDto), headers, HttpMethod.POST,securityCode);
         if (tmpResponseEntity.getStatusCode() != HttpStatus.OK) {
             logger.error("执行结果失败" + tmpResponseEntity.getBody());
         }

@@ -7,6 +7,7 @@ import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
+import com.java110.things.entity.cloud.MachineHeartbeatDto;
 import com.java110.things.entity.fee.FeeDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.MachineFaceDto;
@@ -21,6 +22,7 @@ import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.SeqUtil;
 import com.java110.things.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jetty.util.ajax.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,6 +80,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
     public static final String CMD_SET_PASSWORD = "/setPassWord";// 设置密码
     public static final String CMD_SET_SYSTEMMODE = "/device/systemMode";// 设置模式
     public static final String CMD_SET_IDENTIFY_CALLBACK = "/setIdentifyCallBack";// 设置回调地址
+    public static final String CMD_SET_HEARTBREAT = "/setDeviceHeartBeat";// 设置回调地址
 
 
     //单设备处理
@@ -133,6 +136,17 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
         responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_IDENTIFY_CALLBACK, param.toJSONString(), responseEntity.getBody());
+
+        //设置心跳地址
+        password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
+        url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_SET_HEARTBREAT;
+        param = new JSONObject();
+        param.put("pass", password);
+        param.put("url", MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "IOT_URL") + "/api/accessControl/heartBeat/" + machineDto.getMachineCode());
+        httpHeaders = new HttpHeaders();
+        httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+        responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_HEARTBREAT, param.toJSONString(), responseEntity.getBody());
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             return new ResultDto(ResultDto.ERROR, "初始化设备失败");
@@ -427,6 +441,23 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         return resultParam.toJSONString();//未找到设备
 
 
+    }
+
+    @Override
+    public String heartbeat(String data,String machineCode) throws Exception {
+        JSONObject info = JSONObject.parseObject(data);
+
+        //设备ID
+        //String machineCode = info.getString("deviceKey");
+        String heartBeatTime = null;
+        heartBeatTime = info.getString("time");
+        MachineHeartbeatDto machineHeartbeatDto = new MachineHeartbeatDto(machineCode, heartBeatTime);
+        ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
+        notifyAccessControlService.machineHeartbeat(machineHeartbeatDto);
+        JSONObject resultParam = new JSONObject();
+        resultParam.put("result", 1);
+        resultParam.put("success", true);
+        return resultParam.toJSONString();//未找到设备
     }
 
     /**

@@ -7,6 +7,7 @@ import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
+import com.java110.things.entity.cloud.MachineHeartbeatDto;
 import com.java110.things.entity.fee.FeeDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.MachineFaceDto;
@@ -439,6 +440,23 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         resultParam.put("success", true);
         return resultParam.toJSONString();//未找到设备
 
+    }
+
+    @Override
+    public String heartbeat(String data, String machineCode) throws Exception {
+        JSONObject info = JSONObject.parseObject(data);
+
+        //设备ID
+        //String machineCode = info.getString("deviceKey");
+        String heartBeatTime = null;
+        heartBeatTime = info.getString("time");
+        MachineHeartbeatDto machineHeartbeatDto = new MachineHeartbeatDto(machineCode, heartBeatTime);
+        ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
+        notifyAccessControlService.machineHeartbeat(machineHeartbeatDto);
+        JSONObject resultParam = new JSONObject();
+        resultParam.put("result", 1);
+        resultParam.put("success", true);
+        return resultParam.toJSONString();//未找到设备
     }
 
     /**
