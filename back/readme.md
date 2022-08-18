@@ -34,6 +34,11 @@
 
 对接自己的门禁设备请参考 文档[对接自己的门禁设备](docs/accessControlInterface.md)
 
+### HC小区管理系统配合实时文档
+
+如果和HC小区管理系统一起实施时参考 文档[HC小区管理系统对接使用指南](docs/linkHc.md)
+
+
 ### 更新日志
 
 [HC 物联网系统更新日志](ChangeLog.md)
