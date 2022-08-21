@@ -38,13 +38,17 @@
 
 [自己门禁对接](back/docs/accessControlInterface.md)
 
+## 5. HC小区管理系统配合实时文档
 
-## 5. 相关视频
+如果和HC小区管理系统一起实施时参考 文档[HC小区管理系统对接使用指南](back/docs/linkHc.md)
+
+
+## 6. 相关视频
 
 [https://www.bilibili.com/video/BV1pK4y1t7re](https://www.bilibili.com/video/BV1pK4y1t7re)
 
 
-## 6. 演示
+## 7. 演示
 
 [http://iot.homecommunity.cn/](http://iot.homecommunity.cn/)
 
@@ -56,6 +60,6 @@
 ![image](docs/img/settings.png)
 
 
-## 7. 更新日志
+## 8. 更新日志
 
 [HC物联网系统更新日志](back/ChangeLog.md)
