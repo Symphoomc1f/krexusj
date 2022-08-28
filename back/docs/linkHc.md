@@ -15,7 +15,7 @@ HC小区管理系统添加设备时需要正确的填写厂家协议，HC物联�
 3、在HC小区管理系统添加业主修改业主删除业主时通过HC小区管理系统的databus将数据同步至HC物联网系统，其中包括用户基本信息
 和用户头像信息，具体是按照api.md 协议同步的（此时业主的同步会根据业主的位置同步到 单元门禁，大门门禁）
 
-4、物联网系统收到设备的开门记录时会将记录上报给HC小区管理系统是通过api.md协议中的4.1 开门上报
+4、物联网系统收到设备的开门记录时会将记录上报给HC小区管理系统是通过[HC 物联网系统对接协议](https://gitee.com/java110/MicroCommunityThings/blob/master/back/docs/api.md)协议中的4.1 开门上报
 
 5、HC物联网系统收到设备心跳信息时也会将心跳时间上报给HC小区管理系统，此时可能设备的时钟和HC小区管理系统的时钟不同步，所以
 HC小区管理系统在入库时没有取设备上报时间，而是获取了服务器当前时间
@@ -24,10 +24,10 @@ HC小区管理系统在入库时没有取设备上报时间，而是获取了服
 
 ## 配置流程
 
-1、首先开启databus,登录HC小区管理系统开发这账户（dev/密码您自己设置的），编码映射中找到域为DOMAIN.COMMON键为DATABUS_SWITCH
+1、首先开启databus,登录HC小区管理系统开发这账户（dev/密码您自己设置的），编码映射中找到域为DOMAIN.COMMON，键为DATABUS_SWITCH
 的记录，点击修改将其值修改为ON，点击缓存管理刷新所有缓存
 
-2、打开编码映射databus 页面是否存在以下适配器，如果不存在 请添加
+2、打开编码映射菜单下的databus 页面是否存在以下适配器，如果不存在 请添加
 
 ```
 名称	                业务类型	             适配器
@@ -45,6 +45,8 @@ HC小区管理系统在入库时没有取设备上报时间，而是获取了服
 
 ```
 
+点击缓存管理刷新所有缓存
+
 3、在HC物联网系统库中 添加一条应用记录(当然测试您可以直接用HC测试这个应用)
 
 ```sql
@@ -53,12 +55,13 @@ INSERT INTO c_app(`app_id`, `app_secret`, `app_name`)
 VALUES ('e86a6a373c354927bea5fd21a0bec617', 'ead9a2f67f96e2b8ed2fe38cc9709463', 'HC测试');
 ```
 
-app_id 和 app_secret 请自行生成 推荐为两个uuId
+app_id 和 app_secret 请自行生成 推荐为uuId
 
 4、在HC小区管理系统编码映射中根据域为IOT查询 到APP_ID、APP_SECRET和IOT_URL，将APP_ID 和APP_SECRET 的值
-修改为HC物联网系统中app_id 和 app_secret的值，IOT_URL请填写为物联网系统地址如：http://proxy.homecommunity.cn:9006/
+修改为HC物联网系统中app_id 和 app_secret的值，IOT_URL请填写为物联网系统地址如：http://proxy.homecommunity.cn:9006/，
+点击缓存管理刷新所有缓存
 
-5、在HC物联网系统中配置开门记录上报地址 心跳地址等配置（当然测试可以直接用HC测试这个应用的配置，只需要将域名修改即可）
+5、在HC物联网系统中配置开门记录上报地址 心跳地址等（当然测试可以直接用HC测试这个应用的配置，只需要将域名修改即可）
 
 ```sql
 
