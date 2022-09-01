@@ -72,7 +72,13 @@ export const constantRoutes = [
         name: '小区人员',
         component: () => import('@/views/communityPerson/communityPerson'),
         meta: { title: '小区人员', icon: 'table' }
-      }
+      },
+      {
+        path: 'communityCar',
+        name: '小区车辆',
+        component: () => import('@/views/car/car'),
+        meta: { title: '小区车辆', icon: 'table' }
+      },
     ]
   },
   {
@@ -140,12 +146,7 @@ export const constantRoutes = [
         component: () => import('@/views/carProtocol/carProtocol'),
         meta: { title: '道闸协议', icon: 'table' }
       },
-      {
-        path: 'car',
-        name: '道闸',
-        component: () => import('@/views/car/car'),
-        meta: { title: '同步车辆', icon: 'table' }
-      },
+      
       {
         path: 'carIn',
         name: '道闸',

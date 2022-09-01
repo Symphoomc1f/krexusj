@@ -1,12 +1,12 @@
 package com.java110.things.Controller.car;
 
 import com.java110.things.Controller.BaseController;
-import com.java110.things.entity.car.CarDto;
-import com.java110.things.entity.car.CarInoutDto;
-import com.java110.things.entity.response.ResultDto;
 import com.java110.things.adapt.car.ICarInoutService;
 import com.java110.things.adapt.car.ICarProcess;
 import com.java110.things.adapt.car.ICarService;
+import com.java110.things.entity.car.CarDto;
+import com.java110.things.entity.car.CarInoutDto;
+import com.java110.things.entity.response.ResultDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @ClassName CommunityController
- * @Description TODO 小区信息控制类
+ * @Description TODO 车辆信息控制类
  * @Author wuxw
  * @Date 2020/5/16 10:36
  * @Version 1.0
