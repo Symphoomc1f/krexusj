@@ -129,7 +129,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
     public String getFace(MachineDto machineDto, UserFaceDto userFaceDto) {
 
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
-        String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_ADD_FACE_FIND;
+        String url = "http://" + machineDto.getMachineIp()  + CMD_ADD_FACE_FIND;
         MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
         postParameters.add("pass", password);
         postParameters.add("personId", userFaceDto.getUserId());
@@ -175,7 +175,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         ResponseEntity<String> responseEntity = null;
         try {
             String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
-            String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_ADD_USER;
+            String url = "http://" + machineDto.getMachineIp()  + CMD_ADD_USER;
             MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
             postParameters.add("pass", password);
             JSONObject param = new JSONObject();
@@ -190,7 +190,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
             responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
             saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, postParameters.toString(), responseEntity.getBody());
 
-            url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_ADD_FACE;
+            url = "http://" + machineDto.getMachineIp()  + CMD_ADD_FACE;
             postParameters = new LinkedMultiValueMap<>();
             postParameters.add("pass", password);
             postParameters.add("personId", userFaceDto.getUserId());
@@ -225,7 +225,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
 
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         String url = "";
-        url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_UPDATE_FACE;
+        url = "http://" + machineDto.getMachineIp()  + CMD_UPDATE_FACE;
         MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
         postParameters.add("pass", password);
         postParameters.add("personId", userFaceDto.getUserId());
@@ -253,7 +253,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
     @Override
     public ResultDto deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
-        String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_DELETE_FACE;
+        String url = "http://" + machineDto.getMachineIp()  + CMD_DELETE_FACE;
 
         MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
         postParameters.add("pass", password);
@@ -265,7 +265,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_DELETE_FACE, postParameters.toString(), responseEntity.getBody());
 
 
-        url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_DELETE_PERSION_FACE;
+        url = "http://" + machineDto.getMachineIp()  + CMD_DELETE_PERSION_FACE;
 
 
         postParameters = new LinkedMultiValueMap<>();
@@ -287,7 +287,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
     @Override
     public ResultDto clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
-        String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_RESET;
+        String url = "http://" + machineDto.getMachineIp()  + CMD_RESET;
         MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
         postParameters.add("delete", false);
         postParameters.add("pass", password);
@@ -314,7 +314,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         String url = "";
         for (MachineDto machineDto : machineDtos) {
-            url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_SET_PASSWORD;
+            url = "http://" + machineDto.getMachineIp()  + CMD_SET_PASSWORD;
             MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
             postParameters.add("oldPass", password);
             postParameters.add("newPass", password);
@@ -324,7 +324,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
             ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
             saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_PASSWORD, postParameters.toString(), responseEntity.getBody());
 
-            url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_SET_SYSTEMMODE;
+            url = "http://" + machineDto.getMachineIp()  + CMD_SET_SYSTEMMODE;
             postParameters = new LinkedMultiValueMap<>();
             postParameters.add("pass", password);
             postParameters.add("systemMode", "2");
@@ -335,7 +335,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
             saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_SYSTEMMODE, postParameters.toString(), responseEntity.getBody());
 
             //设置回调地址
-            url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_SET_IDENTIFY_CALLBACK;
+            url = "http://" + machineDto.getMachineIp()  + CMD_SET_IDENTIFY_CALLBACK;
             postParameters = new LinkedMultiValueMap<>();
             postParameters.add("pass", password);
             postParameters.add("callbackUrl", MappingCacheFactory.getValue(MappingCacheFactory.COMMON_DOMAIN, "CJ_CALLBACK_URL"));
@@ -363,7 +363,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
         postParameters.add("pass", password);
         //
-        String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_REBOOT;
+        String url = "http://" + machineDto.getMachineIp()  + CMD_REBOOT;
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
@@ -379,7 +379,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
         postParameters.add("pass", password);
         //
-        String url = "http://" + machineDto.getMachineIp() + ":" + DEFAULT_PORT + CMD_OPEN_DOOR;
+        String url = "http://" + machineDto.getMachineIp()  + CMD_OPEN_DOOR;
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
