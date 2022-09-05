@@ -2,7 +2,7 @@ package com.java110.things.adapt.accessControl.dean;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.java110.things.accessControl.AddUpdateFace;
+import com.java110.things.quartz.accessControl.AddUpdateFace;
 import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;

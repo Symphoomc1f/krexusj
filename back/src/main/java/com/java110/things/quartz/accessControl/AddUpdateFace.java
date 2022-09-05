@@ -1,4 +1,4 @@
-package com.java110.things.accessControl;
+package com.java110.things.quartz.accessControl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.config.Java110Properties;

@@ -1,7 +1,7 @@
 package com.java110.things.init;
 
-import com.java110.things.accessControl.HeartbeatCloudApiThread;
-import com.java110.things.accessControl.ScanAccessControlThread;
+import com.java110.things.quartz.accessControl.HeartbeatCloudApiThread;
+import com.java110.things.quartz.accessControl.ScanAccessControlThread;
 import com.java110.things.factory.ApplicationContextFactory;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.thread.ClearExpireJwtThread;

@@ -25,9 +25,9 @@ import java.util.List;
  **/
 @RestController
 @RequestMapping(path = "/api/accessControl")
-public class AccessControlController extends BaseController {
+public class AccessControlApi extends BaseController {
 
-    private static Logger logger = LoggerFactory.getLogger(AccessControlController.class);
+    private static Logger logger = LoggerFactory.getLogger(AccessControlApi.class);
 
     @Autowired
     private IMachineService machineServiceImpl;

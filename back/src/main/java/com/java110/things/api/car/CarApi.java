@@ -1,0 +1,79 @@
+/*
+ * Copyright 2017-2020 吴学文 and java110 team.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.java110.things.api.car;
+
+import com.java110.things.Controller.BaseController;
+import com.java110.things.adapt.car.ICarMachineProcess;
+import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.response.ResultDto;
+import com.java110.things.factory.CarMachineProcessFactory;
+import com.java110.things.netty.client.CarNettyClient;
+import com.java110.things.service.machine.IMachineService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+
+/**
+ * 道闸对接 接口类
+ * add by wuxw 2020/5/16
+ **/
+@RestController
+@RequestMapping(path = "/api/car")
+public class CarApi extends BaseController {
+
+    private static Logger logger = LoggerFactory.getLogger(CarApi.class);
+
+    @Autowired
+    private IMachineService machineServiceImpl;
+
+
+    /**
+     * 设备心跳
+     * <p>
+     * 门禁配置地址为：/api/accessControl/heartBeat/设备编码
+     *
+     * @param request request请求报文 包括设备 前台填写信息
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/heartBeat/{machineCode}", method = RequestMethod.POST)
+    public ResponseEntity<String> heartBeat(HttpServletRequest request, @PathVariable(value = "machineCode") String machineCode) throws Exception {
+        logger.debug(machineCode + "设备心跳");
+        MachineDto machineDto = new MachineDto();
+        machineDto.setMachineCode(machineCode);
+        machineDto.setMachineTypeCd("9996");
+        List<MachineDto> machineDtos = machineServiceImpl.queryMachines(machineDto);
+
+        if (machineDtos == null || machineDtos.size() < 1) {
+            return ResultDto.error("设备不存在");
+        }
+        //设备重连
+        CarNettyClient.twoGetChannel(machineDtos.get(0));
+
+        ICarMachineProcess carMachineProcess = CarMachineProcessFactory.getCarImpl(machineDtos.get(0).getHmId());
+        carMachineProcess.sendKeepAlive(machineDtos.get(0));
+        return ResultDto.success();
+    }
+
+}

@@ -1,8 +1,8 @@
-package com.java110.things.accessControl;
+package com.java110.things.quartz.car;
 
 import com.java110.things.service.manufacturer.IManufacturerService;
 
-public class BaseAccessControl {
+public class BaseCar {
 
 
 

@@ -1,4 +1,4 @@
-package com.java110.things.accessControl;
+package com.java110.things.quartz.accessControl;
 
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.community.CommunityDto;
