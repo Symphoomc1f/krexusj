@@ -74,6 +74,12 @@ export const constantRoutes = [
         meta: { title: '小区人员', icon: 'table' }
       },
       {
+        path: 'parkingArea',
+        name: '停车场',
+        component: () => import('@/views/parkingArea/parkingArea'),
+        meta: { title: '停车场', icon: 'table' }
+      },
+      {
         path: 'communityCar',
         name: '小区车辆',
         component: () => import('@/views/car/car'),
