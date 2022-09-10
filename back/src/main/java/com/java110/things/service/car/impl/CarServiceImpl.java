@@ -1,4 +1,4 @@
-package com.java110.things.adapt.car.impl;
+package com.java110.things.service.car.impl;
 
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
@@ -6,7 +6,7 @@ import com.java110.things.dao.ICarServiceDao;
 import com.java110.things.entity.PageDto;
 import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.response.ResultDto;
-import com.java110.things.adapt.car.ICarService;
+import com.java110.things.service.car.ICarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;

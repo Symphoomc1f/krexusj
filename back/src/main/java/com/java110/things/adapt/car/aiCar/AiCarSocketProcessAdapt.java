@@ -8,9 +8,9 @@ import com.java110.things.entity.car.CarInoutDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.netty.Java110CarProtocol;
 import com.java110.things.netty.NettySocketHolder;
-import com.java110.things.adapt.car.ICarInoutService;
+import com.java110.things.service.car.ICarInoutService;
 import com.java110.things.adapt.car.ICarProcess;
-import com.java110.things.adapt.car.ICarService;
+import com.java110.things.service.car.ICarService;
 import com.java110.things.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -206,7 +206,7 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
 
         CarDto carDto = new CarDto();
         carDto.setCarNum(acceptJson.getString("car_number"));
-        carDto.setCardId(acceptJson.getString("card_id"));
+        //carDto.setCardId(acceptJson.getString("card_id"));
         try {
             carService.updateCar(carDto);
         } catch (Exception e) {

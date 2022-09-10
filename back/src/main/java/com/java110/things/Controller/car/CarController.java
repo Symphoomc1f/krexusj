@@ -1,9 +1,9 @@
 package com.java110.things.Controller.car;
 
 import com.java110.things.Controller.BaseController;
-import com.java110.things.adapt.car.ICarInoutService;
+import com.java110.things.service.car.ICarInoutService;
 import com.java110.things.adapt.car.ICarProcess;
-import com.java110.things.adapt.car.ICarService;
+import com.java110.things.service.car.ICarService;
 import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.car.CarInoutDto;
 import com.java110.things.entity.response.ResultDto;

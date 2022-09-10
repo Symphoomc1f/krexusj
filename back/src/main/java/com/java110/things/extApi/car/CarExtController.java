@@ -1,0 +1,151 @@
+/*
+ * Copyright 2017-2020 吴学文 and java110 team.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.java110.things.extApi.car;
+
+import com.alibaba.fastjson.JSONObject;
+import com.java110.things.Controller.BaseController;
+import com.java110.things.entity.community.CommunityDto;
+import com.java110.things.entity.car.CarDto;
+import com.java110.things.entity.response.ResultDto;
+import com.java110.things.service.community.ICommunityService;
+import com.java110.things.service.car.ICarService;
+import com.java110.things.util.Assert;
+import com.java110.things.util.BeanConvertUtil;
+import com.java110.things.util.SeqUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+/**
+ * 车辆对外 控制类
+ * <p>
+ * 完成车辆添加 修改 删除 查询功能
+ * <p>
+ * add by wuxw 2020-12-17
+ */
+@RestController
+@RequestMapping(path = "/extApi/car")
+public class CarExtController extends BaseController {
+
+    @Autowired
+    ICarService carServiceImpl;
+
+    @Autowired
+    ICommunityService communityServiceImpl;
+
+    /**
+     * 添加车辆信息
+     * <p>
+     *
+     * @param reqParam {
+     *                 "carCode":""
+     *                 car_name
+     *                 car_type_cd
+     *                 create_time
+     *                 status_cd
+     *                 oem
+     *                 ext_car_id
+     *                 community_id
+     *                 hm_id
+     *                 }
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/addCar", method = RequestMethod.POST)
+    public ResponseEntity<String> addCar(@RequestBody String reqParam) throws Exception {
+
+        JSONObject reqJson = JSONObject.parseObject(reqParam);
+
+        Assert.hasKeyAndValue(reqJson, "num", "未包含车辆编码");
+        Assert.hasKeyAndValue(reqJson, "extPaId", "未包含外部车辆编码");
+        Assert.hasKeyAndValue(reqJson, "extCommunityId", "未包含外部车辆编码");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
+
+        CommunityDto communityDto = new CommunityDto();
+        communityDto.setExtCommunityId(reqJson.getString("extCommunityId"));
+        ResultDto resultDto = communityServiceImpl.getCommunity(communityDto);
+
+        List<CommunityDto> communityDtos = (List<CommunityDto>) resultDto.getData();
+
+        Assert.listOnlyOne(communityDtos, "未找到车辆信息");
+
+        CarDto carDto = BeanConvertUtil.covertBean(reqJson, CarDto.class);
+        carDto.setCarId(SeqUtil.getId());
+        carDto.setCommunityId(communityDtos.get(0).getCommunityId());
+        ResultDto result = carServiceImpl.saveCar(carDto);
+
+        return ResultDto.createResponseEntity(result);
+    }
+
+
+    /**
+     * 修改车辆信息
+     * <p>
+     *
+     * @param reqParam {
+     *                 "name": "HC车辆",
+     *                 "address": "青海省西宁市",
+     *                 "cityCode": "510104",
+     *                 "extPaId": "702020042194860039"
+     *                 }
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/updateCar", method = RequestMethod.POST)
+    public ResponseEntity<String> updateCar(@RequestBody String reqParam) throws Exception {
+
+        JSONObject reqJson = JSONObject.parseObject(reqParam);
+        Assert.hasKeyAndValue(reqJson, "extPaId", "未包含外部车辆编码");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
+
+        CarDto carDto = BeanConvertUtil.covertBean(reqJson, CarDto.class);
+
+
+        ResultDto result = carServiceImpl.updateCar(carDto);
+
+        return ResultDto.createResponseEntity(result);
+    }
+
+    /**
+     * 删除车辆信息
+     * <p>
+     *
+     * @param reqParam {
+     *                 "extPaId": "702020042194860039"
+     *                 }
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/deleteCar", method = RequestMethod.POST)
+    public ResponseEntity<String> deleteCar(@RequestBody String reqParam) throws Exception {
+
+        JSONObject reqJson = JSONObject.parseObject(reqParam);
+
+        Assert.hasKeyAndValue(reqJson, "extPaId", "未包含外部车辆编码");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
+
+        CarDto carDto = BeanConvertUtil.covertBean(reqJson, CarDto.class);
+        ResultDto result = carServiceImpl.deleteCar(carDto);
+
+        return ResultDto.createResponseEntity(result);
+    }
+
+}

@@ -17,33 +17,33 @@ import java.util.List;
 public interface ICarServiceDao {
 
     /**
-     * 保存设备信息
+     * 保存车辆信息
      *
-     * @param carDto 设备信息
+     * @param carDto 车辆信息
      * @return 返回影响记录数
      */
     int saveCar(CarDto carDto);
 
     /**
-     * 查询设备信息
+     * 查询车辆信息
      *
-     * @param carDto 设备信息
+     * @param carDto 车辆信息
      * @return
      */
     List<CarDto> getCars(CarDto carDto);
 
     /**
-     * 查询设备总记录数
+     * 查询车辆总记录数
      *
-     * @param carDto 设备信息
+     * @param carDto 车辆信息
      * @return
      */
     long getCarCount(CarDto carDto);
 
     /**
-     * 修改设备信息
+     * 修改车辆信息
      *
-     * @param carDto 设备信息
+     * @param carDto 车辆信息
      * @return 返回影响记录数
      */
     int updateCar(CarDto carDto);

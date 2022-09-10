@@ -19,7 +19,7 @@
         class="filter-item"
         type="primary"
         icon="el-icon-search"
-        @click="queryCommunity"
+        @click="queryParkingArea"
         >查询停车场</el-button
       >
       <el-button
@@ -27,7 +27,7 @@
         style="margin-left: 10px"
         type="primary"
         icon="el-icon-edit"
-        @click="addCommunity"
+        @click="addParkingArea"
         >添加停车场</el-button
       >
     </div>
@@ -58,7 +58,7 @@
           <el-button
             size="mini"
             type="danger"
-            @click="deleteCommunity(row, $index)"
+            @click="deleteParkingArea(row, $index)"
             >删除</el-button
           >
         </template>
@@ -74,7 +74,7 @@
         label-width="70px"
         style="width: 60%; margin-left: 50px"
       >
-        <el-form-item label="停车场编号" prop="type">
+        <el-form-item label="编号" prop="type">
           <el-input v-model="temp.num" placeholder="请输入停车场编号" />
         </el-form-item>
         <el-form-item label="第三方ID" prop="type">
@@ -91,16 +91,16 @@
 
     <el-dialog
       title="温馨提示"
-      :visible.sync="deleteCommunityDailogVisible"
+      :visible.sync="deleteParkingAreaDailogVisible"
       width="30%"
       :before-close="handleClose"
     >
       <span>您确定删除当前停车场吗？</span>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="deleteCommunityDailogVisible = false"
+        <el-button @click="deleteParkingAreaDailogVisible = false"
           >取 消</el-button
         >
-        <el-button type="primary" @click="doDeleteCommunity">确 定</el-button>
+        <el-button type="primary" @click="doDeleteParkingArea">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -136,9 +136,9 @@ export default {
       },
       list: null,
       listLoading: true,
-      deleteCommunityDailogVisible: false,
+      deleteParkingAreaDailogVisible: false,
       dialogFormVisible: false,
-      curCommunity: {},
+      curParkingArea: {},
       temp: {
         num: "",
         extPaId: "",
@@ -156,12 +156,12 @@ export default {
     },
   },
   created() {
-    this.fetchData();
+    this.queryParkingArea();
   },
   methods: {
-    queryCommunity() {
+    queryParkingArea() {
       this.listLoading = true;
-      getParkingArea(this.listQuery).then((response) => {
+      getParkingAreas(this.listQuery).then((response) => {
         this.list = response.data;
         this.listLoading = false;
       });
@@ -175,7 +175,7 @@ export default {
     },
     doDeleteParkingArea() {
       this.listLoading = true;
-      deleteParkingAreas(this.curParkingArea).then((response) => {
+      deleteParkingArea(this.curParkingArea).then((response) => {
         this.listLoading = false;
         this.$message({
           type: "info",
@@ -189,7 +189,7 @@ export default {
       this.listLoading = true;
       let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
       this.temp.communityId = _currCommunity.communityId;
-      saveParkingAreas(this.temp).then((response) => {
+      saveParkingArea(this.temp).then((response) => {
         this.listLoading = false;
         this.dialogFormVisible = false;
         this.queryParkingArea();

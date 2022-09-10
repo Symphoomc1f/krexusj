@@ -14,8 +14,10 @@ public class CarDto extends PageDto implements Serializable {
     private Date createTime;
     private String communityId;
     private String statusCd;
-    private String paId;
-    private String cardId;
+    private String extCarId;
+    private String personName;
+    private String personTel;
+
 
     public String getCarId() {
         return carId;
@@ -73,19 +75,27 @@ public class CarDto extends PageDto implements Serializable {
         this.statusCd = statusCd;
     }
 
-    public String getPaId() {
-        return paId;
+    public String getExtCarId() {
+        return extCarId;
     }
 
-    public void setPaId(String paId) {
-        this.paId = paId;
+    public void setExtCarId(String extCarId) {
+        this.extCarId = extCarId;
     }
 
-    public String getCardId() {
-        return cardId;
+    public String getPersonName() {
+        return personName;
     }
 
-    public void setCardId(String cardId) {
-        this.cardId = cardId;
+    public void setPersonName(String personName) {
+        this.personName = personName;
+    }
+
+    public String getPersonTel() {
+        return personTel;
+    }
+
+    public void setPersonTel(String personTel) {
+        this.personTel = personTel;
     }
 }

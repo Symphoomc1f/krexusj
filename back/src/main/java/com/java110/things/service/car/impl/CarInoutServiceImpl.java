@@ -1,4 +1,4 @@
-package com.java110.things.adapt.car.impl;
+package com.java110.things.service.car.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.constant.ResponseConstant;
@@ -13,7 +13,7 @@ import com.java110.things.exception.ServiceException;
 import com.java110.things.exception.ThreadException;
 import com.java110.things.factory.HttpFactory;
 import com.java110.things.factory.MappingCacheFactory;
-import com.java110.things.adapt.car.ICarInoutService;
+import com.java110.things.service.car.ICarInoutService;
 import com.java110.things.service.community.ICommunityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;

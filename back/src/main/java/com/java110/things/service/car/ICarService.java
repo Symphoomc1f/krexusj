@@ -1,4 +1,4 @@
-package com.java110.things.adapt.car;
+package com.java110.things.service.car;
 
 import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.response.ResultDto;

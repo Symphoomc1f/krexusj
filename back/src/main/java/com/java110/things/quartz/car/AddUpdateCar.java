@@ -18,7 +18,7 @@ import com.java110.things.factory.CarProcessFactory;
 import com.java110.things.factory.HttpFactory;
 import com.java110.things.factory.ImageFactory;
 import com.java110.things.factory.MappingCacheFactory;
-import com.java110.things.adapt.car.ICarService;
+import com.java110.things.service.car.ICarService;
 import com.java110.things.service.machine.IMachineFaceService;
 import com.java110.things.util.BeanConvertUtil;
 import com.java110.things.util.DateUtil;
@@ -147,7 +147,7 @@ public class AddUpdateCar extends BaseCar {
         carDto.setEndTime(endTime);
         carDto.setCreateTime(new Date());
         carDto.setCommunityId(communityDto.getCommunityId());
-        carDto.setPaId(carResultDto.getPaId());
+        //carDto.setPaId(carResultDto.getPaId());
 
         if (resultDto.getTotal() > 0) {
             carService.updateCar(carDto);

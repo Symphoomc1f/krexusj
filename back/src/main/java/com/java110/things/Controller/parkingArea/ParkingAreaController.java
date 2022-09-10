@@ -65,7 +65,7 @@ public class ParkingAreaController extends BaseController {
      * @throws Exception
      */
     @RequestMapping(path = "/getParkingAreas", method = RequestMethod.GET)
-    public ResponseEntity<String> getParkingAreas(@RequestParam String paId, @RequestParam(value = "communityId") String communityId,
+    public ResponseEntity<String> getParkingAreas(@RequestParam(value = "paId",required = false) String paId, @RequestParam(value = "communityId") String communityId,
                                                   HttpServletRequest request) throws Exception {
 
         ParkingAreaDto parkingAreaDto = new ParkingAreaDto();

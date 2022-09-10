@@ -6,7 +6,7 @@ import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.CarProcessFactory;
-import com.java110.things.adapt.car.ICarService;
+import com.java110.things.service.car.ICarService;
 import com.java110.things.service.machine.IMachineFaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -42,9 +42,9 @@ public class DeleteCar extends BaseCar {
         CarDto carDto = carDtoList.get(0);
         CarResultDto carResultDto = new CarResultDto();
         carResultDto.setCarNum(carDto.getCarNum());
-        carResultDto.setCarId(carDto.getCardId());
+        //carResultDto.setCarId(carDto.getCardId());
 
-        carResultDto.setPaId(carDto.getPaId());
+        //carResultDto.setPaId(carDto.getPaId());
 
         CarProcessFactory.getCarImpl().deleteCar(carResultDto);
 

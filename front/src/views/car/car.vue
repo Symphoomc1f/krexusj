@@ -29,6 +29,15 @@
       <el-table-column align="center" label="车牌号" >
         <template slot-scope="scope">{{ scope.row.carNum }}</template>
       </el-table-column>
+      <el-table-column align="center" label="联系人" >
+        <template slot-scope="scope">{{ scope.row.personName }}</template>
+      </el-table-column>
+      <el-table-column align="center" label="联系电话" >
+        <template slot-scope="scope">{{ scope.row.personTel }}</template>
+      </el-table-column>
+      <el-table-column align="center" label="第三方ID" >
+        <template slot-scope="scope">{{ scope.row.extCarId }}</template>
+      </el-table-column>
       <el-table-column align="center" label="开始时间">
         <template slot-scope="scope">{{ formatTime(scope.row.startTime) }}</template>
       </el-table-column>
