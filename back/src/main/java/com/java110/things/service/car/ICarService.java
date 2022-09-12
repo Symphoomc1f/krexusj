@@ -3,6 +3,8 @@ package com.java110.things.service.car;
 import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.response.ResultDto;
 
+import java.util.List;
+
 /**
  * @ClassName ICarService
  * @Description TODO 小区服务接口类
@@ -30,6 +32,15 @@ public interface ICarService {
      * @throws Exception
      */
     ResultDto getCar(CarDto carDto) throws Exception;
+
+    /**
+     * 获取车辆信息
+     *
+     * @param carDto 车辆信息
+     * @return
+     * @throws Exception
+     */
+    List<CarDto> queryCars(CarDto carDto) throws Exception;
 
     /**
      * 修改车辆信息

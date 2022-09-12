@@ -4,9 +4,9 @@
 
     <insert id="saveCar" parameterType="com.java110.things.entity.car.CarDto">
         INSERT INTO car(`car_id`, `car_num`, `start_time`, `end_time`, `create_time`, `status_cd`,
-        `community_id`,ext_car_id,person_name,person_tel)
+        `community_id`,ext_car_id,person_name,person_tel,pa_id)
         VALUES (#{carId}, #{carNum}, #{startTime}, #{endTime}, #{createTime}, '0',
-        #{communityId},#{extCarId},#{personName},#{personTel})
+        #{communityId},#{extCarId},#{personName},#{personTel},#{paId})
     </insert>
 
     <!--
@@ -22,7 +22,8 @@
         t.create_time createTime,
         t.ext_car_id extCarId,
         t.person_name personName,
-        t.person_tel personTel
+        t.person_tel personTel,
+        t.pa_id paId
         from car t
         where 1=1
         and t.status_cd = '0'
@@ -38,6 +39,9 @@
         <if test="extCarId != null and extCarId != ''">
             and t.ext_car_id = #{extCarId}
         </if>
+        <if test="paId != null and paId != ''">
+            and t.pa_id = #{extCarId}
+        </if>
         order by t.create_time desc
         <if test="page != -1 and page != null ">
             limit #{page}, #{row}
@@ -50,6 +54,7 @@
         count(1) count
         from car t
         where 1=1
+        and t.status_cd = '0'
         <if test="carId != null and carId != ''">
             and t.car_id = #{carId}
         </if>
@@ -61,6 +66,9 @@
         </if>
         <if test="extCarId != null and extCarId != ''">
             and t.ext_car_id = #{extCarId}
+        </if>
+        <if test="paId != null and paId != ''">
+            and t.pa_id = #{extCarId}
         </if>
 
     </select>
@@ -94,6 +102,9 @@
         </if>
         <if test="carNum != null and carNum != ''">
             and t.car_num = #{carNum}
+        </if>
+        <if test="paId != null and paId != ''">
+            and t.pa_id = #{paId}
         </if>
         <if test="communityId != null and communityId != ''">
             and t.community_id = #{communityId}

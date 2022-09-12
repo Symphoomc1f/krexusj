@@ -79,6 +79,19 @@ public class CarServiceImpl implements ICarService {
     }
 
     @Override
+    public List<CarDto> queryCars(CarDto carDto) throws Exception {
+        if (carDto.getPage() != PageDto.DEFAULT_PAGE) {
+            carDto.setPage((carDto.getPage() - 1) * carDto.getRow());
+        }
+        List<CarDto> carDtoList = null;
+
+        carDtoList = carServiceDao.getCars(carDto);
+        //刷新人脸地
+        return carDtoList;
+
+    }
+
+    @Override
     public ResultDto updateCar(CarDto carDto) throws Exception {
         int count = carServiceDao.updateCar(carDto);
         ResultDto resultDto = null;

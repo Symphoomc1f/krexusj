@@ -17,11 +17,13 @@ package com.java110.things.extApi.car;
 
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
-import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.car.CarDto;
+import com.java110.things.entity.community.CommunityDto;
+import com.java110.things.entity.parkingArea.ParkingAreaDto;
 import com.java110.things.entity.response.ResultDto;
-import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.car.ICarService;
+import com.java110.things.service.community.ICommunityService;
+import com.java110.things.service.parkingArea.IParkingAreaService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
 import com.java110.things.util.SeqUtil;
@@ -51,6 +53,9 @@ public class CarExtController extends BaseController {
     @Autowired
     ICommunityService communityServiceImpl;
 
+    @Autowired
+    IParkingAreaService parkingAreaServiceImpl;
+
     /**
      * 添加车辆信息
      * <p>
@@ -74,9 +79,14 @@ public class CarExtController extends BaseController {
 
         JSONObject reqJson = JSONObject.parseObject(reqParam);
 
-        Assert.hasKeyAndValue(reqJson, "num", "未包含车辆编码");
-        Assert.hasKeyAndValue(reqJson, "extPaId", "未包含外部车辆编码");
-        Assert.hasKeyAndValue(reqJson, "extCommunityId", "未包含外部车辆编码");
+        Assert.hasKeyAndValue(reqJson, "carNum", "未包含车辆编码");
+        Assert.hasKeyAndValue(reqJson, "startTime", "未包含车辆起租时间");
+        Assert.hasKeyAndValue(reqJson, "endTime", "未包含车辆截租时间");
+        Assert.hasKeyAndValue(reqJson, "extCarId", "未包含外部车辆编码");
+        Assert.hasKeyAndValue(reqJson, "personName", "未包含联系人");
+        Assert.hasKeyAndValue(reqJson, "personTel", "未包含联系电话");
+        Assert.hasKeyAndValue(reqJson, "extPaId", "未包含外部外部停车场ID");
+        Assert.hasKeyAndValue(reqJson, "extCommunityId", "未包含外部小区ID");
         Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
 
         CommunityDto communityDto = new CommunityDto();
@@ -85,10 +95,18 @@ public class CarExtController extends BaseController {
 
         List<CommunityDto> communityDtos = (List<CommunityDto>) resultDto.getData();
 
-        Assert.listOnlyOne(communityDtos, "未找到车辆信息");
+        Assert.listOnlyOne(communityDtos, "未找到小区信息");
+
+        ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
+        parkingAreaDto.setExtPaId(reqJson.getString("extPaId"));
+        parkingAreaDto.setCommunityId(communityDtos.get(0).getCommunityId());
+        List<ParkingAreaDto> parkingAreaDtos = parkingAreaServiceImpl.queryParkingAreas(parkingAreaDto);
+
+        Assert.listOnlyOne(parkingAreaDtos, "未找到停车场信息");
 
         CarDto carDto = BeanConvertUtil.covertBean(reqJson, CarDto.class);
         carDto.setCarId(SeqUtil.getId());
+        carDto.setPaId(parkingAreaDtos.get(0).getPaId());
         carDto.setCommunityId(communityDtos.get(0).getCommunityId());
         ResultDto result = carServiceImpl.saveCar(carDto);
 
@@ -113,12 +131,29 @@ public class CarExtController extends BaseController {
     public ResponseEntity<String> updateCar(@RequestBody String reqParam) throws Exception {
 
         JSONObject reqJson = JSONObject.parseObject(reqParam);
+        Assert.hasKeyAndValue(reqJson, "carNum", "未包含车辆编码");
+        Assert.hasKeyAndValue(reqJson, "startTime", "未包含车辆起租时间");
+        Assert.hasKeyAndValue(reqJson, "endTime", "未包含车辆截租时间");
+        Assert.hasKeyAndValue(reqJson, "extCarId", "未包含外部车辆编码");
         Assert.hasKeyAndValue(reqJson, "extPaId", "未包含外部车辆编码");
+        Assert.hasKeyAndValue(reqJson, "personName", "未包含联系人");
+        Assert.hasKeyAndValue(reqJson, "personTel", "未包含联系电话");
         Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
 
         CarDto carDto = BeanConvertUtil.covertBean(reqJson, CarDto.class);
 
+        ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
+        parkingAreaDto.setExtPaId(reqJson.getString("extPaId"));
+        List<ParkingAreaDto> parkingAreaDtos = parkingAreaServiceImpl.queryParkingAreas(parkingAreaDto);
+        Assert.listOnlyOne(parkingAreaDtos, "未找到停车场信息");
 
+        CarDto tmpCarDto = new CarDto();
+        tmpCarDto.setExtCarId(reqJson.getString("extCarId"));
+        tmpCarDto.setPaId(parkingAreaDtos.get(0).getPaId());
+        List<CarDto> carDtos = carServiceImpl.queryCars(tmpCarDto);
+
+        Assert.listOnlyOne(carDtos, "未找到车辆信息");
+        carDto.setCarId(carDtos.get(0).getCarId());
         ResultDto result = carServiceImpl.updateCar(carDto);
 
         return ResultDto.createResponseEntity(result);
@@ -139,10 +174,25 @@ public class CarExtController extends BaseController {
 
         JSONObject reqJson = JSONObject.parseObject(reqParam);
 
-        Assert.hasKeyAndValue(reqJson, "extPaId", "未包含外部车辆编码");
+        Assert.hasKeyAndValue(reqJson, "extCarId", "未包含外部车辆编码");
+        Assert.hasKeyAndValue(reqJson, "extPaId", "未包含外部停车场编码");
         Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
 
         CarDto carDto = BeanConvertUtil.covertBean(reqJson, CarDto.class);
+
+        ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
+        parkingAreaDto.setExtPaId(reqJson.getString("extPaId"));
+        List<ParkingAreaDto> parkingAreaDtos = parkingAreaServiceImpl.queryParkingAreas(parkingAreaDto);
+        Assert.listOnlyOne(parkingAreaDtos, "未找到停车场信息");
+
+        CarDto tmpCarDto = new CarDto();
+        tmpCarDto.setExtCarId(reqJson.getString("extCarId"));
+        tmpCarDto.setPaId(parkingAreaDtos.get(0).getPaId());
+        List<CarDto> carDtos = carServiceImpl.queryCars(tmpCarDto);
+
+        Assert.listOnlyOne(carDtos, "未找到车辆信息");
+        carDto.setCarId(carDtos.get(0).getCarId());
+
         ResultDto result = carServiceImpl.deleteCar(carDto);
 
         return ResultDto.createResponseEntity(result);
