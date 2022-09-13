@@ -234,6 +234,8 @@
 | machineVersion | String | 否 | v1.0 | 设备版本 |
 | machineName | String | 是 | HC门禁 | 设备名称 |
 | machineTypeCd | String | 是 | 9999 | 设备类型 9999	门禁9996	道闸9997	考勤机 |
+| locationType | String | 是 | 9999 | 位置类型 1000 小区 4000 停车场 |
+| locationObjId | String | 是 | 9999 | 位置ID |
 | machineIp | String | 否 | 192.168.1.1 | 设备IP |
 | machineMac | String | 否 | 11:1:11:1 | 设备mac |
 | extMachineId | String | 是 | 702020042194860037 | 外部设备编码 |
@@ -248,6 +250,8 @@
     "machineCode": "101010",
     "machineName": "HC门禁",
     "machineTypeCd": "9999",
+    "locationType": "1000",
+    "locationObjId": "702020042194860039",
     "extMachineId": "702020042194860037",
     "extCommunityId": "702020042194860039",
     "hmId": "702020042194860039",
@@ -280,6 +284,8 @@
 | machineVersion | String | 否 | v1.0 | 设备版本 |
 | machineName | String | 是 | HC门禁 | 设备名称 |
 | machineTypeCd | String | 是 | 9999 | 设备类型 门禁9999 |
+| locationType | String | 是 | 9999 | 位置类型 1000 小区 4000 停车场 |
+| locationObjId | String | 是 | 9999 | 位置ID |
 | machineIp | String | 否 | 192.168.1.1 | 设备IP |
 | machineMac | String | 否 | 11:1:11:1 | 设备mac |
 | extMachineId | String | 是 | 702020042194860037 | 外部设备编码 |
@@ -294,6 +300,8 @@
     "machineCode": "101010",
     "machineName": "HC门禁",
     "machineTypeCd": "9999",
+    "locationType": "1000",
+    "locationObjId": "702020042194860039",
     "extMachineId": "702020042194860037",
     "extCommunityId": "702020042194860039",
     "hmId": "702020042194860039",
