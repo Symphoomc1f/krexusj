@@ -1,12 +1,11 @@
 package com.java110.things.adapt.car.zhenshi;
 
+import com.alibaba.fastjson.JSONObject;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.netty.client.CarNettyClient;
+import sun.misc.BASE64Encoder;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 /**
  * 臻识 道闸摄像头 字节和 字符串转换处理类
@@ -27,8 +26,13 @@ public class ZhenshiByteToString {
                 //接收实际数据
                 byte[] data = new byte[sn_len];
                 int recvLen = recvBlock(inputStream, data, sn_len);
-                sn = new String(data, 0, recvLen);
+                JSONObject dataObj = onRecv(data, recvLen);
+                if (dataObj != null) {
+                    sn = dataObj.toJSONString();
+                }
             }
+        } catch (Exception e) {
+
         } finally {
             if (inputStream != null) {
                 try {
@@ -39,6 +43,80 @@ public class ZhenshiByteToString {
             }
         }
         return sn;
+    }
+
+    public static JSONObject onRecv(byte[] data, int len) throws UnsupportedEncodingException {
+        //String ivs = new String(data,"UTF-8" );
+        JSONObject dataObj = null;
+        if (len > 20 * 1024) {
+            //带图片数据
+            dataObj = onIVSResultRecv(data, len);
+        } else {
+            //普通的指令响应
+            String ivs = new String(data, "UTF-8");
+
+            dataObj = JSONObject.parseObject(ivs);
+        }
+        return dataObj;
+    }
+
+    public static JSONObject onIVSResultRecv(byte[] data, int len) {
+        //json处理
+        int pos = 0;
+        while (true) {
+            if (data[pos] == 0) {
+                break;
+            }
+            pos++;
+        }
+
+
+        String ivs = new String(data, 0, pos);
+
+        JSONObject dataObj = JSONObject.parseObject(ivs);
+
+        String image = "";
+
+        // 此处改为通过json来解析车牌识别结果,来获取车牌图片的大小
+        int nImgSize = len - pos - 1;
+
+        ByteArrayOutputStream baos = null;
+        try {
+            baos = new ByteArrayOutputStream();
+
+            baos.write(data, pos + 1, nImgSize);
+            byte[] imgData = baos.toByteArray();
+            baos.flush();
+            image = new BASE64Encoder().encode(imgData);
+            dataObj.put("photoJpg", image);
+        } catch (Exception e) {
+            //读取图片失败
+
+        } finally {
+            if (baos != null) {
+                try {
+                    baos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return dataObj;
+
+    }
+
+    public static int saveImage(byte[] buff, int pos, int len, String imgPath) {
+        int ret = -1;
+        try {
+            DataOutputStream out = new DataOutputStream(new FileOutputStream(imgPath));
+            out.write(buff, pos, len);
+            out.close();
+        } catch (IOException io) {
+            System.out.println("save image failed " + imgPath);
+        }
+
+        return ret;
     }
 
 

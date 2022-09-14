@@ -9,9 +9,9 @@
     <insert id="saveMachine" parameterType="com.java110.things.entity.machine.MachineDto">
         INSERT INTO
         machine (machine_id, machine_code, machine_version, machine_name, machine_type_cd, machine_ip,
-        machine_mac,oem,ext_machine_id,community_id,hm_id,location_type,location_obj_id)
+        machine_mac,oem,ext_machine_id,community_id,hm_id,location_type,location_obj_id,heartbeat_time)
         VALUES (#{machineId}, #{machineCode}, #{machineVersion}, #{machineName}, #{machineTypeCd}, #{machineIp},
-        #{machineMac},#{oem},#{extMachineId},#{communityId},#{hmId},#{locationType},#{locationObjId})
+        #{machineMac},#{oem},#{extMachineId},#{communityId},#{hmId},#{locationType},#{locationObjId},#{heartbeatTime})
     </insert>
 
     <!--

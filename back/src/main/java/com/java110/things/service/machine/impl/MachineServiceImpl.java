@@ -10,11 +10,13 @@ import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.AccessControlProcessFactory;
+import com.java110.things.factory.CarMachineProcessFactory;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.machine.IMachineCmdService;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.Assert;
+import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
 import com.java110.things.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +95,12 @@ public class MachineServiceImpl implements IMachineService {
     @Override
     public ResultDto saveMachine(MachineDto machineDto) throws Exception {
         //初始化设备信息
-        AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).initAssessControlProcess(machineDto);
+        if (MachineDto.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
+            AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).initAssessControlProcess(machineDto);
+        } else if (MachineDto.MACHINE_TYPE_CAR.equals(machineDto.getMachineTypeCd())) {
+            CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).initCar(machineDto);
+        }
+        machineDto.setHeartbeatTime(DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
         int count = machineServiceDao.saveMachine(machineDto);
         ResultDto resultDto = null;
         JSONObject data = new JSONObject();
@@ -158,9 +165,9 @@ public class MachineServiceImpl implements IMachineService {
         List<MachineDto> machineDtoList = machineServiceDao.getMachines(machineDto);
         Assert.listOnlyOne(machineDtoList, "设备不存在");
         machineDto = machineDtoList.get(0);
-        if (MachineConstant.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
+        if (MachineDto.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
             AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).restartMachine(machineDto);
-        } else if (MachineConstant.MACHINE_TYPE_ATTENDANCE.equals(machineDto.getMachineTypeCd())) {
+        } else if (MachineDto.MACHINE_TYPE_ATTENDANCE.equals(machineDto.getMachineTypeCd())) {
             MachineCmdDto machineCmdDto = new MachineCmdDto();
             machineCmdDto.setCmdId(SeqUtil.getId());
             machineCmdDto.setState(MachineConstant.MACHINE_CMD_STATE_NO_DEAL);
@@ -173,6 +180,8 @@ public class MachineServiceImpl implements IMachineService {
             machineCmdDto.setObjType(MachineConstant.MACHINE_CMD_OBJ_TYPE_SYSTEM);
             machineCmdDto.setObjTypeValue("-1");
             machineCmdServiceImpl.saveMachineCmd(machineCmdDto);
+        }else if (MachineDto.MACHINE_TYPE_CAR.equals(machineDto.getMachineTypeCd())) {
+            CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).openDoor(machineDto);
         }
         JSONObject data = new JSONObject();
         if (StringUtil.isEmpty(machineDto.getTaskId())) {
@@ -186,7 +195,12 @@ public class MachineServiceImpl implements IMachineService {
         List<MachineDto> machineDtoList = machineServiceDao.getMachines(machineDto);
         Assert.listOnlyOne(machineDtoList, "设备不存在");
         machineDto = machineDtoList.get(0);
-        AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).openDoor(machineDto);
+        //初始化设备信息
+        if (MachineDto.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
+            AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).openDoor(machineDto);
+        } else if (MachineDto.MACHINE_TYPE_CAR.equals(machineDto.getMachineTypeCd())) {
+            CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).openDoor(machineDto);
+        }
         JSONObject data = new JSONObject();
         if (StringUtil.isEmpty(machineDto.getTaskId())) {
             data.put("taskId", machineDto.getTaskId());

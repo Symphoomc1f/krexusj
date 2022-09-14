@@ -16,6 +16,7 @@
 package com.java110.things.netty.client;
 
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.factory.CarMachineProcessFactory;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -23,6 +24,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +59,8 @@ public class CarNettyClient {
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
+                        //socketChannel.pipeline().addLast(new LineBasedFrameDecoder(1024*1024));
+                        socketChannel.pipeline().addLast("framedecoder",new LengthFieldBasedFrameDecoder(5*1024*1024, 4, 4,0,0));
                         socketChannel.pipeline().addLast(new CarNettyClientHandler());
                     }
                 });
@@ -76,7 +80,7 @@ public class CarNettyClient {
             getChannel(machineDto);
             return;
         }
-        if (!future.isSuccess()) {
+        if (!future.isSuccess() || !future.channel().isActive()) {
             logger.info("连接失败 ！！！");
             getChannel(machineDto);
         }
@@ -85,9 +89,9 @@ public class CarNettyClient {
     //   获取所有连接
     public static final Map<String, ChannelFuture> getChannel(MachineDto machineDto) {
 
-        if (channels.containsKey(machineDto.getMachineCode())) {
-            return channels;
-        }
+//        if (channels.containsKey(machineDto.getMachineCode())) {
+//            return channels;
+//        }
 
         Bootstrap bootstrap = getBootstrap(null);
 
@@ -106,11 +110,16 @@ public class CarNettyClient {
         });
         channels.put(machineDto.getMachineCode(), future);
         ipMachines.put(host + ":" + port, machineDto);
+        try {
+            CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).initCar(machineDto);
+        } catch (Exception e) {
+            logger.error("推送配置信息失败", e);
+        }
         return channels;
     }
 
     //发送消息
-    public static boolean sendMsg(MachineDto machineDto, byte[] headerBytes,byte[] bytes) throws Exception {
+    public static boolean sendMsg(MachineDto machineDto, byte[] headerBytes, byte[] bytes) throws Exception {
         if (!channels.containsKey(machineDto.getMachineCode())) {
             logger.debug("设备[" + machineDto.getMachineCode() + "]未连接");
             return false;

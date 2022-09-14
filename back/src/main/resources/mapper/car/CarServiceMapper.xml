@@ -40,7 +40,7 @@
             and t.ext_car_id = #{extCarId}
         </if>
         <if test="paId != null and paId != ''">
-            and t.pa_id = #{extCarId}
+            and t.pa_id = #{paId}
         </if>
         order by t.create_time desc
         <if test="page != -1 and page != null ">

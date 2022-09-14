@@ -135,7 +135,7 @@ public class CarExtController extends BaseController {
         Assert.hasKeyAndValue(reqJson, "startTime", "未包含车辆起租时间");
         Assert.hasKeyAndValue(reqJson, "endTime", "未包含车辆截租时间");
         Assert.hasKeyAndValue(reqJson, "extCarId", "未包含外部车辆编码");
-        Assert.hasKeyAndValue(reqJson, "extPaId", "未包含外部车辆编码");
+        Assert.hasKeyAndValue(reqJson, "extPaId", "未包含外部停车场编码");
         Assert.hasKeyAndValue(reqJson, "personName", "未包含联系人");
         Assert.hasKeyAndValue(reqJson, "personTel", "未包含联系电话");
         Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");

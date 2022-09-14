@@ -40,8 +40,6 @@ public class ZhenshiCarMachineAdapt implements ICarMachineProcess {
     public void initCar(MachineDto machineDto) {
         //初始化配置
         ZhenshiByteToString.configFormat(machineDto, 1, 1, 1);
-
-
     }
 
     @Override
@@ -72,5 +70,6 @@ public class ZhenshiCarMachineAdapt implements ICarMachineProcess {
     @Override
     public void sendKeepAlive(MachineDto machineDto) {
         ZhenshiByteToString.sendKeepAlive(machineDto);
+
     }
 }
