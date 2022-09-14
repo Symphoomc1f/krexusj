@@ -30,6 +30,8 @@ public class MachineDto extends PageDto implements Serializable {
     private String hmId;
     private String taskId;
     private String heartbeatTime;
+    private String locationObjId;
+    private String locationType;
 
 
     public String getMachineMac() {
@@ -163,5 +165,21 @@ public class MachineDto extends PageDto implements Serializable {
 
     public void setHeartbeatTime(String heartbeatTime) {
         this.heartbeatTime = heartbeatTime;
+    }
+
+    public String getLocationObjId() {
+        return locationObjId;
+    }
+
+    public void setLocationObjId(String locationObjId) {
+        this.locationObjId = locationObjId;
+    }
+
+    public String getLocationType() {
+        return locationType;
+    }
+
+    public void setLocationType(String locationType) {
+        this.locationType = locationType;
     }
 }

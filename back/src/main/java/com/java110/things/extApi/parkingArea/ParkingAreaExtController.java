@@ -115,8 +115,14 @@ public class ParkingAreaExtController extends BaseController {
         JSONObject reqJson = JSONObject.parseObject(reqParam);
         Assert.hasKeyAndValue(reqJson, "extPaId", "未包含外部停车场编码");
         Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
+        ParkingAreaDto tmpParkingAreaDto = new ParkingAreaDto();
+        tmpParkingAreaDto.setExtPaId(reqJson.getString("extPaId"));
+        List<ParkingAreaDto> parkingAreaDtos = parkingAreaServiceImpl.queryParkingAreas(tmpParkingAreaDto);
+
+        Assert.listOnlyOne(parkingAreaDtos, "未找到停车场信息");
 
         ParkingAreaDto parkingAreaDto = BeanConvertUtil.covertBean(reqJson, ParkingAreaDto.class);
+        parkingAreaDto.setPaId(parkingAreaDtos.get(0).getPaId());
 
 
         ResultDto result = parkingAreaServiceImpl.updateParkingArea(parkingAreaDto);
@@ -141,8 +147,14 @@ public class ParkingAreaExtController extends BaseController {
 
         Assert.hasKeyAndValue(reqJson, "extPaId", "未包含外部停车场编码");
         Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
+        ParkingAreaDto tmpParkingAreaDto = new ParkingAreaDto();
+        tmpParkingAreaDto.setExtPaId(reqJson.getString("extPaId"));
+        List<ParkingAreaDto> parkingAreaDtos = parkingAreaServiceImpl.queryParkingAreas(tmpParkingAreaDto);
+
+        Assert.listOnlyOne(parkingAreaDtos, "未找到停车场信息");
 
         ParkingAreaDto parkingAreaDto = BeanConvertUtil.covertBean(reqJson, ParkingAreaDto.class);
+        parkingAreaDto.setPaId(parkingAreaDtos.get(0).getPaId());
         ResultDto result = parkingAreaServiceImpl.deleteParkingArea(parkingAreaDto);
 
         return ResultDto.createResponseEntity(result);

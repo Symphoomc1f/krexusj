@@ -78,6 +78,8 @@ public class MachineExtController extends BaseController {
         Assert.hasKeyAndValue(reqJson, "machineName", "未包含设备名称");
         Assert.hasKeyAndValue(reqJson, "machineTypeCd", "未包含设备类型");
         Assert.hasKeyAndValue(reqJson, "extMachineId", "未包含外部设备编码");
+        Assert.hasKeyAndValue(reqJson, "locationType", "未包含位置类型");
+        Assert.hasKeyAndValue(reqJson, "locationObjId", "未包含位置ID");
         Assert.hasKeyAndValue(reqJson, "extCommunityId", "未包含外部小区编码");
         Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
 

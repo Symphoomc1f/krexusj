@@ -20,12 +20,16 @@ import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 /**
  * 臻识 车辆道闸摄像头接口协议
+ *
+ * 相关 网站地址 http://vzenith.com/case/ivs-fc-productpage/
  */
-public class ZhenshiCarAdapt implements ICarMachineProcess {
-    Logger logger = LoggerFactory.getLogger(ZhenshiCarAdapt.class);
+@Service("zhenshiCarMachineAdapt")
+public class ZhenshiCarMachineAdapt implements ICarMachineProcess {
+    Logger logger = LoggerFactory.getLogger(ZhenshiCarMachineAdapt.class);
 
     @Override
     public void initCar() {
