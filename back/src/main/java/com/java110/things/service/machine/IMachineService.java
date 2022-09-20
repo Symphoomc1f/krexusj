@@ -1,5 +1,6 @@
 package com.java110.things.service.machine;
 
+import com.java110.things.entity.machine.MachineAttrDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.UserDto;
@@ -72,4 +73,28 @@ public interface IMachineService {
      * @throws Exception
      */
     ResultDto openDoor(MachineDto machineDto) throws Exception;
+
+    /**
+     * 保存设备属性信息
+     * @param machineAttrDto 设备信息
+     * @return
+     * @throws Exception
+     */
+    ResultDto saveMachineAttr(MachineAttrDto machineAttrDto) throws Exception;
+    /**
+     * 保存设备属性信息
+     * @param machineAttrDto 设备信息
+     * @return
+     * @throws Exception
+     */
+    ResultDto updateMachineAttr(MachineAttrDto machineAttrDto) throws Exception;
+
+
+    /**
+     * 获取设备属性信息
+     * @param machineAttrDto 设备信息
+     * @return
+     * @throws Exception
+     */
+    List<MachineAttrDto> queryMachineAttrs(MachineAttrDto machineAttrDto) throws Exception;
 }

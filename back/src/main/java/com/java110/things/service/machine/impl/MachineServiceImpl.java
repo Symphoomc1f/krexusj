@@ -6,6 +6,7 @@ import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.dao.IMachineServiceDao;
 import com.java110.things.entity.PageDto;
+import com.java110.things.entity.machine.MachineAttrDto;
 import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
@@ -206,6 +207,65 @@ public class MachineServiceImpl implements IMachineService {
             data.put("taskId", machineDto.getTaskId());
         }
         return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, data);
+    }
+
+
+    /**********************以下为属性相关 **********************/
+    /**
+     * 查询设备信息
+     *
+     * @param machineDto 设备信息
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public List<MachineAttrDto> queryMachineAttrs(MachineAttrDto machineDto) throws Exception {
+        int page = machineDto.getPage();
+
+        if (page != PageDto.DEFAULT_PAGE) {
+            machineDto.setPage((page - 1) * machineDto.getRow());
+        }
+        List<MachineAttrDto> machineDtoList = null;
+        machineDtoList = machineServiceDao.getMachineAttrs(machineDto);
+        return machineDtoList;
+    }
+
+
+
+    @Override
+    public ResultDto saveMachineAttr(MachineAttrDto machineAttrDto) throws Exception {
+        //初始化设备信息
+
+        int count = machineServiceDao.saveMachineAttr(machineAttrDto);
+        ResultDto resultDto = null;
+        JSONObject data = new JSONObject();
+        if (count < 1) {
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG, data);
+        } else {
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, data);
+        }
+        return resultDto;
+    }
+
+    /**
+     * 修改设备信息
+     *
+     * @param machineAttrDto 设备对象
+     * @return
+     */
+    @Override
+    public ResultDto updateMachineAttr(MachineAttrDto machineAttrDto) throws Exception {
+
+
+        int count = machineServiceDao.updateMachineAttr(machineAttrDto);
+        ResultDto resultDto = null;
+        JSONObject data = new JSONObject();
+        if (count < 1) {
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG, data);
+        } else {
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, data);
+        }
+        return resultDto;
     }
 
 

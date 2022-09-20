@@ -27,7 +27,7 @@ public interface ICarMachineProcess {
      * @param machineDto 设备信息
      * @param bytes      字节信息
      */
-    void readByte(MachineDto machineDto, byte[] bytes);
+    void readByte(MachineDto machineDto, byte[] bytes) throws Exception;
 
 
     /**

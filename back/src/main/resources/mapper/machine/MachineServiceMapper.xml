@@ -191,4 +191,82 @@
         </if>
     </update>
 
+
+    <insert id="saveMachineAttr" parameterType="com.java110.things.entity.machine.MachineAttrDto">
+        INSERT INTO `machine_attrs` (`machine_id`, `community_id`, `attr_id`, `spec_cd`, `value`)
+        VALUES (#{machineId}, #{communityId}, #{attrId}, #{specCd}, #{value})
+    </insert>
+
+    <!--
+        查询设备信息
+    -->
+    <select id="getMachineAttrs" parameterType="com.java110.things.entity.machine.MachineAttrDto"
+            resultType="com.java110.things.entity.machine.MachineAttrDto">
+        select
+        t.machine_id machineId,
+        t.community_id communityId,
+        t.attr_id attrId,
+        t.spec_cd specCd,
+        t.value value
+        from machine_attrs t
+        where 1=1
+        <if test="machineId != null and machineId != ''">
+            and t.machine_id = #{machineId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="attrId != null and attrId != ''">
+            and t.attr_id = #{attrId}
+        </if>
+        <if test="specCd != null and specCd != ''">
+            and t.spec_cd = #{specCd}
+        </if>
+        and t.status_cd = '0'
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+
+    </select>
+
+    <select id="getMachineCount" parameterType="com.java110.things.entity.machine.MachineDto" resultType="long">
+        select
+        count(1) count
+        from machine_attrs t
+        where 1=1
+        <if test="machineId != null and machineId != ''">
+            and t.machine_id = #{machineId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="attrId != null and attrId != ''">
+            and t.attr_id = #{attrId}
+        </if>
+        <if test="specCd != null and specCd != ''">
+            and t.spec_cd = #{specCd}
+        </if>
+        and t.status_cd = '0'
+
+    </select>
+
+    <update id="updateMachineAttr" parameterType="com.java110.things.entity.machine.MachineDto">
+        update machine_attrs t
+        set t.value = #{value}
+        where 1=1
+        <if test="machineId != null and machineId != ''">
+            and t.machine_id = #{machineId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="attrId != null and attrId != ''">
+            and t.attr_id = #{attrId}
+        </if>
+        <if test="specCd != null and specCd != ''">
+            and t.spec_cd = #{specCd}
+        </if>
+        and t.status_cd = '0'
+    </update>
+
 </mapper>

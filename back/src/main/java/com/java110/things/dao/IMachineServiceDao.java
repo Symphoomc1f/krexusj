@@ -1,10 +1,10 @@
 package com.java110.things.dao;
 
+import com.java110.things.entity.machine.MachineAttrDto;
 import com.java110.things.entity.machine.MachineDto;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @ClassName IMachineServiceDao
@@ -27,6 +27,7 @@ public interface IMachineServiceDao {
 
     /**
      * 查询设备信息
+     *
      * @param machineDto 设备信息
      * @return
      */
@@ -34,6 +35,7 @@ public interface IMachineServiceDao {
 
     /**
      * 查询设备总记录数
+     *
      * @param machineDto 设备信息
      * @return
      */
@@ -47,4 +49,15 @@ public interface IMachineServiceDao {
      */
     int updateMachine(MachineDto machineDto);
 
+    /**
+     * 查询属性
+     *
+     * @param machineDto
+     * @return
+     */
+    List<MachineAttrDto> getMachineAttrs(MachineAttrDto machineDto);
+
+    int saveMachineAttr(MachineAttrDto machineAttrDto);
+
+    int updateMachineAttr(MachineAttrDto machineAttrDto);
 }
