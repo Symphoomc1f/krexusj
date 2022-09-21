@@ -229,7 +229,7 @@
 
     </select>
 
-    <select id="getMachineCount" parameterType="com.java110.things.entity.machine.MachineDto" resultType="long">
+    <select id="getMachineAttrCount" parameterType="com.java110.things.entity.machine.MachineAttrDto" resultType="long">
         select
         count(1) count
         from machine_attrs t

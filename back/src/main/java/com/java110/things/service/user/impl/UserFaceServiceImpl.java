@@ -204,7 +204,7 @@ public class UserFaceServiceImpl implements IUserFaceService {
         machineFaceDto.setMachineId(machineDto.getMachineId());
         machineFaceDto.setFacePath("/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + ".jpg");
         machineFaceDto.setState("W");
-        machineFaceDto.setState("新增人脸待同步设备");
+        machineFaceDto.setMessage("新增人脸待同步设备");
         machineFaceDto.setCommunityId(machineDto.getCommunityId());
 
 
