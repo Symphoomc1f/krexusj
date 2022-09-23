@@ -1,6 +1,7 @@
 package com.java110.things.adapt.car;
 
 import com.java110.things.entity.accessControl.CarResultDto;
+import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.netty.Java110CarProtocol;
 
@@ -17,6 +18,9 @@ public interface ICarProcess {
      */
     void initCar();
 
+
+    public void initCar(MachineDto machineDto);
+
     /**
      * 查询设备中 人脸数量
      *
@@ -26,6 +30,7 @@ public interface ICarProcess {
 
     /**
      * 根据设备编码和 faceId 查询是否有人脸
+     *
      * @param carResultDto 用户信息
      * @return 如果有人脸 返回 faceId,没有则返回 null
      */
@@ -34,35 +39,40 @@ public interface ICarProcess {
 
     /**
      * 添加修改车牌
+     *
      * @param carResultDto 用户人脸信息
      */
-    void addCar(CarResultDto carResultDto);
+    void addCar(MachineDto machineDto, CarDto carResultDto);
 
 
-    void updateCar(CarResultDto carResultDto);
+    void updateCar(MachineDto machineDto, CarDto carResultDto);
 
 
     /**
      * 删除车牌
+     *
      * @param carResultDto 任务ID
      */
-    void deleteCar(CarResultDto carResultDto);
+    void deleteCar(MachineDto machineDto, CarDto carResultDto);
 
 
     /**
      * 重启设备
+     *
      * @param machineDto 硬件信息
      */
     void restartMachine(MachineDto machineDto);
 
     /**
      * 开门
-     * @param machineDto  硬件信息
+     *
+     * @param machineDto 硬件信息
      */
     void openDoor(MachineDto machineDto);
 
     /**
      * 人脸推送结果
+     *
      * @param data 这个为设备人脸推送协议，请参考设备协议文档
      * @return 处理成功时返回 true 失败时返回false
      */
@@ -70,17 +80,18 @@ public interface ICarProcess {
 
     /**
      * 接受消息
+     *
      * @param content
      * @return
      */
-    Java110CarProtocol accept(String content);
+    Java110CarProtocol accept(MachineDto machineDto, String content);
 
     /**
      * 查询需要支付的订单
+     *
      * @return
      */
     String getNeedPayOrder();
-
 
 
 }

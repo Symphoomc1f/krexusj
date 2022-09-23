@@ -15,17 +15,17 @@ import java.util.concurrent.LinkedBlockingDeque;
 public class NettySocketHolder {
     private static Logger logger = LoggerFactory.getLogger(NettySocketHolder.class);
 
-    private static final Map<Long, NioSocketChannel> MAP = new ConcurrentHashMap<>(16);
+    private static final Map<String, NioSocketChannel> MAP = new ConcurrentHashMap<>();
 
-    public static void put(Long id, NioSocketChannel socketChannel) {
+    public static void put(String id, NioSocketChannel socketChannel) {
         MAP.put(id, socketChannel);
     }
 
-    public static NioSocketChannel get(Long id) {
+    public static NioSocketChannel get(String id) {
         return MAP.get(id);
     }
 
-    public static Map<Long, NioSocketChannel> getMAP() {
+    public static Map<String, NioSocketChannel> getMAP() {
         return MAP;
     }
 
@@ -58,7 +58,7 @@ public class NettySocketHolder {
     }
 
     public static void sendMsg(Java110CarProtocol java110CarProtocol) {
-        long lo=java110CarProtocol.getId();
+        String lo = java110CarProtocol.getId();
         NioSocketChannel channel = get(java110CarProtocol.getId());
         if (channel == null) {
             throw new NoSuchElementException("未包含该链接");

@@ -16,10 +16,13 @@ import java.io.Serializable;
 public class MachineDto extends PageDto implements Serializable {
 
     public static final String MACHINE_TYPE_CAR = "9996";
+    public static final String MACHINE_TYPE_OTHER_CAR = "9995"; // 第三方道闸平台
     public static final String MACHINE_TYPE_ACCESS_CONTROL = "9999";
+    public static final String LOCATION_TYPE_PARKING_AREA = "4000"; //停车场
+    public static final String LOCATION_TYPE_COMMUNITY= "1000"; //停车场
 
     // 考勤机
-    public static  final String MACHINE_TYPE_ATTENDANCE = "9997";
+    public static final String MACHINE_TYPE_ATTENDANCE = "9997";
     private String machineMac;
     private String machineId;
     private String machineCode;

@@ -33,7 +33,11 @@ import org.springframework.web.client.RestTemplate;
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 添加更新人脸
@@ -59,7 +63,7 @@ public class AddUpdateCar extends BaseCar {
      *
      * @param heartbeatTaskDto 心跳下发任务指令
      */
-    public void addUpdateCar(MachineDto machineDto,HeartbeatTaskDto heartbeatTaskDto, CommunityDto communityDto, int action) throws Exception {
+    public void addUpdateCar(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto, CommunityDto communityDto, int action) throws Exception {
 
 
         String url = MappingCacheFactory.getValue("CLOUD_API") + CarConstant.MACHINE_QUERY_CAR_INFO;
@@ -107,22 +111,22 @@ public class AddUpdateCar extends BaseCar {
 
         JSONObject data = paramOut.getJSONObject("data");
 
-        CarResultDto carResultDto = BeanConvertUtil.covertBean(data, CarResultDto.class);
+        CarDto carResultDto = BeanConvertUtil.covertBean(data, CarDto.class);
 
 
         Date startTime = new Date(data.getLong("startTime"));
 
-        carResultDto.setStartTime(DateUtil.getFormatTimeString(startTime, DateUtil.DATE_FORMATE_STRING_A));
+        carResultDto.setStartTime(startTime);
 
         Date endTime = new Date(data.getLong("endTime"));
 
-        carResultDto.setEndTime(DateUtil.getFormatTimeString(endTime, DateUtil.DATE_FORMATE_STRING_A));
+        carResultDto.setEndTime(endTime);
         CarDto tmpCarDto = new CarDto();
         tmpCarDto.setCarId(carResultDto.getCarId());
         ResultDto resultDto = carService.getCar(tmpCarDto);
 
         if (action == CarConstant.CMD_ADD_CAR) {
-            CarProcessFactory.getCarImpl().addCar(carResultDto);
+            CarProcessFactory.getCarImpl(machineDto.getHmId()).addCar(machineDto,carResultDto);
         } else {
             if (resultDto.getTotal() < 1) {
                 throw new IllegalArgumentException("未找到 车辆记录");
@@ -135,7 +139,7 @@ public class AddUpdateCar extends BaseCar {
 
             carResultDto.setCycles(month);
 
-            CarProcessFactory.getCarImpl().updateCar(carResultDto);
+            CarProcessFactory.getCarImpl(machineDto.getHmId()).updateCar(machineDto,carResultDto);
         }
 
         //保存数据

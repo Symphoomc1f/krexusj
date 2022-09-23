@@ -12,6 +12,7 @@ import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.AccessControlProcessFactory;
 import com.java110.things.factory.CarMachineProcessFactory;
+import com.java110.things.factory.CarProcessFactory;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.machine.IMachineCmdService;
@@ -100,6 +101,8 @@ public class MachineServiceImpl implements IMachineService {
             AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).initAssessControlProcess(machineDto);
         } else if (MachineDto.MACHINE_TYPE_CAR.equals(machineDto.getMachineTypeCd())) {
             CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).initCar(machineDto);
+        } else if (MachineDto.MACHINE_TYPE_OTHER_CAR.equals(machineDto.getMachineTypeCd())) {
+            CarProcessFactory.getCarImpl(machineDto.getHmId()).initCar(machineDto);
         }
         machineDto.setHeartbeatTime(DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
         int count = machineServiceDao.saveMachine(machineDto);
@@ -127,7 +130,13 @@ public class MachineServiceImpl implements IMachineService {
         //重新初始化设备信息
         String reInitSwitch = MappingCacheFactory.getValue("ACCESS_CONTROL_REINIT_SWITCH");
         if ("ON".equals(reInitSwitch)) {
-            AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).initAssessControlProcess(machineDto);
+            if (MachineDto.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
+                AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).initAssessControlProcess(machineDto);
+            } else if (MachineDto.MACHINE_TYPE_CAR.equals(machineDto.getMachineTypeCd())) {
+                CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).initCar(machineDto);
+            } else if (MachineDto.MACHINE_TYPE_OTHER_CAR.equals(machineDto.getMachineTypeCd())) {
+                CarProcessFactory.getCarImpl(machineDto.getHmId()).initCar(machineDto);
+            }
         }
 
         int count = machineServiceDao.updateMachine(machineDto);
@@ -181,7 +190,7 @@ public class MachineServiceImpl implements IMachineService {
             machineCmdDto.setObjType(MachineConstant.MACHINE_CMD_OBJ_TYPE_SYSTEM);
             machineCmdDto.setObjTypeValue("-1");
             machineCmdServiceImpl.saveMachineCmd(machineCmdDto);
-        }else if (MachineDto.MACHINE_TYPE_CAR.equals(machineDto.getMachineTypeCd())) {
+        } else if (MachineDto.MACHINE_TYPE_CAR.equals(machineDto.getMachineTypeCd())) {
             CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).openDoor(machineDto);
         }
         JSONObject data = new JSONObject();
@@ -229,7 +238,6 @@ public class MachineServiceImpl implements IMachineService {
         machineDtoList = machineServiceDao.getMachineAttrs(machineDto);
         return machineDtoList;
     }
-
 
 
     @Override

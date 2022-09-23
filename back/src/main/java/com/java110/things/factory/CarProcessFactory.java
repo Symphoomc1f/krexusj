@@ -1,5 +1,6 @@
 package com.java110.things.factory;
 
+import com.java110.things.adapt.car.ICarMachineProcess;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.manufacturer.ManufacturerDto;
 import com.java110.things.entity.response.ResultDto;
@@ -30,14 +31,12 @@ public class CarProcessFactory {
      *
      * @return
      */
-    public static ICarProcess getCarImpl() throws Exception {
-        if (carProcessImpl != null) {
-            return carProcessImpl;
-        }
+    public static ICarProcess getCarImpl(String hmId) throws Exception {
+
         IManufacturerService manufacturerServiceImpl = ApplicationContextFactory.getBean("manufacturerServiceImpl", IManufacturerService.class);
         ManufacturerDto tmpManufacturerDto = new ManufacturerDto();
         tmpManufacturerDto.setHmType("2002");
-        tmpManufacturerDto.setDefaultProtocol("T");
+        tmpManufacturerDto.setHmId(hmId);
         ResultDto resultDto = manufacturerServiceImpl.getManufacturer(tmpManufacturerDto);
 
         if (resultDto.getCode() != ResponseConstant.SUCCESS) {

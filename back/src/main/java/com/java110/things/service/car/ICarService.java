@@ -51,6 +51,9 @@ public interface ICarService {
      */
     ResultDto updateCar(CarDto carDto) throws Exception;
 
+
+    public ResultDto updateCarByMachine(CarDto carDto) throws Exception;
+
     /**
      * 删除设备
      *

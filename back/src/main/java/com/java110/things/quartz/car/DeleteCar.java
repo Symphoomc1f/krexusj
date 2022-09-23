@@ -1,13 +1,14 @@
 package com.java110.things.quartz.car;
 
-import com.java110.things.entity.accessControl.CarResultDto;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.community.CommunityDto;
+import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.CarProcessFactory;
 import com.java110.things.service.car.ICarService;
 import com.java110.things.service.machine.IMachineFaceService;
+import com.java110.things.service.machine.IMachineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,9 @@ public class DeleteCar extends BaseCar {
 
     @Autowired
     private IMachineFaceService machineFaceService;
+
+    @Autowired
+    private IMachineService machineService;
 
     @Autowired
     private ICarService carService;
@@ -39,14 +43,22 @@ public class DeleteCar extends BaseCar {
             throw new IllegalArgumentException("未找到 车辆记录");
         }
         List<CarDto> carDtoList = (List<CarDto>) resultDto.getData();
+
+        // 查询停车场对应设备 是否为 第三方平台
+        MachineDto machineDto = new MachineDto();
+        machineDto.setLocationObjId(carDtoList.get(0).getPaId());
+        List<MachineDto> machineDtos = machineService.queryMachines(machineDto);
+        if (machineDtos == null || machineDtos.size() < 1) {
+            return;
+        }
+
         CarDto carDto = carDtoList.get(0);
-        CarResultDto carResultDto = new CarResultDto();
-        carResultDto.setCarNum(carDto.getCarNum());
+
         //carResultDto.setCarId(carDto.getCardId());
 
         //carResultDto.setPaId(carDto.getPaId());
 
-        CarProcessFactory.getCarImpl().deleteCar(carResultDto);
+        CarProcessFactory.getCarImpl(machineDtos.get(0).getHmId()).deleteCar(machineDtos.get(0), carDto);
 
 //        MachineFaceDto machineFaceDto = new MachineFaceDto();
 //        machineFaceDto.setUserId(heartbeatTaskDto.getTaskinfo());
@@ -55,7 +67,7 @@ public class DeleteCar extends BaseCar {
 //        //machineFaceDto.set
 //        machineFaceService.deleteMachineFace(machineFaceDto);
 
-         carDto = new CarDto();
+        carDto = new CarDto();
         carDto.setCarId(heartbeatTaskDto.getTaskinfo());
         carDto.setCommunityId(communityDto.getCommunityId());
 
