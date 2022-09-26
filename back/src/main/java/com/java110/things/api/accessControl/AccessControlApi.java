@@ -52,7 +52,7 @@ public class AccessControlApi extends BaseController {
         logger.debug("请求报文：" + param);
         IAssessControlProcess assessControlProcess = AccessControlProcessFactory.getAssessControlProcessImpl(machineDtos.get(0).getHmId());
 
-        return new ResponseEntity<String>(assessControlProcess.httpFaceResult(param), HttpStatus.OK);
+        return new ResponseEntity<String>(assessControlProcess.httpFaceResult(machineDtos.get(0), param), HttpStatus.OK);
     }
 
     /**

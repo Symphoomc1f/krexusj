@@ -389,27 +389,19 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
     }
 
     @Override
-    public String httpFaceResult(String data) {
+    public String httpFaceResult(MachineDto machineDto,String data) {
         ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
         JSONObject resultParam = new JSONObject();
         try {
             JSONObject body = JSONObject.parseObject(data);
-            MachineDto machineDto = new MachineDto();
-            machineDto.setMachineIp(body.getString("ip"));
-            List<MachineDto> machineDtos = notifyAccessControlService.queryMachines(machineDto);
 
-            if (machineDtos.size() < 0) {
-                resultParam.put("result", 1);
-                resultParam.put("success", true);
-                return resultParam.toJSONString();//未找到设备
-            }
 
             String userId = body.containsKey("personId") ? body.getString("personId") : "";
             String userName = "";
             if (!StringUtils.isEmpty(userId)) {
                 MachineFaceDto machineFaceDto = new MachineFaceDto();
                 machineFaceDto.setUserId(userId);
-                machineFaceDto.setMachineId(machineDtos.get(0).getMachineId());
+                machineFaceDto.setMachineId(machineDto.getMachineId());
                 List<MachineFaceDto> machineFaceDtos = notifyAccessControlService.queryMachineFaces(machineFaceDto);
                 if (machineFaceDtos != null && machineFaceDtos.size() > 0) {
                     userName = machineFaceDtos.get(0).getName();
@@ -422,7 +414,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
             openDoorDto.setFace(body.getString("base64"));
             openDoorDto.setUserName(userName);
             openDoorDto.setHat("3");
-            openDoorDto.setMachineCode(machineDtos.get(0).getMachineCode());
+            openDoorDto.setMachineCode(machineDto.getMachineCode());
             openDoorDto.setUserId(userId);
             openDoorDto.setOpenId(SeqUtil.getId());
             openDoorDto.setOpenTypeCd(OPEN_TYPE_FACE);

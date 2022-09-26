@@ -313,7 +313,7 @@ public class YldCometAssessControlProcessAdapt implements IAssessControlProcess 
      * @return
      */
     @Override
-    public String httpFaceResult(String data) {
+    public String httpFaceResult(MachineDto machineDto,String data) {
         ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
         try {
             JSONObject param = JSONObject.parseObject(data);

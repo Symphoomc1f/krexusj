@@ -409,7 +409,7 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
     }
 
     @Override
-    public String httpFaceResult(String data) {
+    public String httpFaceResult(MachineDto machineDto,String data) {
         ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
         JSONObject resultParam = new JSONObject();
         try {
@@ -418,22 +418,14 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
             JSONObject info = body.getJSONObject("info");
 
 
-            MachineDto machineDto = new MachineDto();
-            machineDto.setMachineCode(info.getString("DeviceID"));
-            List<MachineDto> machineDtos = notifyAccessControlService.queryMachines(machineDto);
 
-            if (machineDtos.size() < 0) {
-                resultParam.put("code", 404);
-                resultParam.put("desc", "设备不存在");
-                return resultParam.toJSONString();//未找到设备
-            }
 
             String userId = info.containsKey("PersonUUID") ? info.getString("PersonUUID") : "";
             String userName = "";
             if (!StringUtils.isEmpty(userId)) {
                 MachineFaceDto machineFaceDto = new MachineFaceDto();
                 machineFaceDto.setUserId(userId);
-                machineFaceDto.setMachineId(machineDtos.get(0).getMachineId());
+                machineFaceDto.setMachineId(machineDto.getMachineId());
                 List<MachineFaceDto> machineFaceDtos = notifyAccessControlService.queryMachineFaces(machineFaceDto);
                 if (machineFaceDtos != null && machineFaceDtos.size() > 0) {
                     userName = machineFaceDtos.get(0).getName();
@@ -446,7 +438,7 @@ public class DAHttpAssessControlProcessAdapt implements IAssessControlProcess {
             openDoorDto.setFace(body.getString("SanpPic").replace("data:image/jpeg;base64,", ""));
             openDoorDto.setUserName(userName);
             openDoorDto.setHat("3");
-            openDoorDto.setMachineCode(machineDtos.get(0).getMachineCode());
+            openDoorDto.setMachineCode(machineDto.getMachineCode());
             openDoorDto.setUserId(userId);
             openDoorDto.setOpenId(SeqUtil.getId());
             openDoorDto.setOpenTypeCd(OPEN_TYPE_FACE);

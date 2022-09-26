@@ -88,7 +88,7 @@ public class OfficialDemoAssessControlProcessAdapt implements IAssessControlProc
     }
 
     @Override
-    public String httpFaceResult(String data) {
+    public String httpFaceResult(MachineDto machineDto,String data) {
         return "";
     }
 
