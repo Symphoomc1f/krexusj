@@ -1,9 +1,11 @@
 package com.java110.things.service.car.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.dao.ICarServiceDao;
 import com.java110.things.entity.PageDto;
+import com.java110.things.entity.car.CarAttrDto;
 import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
@@ -51,12 +53,16 @@ public class CarServiceImpl implements ICarService {
      */
     @Override
     public ResultDto saveCar(CarDto carDto) throws Exception {
-
+        ResultDto resultDto = null;
         //第三方平台
-        addTransactorOtherCar(carDto);
+        resultDto = addTransactorOtherCar(carDto);
+        if (resultDto.getCode() != ResultDto.SUCCESS) {
+            return resultDto;
+        }
+        carDto.setCardId(resultDto.getData().toString());
 
         int count = carServiceDao.saveCar(carDto);
-        ResultDto resultDto = null;
+
         if (count < 1) {
             resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
         } else {
@@ -65,19 +71,22 @@ public class CarServiceImpl implements ICarService {
         return resultDto;
     }
 
-    private void addTransactorOtherCar(CarDto carDto) throws Exception {
+    private ResultDto addTransactorOtherCar(CarDto carDto) throws Exception {
         // 查询停车场对应设备 是否为 第三方平台
         MachineDto machineDto = new MachineDto();
-        machineDto.setLocationObjId(carDto.getPaId());
+        machineDto.setLocationObjId(carDto.getExtPaId());
         machineDto.setLocationType(MachineDto.LOCATION_TYPE_PARKING_AREA);
         List<MachineDto> machineDtos = machineService.queryMachines(machineDto);
         if (machineDtos == null || machineDtos.size() < 1) {
-            return;
+            return new ResultDto(ResultDto.ERROR, "设备不存在");
         }
 
+        ResultDto resultDto = null;
+
         for (MachineDto tmpMachineDto : machineDtos) {
-            CarProcessFactory.getCarImpl(tmpMachineDto.getHmId()).addCar(tmpMachineDto, carDto);
+            resultDto = CarProcessFactory.getCarImpl(tmpMachineDto.getHmId()).addCar(tmpMachineDto, carDto);
         }
+        return resultDto;
     }
 
     /**
@@ -136,9 +145,13 @@ public class CarServiceImpl implements ICarService {
     @Override
     public ResultDto updateCar(CarDto carDto) throws Exception {
         //修改传送第三方平台
-        updateTransactorOtherCar(carDto);
+        ResultDto resultDto = updateTransactorOtherCar(carDto);
+
+        if (resultDto.getCode() != ResultDto.SUCCESS) {
+            return resultDto;
+        }
         int count = carServiceDao.updateCar(carDto);
-        ResultDto resultDto = null;
+
         if (count < 1) {
             resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
         } else {
@@ -148,14 +161,14 @@ public class CarServiceImpl implements ICarService {
     }
 
 
-    private void updateTransactorOtherCar(CarDto carDto) throws Exception {
+    private ResultDto updateTransactorOtherCar(CarDto carDto) throws Exception {
         // 查询停车场对应设备 是否为 第三方平台
         MachineDto machineDto = new MachineDto();
-        machineDto.setLocationObjId(carDto.getPaId());
+        machineDto.setLocationObjId(carDto.getExtPaId());
         machineDto.setLocationType(MachineDto.LOCATION_TYPE_PARKING_AREA);
         List<MachineDto> machineDtos = machineService.queryMachines(machineDto);
         if (machineDtos == null || machineDtos.size() < 1) {
-            return;
+            return new ResultDto(ResultDto.ERROR, "设备不存在");
         }
 
         CarDto tmpCarDto = new CarDto();
@@ -168,25 +181,28 @@ public class CarServiceImpl implements ICarService {
         double month = dayCompare(preTime, carDto.getEndTime());
 
         carDto.setCycles(month);
-
+        ResultDto resultDto = null;
         for (MachineDto tmpMachineDto : machineDtos) {
-            CarProcessFactory.getCarImpl(tmpMachineDto.getHmId()).updateCar(tmpMachineDto, carDto);
+            resultDto = CarProcessFactory.getCarImpl(tmpMachineDto.getHmId()).updateCar(tmpMachineDto, carDto);
         }
+        return resultDto;
     }
 
 
-    private void deleteTransactorOtherCar(CarDto carDto) throws Exception {
+    private ResultDto deleteTransactorOtherCar(CarDto carDto) throws Exception {
         // 查询停车场对应设备 是否为 第三方平台
         MachineDto machineDto = new MachineDto();
-        machineDto.setLocationObjId(carDto.getPaId());
+        machineDto.setLocationObjId(carDto.getExtPaId());
         machineDto.setLocationType(MachineDto.LOCATION_TYPE_PARKING_AREA);
         List<MachineDto> machineDtos = machineService.queryMachines(machineDto);
         if (machineDtos == null || machineDtos.size() < 1) {
-            return;
+            return new ResultDto(ResultDto.ERROR, "设备不存在");
         }
+        ResultDto resultDto = null;
         for (MachineDto tmpMachineDto : machineDtos) {
-            CarProcessFactory.getCarImpl(tmpMachineDto.getHmId()).deleteCar(tmpMachineDto, carDto);
+            resultDto = CarProcessFactory.getCarImpl(tmpMachineDto.getHmId()).deleteCar(tmpMachineDto, carDto);
         }
+        return resultDto;
     }
 
     /**
@@ -225,10 +241,14 @@ public class CarServiceImpl implements ICarService {
 
     @Override
     public ResultDto deleteCar(CarDto carDto) throws Exception {
-        deleteTransactorOtherCar(carDto);
+        ResultDto resultDto = null;
+        //第三方平台
+        resultDto = deleteTransactorOtherCar(carDto);
+        if (resultDto.getCode() != ResultDto.SUCCESS) {
+            return resultDto;
+        }
         carDto.setStatusCd(SystemConstant.STATUS_INVALID);
         int count = carServiceDao.updateCar(carDto);
-        ResultDto resultDto = null;
         if (count < 1) {
             resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
         } else {
@@ -237,5 +257,61 @@ public class CarServiceImpl implements ICarService {
         return resultDto;
     }
 
+    /**********************以下为属性相关 **********************/
+    /**
+     * 查询车辆信息
+     *
+     * @param carDto 设备信息
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public List<CarAttrDto> queryCarAttrs(CarAttrDto carDto) throws Exception {
+        int page = carDto.getPage();
+
+        if (page != PageDto.DEFAULT_PAGE) {
+            carDto.setPage((page - 1) * carDto.getRow());
+        }
+        List<CarAttrDto> carDtoList = null;
+        carDtoList = carServiceDao.getCarAttrs(carDto);
+        return carDtoList;
+    }
+
+
+    @Override
+    public ResultDto saveCarAttr(CarAttrDto carAttrDto) throws Exception {
+        //初始化设备信息
+
+        int count = carServiceDao.saveCarAttr(carAttrDto);
+        ResultDto resultDto = null;
+        JSONObject data = new JSONObject();
+        if (count < 1) {
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG, data);
+        } else {
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, data);
+        }
+        return resultDto;
+    }
+
+    /**
+     * 修改设备信息
+     *
+     * @param carAttrDto 设备对象
+     * @return
+     */
+    @Override
+    public ResultDto updateCarAttr(CarAttrDto carAttrDto) throws Exception {
+
+
+        int count = carServiceDao.updateCarAttr(carAttrDto);
+        ResultDto resultDto = null;
+        JSONObject data = new JSONObject();
+        if (count < 1) {
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG, data);
+        } else {
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, data);
+        }
+        return resultDto;
+    }
 
 }

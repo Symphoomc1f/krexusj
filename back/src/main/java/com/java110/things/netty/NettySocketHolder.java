@@ -44,7 +44,7 @@ public class NettySocketHolder {
 
         try {
 
-            LinkedBlockingDeque<JSONObject> deque = ServerTools.addQueryDeque(queryId, ServerTools.MIN_TIME);
+            LinkedBlockingDeque<JSONObject> deque = ServerTools.addQueryDeque(queryId, ServerTools.MIN_TIME * 3);//等待3秒
             channel.writeAndFlush(Unpooled.unreleasableBuffer(Unpooled.copiedBuffer(java110CarProtocol.getContent(), CharsetUtil.UTF_8)));
             //查询数据
             if (ServerTools.checkQuery(queryId)) {

@@ -3,6 +3,7 @@ package com.java110.things.adapt.car;
 import com.java110.things.entity.accessControl.CarResultDto;
 import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.response.ResultDto;
 import com.java110.things.netty.Java110CarProtocol;
 
 /**
@@ -42,10 +43,10 @@ public interface ICarProcess {
      *
      * @param carResultDto 用户人脸信息
      */
-    void addCar(MachineDto machineDto, CarDto carResultDto);
+    ResultDto addCar(MachineDto machineDto, CarDto carResultDto);
 
 
-    void updateCar(MachineDto machineDto, CarDto carResultDto);
+    ResultDto updateCar(MachineDto machineDto, CarDto carResultDto);
 
 
     /**
@@ -53,7 +54,7 @@ public interface ICarProcess {
      *
      * @param carResultDto 任务ID
      */
-    void deleteCar(MachineDto machineDto, CarDto carResultDto);
+    ResultDto deleteCar(MachineDto machineDto, CarDto carResultDto);
 
 
     /**

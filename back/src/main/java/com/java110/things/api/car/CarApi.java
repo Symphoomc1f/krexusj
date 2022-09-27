@@ -17,16 +17,21 @@ package com.java110.things.api.car;
 
 import com.java110.things.Controller.BaseController;
 import com.java110.things.adapt.car.ICarMachineProcess;
+import com.java110.things.adapt.car.ICarProcess;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.CarMachineProcessFactory;
+import com.java110.things.factory.CarProcessFactory;
+import com.java110.things.netty.Java110CarProtocol;
 import com.java110.things.netty.client.CarNettyClient;
 import com.java110.things.service.machine.IMachineService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -74,6 +79,42 @@ public class CarApi extends BaseController {
         ICarMachineProcess carMachineProcess = CarMachineProcessFactory.getCarImpl(machineDtos.get(0).getHmId());
         carMachineProcess.sendKeepAlive(machineDtos.get(0));
         return ResultDto.success();
+    }
+
+    /**
+     * 设备心跳
+     * <p>
+     * 门禁配置地址为：/api/car/parkingUp/设备编码
+     *
+     * @param request request请求报文 包括设备 前台填写信息
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/parkingUp/{machineCode}", method = RequestMethod.POST)
+    public ResponseEntity<String> parkingUp(HttpServletRequest request,
+                                            @PathVariable(value = "machineCode") String machineCode,
+                                            @RequestBody String reqJson) throws Exception {
+        ResponseEntity<String> paramOut = null;
+        try {
+            MachineDto machineDto = new MachineDto();
+            machineDto.setMachineCode(machineCode);
+            machineDto.setMachineTypeCd("9995");
+            List<MachineDto> machineDtos = machineServiceImpl.queryMachines(machineDto);
+
+            if (machineDtos == null || machineDtos.size() < 1) {
+                return ResultDto.error("设备不存在");
+            }
+
+            ICarProcess carProcess = CarProcessFactory.getCarImpl(machineDtos.get(0).getHmId());
+            Java110CarProtocol java110CarProtocol = carProcess.accept(machineDtos.get(0), reqJson);
+
+            paramOut = new ResponseEntity<String>(java110CarProtocol.getContent(), HttpStatus.OK);
+        } finally {
+            logger.debug("设备：" + machineCode + ",请求报文：" + reqJson + ",返回报文：" + paramOut);
+        }
+
+        return paramOut;
+
     }
 
 }

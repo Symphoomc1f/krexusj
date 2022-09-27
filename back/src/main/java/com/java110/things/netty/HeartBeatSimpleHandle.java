@@ -9,7 +9,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
@@ -17,10 +17,12 @@ import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.List;
 
-public class HeartBeatSimpleHandle extends SimpleChannelInboundHandler<String> {
+public class HeartBeatSimpleHandle extends ChannelInboundHandlerAdapter {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(HeartBeatSimpleHandle.class);
 
@@ -32,16 +34,23 @@ public class HeartBeatSimpleHandle extends SimpleChannelInboundHandler<String> {
 
         IMachineService machineService = ApplicationContextFactory.getBean("machineServiceImpl", IMachineService.class);
         MachineDto machineDto = new MachineDto();
-        machineDto.setMachineIp(host + ":" + port);
+        machineDto.setMachineIp(host);
         List<MachineDto> machineDtos = machineService.queryMachines(machineDto);
         if (machineDtos == null || machineDtos.size() < 1) {
             return;
         }
-
-        //保存客户端与 Channel 之间的关系
-        NettySocketHolder.put(machineDtos.get(0).getMachineId(), (NioSocketChannel) ctx.channel());
-
+        initMachineToCache(ctx, machineDtos.get(0), true);
     }
+
+
+    private void initMachineToCache(ChannelHandlerContext ctx, MachineDto machineDto, boolean force) {
+        //保存客户端与 Channel 之间的关系
+        Object channel = NettySocketHolder.get(machineDto.getMachineId());
+        if (channel == null || force) {
+            NettySocketHolder.put(machineDto.getMachineId(), (NioSocketChannel) ctx.channel());
+        }
+    }
+
 
     /**
      * 取消绑定
@@ -62,11 +71,13 @@ public class HeartBeatSimpleHandle extends SimpleChannelInboundHandler<String> {
 
         IMachineService machineService = ApplicationContextFactory.getBean("machineServiceImpl", IMachineService.class);
         MachineDto machineDto = new MachineDto();
-        machineDto.setMachineIp(host + ":" + port);
+        machineDto.setMachineIp(host);
         List<MachineDto> machineDtos = machineService.queryMachines(machineDto);
         if (machineDtos == null || machineDtos.size() < 1) {
             return;
         }
+        //检查 设备是否写缓存
+        initMachineToCache(ctx, machineDtos.get(0), false);
         ByteBuf heartbeat = Unpooled.unreleasableBuffer(Unpooled.copiedBuffer(new Java110CarProtocol(machineDtos.get(0).getMachineId(), "http://www.homecommunity.cn").toString(), CharsetUtil.UTF_8));
         if (evt instanceof IdleStateEvent) {
             IdleStateEvent idleStateEvent = (IdleStateEvent) evt;
@@ -80,7 +91,14 @@ public class HeartBeatSimpleHandle extends SimpleChannelInboundHandler<String> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, String content) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        LOGGER.info("收到ByteBuf={}", msg);
+
+        ByteBuf byteBuf = (ByteBuf) msg;
+        byte[] bytes = new byte[byteBuf.readableBytes()];
+        byteBuf.readBytes(bytes);
+        LOGGER.info("收到字节={}", Arrays.toString(bytes));
+        String content = new String(bytes, "utf-8");
         LOGGER.info("收到customProtocol={}", content);
         InetSocketAddress ipSocket = (InetSocketAddress) ctx.channel().remoteAddress();
         int port = ipSocket.getPort();
@@ -88,24 +106,43 @@ public class HeartBeatSimpleHandle extends SimpleChannelInboundHandler<String> {
 
         IMachineService machineService = ApplicationContextFactory.getBean("machineServiceImpl", IMachineService.class);
         MachineDto machineDto = new MachineDto();
-        machineDto.setMachineIp(host + ":" + port);
+        machineDto.setMachineIp(host);
         List<MachineDto> machineDtos = machineService.queryMachines(machineDto);
         if (machineDtos == null || machineDtos.size() < 1) {
             return;
         }
 
-        Java110CarProtocol java110CarProtocol = CarProcessFactory.getCarImpl(machineDtos.get(0).getHmId()).accept(machineDtos.get(0),content);
+        if (!content.endsWith("}")) {
+            content += "}";
+        }
+
+        judgeSyncQuery(content);
+
+        Java110CarProtocol java110CarProtocol = CarProcessFactory.getCarImpl(machineDtos.get(0).getHmId()).accept(machineDtos.get(0), content);
         ctx.channel().writeAndFlush(Unpooled.unreleasableBuffer(Unpooled.copiedBuffer(java110CarProtocol.getContent(), CharsetUtil.UTF_8)));
 
 
-        judgeSyncQuery(content);
     }
+
+    public static void main(String[] args) throws UnsupportedEncodingException {
+        String servcie = "whitelist_sync";
+
+        System.out.printf("query_price,whitelist_sync".contains(servcie) + "");
+    }
+
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        ctx.flush();
+    }
+
 
     private void judgeSyncQuery(String contentStr) {
 
         JSONObject content = JSONObject.parseObject(contentStr);
 
-        if (!content.containsKey("service") || !"query_price".equals(content.getString("service"))) {
+        if (!content.containsKey("service")
+                || !"query_price,whitelist_sync,whitelist_pay_sync".contains(content.getString("service"))
+        ) {
             return;
         }
 

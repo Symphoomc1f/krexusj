@@ -107,6 +107,8 @@ public class CarExtController extends BaseController {
         CarDto carDto = BeanConvertUtil.covertBean(reqJson, CarDto.class);
         carDto.setCarId(SeqUtil.getId());
         carDto.setPaId(parkingAreaDtos.get(0).getPaId());
+        carDto.setExtPaId(parkingAreaDtos.get(0).getExtPaId());
+
         carDto.setCommunityId(communityDtos.get(0).getCommunityId());
         ResultDto result = carServiceImpl.saveCar(carDto);
 
@@ -154,6 +156,8 @@ public class CarExtController extends BaseController {
 
         Assert.listOnlyOne(carDtos, "未找到车辆信息");
         carDto.setCarId(carDtos.get(0).getCarId());
+        carDto.setCardId(carDto.getCardId());
+        carDto.setExtPaId(carDtos.get(0).getExtPaId());
         ResultDto result = carServiceImpl.updateCar(carDto);
 
         return ResultDto.createResponseEntity(result);
@@ -192,6 +196,8 @@ public class CarExtController extends BaseController {
 
         Assert.listOnlyOne(carDtos, "未找到车辆信息");
         carDto.setCarId(carDtos.get(0).getCarId());
+        carDto.setExtPaId(parkingAreaDtos.get(0).getExtPaId());
+        carDto.setCardId(carDtos.get(0).getCardId());
 
         ResultDto result = carServiceImpl.deleteCar(carDto);
 

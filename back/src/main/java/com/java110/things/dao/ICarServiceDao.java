@@ -1,5 +1,6 @@
 package com.java110.things.dao;
 
+import com.java110.things.entity.car.CarAttrDto;
 import com.java110.things.entity.car.CarDto;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -55,4 +56,16 @@ public interface ICarServiceDao {
      * @return 返回影响记录数
      */
     int delete(CarDto carDto);
+
+    /**
+     * 查询属性
+     *
+     * @param carDto
+     * @return
+     */
+    List<CarAttrDto> getCarAttrs(CarAttrDto carDto);
+
+    int saveCarAttr(CarAttrDto carAttrDto);
+
+    int updateCarAttr(CarAttrDto carAttrDto);
 }

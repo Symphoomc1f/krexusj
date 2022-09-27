@@ -1,6 +1,8 @@
 package com.java110.things.service.car;
 
+import com.java110.things.entity.car.CarAttrDto;
 import com.java110.things.entity.car.CarDto;
+import com.java110.things.entity.machine.MachineAttrDto;
 import com.java110.things.entity.response.ResultDto;
 
 import java.util.List;
@@ -62,4 +64,28 @@ public interface ICarService {
      * @throws Exception
      */
     ResultDto deleteCar(CarDto carDto) throws Exception;
+
+    /**
+     * 保存设备属性信息
+     * @param carAttrDto 设备信息
+     * @return
+     * @throws Exception
+     */
+    ResultDto saveCarAttr(CarAttrDto carAttrDto) throws Exception;
+    /**
+     * 保存设备属性信息
+     * @param carAttrDto 设备信息
+     * @return
+     * @throws Exception
+     */
+    ResultDto updateCarAttr(CarAttrDto carAttrDto) throws Exception;
+
+
+    /**
+     * 获取设备属性信息
+     * @param carAttrDto 设备信息
+     * @return
+     * @throws Exception
+     */
+    List<CarAttrDto> queryCarAttrs(CarAttrDto carAttrDto) throws Exception;
 }

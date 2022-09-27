@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 
 public class ServerTools {
@@ -19,7 +20,7 @@ public class ServerTools {
     /**
      * 数据存取队列Map
      */
-    private static final Map<String, LinkedBlockingDeque<JSONObject>> queryDatas = new HashMap<String, LinkedBlockingDeque<JSONObject>>();
+    private static final Map<String, LinkedBlockingDeque<JSONObject>> queryDatas = new ConcurrentHashMap<>();
 
     /**
      * 新增一个查询数据队列

@@ -4,9 +4,9 @@
 
     <insert id="saveCar" parameterType="com.java110.things.entity.car.CarDto">
         INSERT INTO car(`car_id`, `car_num`, `start_time`, `end_time`, `create_time`, `status_cd`,
-        `community_id`,ext_car_id,person_name,person_tel,pa_id)
+        `community_id`,ext_car_id,person_name,person_tel,pa_id,card_id)
         VALUES (#{carId}, #{carNum}, #{startTime}, #{endTime}, #{createTime}, '0',
-        #{communityId},#{extCarId},#{personName},#{personTel},#{paId})
+        #{communityId},#{extCarId},#{personName},#{personTel},#{paId},#{cardId})
     </insert>
 
     <!--
@@ -23,7 +23,8 @@
         t.ext_car_id extCarId,
         t.person_name personName,
         t.person_tel personTel,
-        t.pa_id paId
+        t.pa_id paId,
+        t.card_id cardId
         from car t
         where 1=1
         and t.status_cd = '0'
@@ -95,6 +96,9 @@
             <if test="personTel != null and personTel != ''">
                 t.person_tel = #{personTel},
             </if>
+            <if test="cardId != null and cardId != ''">
+                t.card_id = #{cardId},
+            </if>
         </trim>
         where 1=1
         <if test="carId != null and carId != ''">
@@ -114,5 +118,82 @@
     <delete id="delete" parameterType="com.java110.things.entity.car.CarDto">
         delete from car where car_id = #{carId}
     </delete>
+
+    <insert id="saveCarAttr" parameterType="com.java110.things.entity.car.CarAttrDto">
+        INSERT INTO `car_attrs` (`car_id`, `community_id`, `attr_id`, `spec_cd`, `value`)
+        VALUES (#{carId}, #{communityId}, #{attrId}, #{specCd}, #{value})
+    </insert>
+
+    <!--
+        查询设备信息
+    -->
+    <select id="getCarAttrs" parameterType="com.java110.things.entity.car.CarAttrDto"
+            resultType="com.java110.things.entity.car.CarAttrDto">
+        select
+        t.car_id carId,
+        t.community_id communityId,
+        t.attr_id attrId,
+        t.spec_cd specCd,
+        t.value value
+        from car_attrs t
+        where 1=1
+        <if test="carId != null and carId != ''">
+            and t.car_id = #{carId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="attrId != null and attrId != ''">
+            and t.attr_id = #{attrId}
+        </if>
+        <if test="specCd != null and specCd != ''">
+            and t.spec_cd = #{specCd}
+        </if>
+        and t.status_cd = '0'
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+
+    </select>
+
+    <select id="getCarAttrCount" parameterType="com.java110.things.entity.car.CarAttrDto" resultType="long">
+        select
+        count(1) count
+        from car_attrs t
+        where 1=1
+        <if test="carId != null and carId != ''">
+            and t.car_id = #{carId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="attrId != null and attrId != ''">
+            and t.attr_id = #{attrId}
+        </if>
+        <if test="specCd != null and specCd != ''">
+            and t.spec_cd = #{specCd}
+        </if>
+        and t.status_cd = '0'
+
+    </select>
+
+    <update id="updateCarAttr" parameterType="com.java110.things.entity.car.CarAttrDto">
+        update car_attrs t
+        set t.value = #{value}
+        where 1=1
+        <if test="carId != null and carId != ''">
+            and t.car_id = #{carId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="attrId != null and attrId != ''">
+            and t.attr_id = #{attrId}
+        </if>
+        <if test="specCd != null and specCd != ''">
+            and t.spec_cd = #{specCd}
+        </if>
+        and t.status_cd = '0'
+    </update>
 
 </mapper>

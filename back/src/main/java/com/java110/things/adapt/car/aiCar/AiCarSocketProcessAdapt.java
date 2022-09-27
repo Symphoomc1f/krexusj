@@ -2,16 +2,21 @@ package com.java110.things.adapt.car.aiCar;
 
 
 import com.alibaba.fastjson.JSONObject;
+import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.adapt.car.ICarProcess;
 import com.java110.things.entity.accessControl.CarResultDto;
 import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.car.CarInoutDto;
+import com.java110.things.entity.cloud.MachineHeartbeatDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.response.ResultDto;
+import com.java110.things.factory.NotifyAccessControlFactory;
 import com.java110.things.netty.Java110CarProtocol;
 import com.java110.things.netty.NettySocketHolder;
 import com.java110.things.service.car.ICarInoutService;
 import com.java110.things.service.car.ICarService;
 import com.java110.things.util.DateUtil;
+import com.java110.things.util.SeqUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,11 +84,11 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
      * @param carResultDto 用户人脸信息
      */
     @Override
-    public void addCar(MachineDto machineDto, CarDto carResultDto) {
+    public ResultDto addCar(MachineDto machineDto, CarDto carResultDto) {
         JSONObject data = new JSONObject();
         data.put("service", "whitelist_sync");
-        data.put("parkid", carResultDto.getPaId());
-        data.put("card_id", carResultDto.getCarId());
+        data.put("parkid", carResultDto.getExtPaId());
+        data.put("card_id", carResultDto.getExtCarId());
         data.put("car_number", carResultDto.getCarNum());
         data.put("car_type", "0");
         data.put("startdate", DateUtil.getFormatTimeString(carResultDto.getStartTime(), DateUtil.DATE_FORMATE_STRING_A));
@@ -98,7 +103,14 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
         Java110CarProtocol java110CarProtocol = new Java110CarProtocol();
         java110CarProtocol.setId(machineDto.getMachineId());
         java110CarProtocol.setContent(data.toJSONString());
-        NettySocketHolder.sendMsg(java110CarProtocol);
+        JSONObject resultJson = NettySocketHolder.sendMsgSync(java110CarProtocol, carResultDto.getCarNum());
+        logger.debug("添加车辆返回：" + resultJson);
+        int code = resultJson.getIntValue("result_code");
+        String message = resultJson.getString("message");
+        String cardId = resultJson.getString("card_id");
+
+        return new ResultDto(code, message, cardId);
+
     }
 
     /**
@@ -117,36 +129,46 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
      * @param carResultDto
      */
     @Override
-    public void updateCar(MachineDto machineDto, CarDto carResultDto) {
+    public ResultDto updateCar(MachineDto machineDto, CarDto carResultDto) {
         JSONObject data = new JSONObject();
         data.put("service", "whitelist_pay_sync");
-        data.put("parkid", carResultDto.getPaId());
-        data.put("card_id", carResultDto.getCarId());
+        data.put("parkid", carResultDto.getExtPaId());
+        data.put("card_id", carResultDto.getCardId());
         data.put("car_number", carResultDto.getCarNum());
         data.put("period", "月");
         data.put("pay_count", (int) Math.floor(carResultDto.getCycles()));
         data.put("pay_money", 0.00);
         data.put("pay_time", DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
-        data.put("trade_no", carResultDto.getCarId());
+        data.put("trade_no", SeqUtil.getId());
         data.put("remark", "");
         Java110CarProtocol java110CarProtocol = new Java110CarProtocol();
         java110CarProtocol.setId(machineDto.getMachineId());
         java110CarProtocol.setContent(data.toJSONString());
-        NettySocketHolder.sendMsg(java110CarProtocol);
+        JSONObject resultJson = NettySocketHolder.sendMsgSync(java110CarProtocol, carResultDto.getCarNum());
+        logger.debug("修改车辆返回：" + resultJson);
+        int code = resultJson.getIntValue("result_code");
+        String message = resultJson.getString("message");
+
+        return new ResultDto(code, message);
     }
 
     @Override
-    public void deleteCar(MachineDto machineDto, CarDto carResultDto) {
+    public ResultDto deleteCar(MachineDto machineDto, CarDto carResultDto) {
         JSONObject data = new JSONObject();
         data.put("service", "whitelist_sync");
-        data.put("parkid", carResultDto.getPaId());
-        data.put("card_id", carResultDto.getCarId());
+        data.put("parkid", carResultDto.getExtPaId());
+        data.put("card_id", carResultDto.getCardId());
         data.put("car_number", carResultDto.getCarNum());
         data.put("operate_type", "3");
         Java110CarProtocol java110CarProtocol = new Java110CarProtocol();
         java110CarProtocol.setId(machineDto.getMachineId());
         java110CarProtocol.setContent(data.toJSONString());
-        NettySocketHolder.sendMsg(java110CarProtocol);
+        JSONObject resultJson = NettySocketHolder.sendMsgSync(java110CarProtocol, carResultDto.getCarNum());
+        logger.debug("修改车辆返回：" + resultJson);
+        int code = resultJson.getIntValue("result_code");
+        String message = resultJson.getString("message");
+
+        return new ResultDto(code, message);
     }
 
     @Override
@@ -181,14 +203,14 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
                 resObj = heartbeat(machineDto);
                 break;
             case "uploadcarin":
-                resObj = uploadcarin(machineDto,acceptJson);
+                resObj = uploadcarin(machineDto, acceptJson);
                 break;
             case "uploadcarout":
-                resObj = uploadcarout(machineDto,acceptJson);
+                resObj = uploadcarout(machineDto, acceptJson);
                 break;
-            case "whitelist_sync":
-                resObj = whitelistSync(machineDto,acceptJson);
-                break;
+//            case "whitelist_sync":
+//                resObj = whitelistSync(machineDto, acceptJson);
+//                break;
 
             default:
                 resObj = new JSONObject();
@@ -207,12 +229,23 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
      * @param acceptJson
      * @return
      */
-    private JSONObject whitelistSync(MachineDto machineDto,JSONObject acceptJson) {
+    private JSONObject whitelistSync(MachineDto machineDto, JSONObject acceptJson) {
         System.out.printf("acceptJson" + acceptJson.toJSONString());
+
+        int code = acceptJson.getIntValue("result_code");
+
+        if (code != 0) {
+            JSONObject resObj = new JSONObject();
+            resObj.put("service", "whitelist_sync");
+            resObj.put("result_code", code);
+            resObj.put("message", "失败");
+            return resObj;
+        }
 
         CarDto carDto = new CarDto();
         carDto.setCarNum(acceptJson.getString("car_number"));
-        //carDto.setCardId(acceptJson.getString("card_id"));
+        carDto.setCardId(acceptJson.getString("card_id"));
+
         try {
             carService.updateCarByMachine(carDto);
         } catch (Exception e) {
@@ -225,7 +258,7 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
         return resObj;
     }
 
-    private JSONObject uploadcarout(MachineDto machineDto,JSONObject acceptJson) {
+    private JSONObject uploadcarout(MachineDto machineDto, JSONObject acceptJson) {
         CarInoutDto carInoutDto = new CarInoutDto();
 
         carInoutDto.setInoutType(CarInoutDto.INOUT_TYPE_OUT);
@@ -261,7 +294,7 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
      * @param acceptJson
      * @return
      */
-    private JSONObject uploadcarin(MachineDto machineDto,JSONObject acceptJson) {
+    private JSONObject uploadcarin(MachineDto machineDto, JSONObject acceptJson) {
 
         CarInoutDto carInoutDto = new CarInoutDto();
 
@@ -319,6 +352,17 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
      */
     private JSONObject heartbeat(MachineDto machineDto) {
         JSONObject jsonObject = new JSONObject();
+        try {
+            //设备ID
+            //String machineCode = info.getString("deviceKey");
+            String heartBeatTime = DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A);
+            MachineHeartbeatDto machineHeartbeatDto = new MachineHeartbeatDto(machineDto.getMachineCode(), heartBeatTime);
+            ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
+            notifyAccessControlService.machineHeartbeat(machineHeartbeatDto);
+        } catch (Exception e) {
+            logger.error("心跳失败", e);
+        }
+
         jsonObject.put("service", "heartbeat");
         jsonObject.put("result_code", 0);
         jsonObject.put("message", "在线");
