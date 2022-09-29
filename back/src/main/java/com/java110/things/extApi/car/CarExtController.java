@@ -17,10 +17,12 @@ package com.java110.things.extApi.car;
 
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
+import com.java110.things.entity.car.CarBlackWhiteDto;
 import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.parkingArea.ParkingAreaDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.service.car.ICarBlackWhiteService;
 import com.java110.things.service.car.ICarService;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.parkingArea.IParkingAreaService;
@@ -49,6 +51,9 @@ public class CarExtController extends BaseController {
 
     @Autowired
     ICarService carServiceImpl;
+
+    @Autowired
+    ICarBlackWhiteService carBlackWhiteServiceImpl;
 
     @Autowired
     ICommunityService communityServiceImpl;
@@ -200,6 +205,121 @@ public class CarExtController extends BaseController {
         carDto.setCardId(carDtos.get(0).getCardId());
 
         ResultDto result = carServiceImpl.deleteCar(carDto);
+
+        return ResultDto.createResponseEntity(result);
+    }
+
+    /**
+     * 添加车辆名单信息
+     * <p>
+     *
+     * @param reqParam {
+     *                 "carCode":""
+     *                 car_name
+     *                 car_type_cd
+     *                 create_time
+     *                 status_cd
+     *                 oem
+     *                 ext_car_id
+     *                 community_id
+     *                 hm_id
+     *                 }
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/addBlackWhite", method = RequestMethod.POST)
+    public ResponseEntity<String> addBlackWhite(@RequestBody String reqParam) throws Exception {
+
+        JSONObject reqJson = JSONObject.parseObject(reqParam);
+
+        Assert.hasKeyAndValue(reqJson, "carNum", "未包含车辆编码");
+        Assert.hasKeyAndValue(reqJson, "startTime", "未包含车辆起租时间");
+        Assert.hasKeyAndValue(reqJson, "endTime", "未包含车辆截租时间");
+        Assert.hasKeyAndValue(reqJson, "blackWhite", "未包含联系人");
+        Assert.hasKeyAndValue(reqJson, "extBwId", "未包含联系电话");
+        Assert.hasKeyAndValue(reqJson, "extPaId", "未包含外部外部停车场ID");
+        Assert.hasKeyAndValue(reqJson, "extCommunityId", "未包含外部小区ID");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
+
+        CommunityDto communityDto = new CommunityDto();
+        communityDto.setExtCommunityId(reqJson.getString("extCommunityId"));
+        ResultDto resultDto = communityServiceImpl.getCommunity(communityDto);
+
+        List<CommunityDto> communityDtos = (List<CommunityDto>) resultDto.getData();
+
+        Assert.listOnlyOne(communityDtos, "未找到小区信息");
+
+        ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
+        parkingAreaDto.setExtPaId(reqJson.getString("extPaId"));
+        parkingAreaDto.setCommunityId(communityDtos.get(0).getCommunityId());
+        List<ParkingAreaDto> parkingAreaDtos = parkingAreaServiceImpl.queryParkingAreas(parkingAreaDto);
+
+        Assert.listOnlyOne(parkingAreaDtos, "未找到停车场信息");
+
+        CarBlackWhiteDto carBlackWhiteDto = BeanConvertUtil.covertBean(reqJson, CarBlackWhiteDto.class);
+        carBlackWhiteDto.setBwId(SeqUtil.getId());
+        carBlackWhiteDto.setPaId(parkingAreaDtos.get(0).getPaId());
+        carBlackWhiteDto.setExtPaId(parkingAreaDtos.get(0).getExtPaId());
+
+        carBlackWhiteDto.setCommunityId(communityDtos.get(0).getCommunityId());
+        ResultDto result = carBlackWhiteServiceImpl.saveCarBlackWhite(carBlackWhiteDto);
+
+        return ResultDto.createResponseEntity(result);
+    }
+
+    /**
+     * 添加车辆名单信息
+     * <p>
+     *
+     * @param reqParam {
+     *                 "carCode":""
+     *                 car_name
+     *                 car_type_cd
+     *                 create_time
+     *                 status_cd
+     *                 oem
+     *                 ext_car_id
+     *                 community_id
+     *                 hm_id
+     *                 }
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/deleteBlackWhite", method = RequestMethod.POST)
+    public ResponseEntity<String> deleteBlackWhite(@RequestBody String reqParam) throws Exception {
+
+        JSONObject reqJson = JSONObject.parseObject(reqParam);
+
+        Assert.hasKeyAndValue(reqJson, "carNum", "未包含车辆编码");
+        Assert.hasKeyAndValue(reqJson, "extBwId", "未包含联系电话");
+        Assert.hasKeyAndValue(reqJson, "extPaId", "未包含外部外部停车场ID");
+        Assert.hasKeyAndValue(reqJson, "extCommunityId", "未包含外部小区ID");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
+
+        CommunityDto communityDto = new CommunityDto();
+        communityDto.setExtCommunityId(reqJson.getString("extCommunityId"));
+        ResultDto resultDto = communityServiceImpl.getCommunity(communityDto);
+
+        List<CommunityDto> communityDtos = (List<CommunityDto>) resultDto.getData();
+
+        Assert.listOnlyOne(communityDtos, "未找到小区信息");
+
+        ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
+        parkingAreaDto.setExtPaId(reqJson.getString("extPaId"));
+        parkingAreaDto.setCommunityId(communityDtos.get(0).getCommunityId());
+        List<ParkingAreaDto> parkingAreaDtos = parkingAreaServiceImpl.queryParkingAreas(parkingAreaDto);
+
+        Assert.listOnlyOne(parkingAreaDtos, "未找到停车场信息");
+        CarBlackWhiteDto carBlackWhiteDto = new CarBlackWhiteDto();
+        carBlackWhiteDto.setCarNum(reqJson.getString("carNum"));
+        carBlackWhiteDto.setExtBwId(reqJson.getString("extBwId"));
+        carBlackWhiteDto.setCommunityId(reqJson.getString("communityId"));
+        List<CarBlackWhiteDto> carBlackWhiteDtos = carBlackWhiteServiceImpl.queryCarBlackWhites(carBlackWhiteDto);
+
+        Assert.listOnlyOne(carBlackWhiteDtos, "未找到黑白名单");
+
+
+        ResultDto result = carBlackWhiteServiceImpl.deleteCarBlackWhite(carBlackWhiteDtos.get(0));
 
         return ResultDto.createResponseEntity(result);
     }

@@ -1,6 +1,7 @@
 package com.java110.things.adapt.car;
 
 import com.java110.things.entity.accessControl.CarResultDto;
+import com.java110.things.entity.car.CarBlackWhiteDto;
 import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
@@ -95,4 +96,21 @@ public interface ICarProcess {
     String getNeedPayOrder();
 
 
+    /**
+     * 添加白名单
+     *
+     * @param tmpMachineDto
+     * @param carBlackWhiteDto
+     * @return
+     */
+    ResultDto addCarBlackWhite(MachineDto tmpMachineDto, CarBlackWhiteDto carBlackWhiteDto);
+
+    /**
+     * 删除白名单
+     *
+     * @param tmpMachineDto
+     * @param carBlackWhiteDto
+     * @return
+     */
+    ResultDto deleteCarBlackWhite(MachineDto tmpMachineDto, CarBlackWhiteDto carBlackWhiteDto);
 }

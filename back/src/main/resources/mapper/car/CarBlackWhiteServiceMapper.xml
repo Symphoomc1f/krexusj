@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java110.things.dao.ICarServiceDao">
+
+    <insert id="saveCarBlackWhite" parameterType="com.java110.things.entity.car.CarBlackWhiteDto">
+        INSERT INTO car_black_white (`bw_id`, `community_id`, `pa_id`, `black_white`, `car_num`, `start_time`,
+        `end_time`, `ext_bw_id`)
+        VALUES (#{bwId}, #{communityId}, #{paId}, #{blackWhite}, #{carNum}, #{startTime}, #{endTime}, #{extBwId})
+    </insert>
+
+    <!--
+        查询设备信息
+    -->
+    <select id="getCarBlackWhites" parameterType="com.java110.things.entity.car.CarBlackWhiteDto"
+            resultType="com.java110.things.entity.car.CarBlackWhiteDto">
+        select
+        t.bw_id bwId,t.community_id communityId,t.pa_id paId,t.black_white blackWhite,t.car_num carNum,
+        t.start_time startTime,t.end_time endTime,t.ext_bw_id extBwId
+        from car_black_white t
+        where
+        t.status_cd='0'
+        <if test="bwId != null and bwId !=''">
+            and t.bw_id = #{bwId}
+        </if>
+        <if test="communityId != null and communityId !=''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="paId != null and paId !=''">
+            and t.pa_id = #{paId}
+        </if>
+        <if test="blackWhite != null and blackWhite !=''">
+            and t.black_white = #{blackWhite}
+        </if>
+        <if test="carNum != null and carNum !=''">
+            and t.car_num = #{carNum}
+        </if>
+        <if test="startTime != null ">
+            and t.start_time = #{startTime}
+        </if>
+        <if test="endTime != null ">
+            and t.end_time = #{endTime}
+        </if>
+        <if test="extBwId != null and extBwId !=''">
+            and t.ext_bw_id = #{extBwId}
+        </if>
+        order by t.create_time desc
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+
+    </select>
+
+    <select id="getCarBlackWhiteCount" parameterType="com.java110.things.entity.car.CarBlackWhiteDto" resultType="long">
+        select
+        count(1) count
+        from car_black_white t
+        where
+        t.status_cd='0'
+        <if test="bwId != null and bwId !=''">
+            and t.bw_id = #{bwId}
+        </if>
+        <if test="communityId != null and communityId !=''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="paId != null and paId !=''">
+            and t.pa_id = #{paId}
+        </if>
+        <if test="blackWhite != null and blackWhite !=''">
+            and t.black_white = #{blackWhite}
+        </if>
+        <if test="carNum != null and carNum !=''">
+            and t.car_num = #{carNum}
+        </if>
+        <if test="startTime != null ">
+            and t.start_time = #{startTime}
+        </if>
+        <if test="endTime != null ">
+            and t.end_time = #{endTime}
+        </if>
+        <if test="extBwId != null and extBwId !=''">
+            and t.ext_bw_id = #{extBwId}
+        </if>
+
+    </select>
+
+    <update id="updateCarBlackWhite" parameterType="com.java110.things.entity.car.CarBlackWhiteDto">
+        update car_black_white t
+        <trim prefix="SET" suffixOverrides=",">
+
+            <if test="startTime != null">
+                t.start_time = #{startTime},
+            </if>
+            <if test="endTime != null">
+                t.end_time = #{endTime},
+            </if>
+            <if test="statusCd != null and statusCd != ''">
+                t.status_cd = #{statusCd},
+            </if>
+            <if test="extCarId != null and extCarId != ''">
+                t.ext_car_id = #{extCarId},
+            </if>
+        </trim>
+        where 1=1
+        <if test="carNum != null and carNum != ''">
+            and t.car_num = #{carNum}
+        </if>
+        <if test="bwId != null and bwId !=''">
+            and t.bw_id = #{bwId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+    </update>
+
+    <delete id="delete" parameterType="com.java110.things.entity.car.CarBlackWhiteDto">
+        delete from car_black_white where bw_id = #{bwId}
+    </delete>
+
+</mapper>
