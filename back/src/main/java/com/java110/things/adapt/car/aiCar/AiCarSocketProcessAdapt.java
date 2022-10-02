@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.adapt.car.ICarProcess;
 import com.java110.things.entity.accessControl.CarResultDto;
+import com.java110.things.entity.car.CarBlackWhiteDto;
 import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.car.CarInoutDto;
 import com.java110.things.entity.cloud.MachineHeartbeatDto;
@@ -334,6 +335,16 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
                 "  }");
         JSONObject data = NettySocketHolder.sendMsgSync(java110CarProtocol, "浙CBB123");
         return data.toJSONString();
+    }
+
+    @Override
+    public ResultDto addCarBlackWhite(MachineDto tmpMachineDto, CarBlackWhiteDto carBlackWhiteDto) {
+        return null;
+    }
+
+    @Override
+    public ResultDto deleteCarBlackWhite(MachineDto tmpMachineDto, CarBlackWhiteDto carBlackWhiteDto) {
+        return null;
     }
 
     /**
