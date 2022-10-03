@@ -33,7 +33,11 @@ import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.machine.IMachineFaceService;
 import com.java110.things.service.machine.IOperateLogService;
 import com.java110.things.service.openDoor.IOpenDoorService;
-import com.java110.things.util.*;
+import com.java110.things.util.Assert;
+import com.java110.things.util.BeanConvertUtil;
+import com.java110.things.util.DateUtil;
+import com.java110.things.util.SeqUtil;
+import com.java110.things.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +48,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @ClassName NotifyAccessControlServcieImpl
@@ -239,7 +249,7 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
 
         String modelFacePath = "/" + machineDtos.get(0).getCommunityId() + "/" + openDoorDto.getUserId() + ".jpg";
         openDoorDto.setModelFace(modelFacePath);
-
+        openDoorDto.setCommunityId(machineDtos.get(0).getCommunityId());
         //保存 抓拍照片
         ResultDto resultDto = openDoorServiceImpl.saveOpenDoor(openDoorDto);
 
@@ -496,8 +506,8 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
 
         String value = appAttrDto.getValue();
 
-        String upLoadAppId  ="";
-        String securityCode  ="";
+        String upLoadAppId = "";
+        String securityCode = "";
         appAttrDto = appDtos.get(0).getAppAttr(AppAttrDto.SPEC_CD_APP_ID);
 
         if (appAttrDto != null) {
@@ -512,7 +522,7 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
         Map<String, String> headers = new HashMap<>();
         headers.put(SystemConstant.HTTP_APP_ID, upLoadAppId);
 
-        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, value, machineCmdResultDto.toString(), headers, HttpMethod.POST,securityCode);
+        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, value, machineCmdResultDto.toString(), headers, HttpMethod.POST, securityCode);
         if (tmpResponseEntity.getStatusCode() != HttpStatus.OK) {
             logger.error("执行结果失败" + tmpResponseEntity.getBody());
         }
@@ -560,8 +570,8 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
             return;
         }
         String value = appAttrDto.getValue();
-        String upLoadAppId  ="";
-        String securityCode  ="";
+        String upLoadAppId = "";
+        String securityCode = "";
         appAttrDto = appDtos.get(0).getAppAttr(AppAttrDto.SPEC_CD_APP_ID);
 
         if (appAttrDto != null) {
@@ -576,7 +586,7 @@ public class CallAccessControlServiceImpl implements ICallAccessControlService {
 
         Map<String, String> headers = new HashMap<>();
         headers.put(SystemConstant.HTTP_APP_ID, upLoadAppId);
-        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, value, JSONObject.toJSONString(machineHeartbeatDto), headers, HttpMethod.POST,securityCode);
+        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, value, JSONObject.toJSONString(machineHeartbeatDto), headers, HttpMethod.POST, securityCode);
         if (tmpResponseEntity.getStatusCode() != HttpStatus.OK) {
             logger.error("执行结果失败" + tmpResponseEntity.getBody());
         }

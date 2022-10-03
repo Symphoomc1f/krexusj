@@ -6,9 +6,9 @@
     <!-- 保存开门记录 -->
     <insert id="saveOpenDoor" parameterType="com.java110.things.entity.openDoor.OpenDoorDto">
         INSERT INTO open_door(`open_id`, `machine_id`, `machine_code`, `open_type_cd`, `user_id`, `user_name`, `hat`,
-        `model_face`, `face`, `similarity`, `amount_owed`)
+        `model_face`, `face`, `similarity`, `amount_owed`,community_id)
         VALUES (#{openId}, #{machineId}, #{machineCode}, #{openTypeCd}, #{userId}, #{userName}, #{hat}, #{modelFace},
-        #{face}, #{similarity}, #{amountOwed})
+        #{face}, #{similarity}, #{amountOwed},#{communityId})
     </insert>
 
     <!--
@@ -17,32 +17,34 @@
     <select id="getOpenDoors" parameterType="com.java110.things.entity.openDoor.OpenDoorDto"
             resultType="com.java110.things.entity.openDoor.OpenDoorDto">
         select
-            t.open_id openId,
-            t.machine_id machineId,
-            t.machine_code machineCode,
-            t.open_type_cd openTypeCd,
-            td2.name openTypeCdName,
-            t.user_id userId,
-            t.user_name userName,
-            t.hat hat,
-            td1.name hatName,
-            t.model_face modelFace,
-            t.face face,
-            t.amount_owed amountOwed,
-            m.machine_name machineName,
-            m.machine_ip machineIp,
-            t.similarity,
-            t.create_time createTime
+        t.open_id openId,
+        t.machine_id machineId,
+        t.machine_code machineCode,
+        t.open_type_cd openTypeCd,
+        td2.name openTypeCdName,
+        t.user_id userId,
+        t.user_name userName,
+        t.hat hat,
+        td1.name hatName,
+        t.model_face modelFace,
+        t.face face,
+        t.amount_owed amountOwed,
+        m.machine_name machineName,
+        m.machine_ip machineIp,
+        t.similarity,
+        t.create_time createTime,
+        t.community_id communityId
         from open_door t,machine m,t_dict td1,t_dict td2
         where 1=1
-            and t.machine_id = m.machine_id
-            and m.status_cd = '0'
-            and t.hat = td1.status_cd
-            AND td1.table_name = 'open_door'
-            AND td1.table_columns = 'hat'
-            and t.open_type_cd = td2.status_cd
-            AND td2.table_name = 'open_door'
-            AND td2.table_columns = 'open_type_cd'
+        and t.machine_id = m.machine_id
+        and t.community_id = m.community_id
+        and m.status_cd = '0'
+        and t.hat = td1.status_cd
+        AND td1.table_name = 'open_door'
+        AND td1.table_columns = 'hat'
+        and t.open_type_cd = td2.status_cd
+        AND td2.table_name = 'open_door'
+        AND td2.table_columns = 'open_type_cd'
         <if test="machineCode != null and machineCode != ''">
             and m.machine_code = #{machineCode}
         </if>
@@ -85,11 +87,12 @@
 
     <select id="getOpenDoorCount" parameterType="com.java110.things.entity.openDoor.OpenDoorDto" resultType="long">
         select
-            count(1) count
+        count(1) count
         from open_door t,machine m
         where 1=1
-            and t.machine_id = m.machine_id
-            and m.status_cd = '0'
+        and t.machine_id = m.machine_id
+        and t.community_id = m.community_id
+        and m.status_cd = '0'
         <if test="machineCode != null and machineCode != ''">
             and m.machine_code = #{machineCode}
         </if>
