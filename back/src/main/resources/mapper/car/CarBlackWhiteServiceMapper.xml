@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.java110.things.dao.ICarServiceDao">
+<mapper namespace="com.java110.things.dao.ICarBlackWhiteServiceDao">
 
     <insert id="saveCarBlackWhite" parameterType="com.java110.things.entity.car.CarBlackWhiteDto">
         INSERT INTO car_black_white (`bw_id`, `community_id`, `pa_id`, `black_white`, `car_num`, `start_time`,

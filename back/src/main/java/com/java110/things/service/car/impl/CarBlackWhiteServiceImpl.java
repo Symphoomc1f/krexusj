@@ -32,7 +32,7 @@ import java.util.List;
  * add by wuxw 2020/5/14
  **/
 
-@Service("carServiceImpl")
+@Service("carBlackWhiteServiceImpl")
 public class CarBlackWhiteServiceImpl implements ICarBlackWhiteService {
 
     @Autowired
