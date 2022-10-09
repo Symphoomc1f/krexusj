@@ -80,6 +80,11 @@ public class CarBlackWhiteServiceImpl implements ICarBlackWhiteService {
             return new ResultDto(ResultDto.ERROR, "设备不存在");
         }
 
+
+        if(MachineDto.MACHINE_TYPE_CAR.equals(machineDtos.get(0).getMachineTypeCd())){
+            return new ResultDto(ResultDto.SUCCESS,"成功");
+        }
+
         ResultDto resultDto = null;
 
         for (MachineDto tmpMachineDto : machineDtos) {
@@ -151,6 +156,11 @@ public class CarBlackWhiteServiceImpl implements ICarBlackWhiteService {
         if (machineDtos == null || machineDtos.size() < 1) {
             return new ResultDto(ResultDto.ERROR, "设备不存在");
         }
+
+        if(MachineDto.MACHINE_TYPE_CAR.equals(machineDtos.get(0).getMachineTypeCd())){
+            return new ResultDto(ResultDto.SUCCESS,"成功");
+        }
+
         ResultDto resultDto = null;
         for (MachineDto tmpMachineDto : machineDtos) {
             resultDto = CarProcessFactory.getCarImpl(tmpMachineDto.getHmId()).deleteCarBlackWhite(tmpMachineDto, carBlackWhiteDto);
