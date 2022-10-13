@@ -10,17 +10,11 @@ import java.io.Serializable;
 public class TempCarFeeConfigAttrDto extends PageDto implements Serializable {
 
     private String configId;
-    private String feeName;
-    private String paId;
-    private String areaNum;
-    private String carType;
-    private String ruleId;
+    private String[] configIds;
     private String communityId;
-    private String startTime;
-    private String endTime;
-    private String createTime;
-    private String statusCd;
-    private String extConfigId;
+    private String attrId;
+    private String specCd;
+    private String value;
 
     public String getConfigId() {
         return configId;
@@ -28,46 +22,6 @@ public class TempCarFeeConfigAttrDto extends PageDto implements Serializable {
 
     public void setConfigId(String configId) {
         this.configId = configId;
-    }
-
-    public String getFeeName() {
-        return feeName;
-    }
-
-    public void setFeeName(String feeName) {
-        this.feeName = feeName;
-    }
-
-    public String getPaId() {
-        return paId;
-    }
-
-    public void setPaId(String paId) {
-        this.paId = paId;
-    }
-
-    public String getAreaNum() {
-        return areaNum;
-    }
-
-    public void setAreaNum(String areaNum) {
-        this.areaNum = areaNum;
-    }
-
-    public String getCarType() {
-        return carType;
-    }
-
-    public void setCarType(String carType) {
-        this.carType = carType;
-    }
-
-    public String getRuleId() {
-        return ruleId;
-    }
-
-    public void setRuleId(String ruleId) {
-        this.ruleId = ruleId;
     }
 
     public String getCommunityId() {
@@ -78,43 +32,35 @@ public class TempCarFeeConfigAttrDto extends PageDto implements Serializable {
         this.communityId = communityId;
     }
 
-    public String getStartTime() {
-        return startTime;
+    public String getAttrId() {
+        return attrId;
     }
 
-    public void setStartTime(String startTime) {
-        this.startTime = startTime;
+    public void setAttrId(String attrId) {
+        this.attrId = attrId;
     }
 
-    public String getEndTime() {
-        return endTime;
+    public String getSpecCd() {
+        return specCd;
     }
 
-    public void setEndTime(String endTime) {
-        this.endTime = endTime;
+    public void setSpecCd(String specCd) {
+        this.specCd = specCd;
     }
 
-    public String getCreateTime() {
-        return createTime;
+    public String getValue() {
+        return value;
     }
 
-    public void setCreateTime(String createTime) {
-        this.createTime = createTime;
+    public void setValue(String value) {
+        this.value = value;
     }
 
-    public String getStatusCd() {
-        return statusCd;
+    public String[] getConfigIds() {
+        return configIds;
     }
 
-    public void setStatusCd(String statusCd) {
-        this.statusCd = statusCd;
-    }
-
-    public String getExtConfigId() {
-        return extConfigId;
-    }
-
-    public void setExtConfigId(String extConfigId) {
-        this.extConfigId = extConfigId;
+    public void setConfigIds(String[] configIds) {
+        this.configIds = configIds;
     }
 }

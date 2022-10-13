@@ -51,7 +51,8 @@
 
     </select>
 
-    <select id="getTempCarFeeConfigCount" parameterType="com.java110.things.entity.car.TempCarFeeConfigDto" resultType="long">
+    <select id="getTempCarFeeConfigCount" parameterType="com.java110.things.entity.car.TempCarFeeConfigDto"
+            resultType="long">
         select
         count(1) count
         from temp_car_fee_config t
@@ -117,6 +118,37 @@
 
     <delete id="delete" parameterType="com.java110.things.entity.car.TempCarFeeConfigDto">
         delete from temp_car_fee_config t where config_id = #{configId}
+    </delete>
+
+    <insert id="saveTempCarFeeConfigAttr" parameterType="com.java110.things.entity.car.TempCarFeeConfigAttrDto">
+        INSERT INTO temp_car_fee_config_attr (`config_id`, `community_id`, `attr_id`, `spec_cd`, `value`)
+        VALUES (#{configId}, #{communityId}, #{attrId}, #{specCd}, #{value})
+    </insert>
+
+    <select id="getTempCarFeeConfigAttrs" parameterType="com.java110.things.entity.car.TempCarFeeConfigAttrDto"
+            resultType="com.java110.things.entity.car.TempCarFeeConfigAttrDto">
+        select
+        t.attr_id attrId,
+        t.community_id communityId,
+        t.config_id configId,
+        t.spec_cd specCd,
+        t.`value`
+        from temp_car_fee_config_attr t
+        where 1=1
+        and t.config_id = #{configId}
+        <if test="specCd != null and specCd != ''">
+            and t.spec_cd = #{specCd}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+    </select>
+
+    <delete id="deleteTempCarFeeConfigAttr" parameterType="com.java110.things.entity.car.TempCarFeeConfigAttrDto">
+        delete from temp_car_fee_config_attr t where config_id = #{configId}
+        <if test="attrId != null and attrId !=''">
+            and attr_id = #{attrId}
+        </if>
     </delete>
 
 </mapper>

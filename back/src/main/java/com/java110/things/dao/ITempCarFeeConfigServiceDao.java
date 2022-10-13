@@ -1,5 +1,6 @@
 package com.java110.things.dao;
 
+import com.java110.things.entity.car.TempCarFeeConfigAttrDto;
 import com.java110.things.entity.car.TempCarFeeConfigDto;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -56,4 +57,15 @@ public interface ITempCarFeeConfigServiceDao {
      */
     int delete(TempCarFeeConfigDto carDto);
 
+    int saveTempCarFeeConfigAttr(TempCarFeeConfigAttrDto tempCarFeeConfigAttrDto);
+
+    /**
+     * 查询临时车属性
+     *
+     * @param tempCarFeeConfigAttrDto
+     * @return
+     */
+    List<TempCarFeeConfigAttrDto> getTempCarFeeConfigAttrs(TempCarFeeConfigAttrDto tempCarFeeConfigAttrDto);
+
+    int deleteTempCarFeeConfigAttr(TempCarFeeConfigAttrDto tempCarFeeConfigAttrDto);
 }

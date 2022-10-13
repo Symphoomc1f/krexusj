@@ -15,11 +15,21 @@
  */
 package com.java110.things.extApi.fee;
 
+import com.alibaba.fastjson.JSONObject;
+import com.java110.things.entity.community.CommunityDto;
+import com.java110.things.entity.parkingArea.ParkingAreaDto;
+import com.java110.things.entity.response.ResultDto;
+import com.java110.things.service.community.ICommunityService;
+import com.java110.things.service.parkingArea.IParkingAreaService;
+import com.java110.things.util.Assert;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * 费用对外提供接口类
@@ -32,6 +42,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/extApi/fee")
 public class FeeExtController {
 
+    @Autowired
+    ICommunityService communityServiceImpl;
+
+    @Autowired
+    IParkingAreaService parkingAreaServiceImpl;
+
     /**
      * 添加临时车费用
      * <p>
@@ -42,6 +58,28 @@ public class FeeExtController {
      */
     @RequestMapping(path = "/addTempCarFee", method = RequestMethod.POST)
     public ResponseEntity<String> addTempCarFee(@RequestBody String reqParam) throws Exception {
+        JSONObject reqJson = JSONObject.parseObject(reqParam);
+
+        Assert.hasKeyAndValue(reqJson, "feeName", "未包含费用名称");
+        Assert.hasKeyAndValue(reqJson, "carType", "未包含车辆类型");
+        Assert.hasKeyAndValue(reqJson, "extPaId", "未包含外部外部停车场ID");
+        Assert.hasKeyAndValue(reqJson, "extCommunityId", "未包含外部小区ID");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
+
+        CommunityDto communityDto = new CommunityDto();
+        communityDto.setExtCommunityId(reqJson.getString("extCommunityId"));
+        ResultDto resultDto = communityServiceImpl.getCommunity(communityDto);
+
+        List<CommunityDto> communityDtos = (List<CommunityDto>) resultDto.getData();
+
+        Assert.listOnlyOne(communityDtos, "未找到小区信息");
+
+        ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
+        parkingAreaDto.setExtPaId(reqJson.getString("extPaId"));
+        parkingAreaDto.setCommunityId(communityDtos.get(0).getCommunityId());
+        List<ParkingAreaDto> parkingAreaDtos = parkingAreaServiceImpl.queryParkingAreas(parkingAreaDto);
+
+        Assert.listOnlyOne(parkingAreaDtos, "未找到停车场信息");
         return null;
     }
 

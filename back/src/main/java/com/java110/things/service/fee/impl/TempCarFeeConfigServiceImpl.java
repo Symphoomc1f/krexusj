@@ -4,6 +4,7 @@ import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.dao.ITempCarFeeConfigServiceDao;
 import com.java110.things.entity.PageDto;
+import com.java110.things.entity.car.TempCarFeeConfigAttrDto;
 import com.java110.things.entity.car.TempCarFeeConfigDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.service.fee.ITempCarFeeConfigService;
@@ -131,6 +132,22 @@ public class TempCarFeeConfigServiceImpl implements ITempCarFeeConfigService {
             resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
         }
         return resultDto;
+    }
+
+    @Override
+    public int saveTempCarFeeConfigAttr(TempCarFeeConfigAttrDto tempCarFeeConfigDto) throws Exception {
+        int count = carServiceDao.saveTempCarFeeConfigAttr(tempCarFeeConfigDto);
+        return count;
+    }
+
+    @Override
+    public List<TempCarFeeConfigAttrDto> queryTempCarFeeConfigAttrs(TempCarFeeConfigAttrDto tempCarFeeConfigAttrDto) throws Exception {
+        return carServiceDao.getTempCarFeeConfigAttrs(tempCarFeeConfigAttrDto);
+    }
+
+    @Override
+    public int deleteTempCarFeeConfigAttr(TempCarFeeConfigAttrDto tempCarFeeConfigAttrDto) throws Exception {
+        return carServiceDao.deleteTempCarFeeConfigAttr(tempCarFeeConfigAttrDto);
     }
 
 }

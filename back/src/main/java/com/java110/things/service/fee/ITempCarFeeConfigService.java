@@ -1,5 +1,6 @@
 package com.java110.things.service.fee;
 
+import com.java110.things.entity.car.TempCarFeeConfigAttrDto;
 import com.java110.things.entity.car.TempCarFeeConfigDto;
 import com.java110.things.entity.response.ResultDto;
 
@@ -24,6 +25,7 @@ public interface ITempCarFeeConfigService {
      */
     ResultDto saveTempCarFeeConfig(TempCarFeeConfigDto tempCarFeeConfigDto) throws Exception;
 
+
     /**
      * 获取临时车费用信息
      *
@@ -43,7 +45,6 @@ public interface ITempCarFeeConfigService {
     List<TempCarFeeConfigDto> queryTempCarFeeConfigs(TempCarFeeConfigDto tempCarFeeConfigDto) throws Exception;
 
 
-
     public ResultDto updateTempCarFeeConfig(TempCarFeeConfigDto tempCarFeeConfigDto) throws Exception;
 
     /**
@@ -55,5 +56,31 @@ public interface ITempCarFeeConfigService {
      */
     ResultDto deleteTempCarFeeConfig(TempCarFeeConfigDto tempCarFeeConfigDto) throws Exception;
 
+    /**
+     * 保存临时车费用信息
+     *
+     * @param tempCarFeeConfigDto 临时车费用信息
+     * @return
+     * @throws Exception
+     */
+    int saveTempCarFeeConfigAttr(TempCarFeeConfigAttrDto tempCarFeeConfigDto) throws Exception;
+
+    /**
+     * 保存临时车费用信息
+     *
+     * @param tempCarFeeConfigAttrDto 临时车费用属性信息
+     * @return
+     * @throws Exception
+     */
+    List<TempCarFeeConfigAttrDto> queryTempCarFeeConfigAttrs(TempCarFeeConfigAttrDto tempCarFeeConfigAttrDto) throws Exception;
+
+    /**
+     * 删除临时车费用信息
+     *
+     * @param tempCarFeeConfigAttrDto 临时车费用信息
+     * @return
+     * @throws Exception
+     */
+    int deleteTempCarFeeConfigAttr(TempCarFeeConfigAttrDto tempCarFeeConfigAttrDto) throws Exception;
 
 }
