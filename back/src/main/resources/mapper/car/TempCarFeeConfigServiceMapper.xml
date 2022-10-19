@@ -145,7 +145,7 @@
     </select>
 
     <delete id="deleteTempCarFeeConfigAttr" parameterType="com.java110.things.entity.car.TempCarFeeConfigAttrDto">
-        delete from temp_car_fee_config_attr t where config_id = #{configId}
+        delete from temp_car_fee_config_attr where config_id = #{configId}
         <if test="attrId != null and attrId !=''">
             and attr_id = #{attrId}
         </if>

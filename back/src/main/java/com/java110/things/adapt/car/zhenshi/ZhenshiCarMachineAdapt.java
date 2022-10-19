@@ -17,9 +17,11 @@ package com.java110.things.adapt.car.zhenshi;
 
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.adapt.BaseMachineAdapt;
+import com.java110.things.adapt.car.ICallCarService;
 import com.java110.things.adapt.car.ICarMachineProcess;
 import com.java110.things.entity.machine.MachineAttrDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.response.ResultDto;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.SeqUtil;
 import com.java110.things.util.StringUtil;
@@ -40,9 +42,13 @@ public class ZhenshiCarMachineAdapt extends BaseMachineAdapt implements ICarMach
     Logger logger = LoggerFactory.getLogger(ZhenshiCarMachineAdapt.class);
 
     private static final String CMD_GET_RTSP_URI = "get_rtsp_uri";//获取视频连接
+    private static final String CMD_RESULT = "ivs_result";// 车牌识别结果
 
     @Autowired
     private IMachineService machineService;
+
+    @Autowired
+    private ICallCarService callCarServiceImpl;
 
     @Override
     public void initCar() {
@@ -94,7 +100,84 @@ public class ZhenshiCarMachineAdapt extends BaseMachineAdapt implements ICarMach
             case CMD_GET_RTSP_URI:
                 doGetRtspUriResult(reqData, machineDto);
                 break;
+            case CMD_RESULT:
+                doResult(reqData, machineDto);
+                break;
         }
+    }
+
+    /**
+     * 车辆识别结果
+     * <p>
+     * {
+     * "PlateResult": {
+     * "featureCode": true,
+     * "timeUsed": 85,
+     * "plate_true_width": 0,
+     * "confidence": 100,
+     * "bright": 0,
+     * "carBright": 0,
+     * "type": 1,
+     * "enable_encrypt": 1,
+     * "colorType": 1,
+     * "timeStamp": {
+     * "Timeval": {
+     * "sec": 1610940292,
+     * "usec": 391030
+     * }
+     * },
+     * "fake_plate": 0,
+     * "license": "ANX9Q3ftqPOVPJd1Tox8SQ==",
+     * "plate_distance": 0,
+     * "carColor": 0,
+     * "car_brand": {
+     * "year": 65535,
+     * "type": 255,
+     * "brand": 255
+     * },
+     * "colorValue": 0,
+     * "location": {
+     * "RECT": {
+     * "top": 736,
+     * "left": 905,
+     * "bottom": 783,
+     * "right": 1076
+     * }
+     * },
+     * "triggerType": 8,
+     * "direction": 4
+     * },
+     * "fullImgSize": 84866,
+     * "active_id": 1,
+     * "photoJpg": "gkKFhcYGRJiilopSdkB/9k=",
+     * "timeString": "2021-01-18 11:24:52",
+     * "cmd": "ivs_result",
+     * "id": 65,
+     * "imageformat": "jpg",
+     * "clipImgSize": 0
+     * }
+     *
+     * @param reqData
+     * @param machineDto
+     */
+    private void doResult(JSONObject reqData, MachineDto machineDto) {
+
+        JSONObject plateResult = reqData.getJSONObject("PlateResult");
+
+        String type = plateResult.getString("type");
+
+        String license = plateResult.getString("license");
+
+        ResultDto resultDto = callCarServiceImpl.ivsResult(type, license, machineDto);
+
+        if (ResultDto.SUCCESS != resultDto.getCode()) {
+            logger.debug("不开门原因" + resultDto.getMsg());
+            return; //不开门
+        }
+
+        openDoor(machineDto);
+
+
     }
 
     /**

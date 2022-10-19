@@ -2,7 +2,6 @@ package com.java110.things.adapt.accessControl.chuangjiang;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.java110.things.quartz.accessControl.AddUpdateFace;
 import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
@@ -18,7 +17,9 @@ import com.java110.things.entity.room.RoomDto;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.MqttFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
+import com.java110.things.quartz.accessControl.AddUpdateFace;
 import com.java110.things.service.machine.IMachineService;
+import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
 import com.java110.things.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -116,7 +117,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
     @Override
     public ResultDto initAssessControlProcess(MachineDto machineDto) {
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
-        String url = "http://" + machineDto.getMachineIp()  + CMD_SET_SYSTEMMODE;
+        String url = "http://" + machineDto.getMachineIp() + CMD_SET_SYSTEMMODE;
         JSONObject param = new JSONObject();
         param.put("pass", password);
         param.put("systemMode", "2");
@@ -138,7 +139,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
 
         //设置心跳地址
         password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
-        url = "http://" + machineDto.getMachineIp() +  CMD_SET_HEARTBREAT;
+        url = "http://" + machineDto.getMachineIp() + CMD_SET_HEARTBREAT;
         param = new JSONObject();
         param.put("pass", password);
         param.put("url", MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "IOT_URL") + "/api/accessControl/heartBeat/" + machineDto.getMachineCode());
@@ -164,7 +165,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
     public String getFace(MachineDto machineDto, UserFaceDto userFaceDto) {
 
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
-        String url = "http://" + machineDto.getMachineIp() +  CMD_ADD_FACE_FIND;
+        String url = "http://" + machineDto.getMachineIp() + CMD_ADD_FACE_FIND;
         JSONObject param = new JSONObject();
         param.put("pass", password);
         param.put("personId", userFaceDto.getUserId());
@@ -204,7 +205,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
     @Override
     public ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
-        String url = "http://" + machineDto.getMachineIp() +  CMD_ADD_USER;
+        String url = "http://" + machineDto.getMachineIp() + CMD_ADD_USER;
 
         JSONObject paramObj = JSONObject.parseObject("{\"person\":{}}");
         JSONObject param = paramObj.getJSONObject("person");
@@ -218,7 +219,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, param.toJSONString(), responseEntity.getBody());
 
-        url = "http://" + machineDto.getMachineIp() +  CMD_ADD_FACE;
+        url = "http://" + machineDto.getMachineIp() + CMD_ADD_FACE;
         param = new JSONObject();
         param.put("pass", password);
         param.put("personId", userFaceDto.getUserId());
@@ -247,7 +248,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         String url = "";
         JSONObject param = new JSONObject();
-        url = "http://" + machineDto.getMachineIp() +  CMD_ADD_FACE;
+        url = "http://" + machineDto.getMachineIp() + CMD_ADD_FACE;
         param = new JSONObject();
         param.put("pass", password);
         param.put("personId", userFaceDto.getUserId());
@@ -273,7 +274,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
     @Override
     public ResultDto deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
-        String url = "http://" + machineDto.getMachineIp() +  CMD_DELETE_FACE;
+        String url = "http://" + machineDto.getMachineIp() + CMD_DELETE_FACE;
 
 
         JSONObject param = new JSONObject();
@@ -291,7 +292,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
     @Override
     public ResultDto clearFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
-        String url = "http://" + machineDto.getMachineIp() +  CMD_RESET;
+        String url = "http://" + machineDto.getMachineIp() + CMD_RESET;
         JSONObject param = new JSONObject();
         param.put("delete", false);
         param.put("pass", password);
@@ -318,7 +319,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         String url = "";
         for (MachineDto machineDto : machineDtos) {
-            url = "http://" + machineDto.getMachineIp() +  CMD_SET_PASSWORD;
+            url = "http://" + machineDto.getMachineIp() + CMD_SET_PASSWORD;
             JSONObject param = new JSONObject();
             param.put("oldPass", password);
             param.put("newPass", password);
@@ -327,7 +328,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
             ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
             saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_PASSWORD, param.toJSONString(), responseEntity.getBody());
 
-            url = "http://" + machineDto.getMachineIp() +  CMD_SET_SYSTEMMODE;
+            url = "http://" + machineDto.getMachineIp() + CMD_SET_SYSTEMMODE;
             param = new JSONObject();
             param.put("pass", password);
             param.put("systemMode", "2");
@@ -337,7 +338,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
             saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_SYSTEMMODE, param.toJSONString(), responseEntity.getBody());
 
             //设置回调地址
-            url = "http://" + machineDto.getMachineIp() +  CMD_SET_IDENTIFY_CALLBACK;
+            url = "http://" + machineDto.getMachineIp() + CMD_SET_IDENTIFY_CALLBACK;
             param = new JSONObject();
             param.put("pass", password);
             param.put("callbackUrl", MappingCacheFactory.getValue(MappingCacheFactory.COMMON_DOMAIN, "CJ_CALLBACK_URL") + "?machineCode=" + machineDto.getMachineCode());
@@ -364,7 +365,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         JSONObject param = new JSONObject();
         param.put("pass", password);
         //
-        String url = "http://" + machineDto.getMachineIp() +  CMD_REBOOT;
+        String url = "http://" + machineDto.getMachineIp() + CMD_REBOOT;
         HttpHeaders httpHeaders = new HttpHeaders();
         HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
@@ -388,7 +389,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
     }
 
     @Override
-    public String httpFaceResult(MachineDto machineDto,String data) {
+    public String httpFaceResult(MachineDto machineDto, String data) {
         ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
         JSONObject resultParam = new JSONObject();
         try {
@@ -434,13 +435,14 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
     }
 
     @Override
-    public String heartbeat(String data,String machineCode) throws Exception {
+    public String heartbeat(String data, String machineCode) throws Exception {
         JSONObject info = JSONObject.parseObject(data);
 
         //设备ID
         //String machineCode = info.getString("deviceKey");
         String heartBeatTime = null;
-        heartBeatTime = info.getString("time");
+        //heartBeatTime = info.getString("time");
+        heartBeatTime = DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A);
         MachineHeartbeatDto machineHeartbeatDto = new MachineHeartbeatDto(machineCode, heartBeatTime);
         ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
         notifyAccessControlService.machineHeartbeat(machineHeartbeatDto);

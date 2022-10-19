@@ -7,6 +7,8 @@ import java.net.Socket;
 
 public class CarTestMain {
 
+    public static int count = 0;
+
     public static void main(String[] args) {
 
 
@@ -27,8 +29,8 @@ public class CarTestMain {
             //配置的方式：主动推送，JSON格式，带图片
             configFormat(socket, ENABLE_PUSH, JSON_FMT, ENABLE_IMAGE);
 
-            AddWhiteList(socket);
-            getVedio(socket);
+
+            //getVedio(socket);
              sn_len = recvPacketSize(socket);
             if (sn_len > 0) {
                 //接收实际数据
@@ -45,6 +47,7 @@ public class CarTestMain {
             sendCmd(socket, triggerCmd1);
 
             // sendKeepAlive(socket);
+
             int count = 0;
 
             boolean run = true;
@@ -56,6 +59,7 @@ public class CarTestMain {
                     sendKeepAlive(socket);
                     count = 0;
                 }
+                get_ems(socket);
 
                 count++;
 
@@ -103,24 +107,22 @@ public class CarTestMain {
 
     }
 
-    public static void AddWhiteList(Socket socket) {
-        String cmd = "{"
-                + "\"cmd\":\"white_list_operator\","
-                + "\"operator_type\":\"update_or_add\","
-                + "\"dldb_rec\":{"
-                + "\"create_time\":\"2018-10-1 12:30:40\","
-                + "\"enable_time\":\"2018-08-08 12:30:40\","
-                + "\"overdue_time\":\"2018-12-12 12:30:40\","
-                + "\"enable\":1,"
-                + "\"plate\":\"川A12345\","
-                + "\"time_seg_enable\":0,"
-                + "\"seg_time\": \"\","
-                + "\"need_alarm\":0,"
-                + "\"vehicle_code\":\"123456\","
-                + "\"vehicle_comment\":\"123456\","
-                + "\"customer_id\":1"
-                + "}"
-                + "} ";
+    public static void get_ems(Socket socket) {
+        if(count > 0){
+            return ;
+        }
+        count ++;
+//        String cmd = "{\n" +
+//                "\"cmd\" : \"enable_encrypt\",\n" +
+//                "\"encrypt_key\" : \"NWU0ZGU1MjhkYmM5ZTRmOWZhN2I5OWRkZTMyOGQwYzYzYmJkNjk5OA==\",\n" +
+//                "\"id\" : \"999999\",\n" +
+//                "\"m_id\" : 0\n" +
+//                "}";
+        String cmd = "{\n" +
+                "\"cmd\" : \"get_encrypt_key\",\n" +
+                "\"id\" : \"999999\",\n" +
+                "\"prime_key\" : \"Vg0MgpeBCOzzCxbsQ68V2NHd0Zk=\"\n" +
+                "}";
         try {
             byte[] b = cmd.getBytes("gb2312");//编码
             String sa = new String(b, "gb2312");//解码
@@ -227,6 +229,8 @@ public class CarTestMain {
             onIVSResultRecv(data, len);
         } else {
             //普通的指令响应
+            String ivs = new String(data,"UTF-8" );
+            System.out.println("接受内容"+ivs);
         }
     }
 

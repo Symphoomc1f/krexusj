@@ -19,7 +19,11 @@ public class MachineDto extends PageDto implements Serializable {
     public static final String MACHINE_TYPE_OTHER_CAR = "9995"; // 第三方道闸平台
     public static final String MACHINE_TYPE_ACCESS_CONTROL = "9999";
     public static final String LOCATION_TYPE_PARKING_AREA = "4000"; //停车场
-    public static final String LOCATION_TYPE_COMMUNITY= "1000"; //停车场
+    public static final String LOCATION_TYPE_COMMUNITY = "1000"; //停车场
+
+    public static final String MACHINE_DIRECTION_ENTER = "3306"; // 进场
+    public static final String MACHINE_DIRECTION_OUT = "3307"; // 出场
+
 
     // 考勤机
     public static final String MACHINE_TYPE_ATTENDANCE = "9997";
@@ -41,6 +45,7 @@ public class MachineDto extends PageDto implements Serializable {
     private String heartbeatTime;
     private String locationObjId;
     private String locationType;
+    private String direction;
 
 
     public String getMachineMac() {
@@ -190,5 +195,14 @@ public class MachineDto extends PageDto implements Serializable {
 
     public void setLocationType(String locationType) {
         this.locationType = locationType;
+    }
+
+
+    public String getDirection() {
+        return direction;
+    }
+
+    public void setDirection(String direction) {
+        this.direction = direction;
     }
 }

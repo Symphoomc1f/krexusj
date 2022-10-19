@@ -47,11 +47,6 @@ public class TempCarFeeConfigServiceImpl implements ITempCarFeeConfigService {
     public ResultDto saveTempCarFeeConfig(TempCarFeeConfigDto tempCarFeeConfigDto) throws Exception {
         ResultDto resultDto = null;
 
-        if (resultDto.getCode() != ResultDto.SUCCESS) {
-            return resultDto;
-        }
-
-
         int count = carServiceDao.saveTempCarFeeConfig(tempCarFeeConfigDto);
 
         if (count < 1) {
@@ -120,10 +115,7 @@ public class TempCarFeeConfigServiceImpl implements ITempCarFeeConfigService {
     @Override
     public ResultDto deleteTempCarFeeConfig(TempCarFeeConfigDto tempCarFeeConfigDto) throws Exception {
         ResultDto resultDto = null;
-        //第三方平台
-        if (resultDto.getCode() != ResultDto.SUCCESS) {
-            return resultDto;
-        }
+
         tempCarFeeConfigDto.setStatusCd(SystemConstant.STATUS_INVALID);
         int count = carServiceDao.updateTempCarFeeConfig(tempCarFeeConfigDto);
         if (count < 1) {
