@@ -41,6 +41,6 @@ public interface ICallCarService {
      *     msg:说明原因
      * }
      */
-    public ResultDto ivsResult(String type, String carNum, MachineDto machineDto);
+    public ResultDto ivsResult(String type, String carNum, MachineDto machineDto) throws Exception;
 
 }

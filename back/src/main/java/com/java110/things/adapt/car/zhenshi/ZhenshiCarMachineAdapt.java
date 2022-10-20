@@ -162,21 +162,26 @@ public class ZhenshiCarMachineAdapt extends BaseMachineAdapt implements ICarMach
      */
     private void doResult(JSONObject reqData, MachineDto machineDto) {
 
-        JSONObject plateResult = reqData.getJSONObject("PlateResult");
+        try {
 
-        String type = plateResult.getString("type");
+            JSONObject plateResult = reqData.getJSONObject("PlateResult");
 
-        String license = plateResult.getString("license");
+            String type = plateResult.getString("type");
 
-        ResultDto resultDto = callCarServiceImpl.ivsResult(type, license, machineDto);
+            String license = plateResult.getString("license");
 
-        if (ResultDto.SUCCESS != resultDto.getCode()) {
-            logger.debug("不开门原因" + resultDto.getMsg());
-            return; //不开门
+            ResultDto resultDto = callCarServiceImpl.ivsResult(type, license, machineDto);
+
+            if (ResultDto.SUCCESS != resultDto.getCode()) {
+                logger.debug("不开门原因" + resultDto.getMsg());
+                return; //不开门
+            }
+
+            openDoor(machineDto);
+
+        } catch (Exception e) {
+            logger.error("开门异常", e);
         }
-
-        openDoor(machineDto);
-
 
     }
 

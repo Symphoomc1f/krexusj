@@ -7,6 +7,12 @@ import java.util.Date;
 
 public class CarBlackWhiteDto extends PageDto implements Serializable {
 
+
+    //黑白名单 黑名单
+    public static final String BLACK_WHITE_BLACK = "1111";
+    //白名单
+    public static final String BLACK_WHITE_WHITE = "2222";
+
     private String bwId;
     private String carNum;
     private Date startTime;
