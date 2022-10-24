@@ -3,6 +3,8 @@ package com.java110.things.service.car;
 import com.java110.things.entity.car.CarInoutDto;
 import com.java110.things.entity.response.ResultDto;
 
+import java.util.List;
+
 /**
  * @ClassName ICarInoutService
  * @Description TODO 进出场服务类
@@ -30,6 +32,15 @@ public interface ICarInoutService {
      * @throws Exception
      */
     ResultDto getCarInout(CarInoutDto carInoutDto) throws Exception;
+
+    /**
+     * 获取车辆信息
+     *
+     * @param carInoutDto 车辆信息
+     * @return
+     * @throws Exception
+     */
+    List<CarInoutDto> queryCarInout(CarInoutDto carInoutDto) throws Exception;
 
     /**
      * 修改车辆信息

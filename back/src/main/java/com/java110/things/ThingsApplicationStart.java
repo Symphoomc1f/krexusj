@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -52,6 +53,7 @@ import java.util.List;
 @MapperScan("com.java110.things.dao")
 @SpringBootApplication
 @EnableScheduling
+@EnableAsync
 public class ThingsApplicationStart implements WebMvcConfigurer {
 
     private static Logger logger = LoggerFactory.getLogger(ThingsApplicationStart.class);
