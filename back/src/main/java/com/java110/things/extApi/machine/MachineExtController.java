@@ -127,6 +127,8 @@ public class MachineExtController extends BaseController {
         Assert.hasKeyAndValue(reqJson, "extMachineId", "未包含外部设备编码");
         Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
 
+
+
         MachineDto machineDto = BeanConvertUtil.covertBean(reqJson, MachineDto.class);
 
 

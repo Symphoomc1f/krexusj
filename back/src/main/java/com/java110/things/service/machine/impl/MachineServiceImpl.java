@@ -130,12 +130,17 @@ public class MachineServiceImpl implements IMachineService {
         //重新初始化设备信息
         String reInitSwitch = MappingCacheFactory.getValue("ACCESS_CONTROL_REINIT_SWITCH");
         if ("ON".equals(reInitSwitch)) {
-            if (MachineDto.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
-                AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).initAssessControlProcess(machineDto);
-            } else if (MachineDto.MACHINE_TYPE_CAR.equals(machineDto.getMachineTypeCd())) {
-                CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).initCar(machineDto);
-            } else if (MachineDto.MACHINE_TYPE_OTHER_CAR.equals(machineDto.getMachineTypeCd())) {
-                CarProcessFactory.getCarImpl(machineDto.getHmId()).initCar(machineDto);
+            MachineDto tmpMachineDto = new MachineDto();
+            tmpMachineDto.setExtMachineId(machineDto.getExtMachineId());
+            List<MachineDto> machineDtos = queryMachines(tmpMachineDto);
+            Assert.listOnlyOne(machineDtos, "未找到设备信息");
+
+            if (MachineDto.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDtos.get(0).getMachineTypeCd())) {
+                AccessControlProcessFactory.getAssessControlProcessImpl(machineDtos.get(0).getHmId()).initAssessControlProcess(machineDtos.get(0));
+            } else if (MachineDto.MACHINE_TYPE_CAR.equals(machineDtos.get(0).getMachineTypeCd())) {
+                CarMachineProcessFactory.getCarImpl(machineDtos.get(0).getHmId()).initCar(machineDtos.get(0));
+            } else if (MachineDto.MACHINE_TYPE_OTHER_CAR.equals(machineDtos.get(0).getMachineTypeCd())) {
+                CarProcessFactory.getCarImpl(machineDtos.get(0).getHmId()).initCar(machineDtos.get(0));
             }
         }
 
