@@ -24,6 +24,7 @@ public class CarInoutDto extends PageDto implements Serializable {
     private String inoutType;
     private String statusCd;
     private String machineCode;
+    private String paId;
 
     public String getInoutId() {
         return inoutId;
@@ -135,5 +136,13 @@ public class CarInoutDto extends PageDto implements Serializable {
 
     public void setMachineCode(String machineCode) {
         this.machineCode = machineCode;
+    }
+
+    public String getPaId() {
+        return paId;
+    }
+
+    public void setPaId(String paId) {
+        this.paId = paId;
     }
 }

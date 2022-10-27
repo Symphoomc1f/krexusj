@@ -24,7 +24,8 @@
             t.real_charge realCharge,
             t.pay_type payType,
             t.remark,
-            t.inout_type inoutType
+            t.inout_type inoutType,
+            t.pa_id paId
         from car_inout t
         where 1=1
         <if test="inoutId != null and inoutId != ''">
@@ -35,6 +36,9 @@
         </if>
         <if test="communityId != null and communityId != ''">
             and t.community_id = #{communityId}
+        </if>
+        <if test="paId != null and paId != ''">
+            and t.pa_id = #{paId}
         </if>
         <if test="inoutType != null and inoutType != ''">
             and t.inout_type = #{inoutType}
@@ -60,6 +64,9 @@
         <if test="communityId != null and communityId != ''">
             and t.community_id = #{communityId}
         </if>
+        <if test="paId != null and paId != ''">
+            and t.pa_id = #{paId}
+        </if>
         <if test="inoutType != null and inoutType != ''">
             and t.inout_type = #{inoutType}
         </if>
@@ -82,6 +89,9 @@
         </if>
         <if test="communityId != null and communityId != ''">
             and t.community_id = #{communityId}
+        </if>
+        <if test="paId != null and paId != ''">
+            and t.pa_id = #{paId}
         </if>
         <if test="inoutType != null and inoutType != ''">
             and t.inout_type = #{inoutType}
