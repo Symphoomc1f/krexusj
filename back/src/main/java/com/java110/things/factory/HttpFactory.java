@@ -103,7 +103,7 @@ public class HttpFactory {
      * @return 返回 ResponseEntity
      */
     public static ResponseEntity<String> exchange(RestTemplate restTemplate, String url, String param, Map<String, String> headers, HttpMethod httpMethod) throws UnsupportedEncodingException {
-        return exchange(restTemplate, url, param, null, httpMethod, MappingCacheFactory.getValue("SECURITY_CODE"));
+        return exchange(restTemplate, url, param, headers, httpMethod, MappingCacheFactory.getValue("SECURITY_CODE"));
     }
 
     /**
