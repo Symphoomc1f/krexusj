@@ -76,6 +76,9 @@ public class MqttPushClient {
      * @param data
      */
     public void publish(String topic, String data) {
+        if(!client.isConnected()){
+            connect();
+        }
         publish(topic, data, 1, false);
     }
 
