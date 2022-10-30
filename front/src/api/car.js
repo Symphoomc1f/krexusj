@@ -8,6 +8,13 @@ export function queryCars(params) {
     })
 }
 
+export function deleteCars(params) {
+    return request({
+        url: '/api/car/deleteCar',
+        method: 'post',
+        data:params
+    })
+}
 
 export function getCarInouts(params) {
     return request({

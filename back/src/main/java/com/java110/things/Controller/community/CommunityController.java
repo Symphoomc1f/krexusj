@@ -55,6 +55,25 @@ public class CommunityController extends BaseController {
 
 
     /**
+     * 更新小区信息
+     *
+     * @param param 请求报文
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/updateCommunitys", method = RequestMethod.POST)
+    public ResponseEntity<String> updateCommunitys(@RequestBody String param, HttpServletRequest request) throws Exception {
+        JSONObject paramObj = super.getParamJson(param);
+        Assert.hasKeyAndValue(paramObj, "address", "请求报文中未包含地址");
+        Assert.hasKeyAndValue(paramObj, "name", "请求报文中未包含小区名称");
+        Assert.hasKeyAndValue(paramObj, "extCommunityId", "请求报文中未包含外部编码");
+        CommunityDto communityDto = BeanConvertUtil.covertBean(paramObj, CommunityDto.class);
+        ResultDto resultDto = communityServiceImpl.updateCommunity(communityDto);
+        return super.createResponseEntity(resultDto);
+    }
+
+
+    /**
      * 添加设备接口类
      *
      * @param communityId 页数

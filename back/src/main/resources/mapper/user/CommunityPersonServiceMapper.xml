@@ -113,6 +113,9 @@
             <if test="extPersonId != null and extPersonId != ''">
                 t.ext_person_id = #{extPersonId},
             </if>
+            <if test="personType != null and personType != ''">
+                t.person_type = #{personType},
+            </if>
             <if test="statusCd != null and statusCd != ''">
                 t.status_cd = #{statusCd}
             </if>
@@ -124,9 +127,6 @@
         </if>
         <if test="communityId != null and communityId != ''">
             and t.community_id = #{communityId}
-        </if>
-        <if test="personType != null and personType != ''">
-            and t.person_type = #{personType}
         </if>
         <if test="extPersonId != null and extPersonId != ''">
             and t.ext_person_id = #{extPersonId}

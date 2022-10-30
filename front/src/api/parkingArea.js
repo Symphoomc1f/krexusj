@@ -23,3 +23,11 @@ export function saveParkingArea(params) {
         data:params
     })
 }
+
+export function updateParkingArea(params) {
+    return request({
+        url: '/api/parkingArea/updateParkingArea',
+        method: 'post',
+        data:params
+    })
+  }

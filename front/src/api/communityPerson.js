@@ -38,6 +38,13 @@ export function saveCommunityPersons(params) {
         data:params
     })
 }
+export function updateCommunityPerson(params) {
+    return request({
+        url: '/api/communityPerson/updateCommunityPerson',
+        method: 'post',
+        data:params
+    })
+  }
 
 export function getBase64(file) {
     return new Promise(function(resolve, reject) {

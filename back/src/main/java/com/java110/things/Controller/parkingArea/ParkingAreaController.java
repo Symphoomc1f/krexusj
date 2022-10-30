@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
 import com.java110.things.entity.parkingArea.ParkingAreaDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.entity.user.UserDto;
 import com.java110.things.service.parkingArea.IParkingAreaService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
@@ -55,6 +56,24 @@ public class ParkingAreaController extends BaseController {
         ResultDto resultDto = parkingAreaServiceImpl.saveParkingArea(parkingAreaDto);
         return super.createResponseEntity(resultDto);
     }
+
+    /**
+     * 更细用户
+     *
+     * @param param 请求报文
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/updateParkingArea", method = RequestMethod.POST)
+    public ResponseEntity<String> updateParkingArea(@RequestBody String param) throws Exception {
+        JSONObject paramObj = super.getParamJson(param);
+        Assert.hasKeyAndValue(paramObj, "paId", "请求报文中未包含停车场ID");
+        Assert.hasKeyAndValue(paramObj, "num", "请求报文中未包含停车场编号");
+        Assert.hasKeyAndValue(paramObj, "communityId", "请求报文中未包含小区信息");
+        ResultDto resultDto = parkingAreaServiceImpl.updateParkingArea(BeanConvertUtil.covertBean(paramObj, ParkingAreaDto.class));
+        return super.createResponseEntity(resultDto);
+    }
+
 
 
     /**

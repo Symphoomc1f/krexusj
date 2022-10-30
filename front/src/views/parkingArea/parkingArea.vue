@@ -55,12 +55,10 @@
       </el-table-column>
       <el-table-column class-name="status-col" label="操作" align="right">
         <template slot-scope="{ row, $index }">
-          <el-button
-            size="mini"
-            type="danger"
-            @click="deleteParkingArea(row, $index)"
-            >删除</el-button
-          >
+          <el-row>
+            <el-button size="mini"  type="primary" @click="editParkingArea(row,$index)">修改</el-button>
+            <el-button size="mini" type="danger" @click="deleteParkingArea(row, $index)" >删除</el-button>
+           </el-row> 
         </template>
       </el-table-column>
     </el-table>
@@ -111,6 +109,7 @@ import {
   getParkingAreas,
   deleteParkingArea,
   saveParkingArea,
+  updateParkingArea,
 } from "@/api/parkingArea";
 import { parseTime } from "@/utils";
 
@@ -140,6 +139,7 @@ export default {
       dialogFormVisible: false,
       curParkingArea: {},
       temp: {
+        paId:"",
         num: "",
         extPaId: "",
       },
@@ -169,6 +169,10 @@ export default {
     addParkingArea() {
       this.dialogFormVisible = true;
     },
+    editParkingArea(_row, _index) {
+      this.dialogFormVisible = true;
+      this.temp = _row;
+    },
     deleteParkingArea(_row) {
       this.deleteParkingAreaDailogVisible = true;
       this.curParkingArea = _row;
@@ -188,6 +192,15 @@ export default {
     saveParkingAreaInfo() {
       this.listLoading = true;
       let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+      console.log(this.temp.paId);
+      if (this.temp.paId != "") {
+          updateParkingArea(this.temp).then(response => {
+          this.listLoading = false;
+          this.dialogFormVisible = false;
+          this.queryParkingArea();
+        });
+        return;
+      }
       this.temp.communityId = _currCommunity.communityId;
       saveParkingArea(this.temp).then((response) => {
         this.listLoading = false;
