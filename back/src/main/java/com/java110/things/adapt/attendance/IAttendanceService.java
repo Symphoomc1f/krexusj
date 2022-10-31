@@ -42,6 +42,9 @@ public interface IAttendanceService {
     ResultDto getClasses(AttendanceClassesDto attendanceClassesDto);
 
 
+    List<AttendanceClassesDto> getAttendanceClasses(AttendanceClassesDto attendanceClassesDto);
+
+
     /**
      * 查询班次
      * @param staffDto 班次信息
@@ -96,7 +99,10 @@ public interface IAttendanceService {
 
     ResultDto insertAttendanceClassesDto(AttendanceClassesDto attendanceClassesDto, List<AttendanceClassesAttrDto> attrDtos);
 
+    ResultDto saveAttendanceClassesAttrDto(AttendanceClassesAttrDto attrDto);
+
     ResultDto deleteAttendanceClassesDto(AttendanceClassesDto attendanceClassesDto);
+    ResultDto deleteAttendanceClassesAttrDto(AttendanceClassesAttrDto attendanceClassesAttrDto);
 
     public ResultDto updateAttendanceClasses(AttendanceClassesDto attendanceClassesDto);
 

@@ -24,6 +24,7 @@ public class AttendanceClassesDto extends PageDto implements Serializable {
     private String statusCd;
     private String lateOffset;
     private String leaveOffset;
+    private String extClassesId;
 
     public String getClassesId() {
         return classesId;
@@ -89,11 +90,27 @@ public class AttendanceClassesDto extends PageDto implements Serializable {
         this.statusCd = statusCd;
     }
 
-    public String getLateOffset() {return lateOffset;}
+    public String getLateOffset() {
+        return lateOffset;
+    }
 
-    public void setLateOffset(String lateOffset) {this.lateOffset = lateOffset; }
+    public void setLateOffset(String lateOffset) {
+        this.lateOffset = lateOffset;
+    }
 
-    public String getLeaveOffset() {return leaveOffset;}
+    public String getLeaveOffset() {
+        return leaveOffset;
+    }
 
-    public void setLeaveOffset(String leaveOffset) {this.leaveOffset = leaveOffset;}
+    public void setLeaveOffset(String leaveOffset) {
+        this.leaveOffset = leaveOffset;
+    }
+
+    public String getExtClassesId() {
+        return extClassesId;
+    }
+
+    public void setExtClassesId(String extClassesId) {
+        this.extClassesId = extClassesId;
+    }
 }
