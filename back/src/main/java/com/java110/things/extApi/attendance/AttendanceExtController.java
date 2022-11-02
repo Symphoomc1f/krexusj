@@ -21,9 +21,12 @@ import com.java110.things.Controller.BaseController;
 import com.java110.things.adapt.attendance.IAttendanceService;
 import com.java110.things.entity.attendance.AttendanceClassesAttrDto;
 import com.java110.things.entity.attendance.AttendanceClassesDto;
+import com.java110.things.entity.attendance.AttendanceClassesStaffDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.entity.user.StaffDto;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.parkingArea.IParkingAreaService;
+import com.java110.things.service.staff.IStaffService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
 import com.java110.things.util.SeqUtil;
@@ -51,6 +54,9 @@ public class AttendanceExtController extends BaseController {
     @Autowired
     IAttendanceService attendanceServiceImpl;
 
+    @Autowired
+    private IStaffService staffServiceImpl;
+
 
     @Autowired
     ICommunityService communityServiceImpl;
@@ -76,8 +82,8 @@ public class AttendanceExtController extends BaseController {
      * @return 成功或者失败
      * @throws Exception
      */
-    @RequestMapping(path = "/addAttendance", method = RequestMethod.POST)
-    public ResponseEntity<String> addAttendance(@RequestBody String reqParam) throws Exception {
+    @RequestMapping(path = "/addAttendanceClass", method = RequestMethod.POST)
+    public ResponseEntity<String> addAttendanceClass(@RequestBody String reqParam) throws Exception {
 
         JSONObject reqJson = JSONObject.parseObject(reqParam);
 
@@ -132,8 +138,8 @@ public class AttendanceExtController extends BaseController {
      * @return 成功或者失败
      * @throws Exception
      */
-    @RequestMapping(path = "/updateAttendance", method = RequestMethod.POST)
-    public ResponseEntity<String> updateAttendance(@RequestBody String reqParam) throws Exception {
+    @RequestMapping(path = "/updateAttendanceClass", method = RequestMethod.POST)
+    public ResponseEntity<String> updateAttendanceClass(@RequestBody String reqParam) throws Exception {
 
         JSONObject reqJson = JSONObject.parseObject(reqParam);
 
@@ -195,8 +201,8 @@ public class AttendanceExtController extends BaseController {
      * @return 成功或者失败
      * @throws Exception
      */
-    @RequestMapping(path = "/deleteAttendance", method = RequestMethod.POST)
-    public ResponseEntity<String> deleteAttendance(@RequestBody String reqParam) throws Exception {
+    @RequestMapping(path = "/deleteAttendanceClass", method = RequestMethod.POST)
+    public ResponseEntity<String> deleteAttendanceClass(@RequestBody String reqParam) throws Exception {
 
         JSONObject reqJson = JSONObject.parseObject(reqParam);
 
@@ -215,6 +221,74 @@ public class AttendanceExtController extends BaseController {
         attendanceServiceImpl.deleteAttendanceClassesAttrDto(attendanceClassesAttrDto);
         ResultDto resultDto = attendanceServiceImpl.deleteAttendanceClassesDto(attendanceClassesDtos.get(0));
 
+        return ResultDto.createResponseEntity(resultDto);
+    }
+
+
+    /**
+     * 添加考勤信息
+     * <p>
+     *
+     * @param reqParam {
+     *                 "attendanceCode":""
+     *                 attendance_name
+     *                 attendance_type_cd
+     *                 create_time
+     *                 status_cd
+     *                 oem
+     *                 ext_attendance_id
+     *                 community_id
+     *                 hm_id
+     *                 }
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/addAttendanceClassStaff", method = RequestMethod.POST)
+    public ResponseEntity<String> addAttendanceClassStaff(@RequestBody String reqParam) throws Exception {
+
+        JSONObject reqJson = JSONObject.parseObject(reqParam);
+
+        Assert.hasKeyAndValue(reqJson, "extClassesId", "未包含外部考勤班组ID");
+        Assert.hasKeyAndValue(reqJson, "extStaffId", "未包含外部员工ID");
+        Assert.hasKeyAndValue(reqJson, "staffName", "未包含员工名称");
+        Assert.hasKeyAndValue(reqJson, "departmentId", "未包含部门ID");
+        Assert.hasKeyAndValue(reqJson, "departmentName", "未包含部门名称");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
+
+        StaffDto staffDto = new StaffDto();
+        staffDto.setExtStaffId(reqJson.getString("extStaffId"));
+        //检查员工是否存在
+        List<StaffDto> staffDtos = attendanceServiceImpl.queryStaffs(staffDto);
+
+        String staffId = "";
+
+        if (staffDtos == null || staffDtos.size() < 1) {
+            StaffDto tmpStaffDto = BeanConvertUtil.covertBean(reqJson, StaffDto.class);
+            tmpStaffDto.setStaffId(SeqUtil.getId());
+            staffServiceImpl.saveStaff(tmpStaffDto);
+            staffId = tmpStaffDto.getStaffId();
+        } else {
+            staffId = staffDtos.get(0).getStaffId();
+        }
+        AttendanceClassesDto attendanceClassesDto = new AttendanceClassesDto();
+        attendanceClassesDto.setExtClassesId(reqJson.getString("extClassesId"));
+        List<AttendanceClassesDto> attendanceClassesDtos = attendanceServiceImpl.getAttendanceClasses(attendanceClassesDto);
+
+        Assert.listOnlyOne(attendanceClassesDtos, "不存在考勤班组");
+
+        //判断员工是否在这个考勤班组中
+        AttendanceClassesStaffDto attendanceClassesStaffDto = new AttendanceClassesStaffDto();
+        attendanceClassesStaffDto.setClassesId(attendanceClassesDtos.get(0).getClassesId());
+        attendanceClassesStaffDto.setStaffId(staffId);
+        List<AttendanceClassesStaffDto> attendanceClassesStaffDtos = attendanceServiceImpl.queryClassStaffs(attendanceClassesStaffDto);
+        //班组中已经存在
+        if (attendanceClassesStaffDtos != null && attendanceClassesStaffDtos.size() > 0) {
+            return ResultDto.success();
+        }
+        attendanceClassesStaffDto = BeanConvertUtil.covertBean(reqJson, AttendanceClassesStaffDto.class);
+        attendanceClassesStaffDto.setStaffId(staffId);
+        attendanceClassesStaffDto.setClassesId(SeqUtil.getId());
+        ResultDto resultDto = attendanceServiceImpl.saveClassStaff(attendanceClassesStaffDto);
         return ResultDto.createResponseEntity(resultDto);
     }
 

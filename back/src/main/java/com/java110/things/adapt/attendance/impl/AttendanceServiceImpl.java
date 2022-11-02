@@ -298,6 +298,22 @@ public class AttendanceServiceImpl implements IAttendanceService {
     }
 
     @Override
+    public List<StaffDto> queryStaffs(StaffDto staffDto) {
+        int page = staffDto.getPage();
+
+        if (page != PageDto.DEFAULT_PAGE) {
+            staffDto.setPage((page - 1) * staffDto.getRow());
+        }
+
+        List<StaffDto> staffDtos = null;
+
+        staffDtos = staffServiceDao.getStaffs(staffDto);
+
+        return staffDtos;
+    }
+
+
+    @Override
     public ResultDto saveClassStaff(AttendanceClassesStaffDto attendanceClassesStaffDto) {
         long flag = attendanceClassesServiceDao.saveAttendanceClassesStaff(attendanceClassesStaffDto);
         if (flag > 0) {
@@ -348,6 +364,21 @@ public class AttendanceServiceImpl implements IAttendanceService {
         }
         ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, count, totalPage, attendanceClassesStaffDtos);
         return resultDto;
+    }
+
+    @Override
+    public List<AttendanceClassesStaffDto> queryClassStaffs(AttendanceClassesStaffDto attendanceClassesStaffDto) {
+        int page = attendanceClassesStaffDto.getPage();
+
+        if (page != PageDto.DEFAULT_PAGE) {
+            attendanceClassesStaffDto.setPage((page - 1) * attendanceClassesStaffDto.getRow());
+        }
+
+        List<AttendanceClassesStaffDto> attendanceClassesStaffDtos = null;
+
+        attendanceClassesStaffDtos = attendanceClassesServiceDao.getAttendanceClassesStaffs(attendanceClassesStaffDto);
+
+        return attendanceClassesStaffDtos;
     }
 
     @Override
