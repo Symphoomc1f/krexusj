@@ -226,7 +226,7 @@ public class AttendanceExtController extends BaseController {
 
 
     /**
-     * 添加考勤信息
+     * 添加考勤员工信息
      * <p>
      *
      * @param reqParam {
@@ -289,6 +289,62 @@ public class AttendanceExtController extends BaseController {
         attendanceClassesStaffDto.setStaffId(staffId);
         attendanceClassesStaffDto.setClassesId(SeqUtil.getId());
         ResultDto resultDto = attendanceServiceImpl.saveClassStaff(attendanceClassesStaffDto);
+        return ResultDto.createResponseEntity(resultDto);
+    }
+
+    /**
+     * 添加考勤员工信息
+     * <p>
+     *
+     * @param reqParam {
+     *                 "attendanceCode":""
+     *                 attendance_name
+     *                 attendance_type_cd
+     *                 create_time
+     *                 status_cd
+     *                 oem
+     *                 ext_attendance_id
+     *                 community_id
+     *                 hm_id
+     *                 }
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/deleteAttendanceClassStaff", method = RequestMethod.POST)
+    public ResponseEntity<String> deleteAttendanceClassStaff(@RequestBody String reqParam) throws Exception {
+
+        JSONObject reqJson = JSONObject.parseObject(reqParam);
+
+        Assert.hasKeyAndValue(reqJson, "extClassesId", "未包含外部考勤班组ID");
+        Assert.hasKeyAndValue(reqJson, "extStaffId", "未包含外部员工ID");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
+
+        StaffDto staffDto = new StaffDto();
+        staffDto.setExtStaffId(reqJson.getString("extStaffId"));
+        //检查员工是否存在
+        List<StaffDto> staffDtos = attendanceServiceImpl.queryStaffs(staffDto);
+
+        Assert.listOnlyOne(staffDtos, "员工不存在");
+
+        AttendanceClassesDto attendanceClassesDto = new AttendanceClassesDto();
+        attendanceClassesDto.setExtClassesId(reqJson.getString("extClassesId"));
+        List<AttendanceClassesDto> attendanceClassesDtos = attendanceServiceImpl.getAttendanceClasses(attendanceClassesDto);
+
+        Assert.listOnlyOne(attendanceClassesDtos, "不存在考勤班组");
+
+        //判断员工是否在这个考勤班组中
+        AttendanceClassesStaffDto attendanceClassesStaffDto = new AttendanceClassesStaffDto();
+        attendanceClassesStaffDto.setClassesId(attendanceClassesDtos.get(0).getClassesId());
+        attendanceClassesStaffDto.setStaffId(staffDtos.get(0).getStaffId());
+        List<AttendanceClassesStaffDto> attendanceClassesStaffDtos = attendanceServiceImpl.queryClassStaffs(attendanceClassesStaffDto);
+        //班组中已经存在
+        if (attendanceClassesStaffDtos != null && attendanceClassesStaffDtos.size() > 0) {
+            return ResultDto.success();
+        }
+        attendanceClassesStaffDto = BeanConvertUtil.covertBean(reqJson, AttendanceClassesStaffDto.class);
+        attendanceClassesStaffDto.setStaffId(staffDtos.get(0).getStaffId());
+        attendanceClassesStaffDto.setClassesId(SeqUtil.getId());
+        ResultDto resultDto = attendanceServiceImpl.deleteClassStaff(attendanceClassesStaffDto);
         return ResultDto.createResponseEntity(resultDto);
     }
 
