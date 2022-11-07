@@ -25,7 +25,6 @@ import com.java110.things.entity.attendance.AttendanceClassesStaffDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.StaffDto;
 import com.java110.things.service.community.ICommunityService;
-import com.java110.things.service.parkingArea.IParkingAreaService;
 import com.java110.things.service.staff.IStaffService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
@@ -61,8 +60,6 @@ public class AttendanceExtController extends BaseController {
     @Autowired
     ICommunityService communityServiceImpl;
 
-    @Autowired
-    IParkingAreaService parkingAreaServiceImpl;
 
     /**
      * 添加考勤信息
@@ -222,6 +219,34 @@ public class AttendanceExtController extends BaseController {
         ResultDto resultDto = attendanceServiceImpl.deleteAttendanceClassesDto(attendanceClassesDtos.get(0));
 
         return ResultDto.createResponseEntity(resultDto);
+    }
+
+    /**
+     * 添加考勤员工信息
+     * <p>
+     *
+     * @param reqParam {
+     *                 "attendanceCode":""
+     *                 attendance_name
+     *                 attendance_type_cd
+     *                 create_time
+     *                 status_cd
+     *                 oem
+     *                 ext_attendance_id
+     *                 community_id
+     *                 hm_id
+     *                 }
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/addAttendanceClassStaffs", method = RequestMethod.POST)
+    public ResponseEntity<String> addAttendanceClassStaffs(@RequestBody String reqParam) throws Exception {
+
+        JSONArray datas = JSONArray.parseArray(reqParam);
+        for (int dataIndex = 0; dataIndex < datas.size(); dataIndex++) {
+            addAttendanceClass(datas.get(0).toString());
+        }
+        return ResultDto.success();
     }
 
 
