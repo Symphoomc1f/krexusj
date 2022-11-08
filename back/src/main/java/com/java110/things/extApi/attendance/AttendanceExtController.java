@@ -167,6 +167,8 @@ public class AttendanceExtController extends BaseController {
         }
 
         attendanceClassesDto = BeanConvertUtil.covertBean(reqJson, AttendanceClassesDto.class);
+        attendanceClassesDto.setStatusCd("0");
+        attendanceClassesDto.setClassesId(attendanceClassesDtos.get(0).getClassesId());
         ResultDto result = attendanceServiceImpl.updateAttendanceClasses(attendanceClassesDto);
 
         if (result.getCode() != ResultDto.SUCCESS) {
@@ -180,7 +182,7 @@ public class AttendanceExtController extends BaseController {
         for (int attrIndex = 0; attrIndex < attrs.size(); attrIndex++) {
             JSONObject attrObj = attrs.getJSONObject(attrIndex);
             attendanceClassesAttrDto = BeanConvertUtil.covertBean(attrObj, AttendanceClassesAttrDto.class);
-            attendanceClassesAttrDto.setClassesId(attendanceClassesDto.getClassesId());
+            attendanceClassesAttrDto.setClassesId(attendanceClassesDtos.get(0).getClassesId());
             attendanceClassesAttrDto.setAttrId(SeqUtil.getId());
             attendanceServiceImpl.saveAttendanceClassesAttrDto(attendanceClassesAttrDto);
         }
@@ -244,7 +246,7 @@ public class AttendanceExtController extends BaseController {
 
         JSONArray datas = JSONArray.parseArray(reqParam);
         for (int dataIndex = 0; dataIndex < datas.size(); dataIndex++) {
-            addAttendanceClass(datas.get(0).toString());
+            addAttendanceClassStaff(datas.get(dataIndex).toString());
         }
         return ResultDto.success();
     }
@@ -313,6 +315,7 @@ public class AttendanceExtController extends BaseController {
         attendanceClassesStaffDto = BeanConvertUtil.covertBean(reqJson, AttendanceClassesStaffDto.class);
         attendanceClassesStaffDto.setStaffId(staffId);
         attendanceClassesStaffDto.setClassesId(SeqUtil.getId());
+        attendanceClassesStaffDto.setCsId(SeqUtil.getId());
         ResultDto resultDto = attendanceServiceImpl.saveClassStaff(attendanceClassesStaffDto);
         return ResultDto.createResponseEntity(resultDto);
     }

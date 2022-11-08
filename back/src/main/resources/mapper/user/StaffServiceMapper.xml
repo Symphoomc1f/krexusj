@@ -4,7 +4,7 @@
 
     <insert id="saveStaff" parameterType="com.java110.things.entity.user.StaffDto">
         INSERT INTO staff
-            (`staff_id`, `staff_name`, `department_id`, `department_name`, `face1`, `face2`, `face3`)
+            (`staff_id`, `staff_name`, `department_id`, `department_name`, `face1`, `face2`, `face3`,ext_staff_id)
         values
         (
             #{staffId},
@@ -13,7 +13,8 @@
             #{departmentName},
             #{face1},
             #{face2},
-            #{face3}
+            #{face3},
+            #{extStaffId}
         )
     </insert>
 
@@ -21,7 +22,8 @@
     <select id="getStaffs" parameterType="com.java110.things.entity.user.StaffDto"
             resultType="com.java110.things.entity.user.StaffDto">
         SELECT
-        u.`staff_id` staffId, u.`staff_name` staffName, u.`department_id` departmentId, u.`department_name` departmentName, u.`face1`, u.`face2`,u.`face3`
+        u.`staff_id` staffId, u.`staff_name` staffName, u.`department_id` departmentId,
+        u.`department_name` departmentName, u.`face1`, u.`face2`,u.`face3`,u.ext_staff_id extStaffId
         FROM
         staff u
         WHERE
@@ -31,6 +33,9 @@
         </if>
         <if test="staffId != null and staffId != ''">
             and u.staff_id = #{staffId}
+        </if>
+        <if test="extStaffId != null and extStaffId != ''">
+            and u.ext_staff_id = #{extStaffId}
         </if>
         <if test="departmentId != null and departmentId != ''">
             and u.department_id = #{departmentId}
@@ -53,6 +58,9 @@
         </if>
         <if test="staffId != null and staffId != ''">
             and u.staff_id = #{staffId}
+        </if>
+        <if test="extStaffId != null and extStaffId != ''">
+            and u.ext_staff_id = #{extStaffId}
         </if>
         <if test="departmentId != null and departmentId != ''">
             and u.department_id = #{departmentId}
@@ -80,6 +88,9 @@
         where 1=1
         <if test="staffId != null and staffId != ''">
             and staff_id = #{staffId}
+        </if>
+        <if test="extStaffId != null and extStaffId != ''">
+            and u.ext_staff_id = #{extStaffId}
         </if>
     </update>
 
