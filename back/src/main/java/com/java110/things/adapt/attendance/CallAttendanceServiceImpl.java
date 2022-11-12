@@ -186,6 +186,17 @@ public class CallAttendanceServiceImpl implements ICallAttendanceService {
      * @throws Exception
      */
     @Override
+    public void saveMachineCmd(MachineCmdDto machineCmdDto) throws Exception {
+        machineCmdServiceImpl.saveMachineCmd(machineCmdDto);
+    }
+
+    /**
+     * 插入指令 给设备
+     *
+     * @param machineCmdDto
+     * @throws Exception
+     */
+    @Override
     public void insertMachineCmd(MachineCmdDto machineCmdDto) throws Exception {
         List<MachineDto> machineDtos = null;
         if (StringUtil.isEmpty(machineCmdDto.getMachineCode())) {

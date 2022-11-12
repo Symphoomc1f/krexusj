@@ -38,6 +38,7 @@ public interface ICallAttendanceService {
      */
     List<MachineCmdDto> getMachineCmds(MachineCmdDto machineCmdDto) throws Exception;
 
+    public void saveMachineCmd(MachineCmdDto machineCmdDto) throws Exception;
     /**
      * 插入设备指令
      * @param machineCmdDto

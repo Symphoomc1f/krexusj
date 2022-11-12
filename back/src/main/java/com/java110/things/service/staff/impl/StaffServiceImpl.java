@@ -1,16 +1,21 @@
 package com.java110.things.service.staff.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.java110.things.constant.MachineConstant;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.dao.IStaffServiceDao;
 import com.java110.things.entity.PageDto;
+import com.java110.things.entity.attendance.AttendanceClassesStaffDto;
+import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.StaffDto;
+import com.java110.things.service.machine.IMachineCmdService;
 import com.java110.things.service.staff.IStaffService;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.Assert;
+import com.java110.things.util.SeqUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -43,6 +48,9 @@ public class StaffServiceImpl implements IStaffService {
     @Autowired
     private IMachineService machineService;
 
+    @Autowired
+    private IMachineCmdService machineCmdServiceImpl;
+
     /**
      * 添加小区信息
      *
@@ -52,6 +60,9 @@ public class StaffServiceImpl implements IStaffService {
     @Override
     public ResultDto saveStaff(StaffDto staffDto) throws Exception {
         ResultDto resultDto = null;
+
+        //设备写值
+        addStaffMachineCmd(staffDto);
 
         int count = staffServiceDao.saveStaff(staffDto);
 
@@ -63,6 +74,36 @@ public class StaffServiceImpl implements IStaffService {
         return resultDto;
     }
 
+    private void addStaffMachineCmd(StaffDto staffDto) throws Exception {
+
+
+        //根据部门查询设备
+        MachineDto machineDto = new MachineDto();
+
+        machineDto.setMachineTypeCd(MachineDto.MACHINE_TYPE_ATTENDANCE);
+        machineDto.setLocationType("5000");
+        machineDto.setLocationObjId(staffDto.getDepartmentId());
+        List<MachineDto> machineDtos = machineService.queryMachines(machineDto);
+
+        if (machineDtos == null || machineDtos.size() < 1) {
+            return;
+        }
+
+        for (MachineDto machineDto1 : machineDtos) {
+            MachineCmdDto machineCmdDto = new MachineCmdDto();
+            machineCmdDto.setMachineCode(machineDto1.getMachineCode());
+            machineCmdDto.setState("1000");
+            machineCmdDto.setCmdId(SeqUtil.getId());
+            machineCmdDto.setCmdName("同步人员");
+            machineCmdDto.setMachineTypeCd(machineDto1.getMachineTypeCd());
+            machineCmdDto.setObjType("002");
+            machineCmdDto.setObjTypeValue(staffDto.getStaffId());
+            machineCmdDto.setCmdCode("101");
+            machineCmdDto.setCommunityId(machineDto1.getCommunityId());
+            machineCmdDto.setMachineId(machineDto1.getMachineId());
+            machineCmdServiceImpl.saveMachineCmd(machineCmdDto);
+        }
+    }
 
 
     /**
@@ -126,7 +167,7 @@ public class StaffServiceImpl implements IStaffService {
     @Override
     public ResultDto deleteStaff(StaffDto staffDto) throws Exception {
         ResultDto resultDto = null;
-
+        deleteStaffMachineCmd(staffDto);
         int count = staffServiceDao.updateStaff(staffDto);
         if (count < 1) {
             resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
@@ -134,6 +175,38 @@ public class StaffServiceImpl implements IStaffService {
             resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
         }
         return resultDto;
+    }
+
+
+    private void deleteStaffMachineCmd(StaffDto staffDto) throws Exception {
+
+
+        //根据部门查询设备
+        MachineDto machineDto = new MachineDto();
+
+        machineDto.setMachineTypeCd(MachineDto.MACHINE_TYPE_ATTENDANCE);
+        machineDto.setLocationType("5000");
+        machineDto.setLocationObjId(staffDto.getDepartmentId());
+        List<MachineDto> machineDtos = machineService.queryMachines(machineDto);
+
+        if (machineDtos == null || machineDtos.size() < 1) {
+            return;
+        }
+
+        for (MachineDto machineDto1 : machineDtos) {
+            MachineCmdDto machineCmdDto = new MachineCmdDto();
+            machineCmdDto.setMachineCode(machineDto1.getMachineCode());
+            machineCmdDto.setState("1000");
+            machineCmdDto.setCmdId(SeqUtil.getId());
+            machineCmdDto.setCmdName("同步人员");
+            machineCmdDto.setMachineTypeCd(machineDto1.getMachineTypeCd());
+            machineCmdDto.setObjType("002");
+            machineCmdDto.setObjTypeValue(staffDto.getStaffId());
+            machineCmdDto.setCmdCode(MachineConstant.CMD_DELETE_FACE);
+            machineCmdDto.setCommunityId(machineDto1.getCommunityId());
+            machineCmdDto.setMachineId(machineDto1.getMachineId());
+            machineCmdServiceImpl.saveMachineCmd(machineCmdDto);
+        }
     }
 
 

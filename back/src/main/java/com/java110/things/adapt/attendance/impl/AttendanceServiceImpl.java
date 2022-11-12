@@ -99,10 +99,10 @@ public class AttendanceServiceImpl implements IAttendanceService {
                 result = paramOut.toJSONString();
             }
 
-            if (StringUtil.isEmpty(result)) {
-                //请求云端是否有 指令
-                result = getCmdFromCloud(machineDto);
-            }
+//            if (StringUtil.isEmpty(result)) {
+//                //请求云端是否有 指令
+//                result = getCmdFromCloud(machineDto);
+//            }
         } catch (Exception e) {
             logger.error("设备获取指令失败", e);
         } finally {
@@ -168,7 +168,7 @@ public class AttendanceServiceImpl implements IAttendanceService {
                     break;
                 case MachineConstant
                         .CMD_DELETE_FACE:
-                    getAttendanceProcess().deleteFace(syncGetTaskResultDto, paramOut);
+                    // getAttendanceProcess().deleteFace(syncGetTaskResultDto, paramOut);
                     break;
                 case MachineConstant
                         .CMD_CLEAR_FACE:
@@ -210,6 +210,9 @@ public class AttendanceServiceImpl implements IAttendanceService {
                     break;
                 case MachineConstant.CMD_CREATE_FACE:
                     getAttendanceProcess().addFace(machineCmdDto, paramOut);
+                    break;
+                case MachineConstant.CMD_DELETE_FACE:
+                    getAttendanceProcess().deleteFace(machineCmdDto, paramOut);
                     break;
             }
 
@@ -314,13 +317,16 @@ public class AttendanceServiceImpl implements IAttendanceService {
 
 
     @Override
-    public ResultDto saveClassStaff(AttendanceClassesStaffDto attendanceClassesStaffDto) {
+    public ResultDto saveClassStaff(AttendanceClassesStaffDto attendanceClassesStaffDto) throws Exception {
+
+
         long flag = attendanceClassesServiceDao.saveAttendanceClassesStaff(attendanceClassesStaffDto);
         if (flag > 0) {
             return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
         }
         return new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
     }
+
 
     @Override
     public ResultDto deleteClassStaff(AttendanceClassesStaffDto attendanceClassesStaffDto) {

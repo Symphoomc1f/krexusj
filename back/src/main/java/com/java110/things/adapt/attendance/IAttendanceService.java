@@ -73,7 +73,7 @@ public interface IAttendanceService {
      * @param attendanceClassesStaffDto 班次信息
      * @return
      */
-    ResultDto saveClassStaff(AttendanceClassesStaffDto attendanceClassesStaffDto);
+    ResultDto saveClassStaff(AttendanceClassesStaffDto attendanceClassesStaffDto) throws Exception;
 
 
     /**

@@ -43,6 +43,9 @@ public class MachineConstant {
     //增加更新人脸
     public static final String CMD_CREATE_FACE = "101";
 
+    //增加更新人脸
+    public static final String CMD_UPDATE_FACE = "104";
+
     //删除人脸
     public static final String CMD_DELETE_FACE = "102";
 
