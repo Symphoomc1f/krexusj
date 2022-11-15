@@ -1,8 +1,10 @@
 package com.java110.things.entity.accessControl;
 
 import com.java110.things.entity.PageDto;
+import com.java110.things.entity.user.UserAttrDto;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class UserFaceDto extends PageDto implements Serializable {
 
@@ -35,6 +37,8 @@ public class UserFaceDto extends PageDto implements Serializable {
     private String departmentId;
     private String departmentName;
     private String personType;
+
+    private List<UserAttrDto> userAttrDtos;
 
     public String getUserId() {
         return userId;
@@ -162,5 +166,13 @@ public class UserFaceDto extends PageDto implements Serializable {
 
     public void setPersonType(String personType) {
         this.personType = personType;
+    }
+
+    public List<UserAttrDto> getUserAttrDtos() {
+        return userAttrDtos;
+    }
+
+    public void setUserAttrDtos(List<UserAttrDto> userAttrDtos) {
+        this.userAttrDtos = userAttrDtos;
     }
 }

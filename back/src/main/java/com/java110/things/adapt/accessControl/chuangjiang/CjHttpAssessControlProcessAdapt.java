@@ -14,6 +14,7 @@ import com.java110.things.entity.machine.OperateLogDto;
 import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.room.RoomDto;
+import com.java110.things.entity.user.UserAttrDto;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.MqttFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
@@ -69,6 +70,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
     public static final String CMD_REBOOT = "/restartDevice";// 重启设备
 
     public static final String CMD_ADD_USER = "/person/create"; // 添加人员
+    public static final String CMD_UPDATE_USER = "/person/update"; // 修改人员
 
     public static final String CMD_DELETE_PERSION_FACE = "/face/deletePerson"; //修改人脸
 
@@ -206,13 +208,13 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
     public ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         String url = "http://" + machineDto.getMachineIp() + CMD_ADD_USER;
-
+        String idNumber = getIdNumber(userFaceDto);
         JSONObject paramObj = JSONObject.parseObject("{\"person\":{}}");
         JSONObject param = paramObj.getJSONObject("person");
         param.put("id", userFaceDto.getUserId());
         param.put("name", userFaceDto.getName());
         param.put("idcardNum", "");
-        param.put("iDNumber", userFaceDto.getIdNumber());
+        param.put("iDNumber", idNumber);
         paramObj.put("pass", password);
         HttpHeaders httpHeaders = new HttpHeaders();
         HttpEntity httpEntity = new HttpEntity(paramObj.toJSONString(), httpHeaders);
@@ -242,12 +244,40 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
 
     }
 
+    private String getIdNumber(UserFaceDto userFaceDto) {
+        List<UserAttrDto> userAttrDtos = userFaceDto.getUserAttrDtos();
+
+        if (userAttrDtos == null) {
+            return userFaceDto.getIdNumber();
+        }
+
+        for (UserAttrDto userAttrDto : userAttrDtos) {
+            if (UserAttrDto.SPEC_CD_ACCESS_KEY.equals(userAttrDto.getSpecCd())) {
+                return userAttrDto.getValue();
+            }
+        }
+        return userFaceDto.getIdNumber();
+    }
+
     @Override
     public ResultDto updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
 
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
-        String url = "";
-        JSONObject param = new JSONObject();
+        String url = "http://" + machineDto.getMachineIp() + CMD_UPDATE_USER;
+        String idNumber = getIdNumber(userFaceDto);
+        JSONObject paramObj = JSONObject.parseObject("{\"person\":{}}");
+        JSONObject param = paramObj.getJSONObject("person");
+        param.put("id", userFaceDto.getUserId());
+        param.put("name", userFaceDto.getName());
+        param.put("idcardNum", "");
+        param.put("iDNumber", idNumber);
+        paramObj.put("pass", password);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        HttpEntity httpEntity = new HttpEntity(paramObj.toJSONString(), httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_UPDATE_USER, param.toJSONString(), responseEntity.getBody());
+
+        param = new JSONObject();
         url = "http://" + machineDto.getMachineIp() + CMD_ADD_FACE;
         param = new JSONObject();
         param.put("pass", password);
@@ -256,9 +286,9 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         param.put("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
         param.put("base64", userFaceDto.getFaceBase64());
         //添加人脸
-        HttpHeaders httpHeaders = new HttpHeaders();
-        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
-        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
+        httpHeaders = new HttpHeaders();
+        httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+        responseEntity = restTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE, param.toJSONString(), responseEntity.getBody());
 
