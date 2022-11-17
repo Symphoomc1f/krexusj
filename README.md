@@ -59,7 +59,10 @@
 ![image](docs/img/menjingxiyi.png)
 ![image](docs/img/settings.png)
 
+## 8. 对接设备
 
-## 8. 更新日志
+[HC物联网系统更新日志](back/docs/machine.md)
+
+## 9. 更新日志
 
 [HC物联网系统更新日志](back/ChangeLog.md)
