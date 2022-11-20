@@ -61,7 +61,7 @@
 
 ## 8. 对接设备
 
-[HC物联网系统更新日志](back/docs/machine.md)
+[HC物联网系统已对接设备](back/docs/machine.md)
 
 ## 9. 更新日志
 
