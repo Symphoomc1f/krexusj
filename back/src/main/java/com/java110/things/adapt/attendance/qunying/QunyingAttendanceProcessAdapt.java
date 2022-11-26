@@ -461,7 +461,7 @@ public class QunyingAttendanceProcessAdapt implements IAttendanceProcess {
     public void initMachine(MachineDto machineDto) {
         ICallAttendanceService callAttendanceService = CallAttendanceFactory.getCallAttendanceService();
         MachineDto tmpMachineDto = callAttendanceService.getMachine(machineDto);
-        if (tmpMachineDto != null) {
+        if (tmpMachineDto == null) {
             throw new IllegalArgumentException("设备不存在");
         }
 //
