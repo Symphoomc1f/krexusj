@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 小区对外 控制类
@@ -94,7 +95,7 @@ public class CommunityExtController extends BaseController {
      * @throws Exception
      */
     @RequestMapping(path = "/updateCommunity", method = RequestMethod.POST)
-    public ResponseEntity<String> updateCommunity(@RequestBody String reqParam) throws Exception {
+    public ResponseEntity<String> updateCommunity(@RequestBody String reqParam, HttpServletRequest request) throws Exception {
 
         JSONObject reqJson = JSONObject.parseObject(reqParam);
 
@@ -103,8 +104,14 @@ public class CommunityExtController extends BaseController {
         Assert.hasKeyAndValue(reqJson, "cityCode", "未包含城市编码");
         Assert.hasKeyAndValue(reqJson, "extCommunityId", "未包含外部小区编码");
         Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
-
+        CommunityDto tmpCommunityDto = new CommunityDto();
+        tmpCommunityDto.setExtCommunityId(reqJson.getString("extCommunityId"));
+        List<CommunityDto> communityDtos = communityServiceImpl.queryCommunitys(tmpCommunityDto);
+        if (communityDtos == null || communityDtos.size() < 1) {
+            return addCommunity(reqParam, request);
+        }
         CommunityDto communityDto = BeanConvertUtil.covertBean(reqJson, CommunityDto.class);
+        communityDto.setCommunityId(communityDtos.get(0).getCommunityId());
         ResultDto result = communityServiceImpl.updateCommunity(communityDto);
 
         return ResultDto.createResponseEntity(result);
@@ -127,8 +134,12 @@ public class CommunityExtController extends BaseController {
 
         Assert.hasKeyAndValue(reqJson, "extCommunityId", "未包含外部小区编码");
         Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
-
+        CommunityDto tmpCommunityDto = new CommunityDto();
+        tmpCommunityDto.setExtCommunityId(reqJson.getString("extCommunityId"));
+        List<CommunityDto> communityDtos = communityServiceImpl.queryCommunitys(tmpCommunityDto);
+        Assert.listOnlyOne(communityDtos, "小区不存在");
         CommunityDto communityDto = BeanConvertUtil.covertBean(reqJson, CommunityDto.class);
+        communityDto.setCommunityId(communityDtos.get(0).getCommunityId());
         ResultDto result = communityServiceImpl.deleteCommunity(communityDto);
 
         return ResultDto.createResponseEntity(result);
