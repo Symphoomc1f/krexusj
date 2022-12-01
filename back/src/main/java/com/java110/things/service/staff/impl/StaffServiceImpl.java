@@ -168,6 +168,7 @@ public class StaffServiceImpl implements IStaffService {
     public ResultDto deleteStaff(StaffDto staffDto) throws Exception {
         ResultDto resultDto = null;
         deleteStaffMachineCmd(staffDto);
+        staffDto.setStatusCd("1");
         int count = staffServiceDao.updateStaff(staffDto);
         if (count < 1) {
             resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);

@@ -370,9 +370,12 @@ public class AttendanceExtController extends BaseController {
             return ResultDto.success();
         }
         attendanceClassesStaffDto = BeanConvertUtil.covertBean(reqJson, AttendanceClassesStaffDto.class);
-        attendanceClassesStaffDto.setStaffId(staffDtos.get(0).getStaffId());
-        attendanceClassesStaffDto.setClassesId(SeqUtil.getId());
+        attendanceClassesStaffDto.setStaffId(attendanceClassesStaffDtos.get(0).getCsId());
         ResultDto resultDto = attendanceServiceImpl.deleteClassStaff(attendanceClassesStaffDto);
+        if(reqJson.containsKey("deleteStaff") && "1".equals(reqJson.getString("deleteStaff"))){
+            staffServiceImpl.deleteStaff(staffDtos.get(0));
+        }
+
         return ResultDto.createResponseEntity(resultDto);
     }
 

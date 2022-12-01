@@ -81,9 +81,13 @@
             <if test="departmentName != null and departmentName != ''">
                 department_name = #{departmentName},
             </if>
+            <if test="statusCd != null and statusCd != ''">
+                status_cd = #{statusCd},
+            </if>
             <if test="face1 != null">`face1` = #{face1},</if>
             <if test="face2 != null">`face2` = #{face2},</if>
             <if test="face3 != null">`face3` = #{face3}</if>
+
         </set>
         where 1=1
         <if test="staffId != null and staffId != ''">

@@ -23,6 +23,8 @@ public class StaffDto extends PageDto implements Serializable {
     private String face3;
     private String extStaffId;
 
+    private String statusCd;
+
     public String getStaffId() {
         return staffId;
     }
@@ -85,5 +87,13 @@ public class StaffDto extends PageDto implements Serializable {
 
     public void setExtStaffId(String extStaffId) {
         this.extStaffId = extStaffId;
+    }
+
+    public String getStatusCd() {
+        return statusCd;
+    }
+
+    public void setStatusCd(String statusCd) {
+        this.statusCd = statusCd;
     }
 }
