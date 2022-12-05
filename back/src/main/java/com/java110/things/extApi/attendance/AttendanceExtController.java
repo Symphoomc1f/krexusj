@@ -366,13 +366,13 @@ public class AttendanceExtController extends BaseController {
         attendanceClassesStaffDto.setStaffId(staffDtos.get(0).getStaffId());
         List<AttendanceClassesStaffDto> attendanceClassesStaffDtos = attendanceServiceImpl.queryClassStaffs(attendanceClassesStaffDto);
         //班组中已经存在
-        if (attendanceClassesStaffDtos != null && attendanceClassesStaffDtos.size() > 0) {
-            return ResultDto.success();
+        if (attendanceClassesStaffDtos == null || attendanceClassesStaffDtos.size() < 1) {
+            return ResultDto.error("物联网系统不存在考勤信息");
         }
         attendanceClassesStaffDto = BeanConvertUtil.covertBean(reqJson, AttendanceClassesStaffDto.class);
         attendanceClassesStaffDto.setStaffId(attendanceClassesStaffDtos.get(0).getCsId());
         ResultDto resultDto = attendanceServiceImpl.deleteClassStaff(attendanceClassesStaffDto);
-        if(reqJson.containsKey("deleteStaff") && "1".equals(reqJson.getString("deleteStaff"))){
+        if (reqJson.containsKey("deleteStaff") && "1".equals(reqJson.getString("deleteStaff"))) {
             staffServiceImpl.deleteStaff(staffDtos.get(0));
         }
 
