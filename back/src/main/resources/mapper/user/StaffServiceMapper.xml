@@ -94,7 +94,7 @@
             and staff_id = #{staffId}
         </if>
         <if test="extStaffId != null and extStaffId != ''">
-            and u.ext_staff_id = #{extStaffId}
+            and ext_staff_id = #{extStaffId}
         </if>
     </update>
 
