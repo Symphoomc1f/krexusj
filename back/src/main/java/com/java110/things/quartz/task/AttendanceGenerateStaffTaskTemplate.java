@@ -127,7 +127,7 @@ public class AttendanceGenerateStaffTaskTemplate extends TaskSystemQuartz {
         attendanceClassesStaffDto.setClassesId(tmpAttendanceClassesDto.getClassesId());
         attendanceClassesStaffDto.setStatusCd("0");
         List<AttendanceClassesStaffDto> attendanceClassesStaffDtos = attendanceClassesServiceDao.getAttendanceClassesStaffs(attendanceClassesStaffDto);
-        if (attendanceClassesStaffDtos == null || attendanceClassesAttrDtos.size() < 1) {
+        if (attendanceClassesStaffDtos == null || attendanceClassesStaffDtos.size() < 1) {
             return;
         }
         String startTime = getClassessAttrValue(attendanceClassesAttrDtos, CLOCK_TIME_MORNING_WORK);

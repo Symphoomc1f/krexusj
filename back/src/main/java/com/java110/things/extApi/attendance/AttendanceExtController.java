@@ -370,7 +370,7 @@ public class AttendanceExtController extends BaseController {
             return ResultDto.error("物联网系统不存在考勤信息");
         }
         attendanceClassesStaffDto = BeanConvertUtil.covertBean(reqJson, AttendanceClassesStaffDto.class);
-        attendanceClassesStaffDto.setStaffId(attendanceClassesStaffDtos.get(0).getCsId());
+        attendanceClassesStaffDto.setCsId(attendanceClassesStaffDtos.get(0).getCsId());
         ResultDto resultDto = attendanceServiceImpl.deleteClassStaff(attendanceClassesStaffDto);
         if (reqJson.containsKey("deleteStaff") && "1".equals(reqJson.getString("deleteStaff"))) {
             staffServiceImpl.deleteStaff(staffDtos.get(0));
