@@ -305,7 +305,7 @@ public class CallAttendanceServiceImpl implements ICallAttendanceService {
             }
 
             try {
-                String timeStr = tmpAttendanceClassesTaskDetailDto.getValue();
+                String timeStr = tmpAttendanceClassesTaskDetailDto.getValue() + ":00";
                 String dateStr = DateUtil.getFormatTimeString(new Date(), DateUtil.DATE_FORMATE_STRING_B);
 
                 Date hopeTime = DateUtil.getDateFromString(dateStr + " " + timeStr, DateUtil.DATE_FORMATE_STRING_A);
