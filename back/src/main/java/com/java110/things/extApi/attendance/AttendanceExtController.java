@@ -22,21 +22,27 @@ import com.java110.things.adapt.attendance.IAttendanceService;
 import com.java110.things.entity.attendance.AttendanceClassesAttrDto;
 import com.java110.things.entity.attendance.AttendanceClassesDto;
 import com.java110.things.entity.attendance.AttendanceClassesStaffDto;
+import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.StaffDto;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.staff.IStaffService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
+import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
+import com.java110.things.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -377,6 +383,48 @@ public class AttendanceExtController extends BaseController {
         }
 
         return ResultDto.createResponseEntity(resultDto);
+    }
+
+    /**
+     * 查询考勤任务
+     *
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/getAttendanceTasks", method = RequestMethod.GET)
+    public ResponseEntity<String> getAttendanceTasks(
+            @RequestParam int page,
+            @RequestParam int row,
+            @RequestParam(name = "extClassesId", required = false) String extClassesId,
+            @RequestParam(name = "staffName", required = false) String staffName,
+            @RequestParam(name = "date", required = false) String date,
+            @RequestParam(name = "departmentId", required = false) String departmentId
+    ) throws Exception {
+
+        AttendanceClassesTaskDto attendanceClassesTaskDto = new AttendanceClassesTaskDto();
+        attendanceClassesTaskDto.setPage(page);
+        attendanceClassesTaskDto.setRow(row);
+        if (!StringUtil.isEmpty(extClassesId)) {
+            AttendanceClassesDto attendanceClassesDto = new AttendanceClassesDto();
+            attendanceClassesDto.setExtClassesId(extClassesId);
+            List<AttendanceClassesDto> attendanceClassesDtos = attendanceServiceImpl.getAttendanceClasses(attendanceClassesDto);
+            Assert.listOnlyOne(attendanceClassesDtos, "不存在考勤班组");
+            attendanceClassesTaskDto.setClassId(attendanceClassesDtos.get(0).getClassesId());
+        }
+
+        attendanceClassesTaskDto.setStaffName(staffName);
+        attendanceClassesTaskDto.setDepartmentId(departmentId);
+        if (!StringUtil.isEmpty(date)) {
+            Date reqDate = DateUtil.getDateFromString(date, DateUtil.DATE_FORMATE_STRING_B);
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(reqDate);
+            attendanceClassesTaskDto.setTaskYear(calendar.get(Calendar.YEAR) + "");
+            attendanceClassesTaskDto.setTaskMonth((calendar.get(Calendar.MONTH) + 1) + "");
+            attendanceClassesTaskDto.setTaskDay(calendar.get(Calendar.DAY_OF_MONTH) + "");
+        }
+        ResultDto resultDto = attendanceServiceImpl.getAttendanceTasks(attendanceClassesTaskDto);
+        return super.createResponseEntity(resultDto);
     }
 
 }
