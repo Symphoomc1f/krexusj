@@ -263,7 +263,7 @@
             resultType="com.java110.things.entity.attendance.AttendanceClassesTaskDto">
         select t.task_id taskId,t.class_id classId,t.staff_id staffId,t.task_year
         taskYear,t.task_month taskMonth,t.task_day taskDay,t.state,t.create_time createTime,t.status_cd statusCd
-        ,s.staff_name staffName,s.department_name departmentName
+        ,s.staff_name staffName,s.department_name departmentName,s.department_id departmentId
         from attendance_classes_task t
         left join staff s on t.staff_id = s.staff_id and s.status_cd = '0'
         where 1 =1

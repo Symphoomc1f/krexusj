@@ -19,6 +19,8 @@ public class MachineDto extends PageDto implements Serializable {
     public static final String MACHINE_TYPE_OTHER_CAR = "9995"; // 第三方道闸平台
     public static final String MACHINE_TYPE_ACCESS_CONTROL = "9999";
     public static final String LOCATION_TYPE_PARKING_AREA = "4000"; //停车场
+
+    public static final String LOCATION_TYPE_DEPARTMENT = "5000"; //部门
     public static final String LOCATION_TYPE_COMMUNITY = "1000"; //停车场
 
     public static final String MACHINE_DIRECTION_ENTER = "3306"; // 进场
