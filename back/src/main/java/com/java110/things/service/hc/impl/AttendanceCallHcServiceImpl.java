@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.java110.things.dao.IAttendanceClassesServiceDao;
 import com.java110.things.entity.app.AppAttrDto;
 import com.java110.things.entity.app.AppDto;
+import com.java110.things.entity.attendance.AttendanceClassesDto;
 import com.java110.things.entity.attendance.AttendanceClassesTaskDetailDto;
 import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
 import com.java110.things.entity.community.CommunityDto;
@@ -99,13 +100,20 @@ public class AttendanceCallHcServiceImpl implements IAttendanceCallHcService {
 
         String value = appAttrDto.getValue();
 
+        //查询班组
+        AttendanceClassesDto attendanceClassesDto = new AttendanceClassesDto();
+        attendanceClassesDto.setClassesId(attendanceClassesTaskDto.getClassId());
+        List<AttendanceClassesDto> attendanceClassesDtos = attendanceClassesServiceDao.getAttendanceClassess(attendanceClassesDto);
+
+        Assert.listOnlyOne(attendanceClassesDtos, "未找到考勤班组");
+
         //查询考勤明细
         AttendanceClassesTaskDetailDto attendanceClassesTaskDetailDto = new AttendanceClassesTaskDetailDto();
         attendanceClassesTaskDetailDto.setTaskId(taskId);
         List<AttendanceClassesTaskDetailDto> attendanceClassesTaskDetailDtos
                 = attendanceClassesServiceDao.getAttendanceClassesTaskDetails(attendanceClassesTaskDetailDto);
         attendanceClassesTaskDto.setAttendanceClassesTaskDetails(attendanceClassesTaskDetailDtos);
-
+        attendanceClassesTaskDto.setClassId(attendanceClassesDtos.get(0).getExtClassesId());
         String url = value;
         Map<String, String> headers = new HashMap<>();
 
@@ -115,8 +123,64 @@ public class AttendanceCallHcServiceImpl implements IAttendanceCallHcService {
         ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, url, data, headers, HttpMethod.POST);
 
         if (tmpResponseEntity.getStatusCode() != HttpStatus.OK) {
-            throw new ServiceException(Result.SYS_ERROR, "上传车辆失败" + tmpResponseEntity.getBody());
+            throw new ServiceException(Result.SYS_ERROR, "上传考勤任务失败" + tmpResponseEntity.getBody());
         }
 
+    }
+
+    @Override
+    public void checkIn(AttendanceClassesTaskDetailDto attendanceClassesTaskDetailDto, boolean finishAllTaskDetail) throws Exception {
+        AttendanceClassesTaskDto attendanceClassesTaskDto = new AttendanceClassesTaskDto();
+        attendanceClassesTaskDto.setTaskId(attendanceClassesTaskDetailDto.getTaskId());
+        List<AttendanceClassesTaskDto> attendanceClassesTaskDtos = attendanceClassesServiceDao.getAttendanceClassesTasks(attendanceClassesTaskDto);
+
+        Assert.listOnlyOne(attendanceClassesTaskDtos, "未找到任务");
+        attendanceClassesTaskDto = attendanceClassesTaskDtos.get(0);
+        //根据设备查询小区ID
+        MachineDto machineDto = new MachineDto();
+        machineDto.setLocationObjId(attendanceClassesTaskDto.getDepartmentId());
+        machineDto.setLocationType(MachineDto.LOCATION_TYPE_DEPARTMENT);
+        List<MachineDto> machineDtos = machineServiceImpl.queryMachines(machineDto);
+        if (machineDtos == null || machineDtos.size() < 1) {
+            throw new IllegalArgumentException("考勤对应考勤机不存在");
+        }
+
+
+        CommunityDto communityDto = new CommunityDto();
+        communityDto.setCommunityId(machineDtos.get(0).getCommunityId());
+        communityDto.setStatusCd("0");
+        List<CommunityDto> communityDtos = communityServiceImpl.queryCommunitys(communityDto);
+
+        Assert.listOnlyOne(communityDtos, "未包含小区信息");
+
+        AppDto appDto = new AppDto();
+        appDto.setAppId(communityDtos.get(0).getAppId());
+        List<AppDto> appDtos = appServiceImpl.getApp(appDto);
+
+        Assert.listOnlyOne(appDtos, "未找到应用信息");
+        AppAttrDto appAttrDto = appDtos.get(0).getAppAttr(AppAttrDto.SPEC_CD_ATTENDANCE_TASK_DETAIL);
+
+        if (appAttrDto == null) {
+            return;
+        }
+
+        String value = appAttrDto.getValue();
+
+
+        //查询考勤明细
+        String url = value;
+        Map<String, String> headers = new HashMap<>();
+
+        headers.put("communityId", communityDtos.get(0).getCommunityId());
+
+        JSONObject tmpAttendanceClassesTaskDetailDto = JSONObject.parseObject(JSONObject.toJSONString(attendanceClassesTaskDetailDto));
+
+        tmpAttendanceClassesTaskDetailDto.put("finishAllTaskDetail", finishAllTaskDetail);
+        String data = JSONObject.toJSONString(tmpAttendanceClassesTaskDetailDto);
+        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, url, data, headers, HttpMethod.POST);
+
+        if (tmpResponseEntity.getStatusCode() != HttpStatus.OK) {
+            throw new ServiceException(Result.SYS_ERROR, "打卡同步 HC失败" + tmpResponseEntity.getBody());
+        }
     }
 }

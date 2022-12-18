@@ -1,6 +1,6 @@
 package com.java110.things.service.hc;
 
-import com.java110.things.entity.car.CarInoutDto;
+import com.java110.things.entity.attendance.AttendanceClassesTaskDetailDto;
 
 /**
  * 调用HC小区管理系统
@@ -22,4 +22,11 @@ public interface IAttendanceCallHcService {
      * @return
      */
     public void upload(String taskId) throws Exception;
+
+    /**
+     * 考勤
+     *
+     * @throws Exception
+     */
+    void checkIn(AttendanceClassesTaskDetailDto attendanceClassesTaskDetailDto,boolean finishAllTaskDetail) throws Exception;
 }

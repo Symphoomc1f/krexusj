@@ -5,12 +5,7 @@ import com.java110.things.constant.MachineConstant;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.dao.IAttendanceClassesServiceDao;
 import com.java110.things.dao.IMachineServiceDao;
-import com.java110.things.entity.attendance.AttendanceClassesDto;
-import com.java110.things.entity.attendance.AttendanceClassesTaskDetailDto;
-import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
-import com.java110.things.entity.attendance.ClockInDto;
-import com.java110.things.entity.attendance.ClockInResultDto;
-import com.java110.things.entity.attendance.StaffAttendanceLogDto;
+import com.java110.things.entity.attendance.*;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
@@ -22,6 +17,7 @@ import com.java110.things.factory.HttpFactory;
 import com.java110.things.factory.ImageFactory;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.community.ICommunityService;
+import com.java110.things.service.hc.IAttendanceCallHcService;
 import com.java110.things.service.machine.IMachineCmdService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.DateUtil;
@@ -36,13 +32,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @ClassName CallAttendanceServiceImpl
@@ -88,6 +78,9 @@ public class CallAttendanceServiceImpl implements ICallAttendanceService {
 
     @Autowired
     private IAttendanceClassesServiceDao attendanceClassesServiceDao;
+
+    @Autowired
+    private IAttendanceCallHcService attendanceCallHcServiceImpl;
 
     @Override
     public MachineDto getMachine(MachineDto machineDto) {
@@ -422,6 +415,12 @@ public class CallAttendanceServiceImpl implements ICallAttendanceService {
             }
         }
 
+        try {
+            attendanceCallHcServiceImpl.checkIn(tmpAttendanceClassesTaskDetailDto,finishAllTaskDetail);
+        } catch (Exception e) {
+            logger.error("同步HC小区管理系统失败", e);
+        }
+
         //还有未完成的任务
         if (!finishAllTaskDetail) {
             return;
@@ -431,6 +430,9 @@ public class CallAttendanceServiceImpl implements ICallAttendanceService {
         attendanceClassesTaskDto.setState("30000");
         attendanceClassesTaskDto.setStatusCd("0");
         attendanceClassesServiceDao.updateAttendanceClassesTaskDto(attendanceClassesTaskDto);
+
+
+
 
     }
 
