@@ -99,6 +99,11 @@ public class AttendanceCallHcServiceImpl implements IAttendanceCallHcService {
         }
 
         String value = appAttrDto.getValue();
+        String securityCode = "";
+        appAttrDto = appDtos.get(0).getAppAttr(AppAttrDto.SPEC_CD_SECURITY_CODE);
+        if (appAttrDto != null) {
+            securityCode = appAttrDto.getValue();
+        }
 
         //查询班组
         AttendanceClassesDto attendanceClassesDto = new AttendanceClassesDto();
@@ -120,7 +125,7 @@ public class AttendanceCallHcServiceImpl implements IAttendanceCallHcService {
         headers.put("communityId", communityDtos.get(0).getCommunityId());
 
         String data = JSONObject.toJSONString(attendanceClassesTaskDto);
-        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, url, data, headers, HttpMethod.POST);
+        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, url, data, headers, HttpMethod.POST, securityCode);
 
         if (tmpResponseEntity.getStatusCode() != HttpStatus.OK) {
             throw new ServiceException(Result.SYS_ERROR, "上传考勤任务失败" + tmpResponseEntity.getBody());
@@ -166,6 +171,12 @@ public class AttendanceCallHcServiceImpl implements IAttendanceCallHcService {
 
         String value = appAttrDto.getValue();
 
+        String securityCode = "";
+        appAttrDto = appDtos.get(0).getAppAttr(AppAttrDto.SPEC_CD_SECURITY_CODE);
+        if (appAttrDto != null) {
+            securityCode = appAttrDto.getValue();
+        }
+
 
         //查询考勤明细
         String url = value;
@@ -177,7 +188,7 @@ public class AttendanceCallHcServiceImpl implements IAttendanceCallHcService {
 
         tmpAttendanceClassesTaskDetailDto.put("finishAllTaskDetail", finishAllTaskDetail);
         String data = JSONObject.toJSONString(tmpAttendanceClassesTaskDetailDto);
-        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, url, data, headers, HttpMethod.POST);
+        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, url, data, headers, HttpMethod.POST, securityCode);
 
         if (tmpResponseEntity.getStatusCode() != HttpStatus.OK) {
             throw new ServiceException(Result.SYS_ERROR, "打卡同步 HC失败" + tmpResponseEntity.getBody());

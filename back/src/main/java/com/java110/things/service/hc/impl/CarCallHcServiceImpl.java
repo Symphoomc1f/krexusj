@@ -71,7 +71,11 @@ public class CarCallHcServiceImpl implements ICarCallHcService {
         }
 
         String value = appAttrDto.getValue();
-
+        String securityCode = "";
+        appAttrDto = appDtos.get(0).getAppAttr(AppAttrDto.SPEC_CD_SECURITY_CODE);
+        if (appAttrDto != null) {
+            securityCode = appAttrDto.getValue();
+        }
 
         String url = value;
         Map<String, String> headers = new HashMap<>();
@@ -83,7 +87,7 @@ public class CarCallHcServiceImpl implements ICarCallHcService {
         data.put("communityId", communityDtos.get(0).getCommunityId());
         data.put("inTime", CarInoutDto.INOUT_TYPE_IN.equals(carInoutDto.getInoutType()) ? carInoutDto.getOpenTime() : "");
         data.put("outTime", CarInoutDto.INOUT_TYPE_OUT.equals(carInoutDto.getInoutType()) ? carInoutDto.getOpenTime() : "");
-        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, url, data.toString(), headers, HttpMethod.POST);
+        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, url, data.toString(), headers, HttpMethod.POST,securityCode);
 
         if (tmpResponseEntity.getStatusCode() != HttpStatus.OK) {
             throw new ServiceException(Result.SYS_ERROR, "上传车辆失败" + tmpResponseEntity.getBody());
