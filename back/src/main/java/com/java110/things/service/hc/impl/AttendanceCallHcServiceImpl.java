@@ -9,6 +9,7 @@ import com.java110.things.entity.attendance.AttendanceClassesTaskDetailDto;
 import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.user.StaffDto;
 import com.java110.things.exception.Result;
 import com.java110.things.exception.ServiceException;
 import com.java110.things.factory.HttpFactory;
@@ -16,6 +17,7 @@ import com.java110.things.service.app.IAppService;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.hc.IAttendanceCallHcService;
 import com.java110.things.service.machine.IMachineService;
+import com.java110.things.service.staff.IStaffService;
 import com.java110.things.util.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -59,6 +61,9 @@ public class AttendanceCallHcServiceImpl implements IAttendanceCallHcService {
 
     @Autowired
     private IMachineService machineServiceImpl;
+
+    @Autowired
+    private IStaffService staffServiceImpl;
 
     @Override
     @Async
@@ -112,6 +117,14 @@ public class AttendanceCallHcServiceImpl implements IAttendanceCallHcService {
 
         Assert.listOnlyOne(attendanceClassesDtos, "未找到考勤班组");
 
+        //查询员工
+        StaffDto staffDto = new StaffDto();
+        staffDto.setStaffId(attendanceClassesTaskDto.getStaffId());
+        List<StaffDto> staffDtos = staffServiceImpl.queryStaffs(staffDto);
+
+        Assert.listOnlyOne(staffDtos, "员工不存在");
+
+
         //查询考勤明细
         AttendanceClassesTaskDetailDto attendanceClassesTaskDetailDto = new AttendanceClassesTaskDetailDto();
         attendanceClassesTaskDetailDto.setTaskId(taskId);
@@ -119,6 +132,7 @@ public class AttendanceCallHcServiceImpl implements IAttendanceCallHcService {
                 = attendanceClassesServiceDao.getAttendanceClassesTaskDetails(attendanceClassesTaskDetailDto);
         attendanceClassesTaskDto.setAttendanceClassesTaskDetails(attendanceClassesTaskDetailDtos);
         attendanceClassesTaskDto.setClassId(attendanceClassesDtos.get(0).getExtClassesId());
+        attendanceClassesTaskDto.setStaffId(staffDtos.get(0).getExtStaffId());
         String url = value;
         Map<String, String> headers = new HashMap<>();
 
