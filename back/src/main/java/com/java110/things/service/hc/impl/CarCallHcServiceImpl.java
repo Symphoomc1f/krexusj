@@ -80,11 +80,11 @@ public class CarCallHcServiceImpl implements ICarCallHcService {
         String url = value;
         Map<String, String> headers = new HashMap<>();
         headers.put("machineCode", carInoutDto.getMachineCode());
-        headers.put("communityId", communityDtos.get(0).getCommunityId());
+        headers.put("communityId", communityDtos.get(0).getExtCommunityId());
 
         JSONObject data = new JSONObject();
         data.put("carNum", carInoutDto.getCarNum());
-        data.put("communityId", communityDtos.get(0).getCommunityId());
+        data.put("communityId", communityDtos.get(0).getExtCommunityId());
         data.put("inTime", CarInoutDto.INOUT_TYPE_IN.equals(carInoutDto.getInoutType()) ? carInoutDto.getOpenTime() : "");
         data.put("outTime", CarInoutDto.INOUT_TYPE_OUT.equals(carInoutDto.getInoutType()) ? carInoutDto.getOpenTime() : "");
         ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, url, data.toString(), headers, HttpMethod.POST,securityCode);
