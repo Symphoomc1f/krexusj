@@ -248,6 +248,13 @@ public class CallAttendanceServiceImpl implements ICallAttendanceService {
         staffAttendanceLogDto.setReqParam(clockInDto.getPic());
         attendanceClassesServiceDao.saveStaffAttendanceLog(staffAttendanceLogDto);
 
+        //异步同步HC小区管理系统
+        try {
+            attendanceCallHcServiceImpl.checkInTime(staffAttendanceLogDto);
+        } catch (Exception e) {
+            logger.error("同步HC小区管理系统失败", e);
+        }
+
         ClockInResultDto clockInResultDto = null;
         Calendar calendar = Calendar.getInstance();
 

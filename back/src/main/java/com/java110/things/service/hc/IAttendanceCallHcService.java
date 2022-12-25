@@ -1,6 +1,7 @@
 package com.java110.things.service.hc;
 
 import com.java110.things.entity.attendance.AttendanceClassesTaskDetailDto;
+import com.java110.things.entity.attendance.StaffAttendanceLogDto;
 
 /**
  * 调用HC小区管理系统
@@ -28,5 +29,12 @@ public interface IAttendanceCallHcService {
      *
      * @throws Exception
      */
-    void checkIn(AttendanceClassesTaskDetailDto attendanceClassesTaskDetailDto,boolean finishAllTaskDetail) throws Exception;
+    void checkIn(AttendanceClassesTaskDetailDto attendanceClassesTaskDetailDto, boolean finishAllTaskDetail) throws Exception;
+
+    /**
+     * 考勤记录同步
+     *
+     * @param staffAttendanceLogDto
+     */
+    void checkInTime(StaffAttendanceLogDto staffAttendanceLogDto) throws Exception;
 }

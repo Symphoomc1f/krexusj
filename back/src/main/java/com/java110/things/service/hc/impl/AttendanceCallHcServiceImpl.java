@@ -7,6 +7,7 @@ import com.java110.things.entity.app.AppDto;
 import com.java110.things.entity.attendance.AttendanceClassesDto;
 import com.java110.things.entity.attendance.AttendanceClassesTaskDetailDto;
 import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
+import com.java110.things.entity.attendance.StaffAttendanceLogDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.user.StaffDto;
@@ -148,6 +149,7 @@ public class AttendanceCallHcServiceImpl implements IAttendanceCallHcService {
     }
 
     @Override
+    @Async
     public void checkIn(AttendanceClassesTaskDetailDto attendanceClassesTaskDetailDto, boolean finishAllTaskDetail) throws Exception {
         AttendanceClassesTaskDto attendanceClassesTaskDto = new AttendanceClassesTaskDto();
         attendanceClassesTaskDto.setTaskId(attendanceClassesTaskDetailDto.getTaskId());
@@ -201,6 +203,73 @@ public class AttendanceCallHcServiceImpl implements IAttendanceCallHcService {
         JSONObject tmpAttendanceClassesTaskDetailDto = JSONObject.parseObject(JSONObject.toJSONString(attendanceClassesTaskDetailDto));
 
         tmpAttendanceClassesTaskDetailDto.put("finishAllTaskDetail", finishAllTaskDetail);
+        String data = JSONObject.toJSONString(tmpAttendanceClassesTaskDetailDto);
+        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, url, data, headers, HttpMethod.POST, securityCode);
+
+        if (tmpResponseEntity.getStatusCode() != HttpStatus.OK) {
+            throw new ServiceException(Result.SYS_ERROR, "打卡同步 HC失败" + tmpResponseEntity.getBody());
+        }
+    }
+
+    @Override
+    @Async
+    public void checkInTime(StaffAttendanceLogDto staffAttendanceLogDto) throws Exception {
+
+        StaffDto staffDto = new StaffDto();
+        staffDto.setStaffId(staffAttendanceLogDto.getStaffId());
+        List<StaffDto> staffDtos = staffServiceImpl.queryStaffs(staffDto);
+
+        Assert.listOnlyOne(staffDtos, "员工不存在");
+
+        //根据设备查询小区ID
+        MachineDto machineDto = new MachineDto();
+        machineDto.setLocationObjId(staffDtos.get(0).getDepartmentId());
+        machineDto.setLocationType(MachineDto.LOCATION_TYPE_DEPARTMENT);
+        List<MachineDto> machineDtos = machineServiceImpl.queryMachines(machineDto);
+        if (machineDtos == null || machineDtos.size() < 1) {
+            throw new IllegalArgumentException("考勤对应考勤机不存在");
+        }
+
+
+        CommunityDto communityDto = new CommunityDto();
+        communityDto.setCommunityId(machineDtos.get(0).getCommunityId());
+        communityDto.setStatusCd("0");
+        List<CommunityDto> communityDtos = communityServiceImpl.queryCommunitys(communityDto);
+
+        Assert.listOnlyOne(communityDtos, "未包含小区信息");
+
+        AppDto appDto = new AppDto();
+        appDto.setAppId(communityDtos.get(0).getAppId());
+        List<AppDto> appDtos = appServiceImpl.getApp(appDto);
+
+        Assert.listOnlyOne(appDtos, "未找到应用信息");
+        AppAttrDto appAttrDto = appDtos.get(0).getAppAttr(AppAttrDto.SPEC_CD_ATTENDANCE_LOG);
+
+        if (appAttrDto == null) {
+            return;
+        }
+
+        String value = appAttrDto.getValue();
+
+        String securityCode = "";
+        appAttrDto = appDtos.get(0).getAppAttr(AppAttrDto.SPEC_CD_SECURITY_CODE);
+        if (appAttrDto != null) {
+            securityCode = appAttrDto.getValue();
+        }
+
+
+        //查询考勤明细
+        String url = value;
+        Map<String, String> headers = new HashMap<>();
+
+        headers.put("communityId", communityDtos.get(0).getCommunityId());
+
+        JSONObject tmpAttendanceClassesTaskDetailDto = JSONObject.parseObject(JSONObject.toJSONString(staffAttendanceLogDto));
+        tmpAttendanceClassesTaskDetailDto.put("departmentId", staffDtos.get(0).getDepartmentId());
+        tmpAttendanceClassesTaskDetailDto.put("departmentName", staffDtos.get(0).getDepartmentId());
+        tmpAttendanceClassesTaskDetailDto.put("staffName", staffDtos.get(0).getStaffName());
+        tmpAttendanceClassesTaskDetailDto.put("staffId", staffDtos.get(0).getExtStaffId());
+
         String data = JSONObject.toJSONString(tmpAttendanceClassesTaskDetailDto);
         ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, url, data, headers, HttpMethod.POST, securityCode);
 
