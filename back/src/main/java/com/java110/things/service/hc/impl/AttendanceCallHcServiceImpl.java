@@ -266,7 +266,7 @@ public class AttendanceCallHcServiceImpl implements IAttendanceCallHcService {
 
         JSONObject tmpAttendanceClassesTaskDetailDto = JSONObject.parseObject(JSONObject.toJSONString(staffAttendanceLogDto));
         tmpAttendanceClassesTaskDetailDto.put("departmentId", staffDtos.get(0).getDepartmentId());
-        tmpAttendanceClassesTaskDetailDto.put("departmentName", staffDtos.get(0).getDepartmentId());
+        tmpAttendanceClassesTaskDetailDto.put("departmentName", staffDtos.get(0).getDepartmentName());
         tmpAttendanceClassesTaskDetailDto.put("staffName", staffDtos.get(0).getStaffName());
         tmpAttendanceClassesTaskDetailDto.put("staffId", staffDtos.get(0).getExtStaffId());
 
