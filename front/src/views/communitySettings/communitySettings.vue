@@ -42,20 +42,18 @@
       <el-table-column align="center" label="编号" width="90">
         <template slot-scope="scope">{{ scope.$index + 1 }}</template>
       </el-table-column>
-      <el-table-column align="center" label="省份">
-        <template slot-scope="scope">{{ scope.row.provName }}</template>
-      </el-table-column>
-      <el-table-column align="center" label="市、州">
-        <template slot-scope="scope">{{ scope.row.cityName }}</template>
-      </el-table-column>
-      <el-table-column align="center" label="区、县">
-        <template slot-scope="scope">{{ scope.row.areaName }}</template>
-      </el-table-column>
-      <el-table-column align="center" label="小区编码">
-        <template slot-scope="scope">{{ scope.row.communityId }}</template>
-      </el-table-column>
-      <el-table-column align="center" label="小区名称">
+       <el-table-column align="center" label="小区名称">
         <template slot-scope="scope">{{ scope.row.name }}</template>
+      </el-table-column>
+      <el-table-column align="center" label="城市">
+        <template slot-scope="scope">{{ scope.row.provName+scope.row.cityName +scope.row.areaName}}</template>
+      </el-table-column>
+      <el-table-column align="center" label="外部ID">
+        <template slot-scope="scope">{{ scope.row.extCommunityId }}</template>
+      </el-table-column>
+
+       <el-table-column align="center" label="小区编码">
+        <template slot-scope="scope">{{ scope.row.communityId }}</template>
       </el-table-column>
       <el-table-column label="小区地址" align="center">
         <template slot-scope="scope">

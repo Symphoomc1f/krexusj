@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.java110.things.entity.PageDto;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @ClassName MachineDto
@@ -49,6 +50,8 @@ public class MachineDto extends PageDto implements Serializable {
     private String locationType;
     private String direction;
 
+
+    private List<MachineAttrDto> machineAttrDtos;
 
     public String getMachineMac() {
         return machineMac;
@@ -206,5 +209,13 @@ public class MachineDto extends PageDto implements Serializable {
 
     public void setDirection(String direction) {
         this.direction = direction;
+    }
+
+    public List<MachineAttrDto> getMachineAttrDtos() {
+        return machineAttrDtos;
+    }
+
+    public void setMachineAttrDtos(List<MachineAttrDto> machineAttrDtos) {
+        this.machineAttrDtos = machineAttrDtos;
     }
 }

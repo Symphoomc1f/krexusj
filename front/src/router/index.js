@@ -147,12 +147,12 @@ export const constantRoutes = [
         meta: { title: '道闸设备', icon: 'table' }
       },
       {
-        path: 'carProtocol',
+        path: 'barrierGateControl',
         name: '道闸',
-        component: () => import('@/views/carProtocol/carProtocol'),
-        meta: { title: '道闸协议', icon: 'table' }
+        component: () => import('@/views/barrierGateControl/barrierGateControl'),
+        meta: { title: '控制中心', icon: 'table' }
       },
-      
+
       {
         path: 'carIn',
         name: '道闸',
@@ -164,6 +164,12 @@ export const constantRoutes = [
         name: '道闸',
         component: () => import('@/views/carOut/carOut'),
         meta: { title: '车辆出场', icon: 'table' }
+      },
+       {
+        path: 'carProtocol',
+        name: '道闸',
+        component: () => import('@/views/carProtocol/carProtocol'),
+        meta: { title: '道闸协议', icon: 'table' }
       }
     ]
   },
@@ -231,7 +237,7 @@ export const constantRoutes = [
     name: 'Example',
     meta: { title: '组织信息', icon: 'example' },
     children: [
-     
+
       {
         path: '/userManager',
         name: '账号信息',

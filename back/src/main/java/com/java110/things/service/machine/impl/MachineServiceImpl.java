@@ -86,11 +86,40 @@ public class MachineServiceImpl implements IMachineService {
         List<MachineDto> machineDtoList = null;
         if (count > 0) {
             machineDtoList = machineServiceDao.getMachines(machineDto);
+            refreshMachineAttr(machineDtoList);
         } else {
             machineDtoList = new ArrayList<>();
         }
         ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, count, totalPage, machineDtoList);
         return resultDto;
+    }
+
+    private void refreshMachineAttr(List<MachineDto> machineDtoList) {
+
+        if (machineDtoList == null || machineDtoList.size() < 1) {
+            return;
+        }
+
+        List<String> machineIds = new ArrayList<>();
+        for (MachineDto machineDto : machineDtoList) {
+            machineIds.add(machineDto.getMachineId());
+        }
+
+        MachineAttrDto machineAttrDto = new MachineAttrDto();
+        machineAttrDto.setCommunityId(machineDtoList.get(0).getCommunityId());
+        machineAttrDto.setMachineIds(machineIds.toArray(new String[machineIds.size()]));
+        List<MachineAttrDto> machineAttrDtos = machineServiceDao.getMachineAttrs(machineAttrDto);
+
+        List<MachineAttrDto> tmpMachineAttrDtos = null;
+        for (MachineDto machineDto : machineDtoList) {
+            tmpMachineAttrDtos = new ArrayList<>();
+            for (MachineAttrDto tmpMachineAttrDto : machineAttrDtos) {
+                if (machineDto.getMachineId().equals(tmpMachineAttrDto.getMachineId())) {
+                    tmpMachineAttrDtos.add(tmpMachineAttrDto);
+                }
+            }
+            machineDto.setMachineAttrDtos(tmpMachineAttrDtos);
+        }
     }
 
 

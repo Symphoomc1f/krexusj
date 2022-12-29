@@ -18,6 +18,7 @@ public class MachineAttrDto extends PageDto implements Serializable {
     public static final String SPEC_VEDIO_URL = "19089001";
 
     private String machineId;
+    private String[] machineIds;
     private String communityId;
     private String attrId;
     private String specCd;
@@ -71,5 +72,13 @@ public class MachineAttrDto extends PageDto implements Serializable {
 
     public void setStatusCd(String statusCd) {
         this.statusCd = statusCd;
+    }
+
+    public String[] getMachineIds() {
+        return machineIds;
+    }
+
+    public void setMachineIds(String[] machineIds) {
+        this.machineIds = machineIds;
     }
 }
