@@ -20,8 +20,10 @@ import java.lang.reflect.Field;
 public class VedioController {
 
 
-    @RequestMapping(path = "/rtspToRtmp", method = RequestMethod.POST)
-    public ResponseEntity<String> rtspToRtmp(String link, String linkName) throws Exception {
+    @RequestMapping(path = "/rtspToRtmp", method = RequestMethod.GET)
+    public ResponseEntity<String> rtspToRtmp() throws Exception {
+
+        String link = "rtsp://192.168.1.100:8557/h264";
         // 读取RTSP视频资源 传入Rtsp连接
         final FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(link);
         // 设置分辨率宽度
@@ -37,7 +39,7 @@ public class VedioController {
         grabber.start();
         // 流媒体输出地址,最后一个参数是"音频AudioChannels 0:不录制,1:录制"，建议通过grabber获取
         // 地址格式为 rtmp:rtmp://{ip}:{nginx端口}/{该name为传过来的任意值}
-        final FFmpegFrameRecorder recorder = new FFmpegFrameRecorder("rtmp://127.0.0.1:8012/hls/"+linkName, captureWidth, captureHeight, grabber.getAudioChannels());
+        final FFmpegFrameRecorder recorder = new FFmpegFrameRecorder("rtmp://127.0.0.1:1935/myapp/123", captureWidth, captureHeight, grabber.getAudioChannels());
         recorder.setInterleaved(true);
         // 降低编码延时
         recorder.setVideoOption("tune", "zerolatency");

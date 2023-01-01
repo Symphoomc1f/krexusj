@@ -62,7 +62,7 @@ public class CarInoutServiceImpl implements ICarInoutService {
 
 
          carCallHcServiceImpl.carInout(carInoutDto);
-        return resultDto;
+        return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
     }
 
     /**

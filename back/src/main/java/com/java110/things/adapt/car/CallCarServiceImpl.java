@@ -109,6 +109,17 @@ public class CallCarServiceImpl implements ICallCarService {
         if (blackWhiteDtos != null && blackWhiteDtos.size() > 0) {
             return new ResultDto(ResultDto.ERROR, "黑名单车辆(" + carNum + ")不能进入");
         }
+
+        //判断车辆是否在 场内
+        CarInoutDto inoutDto = new CarInoutDto();
+        inoutDto.setCarNum(carNum);
+        inoutDto.setPaId(machineDto.getLocationObjId());
+        inoutDto.setState("1");
+        List<CarInoutDto> carInoutDtos = carInoutServiceImpl.queryCarInout(inoutDto);
+        //黑名单车辆不能进入
+        if (carInoutDtos != null && carInoutDtos.size() > 0) {
+            return new ResultDto(ResultDto.ERROR, carNum + "车辆已在场内");
+        }
         //2.0 进场
         CarInoutDto carInoutDto = new CarInoutDto();
         carInoutDto.setCarNum(carNum);
@@ -120,6 +131,7 @@ public class CallCarServiceImpl implements ICallCarService {
         carInoutDto.setMachineCode(machineDto.getMachineCode());
         carInoutDto.setOpenTime(DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
         carInoutDto.setPaId(machineDto.getLocationObjId());
+        carInoutDto.setState("1");
         ResultDto resultDto = carInoutServiceImpl.saveCarInout(carInoutDto);
 
         //异步上报HC小区管理系统
