@@ -26,7 +26,8 @@
         t.remark,
         t.inout_type inoutType,
         t.pa_id paId,
-        t.state
+        t.state,
+        t.pay_time payTime
         from car_inout t
         where 1=1
         <if test="inoutId != null and inoutId != ''">
@@ -46,6 +47,12 @@
         </if>
         <if test="state != null and inoutType != ''">
             and t.state = #{state}
+        </if>
+        <if test="states != null ">
+            and t.state in
+            <foreach collection="states" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
         </if>
         order by t.create_time desc
         <if test="page != -1 and page != null ">
@@ -88,6 +95,18 @@
             </if>
             <if test="state != null and inoutType != ''">
                 t.state = #{state},
+            </if>
+            <if test="payTime != null and payTime != ''">
+                t.pay_time = #{payTime},
+            </if>
+            <if test="payCharge != null and payCharge != ''">
+                t.pay_charge = #{payCharge},
+            </if>
+            <if test="realCharge != null and realCharge != ''">
+                t.pay_charge = #{realCharge},
+            </if>
+            <if test="payType != null and payType != ''">
+                t.pay_type = #{payType},
             </if>
         </trim>
         where 1=1

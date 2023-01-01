@@ -24,6 +24,7 @@ public class ResultDto implements Serializable {
     public static final int ERROR = -1;
 
     public static final int NO_AUTHORITY_ERROR = 401; // 认证失败
+    public static final int NO_PAY = -2; // 未支付
 
     public static final String SUCCESS_MSG = "成功";
 
