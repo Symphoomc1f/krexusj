@@ -32,7 +32,7 @@ spring :
   datasource:
     username: hc_things
     password: hc_things12345678
-    url: jdbc:mysql://106.52.221.206:3306/hc_things?useUnicode=true&characterEncoding=gbk&zeroDateTimeBehavior=convertToNull&useSSL=false
+    url: jdbc:mysql://iot.homecommunity.cn:3306/hc_things?useUnicode=true&characterEncoding=gbk&zeroDateTimeBehavior=convertToNull&useSSL=false
     driver-class-name: com.mysql.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     initialSize: 5
