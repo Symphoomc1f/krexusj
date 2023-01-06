@@ -120,7 +120,8 @@ public class MachineController extends BaseController {
     public ResponseEntity<String> getMachines(@RequestParam int page,
                                               @RequestParam int row,
                                               @RequestParam String machineTypeCd,
-                                              @RequestParam String communityId) throws Exception {
+                                              @RequestParam String communityId,
+                                              @RequestParam(value = "direction") String direction) throws Exception {
 
         Assert.hasText(machineTypeCd, "请求报文中未包含设备类型");
         MachineDto machineDto = new MachineDto();

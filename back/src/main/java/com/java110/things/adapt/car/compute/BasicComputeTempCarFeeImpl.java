@@ -40,6 +40,7 @@ public class BasicComputeTempCarFeeImpl extends BaseComputeTempCarFee {
     public TempCarFeeResult doCompute(CarInoutDto carInoutDto, TempCarFeeConfigDto tempCarFeeConfigDto,
                                       List<TempCarFeeConfigAttrDto> tempCarFeeConfigAttrDtos) {
 
+
         //获取停车时间
         long min = TempCarFeeFactory.getTempCarMin(carInoutDto);
 

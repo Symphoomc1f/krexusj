@@ -2,6 +2,7 @@ package com.java110.things.adapt.car;
 
 import com.java110.things.adapt.car.compute.IComputeTempCarFee;
 import com.java110.things.entity.car.CarBlackWhiteDto;
+import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.car.CarInoutDto;
 import com.java110.things.entity.car.TempCarFeeConfigDto;
 import com.java110.things.entity.car.TempCarFeeResult;
@@ -12,6 +13,7 @@ import com.java110.things.factory.ApplicationContextFactory;
 import com.java110.things.factory.TempCarFeeFactory;
 import com.java110.things.service.car.ICarBlackWhiteService;
 import com.java110.things.service.car.ICarInoutService;
+import com.java110.things.service.car.ICarService;
 import com.java110.things.service.fee.ITempCarFeeConfigService;
 import com.java110.things.service.hc.ICarCallHcService;
 import com.java110.things.service.parkingArea.IParkingAreaService;
@@ -31,6 +33,9 @@ public class CallCarServiceImpl implements ICallCarService {
 
     @Autowired
     private ICarBlackWhiteService carBlackWhiteServiceImpl;
+
+    @Autowired
+    private ICarService carServiceImpl;
 
     @Autowired
     private ICarInoutService carInoutServiceImpl;
@@ -97,6 +102,11 @@ public class CallCarServiceImpl implements ICallCarService {
             return new ResultDto(ResultDto.SUCCESS, "车辆为白名单");
         }
 
+        //判断车辆是否为月租车
+        if (judgeOwnerCar(machineDto, carNum, parkingAreaDtos.get(0), type, carInoutDtos)) {
+            return new ResultDto(ResultDto.SUCCESS, "车辆为白名单");
+        }
+
         //检查是否支付完成
         if (TempCarFeeFactory.judgeFinishPayTempCarFee(carInoutDtos.get(0))) {
             return new ResultDto(ResultDto.SUCCESS, "已经支付完成");
@@ -115,6 +125,34 @@ public class CallCarServiceImpl implements ICallCarService {
         TempCarFeeResult result = computeTempCarFee.computeTempCarFee(carInoutDtos.get(0), tempCarFeeConfigDtos.get(0));
 
         return new ResultDto(ResultDto.NO_PAY, "未支付", result);
+    }
+
+    /**
+     * 判断是否为月租车
+     *
+     * @param machineDto
+     * @param carNum
+     * @param parkingAreaDto
+     * @param type
+     * @param carInoutDtos
+     * @return
+     */
+    private boolean judgeOwnerCar(MachineDto machineDto, String carNum, ParkingAreaDto parkingAreaDto, String type, List<CarInoutDto> carInoutDtos) throws Exception {
+
+        CarDto carDto = new CarDto();
+        carDto.setPaId(parkingAreaDto.getPaId());
+        carDto.setCarNum(carNum);
+        List<CarDto> carDtos = carServiceImpl.queryCars(carDto);
+
+        if (carDtos == null || carDtos.size() < 1) {
+            return false;
+        }
+
+        if (carDtos.get(0).getEndTime().getTime() > DateUtil.getCurrentDate().getTime()) {
+            return true;
+        }
+
+        return false;
     }
 
 

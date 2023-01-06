@@ -11,7 +11,7 @@
                   入场视频:
                   <el-select v-model="enterMachineId" placeholder="请选择">
                     <el-option
-                      v-for="item in machines"
+                      v-for="item in inMachines"
                       :key="item.machineId"
                       :label="item.machineName"
                       :value="item.machineId"
@@ -35,7 +35,7 @@
                   出场视频:
                   <el-select v-model="outMachineId" placeholder="请选择">
                     <el-option
-                      v-for="item in machines"
+                      v-for="item in outMachines"
                       :key="item.machineId"
                       :label="item.machineName"
                       :value="item.machineId"
@@ -87,33 +87,36 @@
         <div class="right-title" style="margin: 25px">收费信息</div>
         <el-form label-position="left" label-width="70px" style="width: 90%">
           <el-form-item label="车辆">
-            <el-input v-model="fee.carNum" placeholder="请输入道闸名称" />
+            <el-input v-model="fee.carNum" placeholder="请输入车牌号" disabled="disabled"/>
           </el-form-item>
           <el-form-item label="停车时间">
-            <el-input v-model="fee.machineName" placeholder="请输入道闸名称" />
+            <el-input v-model="fee.machineName" placeholder="请输入停车时间"  disabled="disabled" />
           </el-form-item>
           <el-form-item label="应收" prop="type">
-            <el-input v-model="fee.machineCode" placeholder="请输入道闸编码" />
+            <el-input v-model="fee.machineCode" placeholder="请输入映射" disabled="disabled" />
           </el-form-item>
           <el-form-item label="实收" prop="type">
-            <el-input v-model="fee.machineMac" placeholder="请输入道闸MAC" />
+            <el-input v-model="fee.machineMac" placeholder="请输入实收" />
           </el-form-item>
-          <el-form-item style="text-align:center">
+          <el-form-item label="备注" prop="type">
+            <el-input v-model="fee.remark" placeholder="请输入备注" />
+          </el-form-item>
+          <el-form-item style="text-align: center">
             <el-button type="primary" @click="onSubmit">临时车收费</el-button>
           </el-form-item>
         </el-form>
         <!-- 出入信息 -->
         <div class="right-title" style="margin: 25px">出入信息</div>
-        <div style="margin:15px">
+        <div style="margin: 15px">
           <span>20:38 青AGK888 进场</span>
         </div>
-        <div style="margin:15px"> 
+        <div style="margin: 15px">
           <span>20:38 青AGK888 进场</span>
         </div>
-        <div style="margin:15px">
+        <div style="margin: 15px">
           <span>20:38 青AGK888 进场</span>
         </div>
-        <div style="margin:15px">
+        <div style="margin: 15px">
           <span>20:38 青AGK888 进场</span>
         </div>
       </el-col>
@@ -142,18 +145,11 @@ export default {
   components: { Pagination },
   data() {
     return {
-      machines: [],
+      inMachines: [],
+      outMachines: [],
       enterMachineId: "",
       outMachineId: "",
       activeName: "first",
-      listQuery: {
-        page: 1,
-        row: 10,
-        machineTypeCd: "9996",
-        machineCode: "",
-        machineIp: "",
-        machineMac: "",
-      },
       fee: {
         carNum: "",
         time: "",
@@ -161,14 +157,24 @@ export default {
     };
   },
   created() {
-    this.queryMachine();
+    this.queryMachine(3306);
+    this.queryMachine(3307);
   },
   methods: {
-    queryMachine() {
+    queryMachine(_direction) {
       this.listLoading = true;
-      getAccessControlsByCondition(this.listQuery).then((response) => {
-        this.machines = response.data;
-        this.total = response.total;
+      let _data = {
+        page: 1,
+        row: 30,
+        machineTypeCd: "9996",
+        direction: _direction,
+      };
+      getAccessControlsByCondition(_data).then((response) => {
+        if (_direction == "3306") {
+          this.inMachines = response.data;
+        }else{
+          this.outMachines = response.data;
+        }
 
         this.listLoading = false;
       });
