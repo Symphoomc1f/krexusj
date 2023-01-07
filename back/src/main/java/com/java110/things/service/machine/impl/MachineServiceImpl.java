@@ -225,7 +225,7 @@ public class MachineServiceImpl implements IMachineService {
             machineCmdDto.setObjTypeValue("-1");
             machineCmdServiceImpl.saveMachineCmd(machineCmdDto);
         } else if (MachineDto.MACHINE_TYPE_CAR.equals(machineDto.getMachineTypeCd())) {
-            CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).openDoor(machineDto);
+            CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).restartMachine(machineDto);
         }
         JSONObject data = new JSONObject();
         if (StringUtil.isEmpty(machineDto.getTaskId())) {

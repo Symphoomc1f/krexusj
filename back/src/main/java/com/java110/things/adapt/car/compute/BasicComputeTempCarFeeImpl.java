@@ -112,8 +112,7 @@ public class BasicComputeTempCarFeeImpl extends BaseComputeTempCarFee {
                 .setScale(2, BigDecimal.ROUND_HALF_UP).add(new BigDecimal(firstMoney));
 
         double money = minDeci.subtract(maxMinDeci)
-                .divide(new BigDecimal(afterMaxMin))
-                .setScale(0, BigDecimal.ROUND_UP)
+                .divide(new BigDecimal(afterMaxMin),0,BigDecimal.ROUND_UP)
                 .multiply(new BigDecimal(afterMaxByMoney))
                 .setScale(2, BigDecimal.ROUND_HALF_UP)
                 .add(firstToMaxMoney).doubleValue();

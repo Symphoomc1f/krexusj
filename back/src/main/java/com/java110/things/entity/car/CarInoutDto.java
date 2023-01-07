@@ -33,6 +33,9 @@ public class CarInoutDto extends PageDto implements Serializable {
     private String state;
     private String[] states;
     private Date payTime;
+    private String areaNum;
+
+    private long min;
 
     public String getInoutId() {
         return inoutId;
@@ -176,5 +179,21 @@ public class CarInoutDto extends PageDto implements Serializable {
 
     public void setPayTime(Date payTime) {
         this.payTime = payTime;
+    }
+
+    public String getAreaNum() {
+        return areaNum;
+    }
+
+    public void setAreaNum(String areaNum) {
+        this.areaNum = areaNum;
+    }
+
+    public long getMin() {
+        return min;
+    }
+
+    public void setMin(long min) {
+        this.min = min;
     }
 }

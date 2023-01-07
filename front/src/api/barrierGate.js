@@ -134,6 +134,14 @@ export function restartAccessControls(params) {
     })
 }
 
+export function openDoor(params) {
+    return request({
+        url: '/api/machine/openDoor',
+        method: 'post',
+        data:params
+    })
+}
+
 export function getAccessControlsLog(params) {
     let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
 

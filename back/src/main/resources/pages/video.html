@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>RTSP_DEMO</title>
+    <script type="text/javascript" src="vxgplayer-1.8.40.min.js">
+    </script>
+    <link href="vxgplayer-1.8.40.min.css" rel="stylesheet" />
+    <style>
+        .rtsp-input {
+            width: 600px;
+            height: 50px;
+            font-size: 14px;
+        }
+
+        .rtsp-btn {
+            margin-top: 10px;
+            font-size: 14px;
+            width: 100px;
+            height: 40px;
+            line-height: 40px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="vxgplayer" id="vxg_media_player1" url="rtsp://192.168.1.100:8557/h264" autostart controls
+        avsync nmf-src="pnacl/Release/media_player.nmf" nmf-path="media_player.nmf"></div>
+
+    <div>
+        <input class="rtsp-input" id="url_input" type="text" width="200%" value="rtsp://192.168.1.100:8557/h264">
+    </div>
+
+    <div>
+        <button class="rtsp-btn" onclick="change_rtsp()">设置地址</button>
+    </div>
+
+
+    <!--[if IE]>
+   <object type='application/x-vlc-plugin' id='vlc' events='True'
+       classid='clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921' codebase="http://downloads.videolan.org/pub/videolan/vlc/latest/win32/axvlc.cab" width="720" height="540">
+          <param name='mrl' value='rtsp://218.204.223.237:554/live/1/66251FC11353191F/e7ooqwcfbqjoo80j.sdp' />
+          <param name='volume' value='50' />
+          <param name='autoplay' value='true' />
+          <param name='loop' value='false' />
+          <param name='fullscreen' value='false' />
+    </object>
+<![endif]-->
+<!--[if !IE]><!-->
+    <object type='application/x-vlc-plugin' id='vlc' events='True' width="720" height="540" pluginspage="http://www.videolan.org" codebase="http://downloads.videolan.org/pub/videolan/vlc-webplugins/2.0.6/npapi-vlc-2.0.6.tar.xz">
+        <param name='mrl' value='rtsp://192.168.1.100:8557/h264' />
+        <param name='volume' value='50' />
+        <param name='autoplay' value='true' />
+        <param name='loop' value='false' />
+        <param name='fullscreen' value='false' />
+    </object>
+
+
+<!--<![endif]-->
+
+</body>
+
+<script type="text/javascript">
+    function change_rtsp() {
+        
+        vxgplayer('vxg_media_player1').dispose();
+        vxgplayer('vxg_media_player1').stop();
+        vxgplayer('vxg_media_player1').src(document.getElementById('url_input').value);
+        vxgplayer('vxg_media_player1').play();
+    }
+</script>
+
+</html>

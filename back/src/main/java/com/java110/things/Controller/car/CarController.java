@@ -2,20 +2,21 @@ package com.java110.things.Controller.car;
 
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
-import com.java110.things.entity.parkingArea.ParkingAreaDto;
-import com.java110.things.service.car.ICarInoutService;
 import com.java110.things.adapt.car.ICarProcess;
-import com.java110.things.service.car.ICarService;
 import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.car.CarInoutDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.service.car.ICarInoutService;
+import com.java110.things.service.car.ICarService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @ClassName CommunityController
@@ -71,13 +72,15 @@ public class CarController extends BaseController {
     public ResponseEntity<String> getCarInouts(@RequestParam int page,
                                                @RequestParam int row,
                                                @RequestParam(name = "carNum", required = false) String carNum,
-                                               @RequestParam(name = "inoutType", required = false) String inoutType) throws Exception {
+                                               @RequestParam(name = "inoutType", required = false) String inoutType,
+                                               @RequestParam(name = "state", required = false) String state) throws Exception {
 
         CarInoutDto carInoutDto = new CarInoutDto();
         carInoutDto.setPage(page);
         carInoutDto.setRow(row);
         carInoutDto.setCarNum(carNum);
         carInoutDto.setInoutType(inoutType);
+        carInoutDto.setState(state);
         ResultDto resultDto = carInoutService.getCarInout(carInoutDto);
         return super.createResponseEntity(resultDto);
     }

@@ -27,8 +27,10 @@
         t.inout_type inoutType,
         t.pa_id paId,
         t.state,
-        t.pay_time payTime
+        t.pay_time payTime,
+        pa.num areaNum
         from car_inout t
+        left join parking_area pa on t.pa_id = pa.pa_id and pa.status_cd = '0'
         where 1=1
         <if test="inoutId != null and inoutId != ''">
             and t.inout_id = #{inoutId}

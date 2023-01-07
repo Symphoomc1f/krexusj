@@ -121,7 +121,7 @@ public class MachineController extends BaseController {
                                               @RequestParam int row,
                                               @RequestParam String machineTypeCd,
                                               @RequestParam String communityId,
-                                              @RequestParam(value = "direction") String direction) throws Exception {
+                                              @RequestParam(value = "direction",required = false) String direction) throws Exception {
 
         Assert.hasText(machineTypeCd, "请求报文中未包含设备类型");
         MachineDto machineDto = new MachineDto();
@@ -129,6 +129,7 @@ public class MachineController extends BaseController {
         machineDto.setRow(row);
         machineDto.setMachineTypeCd(machineTypeCd);
         machineDto.setCommunityId(communityId);
+        machineDto.setDirection(direction);
 
         ResultDto resultDto = machineServiceImpl.getMachine(machineDto);
         return super.createResponseEntity(resultDto);
