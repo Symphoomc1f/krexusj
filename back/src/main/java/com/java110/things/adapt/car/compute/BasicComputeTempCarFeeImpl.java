@@ -60,7 +60,7 @@ public class BasicComputeTempCarFeeImpl extends BaseComputeTempCarFee {
 
         //处理超过 一天的数据
         if (min > 24 * 60) {
-            BigDecimal dayDeci = minDeci.divide(new BigDecimal(24 * 60)).setScale(0, BigDecimal.ROUND_DOWN);
+            BigDecimal dayDeci = minDeci.divide(new BigDecimal(24 * 60),0, BigDecimal.ROUND_DOWN);
             baseMoney = dayDeci.multiply(new BigDecimal(maxFeeMoney)).doubleValue();
 
             minDeci = minDeci.subtract(dayDeci.multiply(new BigDecimal(24 * 60))).setScale(0, BigDecimal.ROUND_DOWN);
@@ -92,8 +92,7 @@ public class BasicComputeTempCarFeeImpl extends BaseComputeTempCarFee {
             //超过的时间
             BigDecimal afterFirstMin = minDeci.subtract(new BigDecimal(firstMin));
             //时间差 除以 没多少分钟 向上取整
-            double money = afterFirstMin.divide(new BigDecimal(afterMin))
-                    .setScale(0, BigDecimal.ROUND_UP)
+            double money = afterFirstMin.divide(new BigDecimal(afterMin),0, BigDecimal.ROUND_UP)
                     .multiply(new BigDecimal(afterByMoney))
                     .setScale(2, BigDecimal.ROUND_HALF_UP).add(new BigDecimal(firstMoney)).doubleValue();
             return new TempCarFeeResult(carInoutDto.getCarNum(), money, maxFeeMoney, baseMoney);
@@ -106,8 +105,7 @@ public class BasicComputeTempCarFeeImpl extends BaseComputeTempCarFee {
         //最大时间减去 首段时间
         BigDecimal afterFirstMin = maxMinDeci.subtract(new BigDecimal(firstMin));
         //时间差 除以 没多少分钟 向上取整
-        BigDecimal firstToMaxMoney = afterFirstMin.divide(new BigDecimal(afterMin))
-                .setScale(0, BigDecimal.ROUND_UP)
+        BigDecimal firstToMaxMoney = afterFirstMin.divide(new BigDecimal(afterMin),0, BigDecimal.ROUND_UP)
                 .multiply(new BigDecimal(afterByMoney))
                 .setScale(2, BigDecimal.ROUND_HALF_UP).add(new BigDecimal(firstMoney));
 
