@@ -205,7 +205,7 @@ public class ZhenshiCarMachineAdapt extends BaseMachineAdapt implements ICarMach
         if (machineAttrDtos == null || machineAttrDtos.size() < 1) {
             tmpMachineAttr.setAttrId(SeqUtil.getId());
             machineService.saveMachineAttr(tmpMachineAttr);
-        } else {BasicComputeTempCarFeeImpl
+        } else {
             machineService.updateMachineAttr(tmpMachineAttr);
         }
         saveLog(reqData.getString("id"), machineDto.getMachineId(), CMD_GET_RTSP_URI, "", reqData.toJSONString());
