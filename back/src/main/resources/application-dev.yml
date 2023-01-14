@@ -104,3 +104,36 @@ quartz:
           threadPriority: 5
           threadsInheritContextClassLoaderOfInitializingThread: true
   job-store-type: jdbc
+
+#============== kafka ===================
+kafka:
+  topic: java110-hc-xiaoqu
+  consumer:
+    zookeeper:
+      connect: dev.zk.java110.com:2181
+    servers: dev.kafka.java110.com:9092
+    enable:
+      auto:
+        commit: true
+    session:
+      timeout: 6000
+    auto:
+      commit:
+        interval: 100
+      offset:
+        reset: latest
+    topic: test
+    group:
+      id: java110Iot
+    concurrency: 10
+
+  producer:
+    zookeeper:
+      connect: dev.zk.java110.com:2181
+    servers: dev.kafka.java110.com:9092
+    retries: 0
+    batch:
+      size: 4096
+    linger: 1
+    buffer:
+      memory: 40960
