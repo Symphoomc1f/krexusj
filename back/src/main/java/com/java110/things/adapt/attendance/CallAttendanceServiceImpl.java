@@ -423,6 +423,7 @@ public class CallAttendanceServiceImpl implements ICallAttendanceService {
         }
 
         try {
+            tmpAttendanceClassesTaskDetailDto.setDetailId(attendanceClassesTaskDetailDto.getDetailId());
             attendanceCallHcServiceImpl.checkIn(tmpAttendanceClassesTaskDetailDto,finishAllTaskDetail);
         } catch (Exception e) {
             logger.error("同步HC小区管理系统失败", e);
