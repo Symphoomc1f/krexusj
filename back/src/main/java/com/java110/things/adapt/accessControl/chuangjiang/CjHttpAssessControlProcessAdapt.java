@@ -125,8 +125,8 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         param.put("systemMode", "2");
         HttpHeaders httpHeaders = new HttpHeaders();
         HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
-        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_SYSTEMMODE, param.toJSONString(), responseEntity.getBody());
+        ResponseEntity<String> responseEntity ;//= restTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
+        //saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_SYSTEMMODE, param.toJSONString(), responseEntity.getBody());
 
         //设置回调地址
         url = "http://" + machineDto.getMachineIp() + CMD_SET_IDENTIFY_CALLBACK;
