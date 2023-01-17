@@ -111,7 +111,16 @@
           <el-input v-model="temp.machineIp" placeholder="请输入门禁版本" />
         </el-form-item>
         <el-form-item label="oem">
-          <el-input v-model="temp.oem" placeholder="请输入门禁厂家" />
+          <!-- <el-input v-model="temp.oem" placeholder="请输入门禁厂家" /> -->
+          <el-input v-model="temp.hmId" placeholder="请输入门禁厂家" />
+          <el-select v-model="temp.hmId" placeholder="请输入门禁厂家">
+            <el-option
+              v-for="item in protocols"
+              :key="item.hmId"
+              :label="item.hmName"
+              :value="item.hmId">
+            </el-option>
+          </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -144,6 +153,9 @@ import {
   restartAccessControls,
   openDoor
 } from "@/api/accessControl";
+import {
+  getProtocols
+} from "@/api/manufacturerProtocol";
 import Pagination from "@/components/Pagination";
 import { parseTime } from "@/utils";
 
@@ -160,6 +172,14 @@ export default {
         machineMac: ""
       },
       list: null,
+      protocols:null,//设备厂商
+      listcsQuery: {
+        page: 1,
+        row: 20,
+        hmType: "1001",
+        hmName: "",
+        hmId: ""
+      },
       listLoading: true,
       deleteAccessControlDailogVisible: false,
       dialogFormVisible: false,
@@ -171,7 +191,9 @@ export default {
         machineVersion: "",
         machineName: "",
         machineIp: "",
-        oem: ""
+        hmId: "",
+        locationType:"",
+        direction:""
       }
     };
   },
@@ -179,6 +201,13 @@ export default {
     this.fetchData();
   },
   methods: {
+     //添加的时候查询门禁厂商用
+    queryProtocol() {
+      getProtocols(this.listcsQuery).then(response => {
+        this.protocols = response.data;
+        console.log(this.protocols);
+      });
+    },
     fetchData() {
       this.listLoading = true;
       getAccessControls().then(response => {
@@ -199,6 +228,7 @@ export default {
     },
     addAccessControl() {
       this.dialogFormVisible = true;
+      this.queryProtocol();
     },
     deleteAccessControl(_row) {
       this.deleteAccessControlDailogVisible = true;
