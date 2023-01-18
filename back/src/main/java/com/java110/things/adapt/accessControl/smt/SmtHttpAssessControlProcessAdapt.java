@@ -35,7 +35,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import sun.applet.Main;
 
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -82,7 +85,9 @@ public class SmtHttpAssessControlProcessAdapt implements IAssessControlProcess {
         String secret =MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "SMT_SECRET");
         String deviceKey=machineDto.getMachineMac();//设备号
         String host=MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "SMT_HOST");
-        String url = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "SMT_SET_IDENTIFY_CALLBACK"); //设备识别回调地址
+        String url =MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "IOT_URL") +
+                "/api/accessControl/faceResult/" + machineDto.getMachineMac();
+//                MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "SMT_SET_IDENTIFY_CALLBACK"); //设备识别回调地址
         int port=Integer.parseInt(MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "SMT_PORT"));
         int timeout=5000;
         HostInfoDto hostInfo=new HostInfoDto();
@@ -91,18 +96,19 @@ public class SmtHttpAssessControlProcessAdapt implements IAssessControlProcess {
         hostInfo.setTimeout(timeout);
 
         TdxSdkResponse tdxSdkResponse=TdxSdkClient.setIdentifyCallback(hostInfo,deviceKey, secret,url);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, deviceKey, tdxSdkResponse.toString());
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, deviceKey, tdxSdkResponse==null?"":tdxSdkResponse.toString());
 
         //设置心跳地址
-        url = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "SMT_SET_HEARTBEAT_CALLBACK");
+        url = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "IOT_URL")
+                + "/api/accessControl/heartBeat/" + machineDto.getMachineMac();
+                //MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "SMT_SET_HEARTBEAT_CALLBACK");
         tdxSdkResponse=TdxSdkClient.setHeartbeatUrl(hostInfo,deviceKey, secret,url);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, deviceKey, tdxSdkResponse.toString());
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, deviceKey, tdxSdkResponse==null?"":tdxSdkResponse.toString());
 
-        if ("000".equals(tdxSdkResponse.getCode())) {
-
-            return new ResultDto(ResultDto.SUCCESS , tdxSdkResponse.getMsg());
-        }else{
+        if (tdxSdkResponse==null||!"000".equals(tdxSdkResponse.getCode())) {
             return new ResultDto(ResultDto.ERROR, "初始化设备失败");
+        }else{
+            return new ResultDto(ResultDto.SUCCESS , tdxSdkResponse.getMsg());
         }
     }
 
@@ -125,9 +131,9 @@ public class SmtHttpAssessControlProcessAdapt implements IAssessControlProcess {
         String personId=userFaceDto.getUserId();
 
         TdxSdkResponse tdxSdkResponse=TdxSdkClient.findPerson(hostInfo,deviceKey, secret,personId);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, deviceKey, tdxSdkResponse.toString());
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, deviceKey, tdxSdkResponse==null?"":tdxSdkResponse.toString());
 
-        if(!tdxSdkResponse.toString().equals("000")){
+        if (tdxSdkResponse==null||!"000".equals(tdxSdkResponse.getCode())) {
             return AddUpdateFace.MACHINE_HAS_NOT_FACE;
         }
         return personId;
@@ -150,24 +156,22 @@ public class SmtHttpAssessControlProcessAdapt implements IAssessControlProcess {
         hostInfo.setPort(port);
         hostInfo.setTimeout(timeout);
         PersonDto personDto=new PersonDto();
-        personDto.setExpireTime(0l);
+//        personDto.setExpireTime(0l);
         personDto.setId(userFaceDto.getUserId());
         personDto.setIdcardNum(userFaceDto.getIdNumber());
         personDto.setName(userFaceDto.getName());
 
         TdxSdkResponse tdxSdkResponse=TdxSdkClient.addPerson(hostInfo,deviceKey, secret,personDto);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, deviceKey, tdxSdkResponse.toString());
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, deviceKey, tdxSdkResponse==null?"":tdxSdkResponse.toString());
 
         FaceDto faceDto=new FaceDto();
         faceDto.setFaceId(userFaceDto.getUserId());
         faceDto.setPersonId(userFaceDto.getUserId());
         faceDto.setImgBase64(userFaceDto.getFaceBase64());
         tdxSdkResponse=TdxSdkClient.addFace(hostInfo,deviceKey, secret,faceDto);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE, deviceKey, tdxSdkResponse.toString());
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE, deviceKey,tdxSdkResponse==null?"":tdxSdkResponse.toString());
 
-        return new ResultDto(tdxSdkResponse.getCode()=="200" ? ResultDto.SUCCESS : ResultDto.ERROR, tdxSdkResponse.getMsg());
-
-
+        return new ResultDto(tdxSdkResponse.getCode()=="200" ? ResultDto.SUCCESS : ResultDto.ERROR, tdxSdkResponse==null?"":tdxSdkResponse.getMsg());
     }
 
     @Override
@@ -191,12 +195,12 @@ public class SmtHttpAssessControlProcessAdapt implements IAssessControlProcess {
         String personId=heartbeatTaskDto.getTaskid();
 
         TdxSdkResponse tdxSdkResponse=TdxSdkClient.delFace(hostInfo,deviceKey, secret,personId);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, deviceKey, tdxSdkResponse.toString());
-
-        if(tdxSdkResponse.toString().equals("000")){
-            return new ResultDto( ResultDto.SUCCESS , tdxSdkResponse.getMsg());
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, deviceKey, tdxSdkResponse==null?"":tdxSdkResponse.toString());
+        if (tdxSdkResponse==null||!"000".equals(tdxSdkResponse.getCode())) {
+            return new ResultDto( ResultDto.ERROR , tdxSdkResponse==null?"":tdxSdkResponse.getMsg());
+        }else{
+            return new ResultDto( ResultDto.SUCCESS , tdxSdkResponse==null?"":tdxSdkResponse.getMsg());
         }
-        return new ResultDto( ResultDto.ERROR , tdxSdkResponse.getMsg());
 
     }
 
@@ -239,7 +243,7 @@ public class SmtHttpAssessControlProcessAdapt implements IAssessControlProcess {
         hostInfo.setPort(port);
         hostInfo.setTimeout(timeout);
         TdxSdkResponse tdxSdkResponse=TdxSdkClient.rebootDevice(hostInfo,deviceKey,secret);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_OPEN_DOOR, deviceKey, tdxSdkResponse.toString());
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_OPEN_DOOR, deviceKey, tdxSdkResponse==null?"":tdxSdkResponse.toString());
     }
 
     @Override
@@ -260,27 +264,33 @@ public class SmtHttpAssessControlProcessAdapt implements IAssessControlProcess {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         TdxSdkResponse tdxSdkResponse=TdxSdkClient.openDoor(hostInfo,deviceKey,secret);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_OPEN_DOOR, deviceKey, tdxSdkResponse.toString());
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_OPEN_DOOR, deviceKey, tdxSdkResponse==null?"":tdxSdkResponse.toString());
     }
 
-    /**
-     *{
-     *     "standard":"37.3",
-     *     "searchScore":"81.65185",
-     *     "ip":"192.168.204.167",
-     *     "deviceKey":"8DA5A59CF625F562",
-     *     "type":"face_0",
-     *     "token":"D9E2CCDAC4A5D68B4BCE830150DFA4F8",
-     *     "personName":"贾琼公司号",
-     *     "path":"http://192.168.204.167:8090/snapshot/20210227/1614393774845.jpg",
-     *     "imgBase64":"",
-     *     "temperature":"-1.0",
-     *     "personId":"1883349468",
-     *     "time":"1614393774982",
-     *     "temperatureState":"1",
-     *     "livenessScore":"78.943634",
-     *     "mask":"-1"
-     * }
+
+
+//    public static void main(String[] args) throws UnsupportedEncodingException {
+//        String data="standard=37.3&searchScore=87.88905&ip=192.168.204.167&" +
+//                "deviceKey=8DA5A59CF625F562&type=face_0&token=2D2ACE27A6BAF35DAB48DFA2151A89BF" +
+//                "&personName=%E5%BC%A0%E9%BE%99" +
+//                "&path=http%3A%2F%2F192.168.204.167%3A8090%2Fsnapshot%2F20210308%2F1615192075813.jpg" +
+//                "&temperature=-1.0&personId=772021022532740148&time=1615192075944&temperatureState=1" +
+//                "&livenessScore=93.72917&mask=-1";
+//        data=java.net.URLDecoder.decode(data, "utf-8");
+//        String[] bb=data.split("&");
+//        JSONObject body=new JSONObject();
+//        for(int i=0;i<bb.length;i++){
+//            String[] cc=bb[i].split("=");
+//            if(cc.length==2){
+//                body.put(cc[0],cc[1]);
+//            }else{
+//                body.put(cc[0],"");
+//            }
+//        }
+//        System.out.println(body.toJSONString());
+//        System.out.println(java.net.URLDecoder.decode(body.getString("personName"),"utf-8"));
+//    }
+    /*
      * @param machineDto
      * @param data 这个为设备人脸推送协议，请参考设备协议文档
      * @return
@@ -291,24 +301,36 @@ public class SmtHttpAssessControlProcessAdapt implements IAssessControlProcess {
         ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
         JSONObject resultParam = new JSONObject();
         try {
-            JSONObject body = JSONObject.parseObject(data);
+//            JSONObject body = JSONObject.parseObject(data);
+            data=java.net.URLDecoder.decode(data, "utf-8");
+            String[] bb=data.split("&");
+            JSONObject body=new JSONObject();
+            for(int i=0;i<bb.length;i++){
+                String[] cc=bb[i].split("=");
+                if(cc.length==2){
+                    body.put(cc[0],cc[1]);
+                }else{
+                    body.put(cc[0],"");
+                }
+            }
             String type=body.getString("type");
             String userId = body.containsKey("personId") ? body.getString("personId") : "";
-            String userName =body.getString("personName");
-            if("face_0".equals(type)){
+            String userName =java.net.URLDecoder.decode(body.getString("personName"),"utf-8");
+//            if("face_0".equals(type)){
                 OpenDoorDto openDoorDto = new OpenDoorDto();
-                openDoorDto.setFace(body.getString("imgBase64").replace("data:image/jpeg;base64,", ""));
+                openDoorDto.setFace(body.getString("imgBase64"));
                 openDoorDto.setUserName(userName);
                 openDoorDto.setHat("3");
                 openDoorDto.setMachineCode(body.getString("deviceKey"));//machineDto.getMachineCode());
                 openDoorDto.setMachineCode(body.getString("deviceKey"));//machineDto.getMachineCode());
+//                openDoorDto.
                 openDoorDto.setUserId(userId);
                 openDoorDto.setOpenId(SeqUtil.getId());
                 openDoorDto.setOpenTypeCd(OPEN_TYPE_FACE);
-//                openDoorDto.setSimilarity(info.getString("Similarity1"));
+                openDoorDto.setSimilarity(body.getString("searchScore"));
                 freshOwnerFee(openDoorDto);
                 notifyAccessControlService.saveFaceResult(openDoorDto);
-            }
+//            }
 //            if (!StringUtils.isEmpty(userId)) {
 //                MachineFaceDto machineFaceDto = new MachineFaceDto();
 //                machineFaceDto.setUserId(userId);
@@ -325,26 +347,39 @@ public class SmtHttpAssessControlProcessAdapt implements IAssessControlProcess {
             resultParam.put("desc", "异常");
             return resultParam.toJSONString();//未找到设备
         }
-        resultParam.put("code", 200);
-        resultParam.put("desc", "OK");
-        return resultParam.toJSONString();//未找到设备
+        resultParam.put("result", 1);
+        resultParam.put("code","000");
+        resultParam.put("success", "ture");
+        return resultParam.toJSONString();
     }
 
     @Override
     public String heartbeat(String data, String machineCode) throws Exception {
-        JSONObject info = JSONObject.parseObject(data);
-
+//        JSONObject info = JSONObject.parseObject(data);
+        //ip=192.168.204.167&deviceKey=8DA5A59CF625F562&time=1615174935065&version=1.41.4.8&faceCount=0&personCount=0
+        String[] bb=data.split("&");
+        JSONObject info=new JSONObject();
+        for(int i=0;i<bb.length;i++){
+            String[] cc=bb[i].split("=");
+            if(cc.length==2){
+                info.put(cc[0],cc[1]);
+            }else{
+                info.put(cc[0],"");
+            }
+        }
         //设备ID  8DA5A59CF625F562   192.168.204.167   氧仕多视美通测试1
         //String machineCode = info.getString("deviceKey");
         String heartBeatTime = null;
-        heartBeatTime = info.getString("time");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        heartBeatTime =sdf.format(new Date(Long.parseLong(info.getString("time")))) ;
         MachineHeartbeatDto machineHeartbeatDto = new MachineHeartbeatDto(machineCode, heartBeatTime);
         ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
         notifyAccessControlService.machineHeartbeat(machineHeartbeatDto);
         JSONObject resultParam = new JSONObject();
         resultParam.put("result", 1);
-        resultParam.put("success", true);
-        return resultParam.toJSONString();//未找到设备
+        resultParam.put("code","000");
+        resultParam.put("success", "ture");
+        return resultParam.toJSONString();
     }
 
     /**
