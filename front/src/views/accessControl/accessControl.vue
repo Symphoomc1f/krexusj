@@ -104,16 +104,21 @@
         <el-form-item label="版本" prop="type">
           <el-input v-model="temp.machineVersion" placeholder="请输入门禁版本" />
         </el-form-item>
+         <el-form-item label="外部编码">
+          <el-input v-model="temp.extMachineId" placeholder="外部编码" />
+        </el-form-item>
         <el-form-item label="名称">
           <el-input v-model="temp.machineName" placeholder="请输入门禁名称" />
         </el-form-item>
         <el-form-item label="IP" prop="type">
-          <el-input v-model="temp.machineIp" placeholder="请输入门禁版本" />
+          <el-input v-model="temp.machineIp" placeholder="请输入门禁ip" />
         </el-form-item>
         <el-form-item label="oem">
-          <!-- <el-input v-model="temp.oem" placeholder="请输入门禁厂家" /> -->
-          <el-input v-model="temp.hmId" placeholder="请输入门禁厂家" />
-          <el-select v-model="temp.hmId" placeholder="请输入门禁厂家">
+            <el-input v-model="temp.oem" placeholder="请输入门禁厂家" />
+        </el-form-item>
+        <el-form-item label="厂家协议">
+          <el-input v-model="temp.hmId" placeholder="请选择厂家协议" v-show="false"/>
+          <el-select v-model="temp.hmId" placeholder="请选择厂家协议">
             <el-option
               v-for="item in protocols"
               :key="item.hmId"
@@ -193,7 +198,9 @@ export default {
         machineIp: "",
         hmId: "",
         locationType:"",
-        direction:""
+        direction:"",
+        extMachineId:"",
+        oem:""
       }
     };
   },
