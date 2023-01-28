@@ -46,6 +46,8 @@
             <groupId>com.tendcent</groupId>
             <artifactId>tdx-face-sdk</artifactId>
             <version>1.2.2</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/tdx-face-sdk-1.2.2.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -263,5 +265,14 @@
             </plugin>
 
         </plugins>
+        <resources>
+            <resource>
+                <directory>lib</directory>
+                <targetPath>/BOOT-INF/lib/</targetPath>
+                <includes>
+                    <include>**/*.jar</include>
+                </includes>
+            </resource>
+        </resources>
     </build>
 </project>
