@@ -15,7 +15,6 @@
       />
 
       <el-button
-        v-waves
         class="filter-item"
         type="primary"
         icon="el-icon-search"
@@ -84,7 +83,13 @@
         </template>
       </el-table-column>
     </el-table>
-
+    <pagination
+      v-show="total > 0"
+      :total="total"
+      :page.sync="listQuery.page"
+      :limit.sync="listQuery.row"
+      @pagination="fetchData"
+    />
     <el-dialog title="小区" :visible.sync="dialogFormVisible">
       <el-form
         ref="dataForm"
@@ -193,6 +198,7 @@ import {
   updateCommunitys,
   getCityArea,
 } from "@/api/community";
+import Pagination from "@/components/Pagination";
 import { parseTime } from "@/utils";
 
 export default {
@@ -206,7 +212,7 @@ export default {
       return statusMap[status];
     },
   },
-  components: {},
+  components: { Pagination },
   data() {
     return {
       listQuery: {
@@ -220,6 +226,7 @@ export default {
       deleteCommunityDailogVisible: false,
       dialogFormVisible: false,
       curCommunity: {},
+      total: 0,
       temp: {
         communityId: "",
         name: "",
@@ -252,10 +259,14 @@ export default {
     this.fetchData();
   },
   methods: {
+    handleClose(){
+      handleCloses()
+    },
     fetchData() {
       this.listLoading = true;
       getCommunitys().then((response) => {
         this.list = response.data;
+        this.total = response.total;
         this.listLoading = false;
       });
       getCityArea({

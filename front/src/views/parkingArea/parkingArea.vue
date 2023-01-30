@@ -15,7 +15,6 @@
       />
 
       <el-button
-        v-waves
         class="filter-item"
         type="primary"
         icon="el-icon-search"
@@ -62,7 +61,13 @@
         </template>
       </el-table-column>
     </el-table>
-
+ <pagination
+      v-show="total > 0"
+      :total="total"
+      :page.sync="listQuery.page"
+      :limit.sync="listQuery.row"
+      @pagination="queryParkingArea"
+    />
     <el-dialog title="停车场" :visible.sync="dialogFormVisible">
       <el-form
         ref="dataForm"
@@ -111,6 +116,7 @@ import {
   saveParkingArea,
   updateParkingArea,
 } from "@/api/parkingArea";
+import Pagination from "@/components/Pagination";
 import { parseTime } from "@/utils";
 
 export default {
@@ -124,7 +130,7 @@ export default {
       return statusMap[status];
     },
   },
-  components: {},
+   components: { Pagination },
   data() {
     return {
       listQuery: {
@@ -133,6 +139,7 @@ export default {
         communityId: "",
         num: "",
       },
+       total: 0,
       list: null,
       listLoading: true,
       deleteParkingAreaDailogVisible: false,
@@ -163,6 +170,7 @@ export default {
       this.listLoading = true;
       getParkingAreas(this.listQuery).then((response) => {
         this.list = response.data;
+         this.total = response.total;
         this.listLoading = false;
       });
     },

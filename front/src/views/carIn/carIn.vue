@@ -84,6 +84,7 @@ export default {
         inoutType: '1001'
       },
       list: null,
+      total: 0,
       listLoading: true,
     };
   },
@@ -98,6 +99,7 @@ export default {
       this.listLoading = true;
       getCarInouts(this.listQuery).then(response => {
         this.list = response.data;
+        this.total = response.total;
         this.listLoading = false;
       });
     }

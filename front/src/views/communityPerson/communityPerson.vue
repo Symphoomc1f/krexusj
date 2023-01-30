@@ -283,6 +283,9 @@ export default {
     this.queryCommunityPerson();
   },
   methods: {
+    handleClose(){
+      handleCloses()
+    },
     queryCommunityPerson() {
       this.listLoading = true;
       getCommunityPersons(this.listQuery).then((response) => {
