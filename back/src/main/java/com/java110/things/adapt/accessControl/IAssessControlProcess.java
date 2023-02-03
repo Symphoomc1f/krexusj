@@ -23,6 +23,21 @@ public interface IAssessControlProcess {
     ResultDto initAssessControlProcess(MachineDto machineDto);
 
     /**
+     * 添加设备
+     */
+    ResultDto addMachine(MachineDto machineDto);
+
+    /**
+     * 修改设备
+     */
+    ResultDto updateMachine(MachineDto machineDto);
+
+    /**
+     * 删除设备
+     */
+    ResultDto deleteMachine(MachineDto machineDto);
+
+    /**
      * 查询设备中 人脸数量
      *
      * @param machineDto 设备信息，其中包括设备编码，如 mac 设备信号，或者设备IP

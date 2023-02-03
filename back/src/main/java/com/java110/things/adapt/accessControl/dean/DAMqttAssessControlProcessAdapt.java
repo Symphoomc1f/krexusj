@@ -1,6 +1,7 @@
 package com.java110.things.adapt.accessControl.dean;
 
 import com.alibaba.fastjson.JSONObject;
+import com.java110.things.adapt.accessControl.DefaultAbstractAccessControlAdapt;
 import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.constant.ResponseConstant;
@@ -38,7 +39,7 @@ import java.util.List;
  * 伊兰度 门禁设备 Mqtt 方式
  */
 @Service("daMqttAssessControlProcessAdapt")
-public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
+public class DAMqttAssessControlProcessAdapt extends DefaultAbstractAccessControlAdapt {
 
     private static Logger logger = LoggerFactory.getLogger(DAMqttAssessControlProcessAdapt.class);
     //public static Function fun=new Function();
@@ -296,7 +297,7 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
     }
 
     @Override
-    public void mqttMessageArrived(String topic, String data) throws Exception {
+    public void mqttMessageArrived(String topic, String data) {
         JSONObject param = JSONObject.parseObject(data);
 
         if (topic.contains("Ack")) {
@@ -462,7 +463,7 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
     }
 
     @Override
-    public String heartbeat(String data, String machineCode) throws Exception {
+    public String heartbeat(String data, String machineCode) {
         JSONObject info = JSONObject.parseObject(data).getJSONObject("info");
 
         //设备ID
@@ -471,7 +472,11 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
         heartBeatTime = info.getString("time");
         MachineHeartbeatDto machineHeartbeatDto = new MachineHeartbeatDto(machineCode, heartBeatTime);
         ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
-        notifyAccessControlService.machineHeartbeat(machineHeartbeatDto);
+        try {
+            notifyAccessControlService.machineHeartbeat(machineHeartbeatDto);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -480,7 +485,7 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
      *
      * @param openDoorDto
      */
-    private void freshOwnerFee(OpenDoorDto openDoorDto) {
+    public void freshOwnerFee(OpenDoorDto openDoorDto) {
 
         ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
         List<FeeDto> feeDtos = new ArrayList<>();
@@ -519,7 +524,7 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
     }
 
 
-    private void openDoorResult(String data) {
+    public void openDoorResult(String data) {
 
 
         ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
@@ -585,25 +590,13 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
 
     }
 
-    /**
-     * 设备上线
-     *
-     * @param data {
-     *             "cmd": "mqtt_online",
-     *             "sn": "fffffff",
-     *             "result": "mqtt is online"
-     *             }
-     */
-    private void machineOnline(String data) {
 
-
-    }
 
 
     /**
      * 重启
      */
-    private void setUiTitle(MachineDto machineDto) {
+    public void setUiTitle(MachineDto machineDto) {
 
         JSONObject param = new JSONObject();
         param.put("client_id", machineDto.getMachineCode());
@@ -620,58 +613,6 @@ public class DAMqttAssessControlProcessAdapt implements IAssessControlProcess {
 
     }
 
-    /**
-     * 存储日志
-     *
-     * @param logId     日志ID
-     * @param machineId 设备ID
-     * @param cmd       操作命令
-     * @param reqParam  请求报文
-     * @param resParam  返回报文
-     */
-    private void saveLog(String logId, String machineId, String cmd, String reqParam, String resParam) {
-        saveLog(logId, machineId, cmd, reqParam, resParam, "", "", "");
-    }
-
-    /**
-     * 存储日志
-     *
-     * @param logId     日志ID
-     * @param machineId 设备ID
-     * @param cmd       操作命令
-     * @param reqParam  请求报文
-     * @param resParam  返回报文
-     * @param state     状态
-     */
-    private void saveLog(String logId, String machineId, String cmd, String reqParam, String resParam, String state) {
-        saveLog(logId, machineId, cmd, reqParam, resParam, state, "", "");
-    }
-
-    /**
-     * 存储日志
-     *
-     * @param logId     日志ID
-     * @param machineId 设备ID
-     * @param cmd       操作命令
-     * @param reqParam  请求报文
-     * @param resParam  返回报文
-     * @param state     状态
-     * @param userId    业主ID
-     * @param userName  业主名称
-     */
-    private void saveLog(String logId, String machineId, String cmd, String reqParam, String resParam, String state, String userId, String userName) {
-        ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
-        OperateLogDto operateLogDto = new OperateLogDto();
-        operateLogDto.setLogId(logId);
-        operateLogDto.setMachineId(machineId);
-        operateLogDto.setOperateType(cmd);
-        operateLogDto.setReqParam(reqParam);
-        operateLogDto.setResParam(resParam);
-        operateLogDto.setState(state);
-        operateLogDto.setUserId(userId);
-        operateLogDto.setUserName(userName);
-        notifyAccessControlService.saveOrUpdateOperateLog(operateLogDto);
-    }
 
     /**
      * 存储日志

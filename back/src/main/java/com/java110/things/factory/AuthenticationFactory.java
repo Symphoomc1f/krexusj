@@ -291,7 +291,7 @@ public class AuthenticationFactory {
         }
         String expireTime = DEFAULT_JWT_EXPIRE_TIME;
         //保存token Id
-        JWTFactory.setValue(jdi, info.get(LOGIN_USER_ID), Integer.parseInt(expireTime));
+        LocalCacheFactory.setValue(jdi, info.get(LOGIN_USER_ID), Integer.parseInt(expireTime));
         jwt.withIssuer("java110");
         jwt.withJWTId(jdi);
         return jwt.sign(algorithm);
@@ -312,9 +312,9 @@ public class AuthenticationFactory {
         DecodedJWT jwt = verifier.verify(token);
         String jdi = jwt.getId();
         //保存token Id
-        String userId = JWTFactory.getValue(jdi);
+        String userId = LocalCacheFactory.getValue(jdi);
         if (!StringUtil.isNullOrNone(userId)) { //说明redis中jdi 已经失效
-            JWTFactory.removeValue(jdi);
+            LocalCacheFactory.removeValue(jdi);
         }
     }
 
@@ -332,13 +332,13 @@ public class AuthenticationFactory {
         DecodedJWT jwt = verifier.verify(token);
         String jdi = jwt.getId();
         //保存token Id
-        String userId = JWTFactory.getValue(jdi);
+        String userId = LocalCacheFactory.getValue(jdi);
         if (StringUtil.isNullOrNone(userId)) {
             throw new JWTVerificationException("用户还未登录");
         }
         String expireTime = DEFAULT_JWT_EXPIRE_TIME;
         //刷新过时时间
-        JWTFactory.resetExpireTime(jdi, Integer.parseInt(expireTime));
+        LocalCacheFactory.resetExpireTime(jdi, Integer.parseInt(expireTime));
         Map<String, Claim> claims = jwt.getClaims();
         // Add the claim to request header
         Map<String, String> paramOut = new HashMap<String, String>();

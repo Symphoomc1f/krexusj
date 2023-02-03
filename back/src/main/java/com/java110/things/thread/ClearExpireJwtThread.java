@@ -1,6 +1,6 @@
 package com.java110.things.thread;
 
-import com.java110.things.factory.JWTFactory;
+import com.java110.things.factory.LocalCacheFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +36,6 @@ public class ClearExpireJwtThread implements Runnable {
     }
 
     private void executeTask() {
-        JWTFactory.clearExpireJwt();
+        LocalCacheFactory.clearExpireJwt();
     }
 }

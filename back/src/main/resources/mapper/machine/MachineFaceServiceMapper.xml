@@ -16,6 +16,7 @@
         select
         t.id ,
         t.user_id userId,
+        t.ext_user_id extUserId,
         t.name ,
         t.id_number idNumber,
         t.start_time startTime,
@@ -51,6 +52,9 @@
         </if>
         <if test="userId != null and userId != ''">
             and t.user_id = #{userId}
+        </if>
+        <if test="extUserId != null and extUserId != ''">
+            and t.ext_user_id = #{extUserId}
         </if>
         <if test="name != null and name != ''">
             and t.name = #{name}
@@ -140,6 +144,9 @@
             </if>
             <if test="message != null and message != ''">
                 t.message = #{message},
+            </if>
+            <if test="extUserId != null and extUserId != ''">
+                t.ext_user_id = #{extUserId},
             </if>
         </trim>
         where 1=1

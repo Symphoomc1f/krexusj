@@ -2,6 +2,7 @@ package com.java110.things.adapt.accessControl.smt;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.java110.things.adapt.accessControl.DefaultAbstractAccessControlAdapt;
 import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
@@ -47,7 +48,7 @@ import java.util.List;
  * 视美通sdk
  */
 @Service("smtHttpAssessControlProcessAdapt")
-public class SmtHttpAssessControlProcessAdapt implements IAssessControlProcess {
+public class SmtHttpAssessControlProcessAdapt extends DefaultAbstractAccessControlAdapt {
 
     private static Logger logger = LoggerFactory.getLogger(SmtHttpAssessControlProcessAdapt.class);
 
@@ -382,95 +383,6 @@ public class SmtHttpAssessControlProcessAdapt implements IAssessControlProcess {
         return resultParam.toJSONString();
     }
 
-    /**
-     * 查询费用信息
-     *
-     * @param openDoorDto
-     */
-    private void freshOwnerFee(OpenDoorDto openDoorDto) {
 
-
-    }
-
-
-    private void openDoorResult(String data) {
-
-
-    }
-
-    /**
-     * 设备上线
-     *
-     * @param data {
-     *             "cmd": "mqtt_online",
-     *             "sn": "fffffff",
-     *             "result": "mqtt is online"
-     *             }
-     */
-    private void machineOnline(String data) {
-
-
-    }
-
-
-    /**
-     * 重启
-     */
-    private void setUiTitle(MachineDto machineDto) {
-
-    }
-
-    /**
-     * 存储日志
-     *
-     * @param logId     日志ID
-     * @param machineId 设备ID
-     * @param cmd       操作命令
-     * @param reqParam  请求报文
-     * @param resParam  返回报文
-     */
-    private void saveLog(String logId, String machineId, String cmd, String reqParam, String resParam) {
-        saveLog(logId, machineId, cmd, reqParam, resParam, "", "", "");
-    }
-
-    /**
-     * 存储日志
-     *
-     * @param logId     日志ID
-     * @param machineId 设备ID
-     * @param cmd       操作命令
-     * @param reqParam  请求报文
-     * @param resParam  返回报文
-     * @param state     状态
-     */
-    private void saveLog(String logId, String machineId, String cmd, String reqParam, String resParam, String state) {
-        saveLog(logId, machineId, cmd, reqParam, resParam, state, "", "");
-    }
-
-    /**
-     * 存储日志
-     *
-     * @param logId     日志ID
-     * @param machineId 设备ID
-     * @param cmd       操作命令
-     * @param reqParam  请求报文
-     * @param resParam  返回报文
-     * @param state     状态
-     * @param userId    业主ID
-     * @param userName  业主名称
-     */
-    private void saveLog(String logId, String machineId, String cmd, String reqParam, String resParam, String state, String userId, String userName) {
-        ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
-        OperateLogDto operateLogDto = new OperateLogDto();
-        operateLogDto.setLogId(logId);
-        operateLogDto.setMachineId(machineId);
-        operateLogDto.setOperateType(cmd);
-        operateLogDto.setReqParam(reqParam);
-        operateLogDto.setResParam(resParam);
-        operateLogDto.setState(state);
-        operateLogDto.setUserId(userId);
-        operateLogDto.setUserName(userName);
-        notifyAccessControlService.saveOrUpdateOperateLog(operateLogDto);
-    }
 
 }

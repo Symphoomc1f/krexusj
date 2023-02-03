@@ -42,7 +42,7 @@ public interface ICallAccessControlService {
      *
      * @return
      */
-    public List<MachineFaceDto> queryMachineFaces(MachineFaceDto machineFaceDto) throws Exception;
+    public List<MachineFaceDto> queryMachineFaces(MachineFaceDto machineFaceDto) ;
 
     /**
      * 门禁 上报,当门禁上线时 建议将门禁自动上报，系统管理页面和云端可以自动注册设备

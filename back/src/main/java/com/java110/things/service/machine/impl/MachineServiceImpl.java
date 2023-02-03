@@ -128,6 +128,7 @@ public class MachineServiceImpl implements IMachineService {
         //初始化设备信息
         if (MachineDto.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
             AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).initAssessControlProcess(machineDto);
+            AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).addMachine(machineDto);
         } else if (MachineDto.MACHINE_TYPE_CAR.equals(machineDto.getMachineTypeCd())) {
             CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).initCar(machineDto);
         } else if (MachineDto.MACHINE_TYPE_OTHER_CAR.equals(machineDto.getMachineTypeCd())) {
@@ -173,6 +174,10 @@ public class MachineServiceImpl implements IMachineService {
             }
         }
 
+        if (MachineDto.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
+            AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).updateMachine(machineDto);
+        }
+
         int count = machineServiceDao.updateMachine(machineDto);
         ResultDto resultDto = null;
         JSONObject data = new JSONObject();
@@ -189,6 +194,9 @@ public class MachineServiceImpl implements IMachineService {
 
     @Override
     public ResultDto deleteMachine(MachineDto machineDto) throws Exception {
+        if (MachineDto.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
+            AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).deleteMachine(machineDto);
+        }
         machineDto.setStatusCd(SystemConstant.STATUS_INVALID);
         int count = machineServiceDao.updateMachine(machineDto);
         ResultDto resultDto = null;
