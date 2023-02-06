@@ -127,6 +127,13 @@
             </el-option>
           </el-select>
         </el-form-item>
+
+        <el-form-item label="门禁方向">
+          <el-select v-model="temp.direction" placeholder="请选择设备方向">
+            <el-option label="进场" value="3306">进场</el-option>
+            <el-option label="出场" value="3307">出场</el-option>
+          </el-select>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
@@ -197,10 +204,11 @@ export default {
         machineName: "",
         machineIp: "",
         hmId: "",
-        locationType:"",
+        locationType:"1000",
         direction:"",
         extMachineId:"",
-        oem:""
+        oem:"",
+        direction:''
       }
     };
   },

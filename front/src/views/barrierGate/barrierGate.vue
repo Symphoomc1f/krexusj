@@ -139,6 +139,36 @@
         <el-form-item label="oem">
           <el-input v-model="temp.oem" placeholder="请输入道闸厂家" />
         </el-form-item>
+         <el-form-item label="停车场">
+          <el-select v-model="temp.locationObjId" placeholder="请选择停车场">
+            <el-option
+              v-for="item in locationObjIds"
+              :key="item.paId"
+              :label="item.num"
+              :value="item.paId"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="厂家协议">
+          <el-select v-model="temp.hmId" placeholder="请选择厂家协议">
+            <el-option
+              v-for="item in protocols"
+              :key="item.hmId"
+              :label="item.hmName"
+              :value="item.hmId"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="门禁方向">
+          <el-select v-model="temp.direction" placeholder="请选择设备方向">
+            <el-option label="进场" value="3306">进场</el-option>
+            <el-option label="出场" value="3307">出场</el-option>
+          </el-select>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
@@ -175,8 +205,11 @@ import {
   saveAccessControls,
   restartAccessControls,
 } from "@/api/barrierGate";
+import {
+  getParkingAreas
+} from "@/api/parkingArea";
 import Pagination from "@/components/Pagination";
-import { parseTime } from "@/utils";
+import { getProtocols } from "@/api/manufacturerProtocol";
 
 export default {
   filters: {
@@ -202,6 +235,8 @@ export default {
       },
       list: null,
       listLoading: true,
+      protocols: null, //设备厂商
+      locationObjIds: null, //停车场
       deleteAccessControlDailogVisible: false,
       dialogFormVisible: false,
       curAccessControl: {},
@@ -212,7 +247,11 @@ export default {
         machineVersion: "",
         machineName: "",
         machineIp: "",
+        locationType: "4000",
+        locationObjId: "",
         oem: "",
+        hmId: "",
+        direction: "",
       },
       rules: {
         type: [
@@ -236,6 +275,24 @@ export default {
     this.fetchData();
   },
   methods: {
+    queryProtocol() {
+      getProtocols({
+        hmType: "2002",
+      }).then((response) => {
+        this.protocols = response.data;
+        console.log(this.protocols);
+      });
+    },
+    queryParkingAreas() {
+      this.listLoading = true;
+      getParkingAreas({
+        hmType: "2002",
+      }).then((response) => {
+        this.locationObjIds = response.data;
+        this.listLoading = false;
+      });
+    },
+    
     fetchData() {
       this.listLoading = true;
       getAccessControls().then((response) => {
@@ -256,6 +313,8 @@ export default {
     },
     addAccessControl() {
       this.dialogFormVisible = true;
+      this.queryProtocol();
+      this.queryParkingAreas();
     },
     deleteAccessControl(_row) {
       this.deleteAccessControlDailogVisible = true;

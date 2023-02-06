@@ -2,14 +2,14 @@
   <div class="app-container">
     <div class="filter-container" style="margin-bottom: 10px">
       <el-input
-        v-model="listQuery.communityId"
+        v-model="listQuery.num"
         placeholder="请输入停车场编码"
         style="width: 200px"
         class="filter-item"
       />
       <el-input
-        v-model="listQuery.name"
-        placeholder="请输入停车场名称"
+        v-model="listQuery.paId"
+        placeholder="请输入停车场ID"
         style="width: 200px"
         class="filter-item"
       />
@@ -138,6 +138,7 @@ export default {
         row: 10,
         communityId: "",
         num: "",
+        paId:''
       },
        total: 0,
       list: null,
