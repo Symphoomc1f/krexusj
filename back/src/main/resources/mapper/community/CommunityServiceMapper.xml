@@ -13,6 +13,34 @@
         VALUES (#{communityId}, #{name}, #{address}, #{cityCode},#{extCommunityId},#{appId})
     </insert>
 
+
+    <select id="getCommunityCount" parameterType="com.java110.things.entity.community.CommunityDto"
+            resultType="long">
+        select
+        count(1) count
+        from s_community t
+        left join city_area ca on t.city_code = ca.area_code and ca.status_cd = '0'
+        left join city_area ca1 on ca1.area_code = ca.parent_area_code and ca.status_cd = '0'
+        where 1=1
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="name != null and name != ''">
+            and t.name = #{name}
+        </if>
+        <if test="cityCode != null and cityCode != ''">
+            and t.city_code = #{cityCode}
+        </if>
+        <if test="extCommunityId != null and extCommunityId != ''">
+            and t.ext_community_id = #{extCommunityId}
+        </if>
+        <if test="appId != null and appId != ''">
+            and t.app_id = #{appId}
+        </if>
+        and t.status_cd = '0'
+
+    </select>
+
     <!--
         查询小区信息
     -->
@@ -49,6 +77,10 @@
             and t.app_id = #{appId}
         </if>
         and t.status_cd = '0'
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+
     </select>
 
     <update id="updateCommunity" parameterType="com.java110.things.entity.community.CommunityDto">

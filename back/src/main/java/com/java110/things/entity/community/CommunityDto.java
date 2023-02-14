@@ -1,5 +1,7 @@
 package com.java110.things.entity.community;
 
+import com.java110.things.entity.PageDto;
+
 import java.io.Serializable;
 
 /**
@@ -10,7 +12,7 @@ import java.io.Serializable;
  * @Version 1.0
  * add by wuxw 2020/5/18
  **/
-public class CommunityDto implements Serializable {
+public class CommunityDto extends PageDto implements Serializable {
 
     private String communityId;
 

@@ -40,4 +40,5 @@ public interface ICommunityServiceDao {
      */
     int updateCommunity(CommunityDto communityDto);
 
+    long getCommunityCount(CommunityDto communityDto);
 }

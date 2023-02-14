@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.dao.ICommunityServiceDao;
+import com.java110.things.entity.PageDto;
+import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.service.community.ICommunityService;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -80,14 +83,19 @@ public class CommunityServiceImpl implements ICommunityService {
     @Override
     public ResultDto getCommunity(CommunityDto communityDto) throws Exception {
 
-
-        List<CommunityDto> communityDtoList = communityServiceDao.getCommunitys(communityDto);
-        int count = 0;
-        int totalPage = 1;
-        if (communityDtoList != null && communityDtoList.size() > 0) {
-            count = communityDtoList.size();
+        if (communityDto.getPage() != PageDto.DEFAULT_PAGE) {
+            communityDto.setPage((communityDto.getPage() - 1) * communityDto.getRow());
         }
-        totalPage = (int) Math.ceil((double) count / 10.0);
+        List<CommunityDto> communityDtoList = null;
+
+        long count = communityServiceDao.getCommunityCount(communityDto);
+        List<CarDto> carDtoList = null;
+        if (count > 0) {
+            communityDtoList = communityServiceDao.getCommunitys(communityDto);
+        }else{
+            communityDtoList = new ArrayList<>();
+        }
+        int totalPage = (int) Math.ceil((double) count / (double) communityDto.getRow());
 
 
         ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, count, totalPage, communityDtoList);
