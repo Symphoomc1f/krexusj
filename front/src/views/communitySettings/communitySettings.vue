@@ -88,7 +88,7 @@
       :total="total"
       :page.sync="listQuery.page"
       :limit.sync="listQuery.row"
-      @pagination="fetchData"
+      @pagination="queryCommunity"
     />
     <el-dialog title="小区" :visible.sync="dialogFormVisible">
       <el-form
@@ -264,7 +264,7 @@ export default {
     },
     fetchData() {
       this.listLoading = true;
-      getCommunitys().then((response) => {
+      getCommunitys(this.temp).then((response) => {
         this.list = response.data;
         this.total = response.total;
         this.listLoading = false;
