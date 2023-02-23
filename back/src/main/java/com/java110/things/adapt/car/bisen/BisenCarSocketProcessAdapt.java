@@ -1,4 +1,4 @@
-package com.java110.things.adapt.car.aiCar;
+package com.java110.things.adapt.car.bisen;
 
 
 import com.alibaba.fastjson.JSONObject;
@@ -25,34 +25,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * 智能停车系统
+ * http://www.bisen-iot.com/
+ * 百胜云停车系统对接适配器
  */
-@Service("aiCarSocketProcessAdapt")
-public class AiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
+@Service("bisenCarSocketProcessAdapt")
+public class BisenCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
 
-    private static Logger logger = LoggerFactory.getLogger(AiCarSocketProcessAdapt.class);
+    private static Logger logger = LoggerFactory.getLogger(BisenCarSocketProcessAdapt.class);
 
     @Autowired
     private ICarInoutService carInoutService;
 
     @Autowired
     private ICarService carService;
-
-    @Override
-    public void initCar() {
-
-    }
-
-    @Override
-    public void initCar(MachineDto machineDto) {
-
-    }
-
-
-    @Override
-    public int getCarNum() {
-        return 0;
-    }
 
     @Override
     public String getCar(CarResultDto carResultDto) {
