@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java110.things.dao.IParkingAreaAttrServiceDao">
+
+    <insert id="saveParkingAreaAttr" parameterType="com.java110.things.entity.parkingArea.ParkingAreaAttrDto">
+        INSERT INTO parking_area_attr(`attr_id`, `pa_id`, `spec_cd`, `value`)
+        VALUES (#{attrId}, #{paId}, #{specCd}, #{value})
+    </insert>
+    <!--
+        查询设备信息
+    -->
+    <select id="getParkingAreaAttrs" parameterType="com.java110.things.entity.parkingArea.ParkingAreaAttrDto"
+            resultType="com.java110.things.entity.parkingArea.ParkingAreaAttrDto">
+        select t.attr_id attrId,t.pa_id paId,t.spec_cd specCd,t.value
+        from parking_area_attr t
+        where t.status_cd = '0'
+
+        <if test="paId != null and paId != ''">
+            and t.pa_id = #{paId}
+        </if>
+        <if test="specCd != null and specCd != ''">
+            and t.spec_cd = #{specCd}
+        </if>
+        <if test="attrId != null and attrId != ''">
+            and t.attr_id = #{attrId}
+        </if>
+        order by t.create_time desc
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+
+    </select>
+
+    <update id="updateParkingAreaAttr" parameterType="com.java110.things.entity.parkingArea.ParkingAreaAttrDto">
+        update parking_area_attr t
+        <trim prefix="SET" suffixOverrides=",">
+
+            <if test="value != null and value != ''">
+                t.value = #{value},
+            </if>
+            <if test="statusCd != null and statusCd != ''">
+                t.status_cd = #{statusCd},
+            </if>
+        </trim>
+        where 1=1
+        <if test="paId != null and paId != ''">
+            and t.pa_id = #{paId}
+        </if>
+        <if test="attrId != null and attrId != ''">
+            and t.attr_id = #{attrId}
+        </if>
+        <if test="specCd != null and specCd != ''">
+            and t.spec_cd = #{specCd}
+        </if>
+
+    </update>
+
+    <delete id="delete" parameterType="com.java110.things.entity.parkingArea.ParkingAreaAttrDto">
+        delete from parking_area_attr where attr_id = #{attrId}
+    </delete>
+
+</mapper>

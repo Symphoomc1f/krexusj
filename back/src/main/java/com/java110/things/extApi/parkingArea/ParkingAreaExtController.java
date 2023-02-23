@@ -15,9 +15,11 @@
  */
 package com.java110.things.extApi.parkingArea;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
 import com.java110.things.entity.community.CommunityDto;
+import com.java110.things.entity.parkingArea.ParkingAreaAttrDto;
 import com.java110.things.entity.parkingArea.ParkingAreaDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.service.community.ICommunityService;
@@ -32,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -90,6 +93,19 @@ public class ParkingAreaExtController extends BaseController {
         ParkingAreaDto parkingAreaDto = BeanConvertUtil.covertBean(reqJson, ParkingAreaDto.class);
         parkingAreaDto.setPaId(SeqUtil.getId());
         parkingAreaDto.setCommunityId(communityDtos.get(0).getCommunityId());
+
+        if (reqJson.containsKey("attrs")) {
+            JSONArray attrs = reqJson.getJSONArray("attrs");
+            List<ParkingAreaAttrDto> parkingAreaAttrDtos = new ArrayList<>();
+            for (int attrIndex = 0; attrIndex < attrs.size(); attrIndex++) {
+                ParkingAreaAttrDto parkingAreaAttrDto = BeanConvertUtil.covertBean(attrs.getJSONObject(attrIndex), ParkingAreaAttrDto.class);
+                parkingAreaAttrDtos.add(parkingAreaAttrDto);
+            }
+
+            parkingAreaDto.setAttrs(parkingAreaAttrDtos);
+        }
+
+
         ResultDto result = parkingAreaServiceImpl.saveParkingArea(parkingAreaDto);
 
         return ResultDto.createResponseEntity(result);
