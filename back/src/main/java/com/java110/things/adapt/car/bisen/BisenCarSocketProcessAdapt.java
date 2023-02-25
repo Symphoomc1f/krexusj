@@ -12,6 +12,9 @@ import com.java110.things.entity.car.CarInoutDto;
 import com.java110.things.entity.cloud.MachineHeartbeatDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.factory.AuthenticationFactory;
+import com.java110.things.factory.LocalCacheFactory;
+import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
 import com.java110.things.netty.Java110CarProtocol;
 import com.java110.things.netty.NettySocketHolder;
@@ -19,10 +22,15 @@ import com.java110.things.service.car.ICarInoutService;
 import com.java110.things.service.car.ICarService;
 import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
+import com.java110.things.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * http://www.bisen-iot.com/
@@ -32,6 +40,11 @@ import org.springframework.stereotype.Service;
 public class BisenCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
 
     private static Logger logger = LoggerFactory.getLogger(BisenCarSocketProcessAdapt.class);
+
+    public static final String GET_TOKEN = "/auth/oauth/token";
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Autowired
     private ICarInoutService carInoutService;
@@ -364,5 +377,47 @@ public class BisenCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
         jsonObject.put("result_code", 0);
         jsonObject.put("message", "在线");
         return jsonObject;
+    }
+
+    /**
+     * 获取accessToken
+     *
+     * @return
+     */
+    private String getToken() {
+
+        String token = LocalCacheFactory.getValue("bisen_car_token");
+        if (!StringUtil.isEmpty(token)) {
+            return token;
+        }
+        String url = MappingCacheFactory.getValue("BISEN_CAR_URL") + GET_TOKEN;
+        String clientId = MappingCacheFactory.getValue("client_id");
+        String clientSecret = MappingCacheFactory.getValue("client_secret");
+
+        url += ("randomStr="+SeqUtil.getId()+"&scope=server&grant_type=client_credentials&client_id="+clientId+"&client_secret="+clientSecret);
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity("", httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            throw new IllegalStateException("请求百胜获取token失败" + responseEntity);
+        }
+
+        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+        if (paramOut.containsKey("access_token")) {
+            throw new IllegalStateException(paramOut.getString("error_description"));
+        }
+
+        token = paramOut.getString("access_token");
+        LocalCacheFactory.setValue("bisen_token", token, paramOut.getIntValue("expires_in")-200);
+        return token;
+    }
+
+    private HttpHeaders getHeader() {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("Authorization", "Bearer " + getToken());
+        httpHeaders.add("Content-Type", "application/json");
+        return httpHeaders;
     }
 }
