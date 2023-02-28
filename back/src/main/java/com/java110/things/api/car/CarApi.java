@@ -112,9 +112,41 @@ public class CarApi extends BaseController {
         } finally {
             logger.debug("设备：" + machineCode + ",请求报文：" + reqJson + ",返回报文：" + paramOut);
         }
-
         return paramOut;
+    }
 
+    /**
+     * 设备心跳
+     * <p>
+     * 门禁配置地址为：/api/car/parkingUp/设备编码
+     *
+     * @param request request请求报文 包括设备 前台填写信息
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/uploadRecord/{machineCode}/{moreParam}", method = RequestMethod.POST)
+    public ResponseEntity<String> uploadRecord(HttpServletRequest request,
+                                            @PathVariable(value = "machineCode") String machineCode,
+                                            @RequestBody String reqJson) throws Exception {
+        ResponseEntity<String> paramOut = null;
+        try {
+            MachineDto machineDto = new MachineDto();
+            machineDto.setMachineCode(machineCode);
+            machineDto.setMachineTypeCd("9995");
+            List<MachineDto> machineDtos = machineServiceImpl.queryMachines(machineDto);
+
+            if (machineDtos == null || machineDtos.size() < 1) {
+                return ResultDto.error("设备不存在");
+            }
+
+            ICarProcess carProcess = CarProcessFactory.getCarImpl(machineDtos.get(0).getHmId());
+            Java110CarProtocol java110CarProtocol = carProcess.accept(machineDtos.get(0), reqJson);
+
+            paramOut = new ResponseEntity<String>(java110CarProtocol.getContent(), HttpStatus.OK);
+        } finally {
+            logger.debug("设备：" + machineCode + ",请求报文：" + reqJson + ",返回报文：" + paramOut);
+        }
+        return paramOut;
     }
 
 }

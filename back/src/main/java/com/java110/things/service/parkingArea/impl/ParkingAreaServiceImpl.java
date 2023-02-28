@@ -115,7 +115,7 @@ public class ParkingAreaServiceImpl implements IParkingAreaService {
      * @throws Exception
      */
     @Override
-    public List<ParkingAreaDto> queryParkingAreas(ParkingAreaDto parkingAreaDto) throws Exception {
+    public List<ParkingAreaDto> queryParkingAreas(ParkingAreaDto parkingAreaDto) {
         List<ParkingAreaDto> parkingAreaDtoList = parkingAreaServiceDao.getParkingAreas(parkingAreaDto);
         freshAttrs(parkingAreaDtoList);
         return parkingAreaDtoList;

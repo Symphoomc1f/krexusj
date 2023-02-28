@@ -4,15 +4,15 @@ package com.java110.things.adapt.car.bisen;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.adapt.car.DefaultAbstractCarProcessAdapt;
-import com.java110.things.adapt.car.ICarProcess;
 import com.java110.things.entity.accessControl.CarResultDto;
 import com.java110.things.entity.car.CarBlackWhiteDto;
 import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.car.CarInoutDto;
 import com.java110.things.entity.cloud.MachineHeartbeatDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.parkingArea.ParkingAreaAttrDto;
+import com.java110.things.entity.parkingArea.ParkingAreaDto;
 import com.java110.things.entity.response.ResultDto;
-import com.java110.things.factory.AuthenticationFactory;
 import com.java110.things.factory.LocalCacheFactory;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
@@ -20,6 +20,7 @@ import com.java110.things.netty.Java110CarProtocol;
 import com.java110.things.netty.NettySocketHolder;
 import com.java110.things.service.car.ICarInoutService;
 import com.java110.things.service.car.ICarService;
+import com.java110.things.service.parkingArea.IParkingAreaService;
 import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
 import com.java110.things.util.StringUtil;
@@ -28,9 +29,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
 
 /**
  * http://www.bisen-iot.com/
@@ -41,13 +43,19 @@ public class BisenCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
 
     private static Logger logger = LoggerFactory.getLogger(BisenCarSocketProcessAdapt.class);
 
+    public static final String SPEC_EXT_PARKING_ID = "6185-17861";
+
     public static final String GET_TOKEN = "/auth/oauth/token";
+    public static final String CAR_URL = "/api/park/freecar";
 
     @Autowired
     private RestTemplate restTemplate;
 
     @Autowired
     private ICarInoutService carInoutService;
+
+    @Autowired
+    private IParkingAreaService parkingAreaService;
 
     @Autowired
     private ICarService carService;
@@ -57,59 +65,63 @@ public class BisenCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
         return null;
     }
 
+    public String getParkingId(ParkingAreaDto parkingAreaDto) {
+        List<ParkingAreaAttrDto> parkingAreaAttrDtos = parkingAreaDto.getAttrs();
+
+        if (parkingAreaAttrDtos == null || parkingAreaAttrDtos.size() < 1) {
+            return "";
+        }
+
+        for (ParkingAreaAttrDto parkingAreaAttrDto : parkingAreaAttrDtos) {
+            if (SPEC_EXT_PARKING_ID.equals(parkingAreaAttrDto.getSpecCd())) {
+                return parkingAreaAttrDto.getValue();
+            }
+        }
+
+        return "";
+    }
+
     /**
-     * {
-     * "service": "whitelist_sync",
-     * "parkid": "20180001",
-     * "car_number": "粤B99999",
-     * "car_type": 0,
-     * "card_type": 1,
-     * "startdate": "2019-05-25 00:00:01",
-     * "validdate": "2019-06-24 23:59:59",
-     * "cardmoney": 230.50,
-     * "period": "月",
-     * "carusername": "老陈",
-     * "carusertel": "13822220222",
-     * "drive_no": "NO111111222",
-     * "address": "xxxx市xxx区xxx路112号",
-     * "carlocate": "A-1-10",
-     * "create_time": "2019-05-25 20:11:48",
-     * "modify_time": "2019-05-25 20:11:48",
-     * "operator": "李四",
-     * "operate_type": 1,
-     * "limitdaytype": 0,
-     * "remark": ""
-     * }
-     *
      * @param carResultDto 用户人脸信息
      */
     @Override
     public ResultDto addCar(MachineDto machineDto, CarDto carResultDto) {
-        JSONObject data = new JSONObject();
-        data.put("service", "whitelist_sync");
-        data.put("parkid", carResultDto.getExtPaId());
-        data.put("card_id", carResultDto.getExtCarId());
-        data.put("car_number", carResultDto.getCarNum());
-        data.put("car_type", "0");
-        data.put("startdate", DateUtil.getFormatTimeString(carResultDto.getStartTime(), DateUtil.DATE_FORMATE_STRING_A));
-        data.put("validdate", DateUtil.getFormatTimeString(carResultDto.getEndTime(), DateUtil.DATE_FORMATE_STRING_A));
-        data.put("cardmoney", 0.00);
-        data.put("period", "月");
-        data.put("card_type", "1");
-        data.put("carusername", carResultDto.getPersonName());
-        data.put("create_time", DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
-        data.put("modify_time", DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
-        data.put("operate_type", "1");
-        Java110CarProtocol java110CarProtocol = new Java110CarProtocol();
-        java110CarProtocol.setId(machineDto.getMachineId());
-        java110CarProtocol.setContent(data.toJSONString());
-        JSONObject resultJson = NettySocketHolder.sendMsgSync(java110CarProtocol, carResultDto.getCarNum());
-        logger.debug("添加车辆返回：" + resultJson);
-        int code = resultJson.getIntValue("result_code");
-        String message = resultJson.getString("message");
-        String cardId = resultJson.getString("card_id");
 
-        return new ResultDto(code, message, cardId);
+        String url = MappingCacheFactory.getValue("BISEN_CAR_URL") + CAR_URL;
+
+        ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
+        parkingAreaDto.setPaId(carResultDto.getPaId());
+        List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
+        JSONObject postParameters = new JSONObject();
+        postParameters.put("parkingId", getParkingId(parkingAreaDtos.get(0)));
+        postParameters.put("type", 1);
+        JSONObject data = new JSONObject();
+        data.put("plateNum", carResultDto.getCarNum());
+        data.put("startTime", DateUtil.getFormatTimeString(carResultDto.getStartTime(), DateUtil.DATE_FORMATE_STRING_A));
+        data.put("endTime", DateUtil.getFormatTimeString(carResultDto.getEndTime(), DateUtil.DATE_FORMATE_STRING_A));
+        postParameters.put("data", data);
+        postParameters.put("timestamp", DateUtil.getCurrentDate().getTime());
+        HttpHeaders httpHeaders = getHeader();
+        HttpEntity httpEntity = new HttpEntity(postParameters.toJSONString(), httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CAR_URL, postParameters.toJSONString(), responseEntity.getBody());
+
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            throw new IllegalStateException("请求车辆添加失败" + responseEntity);
+        }
+
+        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+        String msg = "成功";
+        if (paramOut.getIntValue("code") != 0) {
+            msg = paramOut.getJSONObject("data").getString("message");
+        }
+
+        if (paramOut.getJSONObject("data").getIntValue("status") != 0) {
+            paramOut.put("code", paramOut.getJSONObject("data").getIntValue("status"));
+            msg = paramOut.getJSONObject("data").getString("message");
+        }
+
+        return new ResultDto(paramOut.getIntValue("code"), msg, carResultDto.getCarId());
 
     }
 
@@ -130,134 +142,113 @@ public class BisenCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
      */
     @Override
     public ResultDto updateCar(MachineDto machineDto, CarDto carResultDto) {
-        JSONObject data = new JSONObject();
-        data.put("service", "whitelist_pay_sync");
-        data.put("parkid", carResultDto.getExtPaId());
-        data.put("card_id", carResultDto.getCardId());
-        data.put("car_number", carResultDto.getCarNum());
-        data.put("period", "月");
-        data.put("pay_count", (int) Math.floor(carResultDto.getCycles()));
-        data.put("pay_money", 0.00);
-        data.put("pay_time", DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
-        data.put("trade_no", SeqUtil.getId());
-        data.put("remark", "");
-        Java110CarProtocol java110CarProtocol = new Java110CarProtocol();
-        java110CarProtocol.setId(machineDto.getMachineId());
-        java110CarProtocol.setContent(data.toJSONString());
-        JSONObject resultJson = NettySocketHolder.sendMsgSync(java110CarProtocol, carResultDto.getCarNum());
-        logger.debug("修改车辆返回：" + resultJson);
-        int code = resultJson.getIntValue("result_code");
-        String message = resultJson.getString("message");
+        String url = MappingCacheFactory.getValue("BISEN_CAR_URL") + CAR_URL;
 
-        return new ResultDto(code, message);
+        ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
+        parkingAreaDto.setPaId(carResultDto.getPaId());
+        List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
+        JSONObject postParameters = new JSONObject();
+        postParameters.put("parkingId", getParkingId(parkingAreaDtos.get(0)));
+        postParameters.put("type", 2);
+        JSONObject data = new JSONObject();
+        data.put("plateNum", carResultDto.getCarNum());
+        data.put("startTime", DateUtil.getFormatTimeString(carResultDto.getStartTime(), DateUtil.DATE_FORMATE_STRING_A));
+        data.put("endTime", DateUtil.getFormatTimeString(carResultDto.getEndTime(), DateUtil.DATE_FORMATE_STRING_A));
+        postParameters.put("data", data);
+        postParameters.put("timestamp", DateUtil.getCurrentDate().getTime());
+        HttpHeaders httpHeaders = getHeader();
+        HttpEntity httpEntity = new HttpEntity(postParameters.toJSONString(), httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CAR_URL, postParameters.toJSONString(), responseEntity.getBody());
+
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            throw new IllegalStateException("请求车辆添加失败" + responseEntity);
+        }
+
+        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+        String msg = "成功";
+        if (paramOut.getIntValue("code") != 0) {
+            msg = paramOut.getJSONObject("data").getString("message");
+        }
+
+        if (paramOut.getJSONObject("data").getIntValue("status") != 0) {
+            paramOut.put("code", paramOut.getJSONObject("data").getIntValue("status"));
+            msg = paramOut.getJSONObject("data").getString("message");
+        }
+
+        return new ResultDto(paramOut.getIntValue("code"), msg, carResultDto.getCarId());
     }
 
     @Override
     public ResultDto deleteCar(MachineDto machineDto, CarDto carResultDto) {
+        String url = MappingCacheFactory.getValue("BISEN_CAR_URL") + CAR_URL;
+
+        ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
+        parkingAreaDto.setPaId(carResultDto.getPaId());
+        List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
+        JSONObject postParameters = new JSONObject();
+        postParameters.put("parkingId", getParkingId(parkingAreaDtos.get(0)));
+        postParameters.put("type", 2);
         JSONObject data = new JSONObject();
-        data.put("service", "whitelist_sync");
-        data.put("parkid", carResultDto.getExtPaId());
-        data.put("card_id", carResultDto.getCardId());
-        data.put("car_number", carResultDto.getCarNum());
-        data.put("operate_type", "3");
-        Java110CarProtocol java110CarProtocol = new Java110CarProtocol();
-        java110CarProtocol.setId(machineDto.getMachineId());
-        java110CarProtocol.setContent(data.toJSONString());
-        JSONObject resultJson = NettySocketHolder.sendMsgSync(java110CarProtocol, carResultDto.getCarNum());
-        logger.debug("修改车辆返回：" + resultJson);
-        int code = resultJson.getIntValue("result_code");
-        String message = resultJson.getString("message");
+        data.put("plateNum", carResultDto.getCarNum());
+        data.put("startTime", DateUtil.getFormatTimeString(carResultDto.getStartTime(), DateUtil.DATE_FORMATE_STRING_A));
+        data.put("endTime", DateUtil.getFormatTimeString(carResultDto.getEndTime(), DateUtil.DATE_FORMATE_STRING_A));
+        postParameters.put("data", data);
+        postParameters.put("timestamp", DateUtil.getCurrentDate().getTime());
+        HttpHeaders httpHeaders = getHeader();
+        HttpEntity httpEntity = new HttpEntity(postParameters.toJSONString(), httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CAR_URL, postParameters.toJSONString(), responseEntity.getBody());
 
-        return new ResultDto(code, message);
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            throw new IllegalStateException("请求车辆添加失败" + responseEntity);
+        }
+
+        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+        String msg = "成功";
+        if (paramOut.getIntValue("code") != 0) {
+            msg = paramOut.getJSONObject("data").getString("message");
+        }
+
+        if (paramOut.getJSONObject("data").getIntValue("status") != 0) {
+            paramOut.put("code", paramOut.getJSONObject("data").getIntValue("status"));
+            msg = paramOut.getJSONObject("data").getString("message");
+        }
+
+        return new ResultDto(paramOut.getIntValue("code"), msg, carResultDto.getCarId());
     }
 
-    @Override
-    public void restartMachine(MachineDto machineDto) {
 
-    }
-
-    @Override
-    public void openDoor(MachineDto machineDto) {
-
-    }
-
-    @Override
-    public String httpFaceResult(String data) {
-        return null;
-    }
-
+    /**
+     * 开门记录上报
+     *
+     * @param machineDto
+     * @param content
+     * @return
+     */
     @Override
     public Java110CarProtocol accept(MachineDto machineDto, String content) {
-        JSONObject acceptJson = JSONObject.parseObject(content);
 
-        String parkId = acceptJson.getString("parkid");
-        String service = acceptJson.getString("service");
+        JSONObject acceptJson = JSONObject.parseObject(content);
+        JSONObject outJson = null;
+        if ("2".equals(acceptJson.getString("passType"))) {
+            outJson = uploadcarout(machineDto, acceptJson);
+        } else {
+            outJson = uploadcarin(machineDto, acceptJson);
+        }
 
         Java110CarProtocol java110CarProtocol = new Java110CarProtocol();
-        JSONObject resObj = null;
-        switch (service) {
-            case "checkKey":
-                resObj = checkKey();
-                break;
-            case "heartbeat":
-                resObj = heartbeat(machineDto);
-                break;
-            case "uploadcarin":
-                resObj = uploadcarin(machineDto, acceptJson);
-                break;
-            case "uploadcarout":
-                resObj = uploadcarout(machineDto, acceptJson);
-                break;
-//            case "whitelist_sync":
-//                resObj = whitelistSync(machineDto, acceptJson);
-//                break;
-
-            default:
-                resObj = new JSONObject();
-                resObj.put("service", service);
-                resObj.put("result_code", -1);
-                resObj.put("message", "当前不支持");
-                break;
-        }
-        java110CarProtocol.setContent(resObj.toJSONString());
-        java110CarProtocol.setId(machineDto.getMachineId());
+        java110CarProtocol.setContent(outJson.toJSONString());
+        java110CarProtocol.setId(SeqUtil.getId());
         return java110CarProtocol;
     }
 
-    /***
-     * {"service":"whitelist_sync","car_number":"贵119","result_code":0,"message":"注册固定车成功","card_id":"201106181136297"}
+    /**
+     * 出场上报
+     * @param machineDto
      * @param acceptJson
      * @return
      */
-    private JSONObject whitelistSync(MachineDto machineDto, JSONObject acceptJson) {
-        System.out.printf("acceptJson" + acceptJson.toJSONString());
-
-        int code = acceptJson.getIntValue("result_code");
-
-        if (code != 0) {
-            JSONObject resObj = new JSONObject();
-            resObj.put("service", "whitelist_sync");
-            resObj.put("result_code", code);
-            resObj.put("message", "失败");
-            return resObj;
-        }
-
-        CarDto carDto = new CarDto();
-        carDto.setCarNum(acceptJson.getString("car_number"));
-        carDto.setCardId(acceptJson.getString("card_id"));
-
-        try {
-            carService.updateCarByMachine(carDto);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        JSONObject resObj = new JSONObject();
-        resObj.put("service", "whitelist_sync");
-        resObj.put("result_code", 0);
-        resObj.put("message", "成功");
-        return resObj;
-    }
-
     private JSONObject uploadcarout(MachineDto machineDto, JSONObject acceptJson) {
         CarInoutDto carInoutDto = new CarInoutDto();
 
@@ -281,10 +272,8 @@ public class BisenCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
         }
 
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("service", "uploadcarout");
-        jsonObject.put("result_code", 0);
-        jsonObject.put("message", "认证成功");
-        jsonObject.put("order_id", acceptJson.getString("order_id"));
+        jsonObject.put("code", 0);
+        jsonObject.put("msg", "成功");
         return jsonObject;
     }
 
@@ -299,12 +288,12 @@ public class BisenCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
         CarInoutDto carInoutDto = new CarInoutDto();
 
         carInoutDto.setInoutType(CarInoutDto.INOUT_TYPE_IN);
-        carInoutDto.setCarNum(acceptJson.getString("car_number"));
-        carInoutDto.setCarType(acceptJson.getString("car_type"));
+        carInoutDto.setCarNum(acceptJson.getString("plateNum"));
+        carInoutDto.setCarType(acceptJson.getString("carType"));
         carInoutDto.setCommunityId(machineDto.getCommunityId());
-        carInoutDto.setGateName(acceptJson.getString("gateinname"));
-        carInoutDto.setInoutId(acceptJson.getString("order_id"));
-        carInoutDto.setOpenTime(acceptJson.getString("in_time"));
+        carInoutDto.setGateName(acceptJson.getString("parkName"));
+        carInoutDto.setInoutId(acceptJson.getString("recordId"));
+        carInoutDto.setOpenTime(acceptJson.getString("inTime"));
         carInoutDto.setRemark(acceptJson.containsKey("remark") ? acceptJson.getString("remark") : "");
         carInoutDto.setMachineCode(machineDto.getMachineCode());
 
@@ -315,10 +304,8 @@ public class BisenCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
         }
 
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("service", "uploadcarin");
-        jsonObject.put("result_code", 0);
-        jsonObject.put("message", "认证成功");
-        jsonObject.put("order_id", acceptJson.getString("order_id"));
+        jsonObject.put("code", 0);
+        jsonObject.put("msg", "成功");
         return jsonObject;
     }
 
@@ -344,17 +331,6 @@ public class BisenCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
     @Override
     public ResultDto deleteCarBlackWhite(MachineDto tmpMachineDto, CarBlackWhiteDto carBlackWhiteDto) {
         return null;
-    }
-
-    /**
-     * 认证接口
-     */
-    private JSONObject checkKey() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("service", "checkKey");
-        jsonObject.put("result_code", 0);
-        jsonObject.put("message", "认证成功");
-        return jsonObject;
     }
 
     /**
@@ -394,7 +370,7 @@ public class BisenCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
         String clientId = MappingCacheFactory.getValue("client_id");
         String clientSecret = MappingCacheFactory.getValue("client_secret");
 
-        url += ("randomStr="+SeqUtil.getId()+"&scope=server&grant_type=client_credentials&client_id="+clientId+"&client_secret="+clientSecret);
+        url += ("randomStr=" + SeqUtil.getId() + "&scope=server&grant_type=client_credentials&client_id=" + clientId + "&client_secret=" + clientSecret);
 
         HttpHeaders httpHeaders = new HttpHeaders();
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity("", httpHeaders);
@@ -410,7 +386,7 @@ public class BisenCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
         }
 
         token = paramOut.getString("access_token");
-        LocalCacheFactory.setValue("bisen_token", token, paramOut.getIntValue("expires_in")-200);
+        LocalCacheFactory.setValue("bisen_token", token, paramOut.getIntValue("expires_in") - 200);
         return token;
     }
 

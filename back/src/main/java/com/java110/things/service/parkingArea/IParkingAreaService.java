@@ -49,7 +49,7 @@ public interface IParkingAreaService {
      * @return
      * @throws Exception
      */
-    List<ParkingAreaDto> queryParkingAreas(ParkingAreaDto parkingAreaDto) throws Exception;
+    List<ParkingAreaDto> queryParkingAreas(ParkingAreaDto parkingAreaDto);
 
     /**
      * 删除停车场
