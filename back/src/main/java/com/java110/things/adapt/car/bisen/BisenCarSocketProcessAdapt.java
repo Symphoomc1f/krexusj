@@ -9,6 +9,7 @@ import com.java110.things.entity.car.CarBlackWhiteDto;
 import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.car.CarInoutDto;
 import com.java110.things.entity.cloud.MachineHeartbeatDto;
+import com.java110.things.entity.fee.TempCarPayOrderDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.parkingArea.ParkingAreaAttrDto;
 import com.java110.things.entity.parkingArea.ParkingAreaDto;
@@ -17,7 +18,6 @@ import com.java110.things.factory.LocalCacheFactory;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
 import com.java110.things.netty.Java110CarProtocol;
-import com.java110.things.netty.NettySocketHolder;
 import com.java110.things.service.car.ICarInoutService;
 import com.java110.things.service.car.ICarService;
 import com.java110.things.service.parkingArea.IParkingAreaService;
@@ -32,6 +32,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.text.ParseException;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -47,6 +49,8 @@ public class BisenCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
 
     public static final String GET_TOKEN = "/auth/oauth/token";
     public static final String CAR_URL = "/api/park/freecar";
+    public static final String GET_NEED_PAY_ORDER_URL = "/api/pay/car";
+    public static final String NOTIFY_NEED_PAY_ORDER_URL = "/api/pay/park";
 
     @Autowired
     private RestTemplate restTemplate;
@@ -245,6 +249,7 @@ public class BisenCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
 
     /**
      * 出场上报
+     *
      * @param machineDto
      * @param acceptJson
      * @return
@@ -253,16 +258,16 @@ public class BisenCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
         CarInoutDto carInoutDto = new CarInoutDto();
 
         carInoutDto.setInoutType(CarInoutDto.INOUT_TYPE_OUT);
-        carInoutDto.setCarNum(acceptJson.getString("car_number"));
-        carInoutDto.setCarType(acceptJson.getString("car_type"));
+        carInoutDto.setCarNum(acceptJson.getString("plateNum"));
+        carInoutDto.setCarType(acceptJson.getString("carType"));
         carInoutDto.setCommunityId(machineDto.getCommunityId());
-        carInoutDto.setGateName(acceptJson.getString("gateoutname"));
-        carInoutDto.setInoutId(acceptJson.getString("order_id"));
-        carInoutDto.setOpenTime(acceptJson.getString("out_time"));
+        carInoutDto.setGateName(acceptJson.getString("parkName"));
+        carInoutDto.setInoutId(acceptJson.getString("recordId"));
+        carInoutDto.setOpenTime(acceptJson.getString("outTime"));
         carInoutDto.setRemark(acceptJson.containsKey("remark") ? acceptJson.getString("remark") : "");
-        carInoutDto.setPayCharge(acceptJson.getString("paycharge"));
-        carInoutDto.setRealCharge(acceptJson.getString("realcharge"));
-        carInoutDto.setPayType(acceptJson.getString("pay_type"));
+        carInoutDto.setPayCharge(acceptJson.getString("charge"));
+        carInoutDto.setRealCharge(acceptJson.getString("charge"));
+        carInoutDto.setPayType("1");
         carInoutDto.setMachineCode(machineDto.getMachineCode());
 
         try {
@@ -310,17 +315,96 @@ public class BisenCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
     }
 
     @Override
-    public String getNeedPayOrder() {
-        Java110CarProtocol java110CarProtocol = new Java110CarProtocol();
-        java110CarProtocol.setId("20180001L");
-        java110CarProtocol.setContent("{\n" +
-                "    \"service\": \"query_price\",\n" +
-                "    \"parkid\": \"20180001\",\n" +
-                "    \"car_number\": \"浙CBB123\",\n" +
-                "    \"pay_scene\": 0\n" +
-                "  }");
-        JSONObject data = NettySocketHolder.sendMsgSync(java110CarProtocol, "浙CBB123");
-        return data.toJSONString();
+    public TempCarPayOrderDto getNeedPayOrder(MachineDto machineDto, CarDto carDto) {
+        String url = MappingCacheFactory.getValue("BISEN_CAR_URL") + GET_NEED_PAY_ORDER_URL;
+
+        ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
+        parkingAreaDto.setPaId(carDto.getExtPaId());
+        List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
+        JSONObject postParameters = new JSONObject();
+        postParameters.put("parkingId", getParkingId(parkingAreaDtos.get(0)));
+        postParameters.put("plateNum", carDto.getCarNum());
+        HttpHeaders httpHeaders = getHeader();
+        HttpEntity httpEntity = new HttpEntity(postParameters.toJSONString(), httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), GET_NEED_PAY_ORDER_URL, postParameters.toJSONString(), responseEntity.getBody());
+
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            throw new IllegalStateException("请求车辆查询待支付订单失败" + responseEntity);
+        }
+
+        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+        String msg = "成功";
+        if (paramOut.getIntValue("code") != 0) {
+            return null;
+        }
+
+        JSONObject data = paramOut.getJSONObject("data");
+
+        TempCarPayOrderDto tempCarPayOrderDto = new TempCarPayOrderDto();
+        tempCarPayOrderDto.setCarNum(data.getString("plateNum"));
+        tempCarPayOrderDto.setOrderId(data.getString("orderId"));
+        tempCarPayOrderDto.setPaId(carDto.getPaId());
+        tempCarPayOrderDto.setExtPaId(carDto.getExtPaId());
+        try {
+            tempCarPayOrderDto.setQueryTime(DateUtil.getDateFromString(data.getString("queryTime"), DateUtil.DATE_FORMATE_STRING_A));
+        } catch (ParseException e) {
+            logger.error("查询日期转换出错", e);
+        }
+        tempCarPayOrderDto.setStopTimeTotal(data.getDouble("stopTimeTotal"));
+        tempCarPayOrderDto.setPayCharge(data.getDouble("payCharge"));
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, new Double(tempCarPayOrderDto.getStopTimeTotal()).intValue() * -1);
+        tempCarPayOrderDto.setInTime(calendar.getTime());
+
+
+        return tempCarPayOrderDto;
+    }
+
+    /**
+     * 支付通知接口
+     *
+     * @param machineDto
+     * @param tempCarPayOrderDto
+     * @return
+     */
+    @Override
+    public ResultDto notifyTempCarFeeOrder(MachineDto machineDto, TempCarPayOrderDto tempCarPayOrderDto) {
+        String url = MappingCacheFactory.getValue("BISEN_CAR_URL") + NOTIFY_NEED_PAY_ORDER_URL;
+
+        ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
+        parkingAreaDto.setPaId(tempCarPayOrderDto.getExtPaId());
+        List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
+        JSONObject postParameters = new JSONObject();
+        postParameters.put("parkingId", getParkingId(parkingAreaDtos.get(0)));
+        postParameters.put("plateNum", tempCarPayOrderDto.getCarNum());
+        postParameters.put("orderId", tempCarPayOrderDto.getOrderId());
+        postParameters.put("amount", tempCarPayOrderDto.getAmount());
+        postParameters.put("payTime", tempCarPayOrderDto.getPayTime());
+        postParameters.put("payType", tempCarPayOrderDto.getPayType());
+        postParameters.put("timestamp", DateUtil.getCurrentDate().getTime());
+        HttpHeaders httpHeaders = getHeader();
+        HttpEntity httpEntity = new HttpEntity(postParameters.toJSONString(), httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), GET_NEED_PAY_ORDER_URL, postParameters.toJSONString(), responseEntity.getBody());
+
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            throw new IllegalStateException("请求车辆查询待支付订单失败" + responseEntity);
+        }
+
+        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+
+        String msg = "成功";
+        if (paramOut.getIntValue("code") != 0) {
+            msg = paramOut.getJSONObject("data").getString("message");
+        }
+
+        if (paramOut.getJSONObject("data").getIntValue("status") != 0) {
+            paramOut.put("code", paramOut.getJSONObject("data").getIntValue("status"));
+            msg = paramOut.getJSONObject("data").getString("message");
+        }
+
+        return new ResultDto(paramOut.getIntValue("code"), msg);
     }
 
     @Override
@@ -332,6 +416,7 @@ public class BisenCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
     public ResultDto deleteCarBlackWhite(MachineDto tmpMachineDto, CarBlackWhiteDto carBlackWhiteDto) {
         return null;
     }
+
 
     /**
      * 心跳接口

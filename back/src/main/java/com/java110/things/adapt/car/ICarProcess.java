@@ -3,6 +3,7 @@ package com.java110.things.adapt.car;
 import com.java110.things.entity.accessControl.CarResultDto;
 import com.java110.things.entity.car.CarBlackWhiteDto;
 import com.java110.things.entity.car.CarDto;
+import com.java110.things.entity.fee.TempCarPayOrderDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.netty.Java110CarProtocol;
@@ -93,7 +94,7 @@ public interface ICarProcess {
      *
      * @return
      */
-    String getNeedPayOrder();
+    TempCarPayOrderDto getNeedPayOrder(MachineDto machineDto, CarDto carDto);
 
 
     /**
@@ -113,4 +114,6 @@ public interface ICarProcess {
      * @return
      */
     ResultDto deleteCarBlackWhite(MachineDto tmpMachineDto, CarBlackWhiteDto carBlackWhiteDto);
+
+    ResultDto notifyTempCarFeeOrder(MachineDto machineDto, TempCarPayOrderDto tempCarPayOrderDto);
 }

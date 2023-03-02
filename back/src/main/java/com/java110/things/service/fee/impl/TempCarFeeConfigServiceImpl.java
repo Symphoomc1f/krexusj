@@ -4,9 +4,13 @@ import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.dao.ITempCarFeeConfigServiceDao;
 import com.java110.things.entity.PageDto;
+import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.car.TempCarFeeConfigAttrDto;
 import com.java110.things.entity.car.TempCarFeeConfigDto;
+import com.java110.things.entity.fee.TempCarPayOrderDto;
+import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.factory.CarProcessFactory;
 import com.java110.things.service.fee.ITempCarFeeConfigService;
 import com.java110.things.service.machine.IMachineService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,6 +144,52 @@ public class TempCarFeeConfigServiceImpl implements ITempCarFeeConfigService {
     @Override
     public int deleteTempCarFeeConfigAttr(TempCarFeeConfigAttrDto tempCarFeeConfigAttrDto) throws Exception {
         return carServiceDao.deleteTempCarFeeConfigAttr(tempCarFeeConfigAttrDto);
+    }
+
+    @Override
+    public ResultDto getTempCarFeeOrder(CarDto carDto) throws Exception {
+
+        // 查询停车场对应设备 是否为 第三方平台
+        MachineDto machineDto = new MachineDto();
+        machineDto.setLocationObjId(carDto.getExtPaId());
+        machineDto.setLocationType(MachineDto.LOCATION_TYPE_PARKING_AREA);
+        List<MachineDto> machineDtos = machineService.queryMachines(machineDto);
+        if (machineDtos == null || machineDtos.size() < 1) {
+            return new ResultDto(ResultDto.ERROR, "设备不存在");
+        }
+        //这里预留 调用自己的 算费系统算费 暂不实现
+        if (MachineDto.MACHINE_TYPE_CAR.equals(machineDtos.get(0).getMachineTypeCd())) {
+            return new ResultDto(ResultDto.SUCCESS, "成功");
+        }
+
+        TempCarPayOrderDto tempCarPayOrderDto = CarProcessFactory.getCarImpl(machineDtos.get(0).getHmId()).getNeedPayOrder(machineDtos.get(0), carDto);
+
+        if (tempCarPayOrderDto == null) {
+            return new ResultDto(ResultDto.ERROR, "查询失败");
+        }
+
+        return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG, tempCarPayOrderDto);
+
+    }
+
+    @Override
+    public ResultDto notifyTempCarFeeOrder(TempCarPayOrderDto tempCarPayOrderDto) throws Exception {
+        // 查询停车场对应设备 是否为 第三方平台
+        MachineDto machineDto = new MachineDto();
+        machineDto.setLocationObjId(tempCarPayOrderDto.getExtPaId());
+        machineDto.setLocationType(MachineDto.LOCATION_TYPE_PARKING_AREA);
+        List<MachineDto> machineDtos = machineService.queryMachines(machineDto);
+        if (machineDtos == null || machineDtos.size() < 1) {
+            return new ResultDto(ResultDto.ERROR, "设备不存在");
+        }
+        //这里预留 调用自己的 算费系统算费 暂不实现
+        if (MachineDto.MACHINE_TYPE_CAR.equals(machineDtos.get(0).getMachineTypeCd())) {
+            return new ResultDto(ResultDto.SUCCESS, "成功");
+        }
+
+        ResultDto resultDto = CarProcessFactory.getCarImpl(machineDtos.get(0).getHmId()).notifyTempCarFeeOrder(machineDtos.get(0), tempCarPayOrderDto);
+
+        return resultDto;
     }
 
 }

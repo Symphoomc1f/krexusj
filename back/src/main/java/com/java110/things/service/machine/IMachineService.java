@@ -47,7 +47,7 @@ public interface IMachineService {
      * @return
      * @throws Exception
      */
-    List<MachineDto> queryMachines(MachineDto machineDto) throws Exception;
+    List<MachineDto> queryMachines(MachineDto machineDto) ;
 
     /**
      * 删除设备

@@ -56,7 +56,7 @@ public class MachineServiceImpl implements IMachineService {
      * @throws Exception
      */
     @Override
-    public List<MachineDto> queryMachines(MachineDto machineDto) throws Exception {
+    public List<MachineDto> queryMachines(MachineDto machineDto)  {
         int page = machineDto.getPage();
 
         if (page != PageDto.DEFAULT_PAGE) {

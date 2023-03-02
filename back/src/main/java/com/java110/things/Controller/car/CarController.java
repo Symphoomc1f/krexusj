@@ -86,28 +86,6 @@ public class CarController extends BaseController {
     }
 
     /**
-     * 添加设备接口类
-     *
-     * @param carNum 页数
-     * @return 成功或者失败
-     * @throws Exception
-     */
-    @RequestMapping(path = "/getNeedPayOrder", method = RequestMethod.GET)
-    public ResponseEntity<String> getNeedPayOrder(@RequestParam int page,
-                                                  @RequestParam int row,
-                                                  @RequestParam(name = "carNum", required = false) String carNum) throws Exception {
-
-        CarDto carDto = new CarDto();
-        carDto.setPage(page);
-        carDto.setRow(row);
-        carDto.setCarNum(carNum);
-
-        String data = aiCarSocketProcessAdapt.getNeedPayOrder();
-        ResultDto resultDto = new ResultDto(0, "成功", data);
-        return super.createResponseEntity(resultDto);
-    }
-
-    /**
      * 删除车辆信息
      * <p>
      *

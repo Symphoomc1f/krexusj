@@ -1,7 +1,9 @@
 package com.java110.things.service.fee;
 
+import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.car.TempCarFeeConfigAttrDto;
 import com.java110.things.entity.car.TempCarFeeConfigDto;
+import com.java110.things.entity.fee.TempCarPayOrderDto;
 import com.java110.things.entity.response.ResultDto;
 
 import java.util.List;
@@ -83,4 +85,12 @@ public interface ITempCarFeeConfigService {
      */
     int deleteTempCarFeeConfigAttr(TempCarFeeConfigAttrDto tempCarFeeConfigAttrDto) throws Exception;
 
+    /**
+     * 查询临时车付费订单
+     * @param carDto
+     * @return
+     */
+    ResultDto getTempCarFeeOrder(CarDto carDto) throws Exception;
+
+    ResultDto notifyTempCarFeeOrder(TempCarPayOrderDto tempCarPayOrderDto)  throws Exception;
 }
