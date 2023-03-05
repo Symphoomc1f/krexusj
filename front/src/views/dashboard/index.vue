@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard-container">
-    <div class="dashboard-text">欢迎访问HC物联网平台</div>
+    <div class="dashboard-text">欢迎访问小区物联网平台</div>
   </div>
 </template>
 
@@ -9,7 +9,7 @@ import { mapGetters } from "vuex";
 
 import { getCommunitys } from "@/api/community";
 export default {
-  name: "HC物联网",
+  name: "小区物联网",
   computed: {
     ...mapGetters(["name"]),
   },

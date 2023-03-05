@@ -11,7 +11,7 @@
     <div class="right-menu">
       <el-dropdown class="avatar-container"  trigger="click">
         <div class="avatar-wrapper" style="margin-top:0px">
-          HC物联网管理平台欢迎您！ 吴学文<i
+            小区物联网管理平台欢迎您！ 吴学文<i
             class="el-icon-arrow-down el-icon--right"
           ></i>
         </div>
@@ -19,12 +19,12 @@
           <router-link to="/">
             <el-dropdown-item> 首页 </el-dropdown-item>
           </router-link>
-          <a target="_blank" href="https://hc.demo.winqi.cn/">
-            <el-dropdown-item>HC云端</el-dropdown-item>
+          <!-- <a target="_blank" href="https://hc.demo.winqi.cn/">
+            <el-dropdown-item>云端</el-dropdown-item>
           </a>
           <a target="_blank" href="http://www.homecommunity.cn/">
-            <el-dropdown-item>HC官网</el-dropdown-item>
-          </a>
+            <el-dropdown-item>官网</el-dropdown-item>
+          </a> -->
           <el-dropdown-item divided @click.native="logout">
             <span style="display: block">退出</span>
           </el-dropdown-item>

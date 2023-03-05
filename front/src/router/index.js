@@ -49,9 +49,9 @@ export const constantRoutes = [
     redirect: '/dashboard',
     children: [{
       path: 'dashboard',
-      name: 'HC物联网',
+      name: '小区物联网',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: 'HC小区物联网平台', icon: '' }
+      meta: { title: '小区物联网平台', icon: '' }
     }]
   },
   {
