@@ -7,6 +7,12 @@
 ./mysql -h127.0.0.1  -e "flush privileges;"
 ./mysql -h127.0.0.1  -e "CREATE DATABASE hc_things ;"
 ./mysql -h127.0.0.1  -e "grant all privileges on hc_things.* to 'hc_things'@'%' ;"
+
+ wget https://dl.winqi.cn/hc/iot/hc_things.sql1
+
+mv hc_things.sql1 hc_things.sql
+
+./mysql -h127.0.0.1  -e "use hc_things; source hc_things.sql"
 ```
 
 ### 添加域名映射
