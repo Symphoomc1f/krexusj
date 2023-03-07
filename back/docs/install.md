@@ -12,7 +12,7 @@
 
 mv hc_things.sql1 hc_things.sql
 
-./mysql -h127.0.0.1  -e "use hc_things; source hc_things.sql"
+./mysql -h127.0.0.1  -e "use hc_things; source /home/mysql/mysql/bin/hc_things.sql"
 ```
 
 ### 添加域名映射

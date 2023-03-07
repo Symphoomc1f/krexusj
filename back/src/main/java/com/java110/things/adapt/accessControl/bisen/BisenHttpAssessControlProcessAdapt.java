@@ -139,41 +139,7 @@ public class BisenHttpAssessControlProcessAdapt extends DefaultAbstractAccessCon
     @Override
     public String getFace(MachineDto machineDto, UserFaceDto userFaceDto) {
 
-        String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
-        String url = "http://" + machineDto.getMachineIp() + CMD_ADD_FACE_FIND;
-        JSONObject param = new JSONObject();
-        param.put("pass", password);
-        param.put("personId", userFaceDto.getUserId());
-        //添加人脸
-        HttpHeaders httpHeaders = new HttpHeaders();
-        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
-        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
-        logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE_FIND, param.toJSONString(), responseEntity.getBody());
-
-        if (HttpStatus.OK != responseEntity.getStatusCode()) {
-            return AddUpdateFace.MACHINE_HAS_NOT_FACE;
-        }
-
-        JSONObject outParam = JSONObject.parseObject(responseEntity.getBody());
-
-        if (!outParam.containsKey("data")) {
-            return AddUpdateFace.MACHINE_HAS_NOT_FACE;
-        }
-
-        JSONArray data = outParam.getJSONArray("data");
-
-        if (data == null || data.size() < 1) {
-            return AddUpdateFace.MACHINE_HAS_NOT_FACE;
-        }
-
-        String personId = data.getJSONObject(0).getString("personId");
-
-        if (StringUtil.isEmpty(personId)) {
-            return AddUpdateFace.MACHINE_HAS_NOT_FACE;
-        }
-
-        return personId;
+        return null;
     }
 
     @Override
