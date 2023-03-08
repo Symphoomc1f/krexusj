@@ -1,6 +1,5 @@
 package com.java110.things.adapt.accessControl.bisen;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.adapt.accessControl.DefaultAbstractAccessControlAdapt;
 import com.java110.things.adapt.accessControl.ICallAccessControlService;
@@ -12,7 +11,6 @@ import com.java110.things.entity.machine.MachineFaceDto;
 import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.*;
-import com.java110.things.quartz.accessControl.AddUpdateFace;
 import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
 import com.java110.things.util.StringUtil;
@@ -116,24 +114,25 @@ public class BisenHttpAssessControlProcessAdapt extends DefaultAbstractAccessCon
 
     @Override
     public ResultDto initAssessControlProcess(MachineDto machineDto) {
-        String url = MappingCacheFactory.getValue("BISEN_URL") + CMD_SET_IDENTIFY_CALLBACK;
-        String appId = MappingCacheFactory.getValue("appId");
-        JSONObject postParameters = new JSONObject();
-        postParameters.put("appId", appId);
-        postParameters.put("callbackUrl", MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "IOT_URL") + "/api/accessControl/faceResult/" + machineDto.getMachineCode());
-        postParameters.put("cbType", 8);
-
-        HttpHeaders httpHeaders = getHeader();
-        HttpEntity httpEntity = new HttpEntity(postParameters.toJSONString(), httpHeaders);
-        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_IDENTIFY_CALLBACK, postParameters.toJSONString(), responseEntity.getBody());
-
-        if (responseEntity.getStatusCode() != HttpStatus.OK) {
-            return new ResultDto(ResultDto.ERROR, "初始化设备失败");
-        }
-
-        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
-        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("code") + paramOut.getString("msg"));
+//        String url = MappingCacheFactory.getValue("BISEN_URL") + CMD_SET_IDENTIFY_CALLBACK;
+//        String appId = MappingCacheFactory.getValue("appId");
+//        JSONObject postParameters = new JSONObject();
+//        postParameters.put("appId", appId);
+//        postParameters.put("callbackUrl", MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "IOT_URL") + "/api/accessControl/faceResult/" + machineDto.getMachineCode());
+//        postParameters.put("cbType", 8);
+//
+//        HttpHeaders httpHeaders = getHeader();
+//        HttpEntity httpEntity = new HttpEntity(postParameters.toJSONString(), httpHeaders);
+//        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
+//        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_IDENTIFY_CALLBACK, postParameters.toJSONString(), responseEntity.getBody());
+//
+//        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+//            return new ResultDto(ResultDto.ERROR, "初始化设备失败");
+//        }
+//
+//        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+//        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("code") + paramOut.getString("msg"));
+        return new ResultDto(ResultDto.SUCCESS,ResultDto.SUCCESS_MSG);
     }
 
     @Override
@@ -491,13 +490,14 @@ public class BisenHttpAssessControlProcessAdapt extends DefaultAbstractAccessCon
         MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
         postParameters.add("appId", appId);
         postParameters.add("appKey", appKey);
-        postParameters.add("timestamp", timestamp);
+        postParameters.add("timestamp", timestamp + "");
         String sign = AuthenticationFactory.md5(appKey + timestamp + appSecret);
         postParameters.add("sign", sign.toLowerCase());
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
+        logger.debug("------请求信息：", httpEntity.toString());
         ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {

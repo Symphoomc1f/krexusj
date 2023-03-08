@@ -56,7 +56,7 @@ public class MachineServiceImpl implements IMachineService {
      * @throws Exception
      */
     @Override
-    public List<MachineDto> queryMachines(MachineDto machineDto)  {
+    public List<MachineDto> queryMachines(MachineDto machineDto) {
         int page = machineDto.getPage();
 
         if (page != PageDto.DEFAULT_PAGE) {
@@ -126,17 +126,25 @@ public class MachineServiceImpl implements IMachineService {
     @Override
     public ResultDto saveMachine(MachineDto machineDto) throws Exception {
         //初始化设备信息
+        ResultDto resultDto = null;
         if (MachineDto.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
-            AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).initAssessControlProcess(machineDto);
-            AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).addMachine(machineDto);
+            resultDto = AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).addMachine(machineDto);
+            if (resultDto != null && resultDto.getCode() != ResultDto.SUCCESS) {
+                return resultDto;
+            }
+            resultDto = AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).initAssessControlProcess(machineDto);
         } else if (MachineDto.MACHINE_TYPE_CAR.equals(machineDto.getMachineTypeCd())) {
             CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).initCar(machineDto);
         } else if (MachineDto.MACHINE_TYPE_OTHER_CAR.equals(machineDto.getMachineTypeCd())) {
             CarProcessFactory.getCarImpl(machineDto.getHmId()).initCar(machineDto);
         }
+
+        if (resultDto != null && resultDto.getCode() != ResultDto.SUCCESS) {
+            return resultDto;
+        }
         machineDto.setHeartbeatTime(DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
         int count = machineServiceDao.saveMachine(machineDto);
-        ResultDto resultDto = null;
+
         JSONObject data = new JSONObject();
         if (StringUtil.isEmpty(machineDto.getTaskId())) {
             data.put("taskId", machineDto.getTaskId());
