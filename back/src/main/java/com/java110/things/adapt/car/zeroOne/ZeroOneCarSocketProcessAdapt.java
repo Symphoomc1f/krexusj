@@ -439,7 +439,6 @@ public class ZeroOneCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
-
             buf.append(key).append('=').append(entry.getValue()).append('&');
         }
         buf.append("key=").append(signKey);
