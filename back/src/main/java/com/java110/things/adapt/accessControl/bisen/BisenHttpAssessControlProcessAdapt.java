@@ -12,6 +12,7 @@ import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.*;
 import com.java110.things.util.DateUtil;
+import com.java110.things.util.HttpClient;
 import com.java110.things.util.SeqUtil;
 import com.java110.things.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -132,7 +133,7 @@ public class BisenHttpAssessControlProcessAdapt extends DefaultAbstractAccessCon
 //
 //        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
 //        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("code") + paramOut.getString("msg"));
-        return new ResultDto(ResultDto.SUCCESS,ResultDto.SUCCESS_MSG);
+        return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG);
     }
 
     @Override
@@ -143,50 +144,62 @@ public class BisenHttpAssessControlProcessAdapt extends DefaultAbstractAccessCon
 
     @Override
     public ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
-
-        String url = MappingCacheFactory.getValue("BISEN_URL") + CMD_ADD_USER;
-        String appId = MappingCacheFactory.getValue("appId");
         JSONObject postParameters = new JSONObject();
-        postParameters.put("appId", appId);
-        postParameters.put("personName", userFaceDto.getName());
-        postParameters.put("tag", userFaceDto.getUserId());
-        postParameters.put("certificateType", 0);
-        postParameters.put("personIdCard", userFaceDto.getIdNumber());
-        postParameters.put("rfid", getIdNumber(userFaceDto));
-        postParameters.put("faceUrl", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
+        String paramOutString = "";
+        try {
+            String url = MappingCacheFactory.getValue("BISEN_URL") + CMD_ADD_USER;
+            String appId = MappingCacheFactory.getValue("appId");
 
-        HttpHeaders httpHeaders = getHeader();
-        HttpEntity httpEntity = new HttpEntity(postParameters.toJSONString(), httpHeaders);
-        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, postParameters.toJSONString(), responseEntity.getBody());
+            postParameters.put("appId", appId);
+            postParameters.put("personName", userFaceDto.getName());
+            postParameters.put("tag", userFaceDto.getUserId());
+            postParameters.put("certificateType", 0);
+            postParameters.put("personIdCard", userFaceDto.getIdNumber());
+            postParameters.put("rfid", getIdNumber(userFaceDto));
+            postParameters.put("faceUrl", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
 
-        if (responseEntity.getStatusCode() != HttpStatus.OK) {
-            throw new IllegalStateException("请求人员添加失败" + responseEntity);
-        }
+//            HttpHeaders httpHeaders = getHeader(postParameters.toJSONString().length());
+//            HttpEntity httpEntity = new HttpEntity(postParameters.toJSONString(), httpHeaders);
 
-        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
-        if (paramOut.getIntValue("code") == 0) {
-            userFaceDto.setExtUserId(paramOut.getJSONObject("data").getString("personGuid"));
-        } else {
-            //刷入外部编码
-            MachineFaceDto machineFaceDto = new MachineFaceDto();
-            machineFaceDto.setUserId(userFaceDto.getUserId());
-            List<MachineFaceDto> faceDtos = callAccessControlServiceImpl.queryMachineFaces(machineFaceDto);
-            if (faceDtos.size() < 1) {
+            logger.debug("人员创建请求：,url:" + url);
+            //responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+            paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "POST");
+            logger.debug("人员创建返回：" + paramOutString);
+
+            saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, postParameters.toJSONString(), paramOutString);
+
+            JSONObject paramOut = JSONObject.parseObject(paramOutString);
+            if (paramOut.getIntValue("code") == 0) {
+                userFaceDto.setExtUserId(paramOut.getJSONObject("data").getString("personGuid"));
+            } else {
+                //刷入外部编码
                 throw new IllegalArgumentException(paramOut.getString("msg"));
+//                MachineFaceDto machineFaceDto = new MachineFaceDto();
+//                machineFaceDto.setUserId(userFaceDto.getUserId());
+//                List<MachineFaceDto> faceDtos = callAccessControlServiceImpl.queryMachineFaces(machineFaceDto);
+//                if (faceDtos.size() < 1) {
+//                    throw new IllegalArgumentException(paramOut.getString("msg"));
+//                }
+//                userFaceDto.setExtUserId(faceDtos.get(0).getExtUserId());
             }
-            userFaceDto.setExtUserId(faceDtos.get(0).getExtUserId());
-        }
 
-        url = MappingCacheFactory.getValue("BISEN_URL") + CMD_SINGLE_PERSON_AUTH;
-        postParameters = new JSONObject();
-        postParameters.put("appId", appId);
-        postParameters.put("deviceNo", machineDto.getMachineCode());
-        postParameters.put("personGuid", userFaceDto.getExtUserId());
-        httpEntity = new HttpEntity(postParameters.toJSONString(), httpHeaders);
-        responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SINGLE_PERSON_AUTH, postParameters.toJSONString(), responseEntity.getBody());
-        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("code") + paramOut.getString("msg"));
+            url = MappingCacheFactory.getValue("BISEN_URL") + CMD_SINGLE_PERSON_AUTH;
+            postParameters = new JSONObject();
+            postParameters.put("appId", appId);
+            postParameters.put("deviceNo", machineDto.getMachineCode());
+            postParameters.put("personGuid", userFaceDto.getExtUserId());
+//            httpHeaders = getHeader(postParameters.toJSONString().length());
+//            httpEntity = new HttpEntity(postParameters.toJSONString(), httpHeaders);
+//            responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+            paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "POST");
+            paramOut = JSONObject.parseObject(paramOutString);
+            saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SINGLE_PERSON_AUTH, postParameters.toJSONString(), paramOutString);
+            return new ResultDto(paramOut.getIntValue("code"), paramOut.getString("msg"));
+        } catch (Exception e) {
+            logger.error("出现异常了" + postParameters + ",返回" + paramOutString, e);
+
+            throw e;
+        }
     }
 
 
@@ -194,6 +207,7 @@ public class BisenHttpAssessControlProcessAdapt extends DefaultAbstractAccessCon
     public ResultDto updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
 
         //刷入外部编码
+        String paramOutString = "";
         MachineFaceDto machineFaceDto = new MachineFaceDto();
         machineFaceDto.setUserId(userFaceDto.getUserId());
         machineFaceDto.setMachineCode(machineDto.getMachineCode());
@@ -214,18 +228,11 @@ public class BisenHttpAssessControlProcessAdapt extends DefaultAbstractAccessCon
         postParameters.put("personIdCard", userFaceDto.getIdNumber());
         postParameters.put("faceUrl", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
 
-        HttpHeaders httpHeaders = getHeader();
-        HttpEntity httpEntity = new HttpEntity(postParameters.toJSONString(), httpHeaders);
-        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_UPDATE_USER, postParameters.toJSONString(), responseEntity.getBody());
-        logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
+        paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "PUT");
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_UPDATE_USER, postParameters.toJSONString(), paramOutString);
 
-        if (responseEntity.getStatusCode() != HttpStatus.OK) {
-            return new ResultDto(ResultDto.ERROR, "调用设备失败");
-        }
-
-        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
-        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("code") + paramOut.getString("msg"));
+        JSONObject paramOut = JSONObject.parseObject(paramOutString);
+        return new ResultDto(paramOut.getIntValue("code"), paramOut.getString("msg"));
     }
 
     @Override
@@ -242,9 +249,10 @@ public class BisenHttpAssessControlProcessAdapt extends DefaultAbstractAccessCon
         HttpHeaders httpHeaders = getHeader();
         HttpEntity httpEntity = new HttpEntity("", httpHeaders);
         //判断人员是否存在
-
         String url = MappingCacheFactory.getValue("BISEN_URL")
                 + "/api/device/hqvtPerson/page?appId=" + appId + "&personGuid=" + faceDtos.get(0).getExtUserId();
+        logger.debug("判断人员是否存在" + url);
+
         ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
@@ -265,11 +273,12 @@ public class BisenHttpAssessControlProcessAdapt extends DefaultAbstractAccessCon
 
         url = MappingCacheFactory.getValue("BISEN_URL")
                 + "/api/device/hqvtPerson/delete/appId/" + appId + "/personGuid/" + faceDtos.get(0).getExtUserId();
+        logger.debug("删除人员" + url);
         responseEntity = outRestTemplate.exchange(url, HttpMethod.DELETE, httpEntity, String.class);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_UPDATE_USER, url, responseEntity.getBody());
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
         paramOut = JSONObject.parseObject(responseEntity.getBody());
-        return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("code") + paramOut.getString("msg"));
+        return new ResultDto(paramOut.getIntValue("code"), paramOut.getString("msg"));
     }
 
     @Override
@@ -352,8 +361,12 @@ public class BisenHttpAssessControlProcessAdapt extends DefaultAbstractAccessCon
                 userName = body.getString("personName");
             }
 
+            if(StringUtil.isEmpty(userName)){
+                userName = "门禁未上报";
+            }
+
             OpenDoorDto openDoorDto = new OpenDoorDto();
-            openDoorDto.setFace(ImageFactory.getBase64ByImgUrl(body.getString("picture")));
+            openDoorDto.setFace(ImageFactory.encodeImageToBase64(body.getString("picture")));
             openDoorDto.setUserName(userName);
             openDoorDto.setHat("3");
             openDoorDto.setMachineCode(machineDto.getMachineCode());
@@ -373,6 +386,11 @@ public class BisenHttpAssessControlProcessAdapt extends DefaultAbstractAccessCon
         resultParam.put("success", true);
         return resultParam.toJSONString();//未找到设备
 
+    }
+
+    public static void main(String[] args) {
+       String img = ImageFactory.getBase64ByImgUrl("https://bisen-temp-iot.oss-cn-beijing.aliyuncs.com/bisen-temp-iot/bs/face/40230b92623d42b59446a07185a1df2f.jpg");
+        System.out.println(img);
     }
 
     @Override
@@ -395,27 +413,52 @@ public class BisenHttpAssessControlProcessAdapt extends DefaultAbstractAccessCon
 
     @Override
     public ResultDto addMachine(MachineDto machineDto) {
-
         ResultDto resultDto = null;
-        String url = MappingCacheFactory.getValue("BISEN_URL") + ADD_MACHINE;
-        String appId = MappingCacheFactory.getValue("appId");
-
         JSONObject postParameters = new JSONObject();
-        postParameters.put("appId", appId);
-        postParameters.put("deviceNo", machineDto.getMachineCode());
-        postParameters.put("deviceName", machineDto.getMachineName());
-        postParameters.put("tag", machineDto.getMachineId());
+        String paramOutString = "";
+        try {
+            String url = MappingCacheFactory.getValue("BISEN_URL") + ADD_MACHINE;
+            String appId = MappingCacheFactory.getValue("appId");
 
-        HttpHeaders httpHeaders = getHeader();
-        HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
-        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
-        if (responseEntity.getStatusCode() != HttpStatus.OK) {
-            resultDto = new ResultDto(ResultDto.ERROR, "请求百胜获取token失败" + responseEntity);
-        }
+            postParameters.put("appId", appId);
+            postParameters.put("deviceNo", machineDto.getMachineCode());
+            postParameters.put("deviceName", machineDto.getMachineName());
+            postParameters.put("tag", machineDto.getMachineId());
 
-        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
-        if (paramOut.getIntValue("code") != 0) {
-            resultDto = new ResultDto(ResultDto.ERROR, paramOut.getString("msg"));
+            HttpHeaders httpHeaders = getHeader();
+            HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
+            ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+            saveLog(SeqUtil.getId(), machineDto.getMachineId(), ADD_MACHINE, postParameters.toJSONString(), responseEntity.getBody());
+
+            if (responseEntity.getStatusCode() != HttpStatus.OK) {
+                resultDto = new ResultDto(ResultDto.ERROR, "请求百胜获取token失败" + responseEntity);
+            }
+
+            JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+            if (paramOut.getIntValue("code") != 0) {
+                resultDto = new ResultDto(ResultDto.ERROR, paramOut.getString("msg"));
+            }
+
+            url = MappingCacheFactory.getValue("BISEN_URL") + CMD_SET_IDENTIFY_CALLBACK;
+
+            postParameters = new JSONObject();
+            postParameters.put("appId", appId);
+            postParameters.put("callbackUrl", MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "IOT_URL") + "/api/accessControl/faceResultBisen");
+            postParameters.put("cbType", 8);
+
+//            httpHeaders = getHeader();
+//            httpEntity = new HttpEntity(postParameters.toJSONString(), httpHeaders);
+//            responseEntity = outRestTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
+            paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "PUT");
+            paramOut = JSONObject.parseObject(paramOutString);
+            saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_IDENTIFY_CALLBACK, paramOutString, responseEntity.getBody());
+
+            if (paramOut.getIntValue("code") != 0) {
+                resultDto = new ResultDto(ResultDto.ERROR, paramOut.getString("msg"));
+            }
+        } catch (Exception e) {
+            logger.error("推送报错" + postParameters, e);
+            throw e;
         }
         return resultDto;
     }
@@ -435,6 +478,7 @@ public class BisenHttpAssessControlProcessAdapt extends DefaultAbstractAccessCon
 
         HttpHeaders httpHeaders = getHeader();
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
+
         ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             resultDto = new ResultDto(ResultDto.ERROR, "请求百胜获取token失败" + responseEntity);
@@ -515,9 +559,17 @@ public class BisenHttpAssessControlProcessAdapt extends DefaultAbstractAccessCon
     }
 
     private HttpHeaders getHeader() {
+        return getHeader(0);
+    }
+
+    private HttpHeaders getHeader(int length) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Authorization", "Bearer " + getToken());
         httpHeaders.add("Content-Type", "application/json");
+        httpHeaders.add("Host", "www.bisen-iot.com");
+        if (length > 0) {
+            httpHeaders.add("Content-Length", length + "");
+        }
         return httpHeaders;
     }
 }
