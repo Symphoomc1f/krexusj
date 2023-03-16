@@ -29,6 +29,10 @@
 
 	4、运行main方法
 
+### 2.3 安装视频
+
+https://www.bilibili.com/video/bv1fv411j7vr
+
 ## 3. 第三方云平台对接协议
 
 [第三方云平台对接协议](back/docs/api.md)
