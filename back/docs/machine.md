@@ -26,6 +26,10 @@
 
 ![image](img/2.jpg)
 
+4、百胜智能门禁（第三方平台）
+
+文档：http://www.bisen-iot.com/docs/a45b755218844fd892f230a492cdcf45
+
 
 ### 道闸设备(已经商用)
 
@@ -35,6 +39,18 @@
 
 ![image](img/4.jpg)
 ![image](img/5.jpg)
+
+2、百胜道闸（第三方平台）
+
+http://www.bisen-iot.com/
+
+3、零壹道闸（第三方平台）
+
+http://www.0easy.com/
+
+4、云盟道闸(第三方平台)
+	
+http://doc.szymzh.com/
 
 ### 考勤机
 
