@@ -7,6 +7,13 @@
 
    front 为前段项目 需要安装nodejs 
 
+## 2. 已对接设备（门禁+车辆道闸+考勤机）
+
+[HC物联网系统已对接设备](back/docs/machine.md)
+
+找相应厂家购买后可以直接使用
+
+
 ## 2. 如何安装
 
 ### 2.1 前段
@@ -28,6 +35,10 @@
 	3、打开src\main\java\com.java110.things.ThingsApplicationStart.java 
 
 	4、运行main方法
+
+### 2.3 安装视频
+
+https://www.bilibili.com/video/bv1fv411j7vr
 
 ## 3. 第三方云平台对接协议
 
@@ -59,9 +70,6 @@
 ![image](docs/img/menjingxiyi.png)
 ![image](docs/img/settings.png)
 
-## 8. 对接设备
-
-[HC物联网系统更新日志](back/docs/machine.md)
 
 ## 9. 更新日志
 
