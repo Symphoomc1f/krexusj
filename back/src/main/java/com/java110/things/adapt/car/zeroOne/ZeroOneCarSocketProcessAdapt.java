@@ -92,12 +92,14 @@ public class ZeroOneCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
     public ResultDto addCar(MachineDto machineDto, CarDto carResultDto) {
 
         String url = MappingCacheFactory.getValue("ZERO_ONE_CAR_URL") + CAR_URL;
+        String appKey = MappingCacheFactory.getValue("ZERO_ONE_APP_KEY");
 
         ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
         parkingAreaDto.setPaId(carResultDto.getPaId());
         List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
         Map<String, String> postParameters = new HashMap<>();
         postParameters.put("parkNo", getParkingId(parkingAreaDtos.get(0)));
+        postParameters.put("appKey", appKey);
         postParameters.put("plate", carResultDto.getCarNum());
         postParameters.put("endDateString", DateUtil.getFormatTimeString(carResultDto.getEndTime(), DateUtil.DATE_FORMATE_STRING_B));
         postParameters.put("chargeNo", getParkingId(parkingAreaDtos.get(0)));
@@ -141,12 +143,14 @@ public class ZeroOneCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
     @Override
     public ResultDto updateCar(MachineDto machineDto, CarDto carResultDto) {
         String url = MappingCacheFactory.getValue("ZERO_ONE_CAR_URL") + UPDATE_CAR_URL;
+        String appKey = MappingCacheFactory.getValue("ZERO_ONE_APP_KEY") ;
 
         ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
         parkingAreaDto.setPaId(carResultDto.getPaId());
         List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
         Map<String, String> postParameters = new HashMap<>();
         postParameters.put("parkNo", getParkingId(parkingAreaDtos.get(0)));
+        postParameters.put("appKey", appKey);
         postParameters.put("plate", carResultDto.getCarNum());
         postParameters.put("newValidEndDate", DateUtil.getFormatTimeString(carResultDto.getEndTime(), DateUtil.DATE_FORMATE_STRING_B));
         postParameters.put("newValidStartDate", DateUtil.getFormatTimeString(carResultDto.getStartTime(), DateUtil.DATE_FORMATE_STRING_B));
@@ -175,12 +179,15 @@ public class ZeroOneCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
     @Override
     public ResultDto deleteCar(MachineDto machineDto, CarDto carResultDto) {
         String url = MappingCacheFactory.getValue("ZERO_ONE_CAR_URL") + DELETE_CAR_URL;
+        String appKey = MappingCacheFactory.getValue("ZERO_ONE_APP_KEY");
 
         ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
         parkingAreaDto.setPaId(carResultDto.getPaId());
         List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
         Map<String, String> postParameters = new HashMap<>();
         postParameters.put("parkNo", getParkingId(parkingAreaDtos.get(0)));
+        postParameters.put("appKey", appKey);
+
         postParameters.put("plate", carResultDto.getCarNum());
         postParameters.put("sign", getSign(postParameters));
         HttpHeaders httpHeaders = getHeader();
@@ -296,12 +303,15 @@ public class ZeroOneCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
     @Override
     public TempCarPayOrderDto getNeedPayOrder(MachineDto machineDto, CarDto carDto) {
         String url = MappingCacheFactory.getValue("ZERO_ONE_CAR_URL") + GET_NEED_PAY_ORDER_URL;
+        String appKey = MappingCacheFactory.getValue("ZERO_ONE_APP_KEY") ;
 
         ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
         parkingAreaDto.setPaId(carDto.getExtPaId());
         List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
         Map<String, String> postParameters = new HashMap<>();
         postParameters.put("parkNo", getParkingId(parkingAreaDtos.get(0)));
+        postParameters.put("appKey", appKey);
+
         postParameters.put("plate", carDto.getCarNum());
         postParameters.put("sign", getSign(postParameters));
         HttpHeaders httpHeaders = getHeader();
@@ -352,12 +362,14 @@ public class ZeroOneCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
     @Override
     public ResultDto notifyTempCarFeeOrder(MachineDto machineDto, TempCarPayOrderDto tempCarPayOrderDto) {
         String url = MappingCacheFactory.getValue("ZERO_ONE_CAR_URL") + NOTIFY_NEED_PAY_ORDER_URL;
+        String appKey = MappingCacheFactory.getValue("ZERO_ONE_APP_KEY") ;
 
         ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
         parkingAreaDto.setPaId(tempCarPayOrderDto.getExtPaId());
         List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
         Map<String, String> postParameters = new HashMap<>();
         postParameters.put("parkNo", getParkingId(parkingAreaDtos.get(0)));
+        postParameters.put("appKey", appKey);
         postParameters.put("plate", tempCarPayOrderDto.getCarNum());
         postParameters.put("serialNumber", tempCarPayOrderDto.getOrderId());
         postParameters.put("sign", getSign(postParameters));
