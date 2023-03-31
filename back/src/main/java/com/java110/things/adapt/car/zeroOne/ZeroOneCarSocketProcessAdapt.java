@@ -121,7 +121,7 @@ public class ZeroOneCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
             msg = paramOut.getString("desc");
         }
 
-        return new ResultDto(paramOut.getIntValue("code"), msg, carResultDto.getCarId());
+        return new ResultDto("200".equals(paramOut.getString("code"))?0:-1, msg, carResultDto.getCarId());
 
     }
 
@@ -173,7 +173,7 @@ public class ZeroOneCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
             msg = paramOut.getString("desc");
         }
 
-        return new ResultDto(paramOut.getIntValue("code"), msg, carResultDto.getCarId());
+        return new ResultDto("200".equals(paramOut.getString("code"))?0:-1, msg, carResultDto.getCarId());
     }
 
     @Override
@@ -205,7 +205,7 @@ public class ZeroOneCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
             msg = paramOut.getString("desc");
         }
 
-        return new ResultDto(paramOut.getIntValue("code"), msg, carResultDto.getCarId());
+        return new ResultDto("200".equals(paramOut.getString("code"))?0:-1, msg, carResultDto.getCarId());
     }
 
 
@@ -394,7 +394,7 @@ public class ZeroOneCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
             msg = paramOut.getJSONObject("data").getString("message");
         }
 
-        return new ResultDto(paramOut.getIntValue("code"), msg);
+        return new ResultDto("200".equals(paramOut.getString("code"))?0:-1, msg);
     }
 
     @Override

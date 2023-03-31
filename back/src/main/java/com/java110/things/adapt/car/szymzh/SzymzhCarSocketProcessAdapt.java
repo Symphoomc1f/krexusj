@@ -26,7 +26,11 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -117,6 +121,15 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求车辆添加失败" + responseEntity);
+        }
+
+        String result = responseEntity.getBody();
+
+        logger.debug("返回内容" + result);
+        try {
+            logger.debug("返回内容gbk" + new String(result.getBytes(),"GBK"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
 
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
