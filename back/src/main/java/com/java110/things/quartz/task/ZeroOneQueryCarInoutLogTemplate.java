@@ -49,7 +49,11 @@ public class ZeroOneQueryCarInoutLogTemplate extends TaskSystemQuartz {
         String [] pIds = parkingIds.split(",");
 
         for(String pId :pIds){
-            zeroOneQueryCarInoutLogAdapt.query(pId);
+            try {
+                zeroOneQueryCarInoutLogAdapt.query(pId);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
 
 

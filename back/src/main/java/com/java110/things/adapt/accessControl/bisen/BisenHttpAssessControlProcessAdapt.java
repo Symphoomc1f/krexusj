@@ -360,7 +360,9 @@ public class BisenHttpAssessControlProcessAdapt extends DefaultAbstractAccessCon
             } else {
                 userName = body.getString("personName");
             }
-
+            if(StringUtil.isEmpty(userId)){
+                userId = "-1";
+            }
             if(StringUtil.isEmpty(userName)){
                 userName = "门禁未上报";
             }
