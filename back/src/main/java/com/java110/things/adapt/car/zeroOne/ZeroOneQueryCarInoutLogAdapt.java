@@ -111,7 +111,7 @@ public class ZeroOneQueryCarInoutLogAdapt {
                     acceptJson = new JSONObject();
                     zeroOneObj = list.getJSONObject(listIndex);
                     acceptJson.put("passType", "1");
-                    acceptJson.put("plateNum", zeroOneObj.getString("plate"));
+                    acceptJson.put("plateNum", zeroOneObj.getString("plateCn"));
                     acceptJson.put("carType", zeroOneObj.getString("parkType"));
                     acceptJson.put("parkName", zeroOneObj.getString("channelName"));
                     acceptJson.put("recordId", zeroOneObj.getString("id"));
@@ -243,6 +243,7 @@ public class ZeroOneQueryCarInoutLogAdapt {
         carInoutDto.setRealCharge(acceptJson.getString("charge"));
         carInoutDto.setPayType("1");
         carInoutDto.setMachineCode(machineDto.getMachineCode());
+        carInoutDto.setPaId(machineDto.getLocationObjId());
 
         try {
             carInoutService.saveCarInout(carInoutDto);
