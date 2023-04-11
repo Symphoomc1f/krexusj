@@ -15,6 +15,7 @@ import com.java110.things.service.car.ICarInoutService;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.fee.ITempCarFeeConfigService;
 import com.java110.things.service.hc.ICarCallHcService;
+import com.java110.things.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -61,6 +62,9 @@ public class CarInoutServiceImpl implements ICarInoutService {
     @Override
     public ResultDto saveCarInout(CarInoutDto carInoutDto) throws Exception {
 
+        if(StringUtil.isEmpty(carInoutDto.getCarType())){
+            carInoutDto.setCarType("1");
+        }
         int count = carInoutServiceDao.saveCarInout(carInoutDto);
         ResultDto resultDto = null;
         if (count < 1) {

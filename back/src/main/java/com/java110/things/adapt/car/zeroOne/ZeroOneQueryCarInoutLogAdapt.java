@@ -244,6 +244,7 @@ public class ZeroOneQueryCarInoutLogAdapt {
         carInoutDto.setPayType("1");
         carInoutDto.setMachineCode(machineDto.getMachineCode());
         carInoutDto.setPaId(machineDto.getLocationObjId());
+        carInoutDto.setState(CarInoutDto.STATE_OUT);
 
         try {
             carInoutService.saveCarInout(carInoutDto);
@@ -277,6 +278,7 @@ public class ZeroOneQueryCarInoutLogAdapt {
         carInoutDto.setRemark(acceptJson.containsKey("remark") ? acceptJson.getString("remark") : "");
         carInoutDto.setMachineCode(machineDto.getMachineCode());
         carInoutDto.setPaId(machineDto.getLocationObjId());
+        carInoutDto.setState(CarInoutDto.STATE_IN);
 
         try {
             carInoutService.saveCarInout(carInoutDto);
