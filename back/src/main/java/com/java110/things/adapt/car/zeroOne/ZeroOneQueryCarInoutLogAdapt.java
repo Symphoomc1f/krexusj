@@ -105,7 +105,7 @@ public class ZeroOneQueryCarInoutLogAdapt {
         JSONObject acceptJson = null;
 
         JSONObject zeroOneObj = null;
-        if (list != null && list.size() > 1) {
+        if (list != null && list.size() > 0) {
             for (int listIndex = 0; listIndex < list.size(); listIndex++) {
                 try {
                     acceptJson = new JSONObject();
@@ -140,7 +140,7 @@ public class ZeroOneQueryCarInoutLogAdapt {
         }
 
         list = paramOut.getJSONObject("data").getJSONArray("list");
-        if (list != null && list.size() > 1) {
+        if (list != null && list.size() > 0) {
             for (int listIndex = 0; listIndex < list.size(); listIndex++) {
                 try {
                     acceptJson = new JSONObject();
@@ -176,7 +176,7 @@ public class ZeroOneQueryCarInoutLogAdapt {
         }
 
         list = paramOut.getJSONObject("data").getJSONArray("list");
-        if (list != null && list.size() > 1) {
+        if (list != null && list.size() > 0) {
             for (int listIndex = 0; listIndex < list.size(); listIndex++) {
                 try {
                     acceptJson = new JSONObject();
