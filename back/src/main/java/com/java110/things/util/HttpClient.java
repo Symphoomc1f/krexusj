@@ -67,7 +67,7 @@ public class HttpClient {
         return result;
     }
 
-    public static String doPost(String httpUrl, String param,String auth,String method) {
+    public static String doPost(String httpUrl, String param, String auth, String method) {
 
         HttpURLConnection connection = null;
         InputStream is = null;
@@ -142,6 +142,8 @@ public class HttpClient {
             }
             // 断开与远程地址url的连接
             connection.disconnect();
+
+            System.out.printf("http 请求 url:" + httpUrl + ",paramIn:" + param + ",paramOut=" + result);
         }
         return result;
     }
