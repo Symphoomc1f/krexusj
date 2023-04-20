@@ -1,6 +1,7 @@
 package com.java110.things.adapt.car.taogesi;
 
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.adapt.car.DefaultAbstractCarProcessAdapt;
@@ -28,11 +29,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -57,10 +54,12 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
     public static final String SPEC_EXT_PARKING_ID = "6185-17861";
 
     public static final String GET_TOKEN = "/park/sys/login";
-    public static final String CAR_URL = "/Api/Inform/AddMthCar";
-    //修改车辆
-    private static final String UPDATE_CAR_URL = "/Api/Inform/ChargeMonthCar";
-    private static final String DELETE_CAR_URL = "/Api/Inform/FailMonthCar";
+    public static final String CAR_URL = "/park/zyb/zybVehicle/add";
+    public static final String ADD_CAR_PERSON = "/park/zyb/zybVehicleOwner/add";
+    //修改车辆http://park.beta.taugas.cn:81/park/zyb/zybVehicle/edit
+    //private static final String UPDATE_CAR_URL = "/park/zyb/zybVehicle/edit";
+    private static final String UPDATE_CAR_URL = "/park/zyb/zybVehicle/customRecharge";
+    private static final String DELETE_CAR_URL = "/park/zyb/zybVehicle/delete?id=1382929411594502145";
     public static final String GET_NEED_PAY_ORDER_URL = "/Api/Inquire/GetCarNoOrderFee";
     public static final String NOTIFY_NEED_PAY_ORDER_URL = "/Api/Inform/PayNotify";
 
@@ -103,20 +102,23 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
     @Override
     public ResultDto addCar(MachineDto machineDto, CarDto carResultDto) {
 
-        String url = MappingCacheFactory.getValue("TAOGESI_CAR_URL") + CAR_URL;
-        String appId = MappingCacheFactory.getValue("TAOGESI_APP_ID");
+        String url = MappingCacheFactory.getValue("TAOGESI_CAR_URL") + ADD_CAR_PERSON;
 
         ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
         parkingAreaDto.setPaId(carResultDto.getPaId());
         List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
-        Map<String, String> postParameters = new HashMap<>();
-        postParameters.put("parkKey", getParkingId(parkingAreaDtos.get(0)));
-        postParameters.put("carNo", carResultDto.getCarNum());
-        postParameters.put("userNo", carResultDto.getPersonName());
-        postParameters.put("version", "v1.0");
-        postParameters.put("appid", appId);
-        postParameters.put("rand", getRand());
-        postParameters.put("sign", getSign(postParameters));
+        Map<String, Object> postParameters = new HashMap<>();
+        postParameters.put("id", carResultDto.getCarId());
+        postParameters.put("depId", getParkingId(parkingAreaDtos.get(0)));
+        postParameters.put("groupId", getParkingId(parkingAreaDtos.get(0)));
+        postParameters.put("idcard", carResultDto.getCarId());
+        postParameters.put("memo", "物业系统添加");
+        postParameters.put("money", "0.00");
+        postParameters.put("name", carResultDto.getPersonName());
+        postParameters.put("normalEnterStatus", "1");
+        postParameters.put("parkingNum", "1");
+        postParameters.put("password", "000000");
+        postParameters.put("phone", carResultDto.getPersonTel());
         HttpHeaders httpHeaders = getHeader();
         HttpEntity httpEntity = new HttpEntity(JSONObject.toJSONString(postParameters), httpHeaders);
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
@@ -129,63 +131,45 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         String result = responseEntity.getBody();
 
         logger.debug("返回内容" + result);
-        try {
-            logger.debug("返回内容gbk" + new String(result.getBytes(), "GBK"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
 
-        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+        JSONObject paramOut = JSONObject.parseObject(result);
         String msg = "成功";
-        if (!"1".equals(paramOut.getString("code"))) {
+        if (!"200".equals(paramOut.getString("code")) || !paramOut.getBoolean("success")) {
             throw new IllegalStateException(paramOut.getString("msg"));
         }
 
         //延期处理
-        url = MappingCacheFactory.getValue("YM_CAR_URL") + UPDATE_CAR_URL;
+        url = MappingCacheFactory.getValue("TAOGESI_CAR_URL") + CAR_URL;
         postParameters = new HashMap<>();
-        postParameters.put("parkKey", getParkingId(parkingAreaDtos.get(0)));
-        postParameters.put("carNo", carResultDto.getCarNum());
-        postParameters.put("mthChargeMoney", "0");
-        postParameters.put("beginTime", DateUtil.getFormatTimeString(carResultDto.getStartTime(), DateUtil.DATE_FORMATE_STRING_A));
-        postParameters.put("endTime", DateUtil.getFormatTimeString(carResultDto.getEndTime(), DateUtil.DATE_FORMATE_STRING_A));
-        postParameters.put("isUpdateBeginTime", "1");
-        postParameters.put("version", "v1.0");
-        postParameters.put("appid", appId);
-        postParameters.put("rand", getRand());
-        postParameters.put("sign", getSign(postParameters));
+        postParameters.put("depId", carResultDto.getCarId());
+        postParameters.put("chargeType", "1");
+        postParameters.put("nickname", carResultDto.getPersonName());
+        postParameters.put("startTime", DateUtil.getFormatTimeString(carResultDto.getStartTime(), DateUtil.DATE_FORMATE_STRING_B));
+        postParameters.put("endTime", DateUtil.getFormatTimeString(carResultDto.getEndTime(), DateUtil.DATE_FORMATE_STRING_B));
+        postParameters.put("feesId", "1");
+        postParameters.put("isOpen", "1");
+        postParameters.put("licensePlate", carResultDto.getCarNum());
+        postParameters.put("ownerId", carResultDto.getCarId());
+        postParameters.put("parkId", getParkingId(parkingAreaDtos.get(0)));
+        postParameters.put("status", "1");
+        JSONArray packageList = new JSONArray();
+        postParameters.put("packageList", packageList);
+        postParameters.put("id", carResultDto.getCarId());
         httpHeaders = getHeader();
         httpEntity = new HttpEntity(JSONObject.toJSONString(postParameters), httpHeaders);
         responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), UPDATE_CAR_URL, JSONObject.toJSONString(postParameters), responseEntity.getBody());
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CAR_URL, JSONObject.toJSONString(postParameters), responseEntity.getBody());
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求车辆延期失败" + responseEntity);
         }
 
         paramOut = JSONObject.parseObject(responseEntity.getBody());
-        if (!"1".equals(paramOut.getString("code"))) {
+        if (!"200".equals(paramOut.getString("code")) || !paramOut.getBoolean("success")) {
             throw new IllegalStateException(paramOut.getString("msg"));
         }
 
-        return new ResultDto(paramOut.getIntValue("code") == 1 ? 0 : -1, msg, carResultDto.getCarId());
-    }
-
-    public String getRand() {
-
-        long timeSeed = System.nanoTime(); // to get the current date time value
-
-        double randSeed = Math.random() * 1000; // random number generation
-
-        long midSeed = (long) (timeSeed * randSeed); // mixing up the time and
-
-        String s = midSeed + "";
-        String subStr = s.substring(0, 9);
-
-        int finalSeed = Integer.parseInt(subStr); // integer value
-
-        return "9." + finalSeed;
-
+        return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : -1, msg, carResultDto.getCarId());
     }
 
     /**
@@ -203,26 +187,54 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
      *
      * @param carResultDto
      */
+//    @Override
+//    public ResultDto updateCar(MachineDto machineDto, CarDto carResultDto) {
+//        String url = MappingCacheFactory.getValue("TAOGESI_CAR_URL") + UPDATE_CAR_URL;
+//        String msg = "成功";
+//        ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
+//        parkingAreaDto.setPaId(carResultDto.getPaId());
+//        Map<String, Object> postParameters = new HashMap<>();
+//        postParameters = new HashMap<>();
+//        postParameters.put("depId", carResultDto.getCarId());
+//        postParameters.put("chargeType", "1");
+//        postParameters.put("startTime", DateUtil.getFormatTimeString(carResultDto.getStartTime(), DateUtil.DATE_FORMATE_STRING_B));
+//        postParameters.put("endTime", DateUtil.getFormatTimeString(carResultDto.getEndTime(), DateUtil.DATE_FORMATE_STRING_B));
+//        postParameters.put("feesId", "1");
+//        postParameters.put("id", carResultDto.getCarId());
+//        postParameters.put("isOpen", "1");
+//        postParameters.put("licensePlate", carResultDto.getCarNum());
+//        postParameters.put("status", "1");
+//        JSONArray packageList = new JSONArray();
+//        postParameters.put("packageList", packageList);
+//        postParameters.put("id", carResultDto.getCarId());
+//        HttpHeaders httpHeaders = getHeader();
+//        HttpEntity httpEntity = new HttpEntity(JSONObject.toJSONString(postParameters), httpHeaders);
+//        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
+//        saveLog(SeqUtil.getId(), machineDto.getMachineId(), UPDATE_CAR_URL, JSONObject.toJSONString(postParameters), responseEntity.getBody());
+//
+//        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+//            throw new IllegalStateException("请求车辆延期失败" + responseEntity);
+//        }
+//
+//        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+//        if (!"200".equals(paramOut.getString("code")) || !paramOut.getBoolean("success")) {
+//            throw new IllegalStateException(paramOut.getString("msg"));
+//        }
+//
+//        return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : -1, msg, carResultDto.getCarId());
+//    }
     @Override
     public ResultDto updateCar(MachineDto machineDto, CarDto carResultDto) {
-        String url = MappingCacheFactory.getValue("YM_CAR_URL") + UPDATE_CAR_URL;
-        String appId = MappingCacheFactory.getValue("YM_APP_ID");
+        String url = MappingCacheFactory.getValue("TAOGESI_CAR_URL") + UPDATE_CAR_URL;
         String msg = "成功";
         ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
         parkingAreaDto.setPaId(carResultDto.getPaId());
-        List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
-        Map<String, String> postParameters = new HashMap<>();
+        Map<String, Object> postParameters = new HashMap<>();
         postParameters = new HashMap<>();
-        postParameters.put("parkKey", getParkingId(parkingAreaDtos.get(0)));
-        postParameters.put("carNo", carResultDto.getCarNum());
-        postParameters.put("mthChargeMoney", "0");
-        postParameters.put("beginTime", DateUtil.getFormatTimeString(carResultDto.getStartTime(), DateUtil.DATE_FORMATE_STRING_A));
-        postParameters.put("endTime", DateUtil.getFormatTimeString(carResultDto.getEndTime(), DateUtil.DATE_FORMATE_STRING_A));
-        postParameters.put("isUpdateBeginTime", "1");
-        postParameters.put("version", "v1.0");
-        postParameters.put("appid", appId);
-        postParameters.put("rand", getRand());
-        postParameters.put("sign", getSign(postParameters));
+        postParameters.put("veId", carResultDto.getCarId());
+        postParameters.put("rechargeMoney", 0);
+        postParameters.put("memo", "物业系统延期");
+        postParameters.put("endDateStr", DateUtil.getFormatTimeString(carResultDto.getEndTime(), DateUtil.DATE_FORMATE_STRING_B));
         HttpHeaders httpHeaders = getHeader();
         HttpEntity httpEntity = new HttpEntity(JSONObject.toJSONString(postParameters), httpHeaders);
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
@@ -233,44 +245,35 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         }
 
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
-        if (!"1".equals(paramOut.getString("code"))) {
+        if (!"200".equals(paramOut.getString("code")) || !paramOut.getBoolean("success")) {
             throw new IllegalStateException(paramOut.getString("msg"));
         }
 
-        return new ResultDto(paramOut.getIntValue("code") == 1 ? 0 : -1, msg, carResultDto.getCarId());
+        return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : -1, msg, carResultDto.getCarId());
     }
 
     @Override
     public ResultDto deleteCar(MachineDto machineDto, CarDto carResultDto) {
-        String url = MappingCacheFactory.getValue("YM_CAR_URL") + DELETE_CAR_URL;
-        String appId = MappingCacheFactory.getValue("YM_APP_ID");
+        String url = MappingCacheFactory.getValue("TAOGESI_CAR_URL") + DELETE_CAR_URL;
 
-        ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
-        parkingAreaDto.setPaId(carResultDto.getPaId());
-        List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
-        Map<String, String> postParameters = new HashMap<>();
-        postParameters.put("parkKey", getParkingId(parkingAreaDtos.get(0)));
-        postParameters.put("carNo", carResultDto.getCarNum());
-        postParameters.put("version", "v1.0");
-        postParameters.put("appid", appId);
-        postParameters.put("rand", getRand());
-        postParameters.put("sign", getSign(postParameters));
+        url += ("?id=" + carResultDto.getCarId());
+
         HttpHeaders httpHeaders = getHeader();
-        HttpEntity httpEntity = new HttpEntity(JSONObject.toJSONString(postParameters), httpHeaders);
-        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), DELETE_CAR_URL, JSONObject.toJSONString(postParameters), responseEntity.getBody());
+        HttpEntity httpEntity = new HttpEntity("", httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.DELETE, httpEntity, String.class);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), DELETE_CAR_URL, url, responseEntity.getBody());
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求车辆添加失败" + responseEntity);
         }
 
-        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
         String msg = "成功";
-        if (!"1".equals(paramOut.getString("code"))) {
-            msg = paramOut.getString("msg");
+        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+        if (!"200".equals(paramOut.getString("code")) || !paramOut.getBoolean("success")) {
+            throw new IllegalStateException(paramOut.getString("msg"));
         }
 
-        return new ResultDto(paramOut.getIntValue("code") == 1 ? 0 : -1, msg, carResultDto.getCarId());
+        return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : -1, msg, carResultDto.getCarId());
     }
 
 
@@ -331,7 +334,6 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         Map<String, String> postParameters = new HashMap<>();
         postParameters.put("code", "0");
         postParameters.put("msg", "成功");
-        postParameters.put("rand", getRand());
         postParameters.put("sign", getSign(postParameters));
         return JSONObject.parseObject(JSONObject.toJSONString(postParameters));
     }
@@ -367,7 +369,6 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         Map<String, String> postParameters = new HashMap<>();
         postParameters.put("code", "0");
         postParameters.put("msg", "成功");
-        postParameters.put("rand", getRand());
         postParameters.put("sign", getSign(postParameters));
         return JSONObject.parseObject(JSONObject.toJSONString(postParameters));
     }
@@ -385,7 +386,6 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         postParameters.put("carNo", carDto.getCarNum());
         postParameters.put("version", "v1.0");
         postParameters.put("appid", appId);
-        postParameters.put("rand", getRand());
         postParameters.put("sign", getSign(postParameters));
         HttpHeaders httpHeaders = getHeader();
         HttpEntity httpEntity = new HttpEntity(JSONObject.toJSONString(postParameters), httpHeaders);
@@ -452,7 +452,6 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         postParameters.put("payedMoney", tempCarPayOrderDto.getAmount() + "");
         postParameters.put("version", "v1.0");
         postParameters.put("appid", appId);
-        postParameters.put("rand", getRand());
         postParameters.put("sign", getSign(postParameters));
         HttpHeaders httpHeaders = getHeader();
         HttpEntity httpEntity = new HttpEntity(JSONObject.toJSONString(postParameters), httpHeaders);
@@ -547,8 +546,8 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
             return token;
         }
         String url = MappingCacheFactory.getValue("TAOGESI_CAR_URL") + GET_TOKEN;
-        String clientId = MappingCacheFactory.getValue("client_id");
-        String clientSecret = MappingCacheFactory.getValue("client_secret");
+        String clientId = MappingCacheFactory.getValue("taogesi_username");
+        String clientSecret = MappingCacheFactory.getValue("taogesi_password");
 
         JSONObject paramIn = new JSONObject();
         paramIn.put("username", clientId);
