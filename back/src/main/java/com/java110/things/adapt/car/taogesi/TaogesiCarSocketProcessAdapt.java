@@ -10,6 +10,7 @@ import com.java110.things.entity.car.CarBlackWhiteDto;
 import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.car.CarInoutDto;
 import com.java110.things.entity.cloud.MachineHeartbeatDto;
+import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.fee.TempCarPayOrderDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.parkingArea.ParkingAreaAttrDto;
@@ -21,6 +22,7 @@ import com.java110.things.factory.NotifyAccessControlFactory;
 import com.java110.things.netty.Java110CarProtocol;
 import com.java110.things.service.car.ICarInoutService;
 import com.java110.things.service.car.ICarService;
+import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.parkingArea.IParkingAreaService;
 import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
@@ -76,6 +78,9 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
     private IParkingAreaService parkingAreaService;
 
     @Autowired
+    private ICommunityService communityServiceImpl;
+
+    @Autowired
     private ICarService carService;
 
     @Override
@@ -83,7 +88,7 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         return null;
     }
 
-    public String getParkingId(ParkingAreaDto parkingAreaDto,String specCd) {
+    public String getParkingId(ParkingAreaDto parkingAreaDto, String specCd) {
         List<ParkingAreaAttrDto> parkingAreaAttrDtos = parkingAreaDto.getAttrs();
 
         if (parkingAreaAttrDtos == null || parkingAreaAttrDtos.size() < 1) {
@@ -106,21 +111,31 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
     public ResultDto addCar(MachineDto machineDto, CarDto carResultDto) {
 
         String url = MappingCacheFactory.getValue("TAOGESI_CAR_URL") + ADD_CAR_PERSON;
-
+        CommunityDto communityDto = new CommunityDto();
+        communityDto.setCommunityId(machineDto.getCommunityId());
+        List<CommunityDto> communityDtos = null;
+        try {
+            communityDtos = communityServiceImpl.queryCommunitys(communityDto);
+        } catch (Exception e) {
+            logger.error("添加车辆异常了", e);
+        }
+        if (communityDtos == null || communityDtos.size() < 1) {
+            throw new IllegalArgumentException("未查到小区信息");
+        }
         ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
         parkingAreaDto.setPaId(carResultDto.getPaId());
         List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
         Map<String, Object> postParameters = new HashMap<>();
         postParameters.put("id", carResultDto.getCarId());
-        postParameters.put("depId", getParkingId(parkingAreaDtos.get(0),SPEC_EXT_PARKING_ID));
-        postParameters.put("groupId", getParkingId(parkingAreaDtos.get(0),SPEC_EXT_PARKING_ID));
+        postParameters.put("depId", communityDtos.get(0).getExtCommunityId());
+        postParameters.put("groupId", getParkingId(parkingAreaDtos.get(0), SPEC_EXT_PARKING_ID));
         postParameters.put("idcard", carResultDto.getCarId());
         postParameters.put("memo", "物业系统添加");
         postParameters.put("money", "0.00");
         postParameters.put("name", carResultDto.getPersonName());
         postParameters.put("normalEnterStatus", "1");
         postParameters.put("parkingNum", "1");
-        postParameters.put("password", getParkingId(parkingAreaDtos.get(0),SPEC_EXT_DEFAULT_PWD));
+        postParameters.put("password", getParkingId(parkingAreaDtos.get(0), SPEC_EXT_DEFAULT_PWD));
         postParameters.put("phone", carResultDto.getPersonTel());
         HttpHeaders httpHeaders = getHeader();
         HttpEntity httpEntity = new HttpEntity(JSONObject.toJSONString(postParameters), httpHeaders);
@@ -144,20 +159,20 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         //延期处理
         url = MappingCacheFactory.getValue("TAOGESI_CAR_URL") + CAR_URL;
         postParameters = new HashMap<>();
-        postParameters.put("depId", carResultDto.getCarId());
+        postParameters.put("depId", communityDtos.get(0).getExtCommunityId());
         postParameters.put("chargeType", "1");
         postParameters.put("nickname", carResultDto.getPersonName());
         postParameters.put("startTime", DateUtil.getFormatTimeString(carResultDto.getStartTime(), DateUtil.DATE_FORMATE_STRING_B));
         postParameters.put("endTime", DateUtil.getFormatTimeString(carResultDto.getEndTime(), DateUtil.DATE_FORMATE_STRING_B));
-        postParameters.put("feesId", getParkingId(parkingAreaDtos.get(0),SPEC_EXT_FEE_ID));
+        postParameters.put("feesId", getParkingId(parkingAreaDtos.get(0), SPEC_EXT_FEE_ID));
         postParameters.put("isOpen", "1");
         postParameters.put("licensePlate", carResultDto.getCarNum());
         postParameters.put("ownerId", carResultDto.getCarId());
-        postParameters.put("parkId", getParkingId(parkingAreaDtos.get(0),SPEC_EXT_PARKING_ID));
+        postParameters.put("parkId", getParkingId(parkingAreaDtos.get(0), SPEC_EXT_PARKING_ID));
         postParameters.put("status", "1");
         JSONArray packageList = new JSONArray();
         JSONObject ids = new JSONObject();
-        ids.put("id",getParkingId(parkingAreaDtos.get(0),SPEC_EXT_PACKAGE_ID));
+        ids.put("id", getParkingId(parkingAreaDtos.get(0), SPEC_EXT_PACKAGE_ID));
         packageList.add(ids);
         postParameters.put("packageList", packageList);
         postParameters.put("id", carResultDto.getCarId());
@@ -388,7 +403,7 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         parkingAreaDto.setPaId(carDto.getExtPaId());
         List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
         Map<String, String> postParameters = new HashMap<>();
-        postParameters.put("parkKey", getParkingId(parkingAreaDtos.get(0),SPEC_EXT_PARKING_ID));
+        postParameters.put("parkKey", getParkingId(parkingAreaDtos.get(0), SPEC_EXT_PARKING_ID));
         postParameters.put("carNo", carDto.getCarNum());
         postParameters.put("version", "v1.0");
         postParameters.put("appid", appId);
@@ -452,7 +467,7 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         parkingAreaDto.setPaId(tempCarPayOrderDto.getExtPaId());
         List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
         Map<String, String> postParameters = new HashMap<>();
-        postParameters.put("parkKey", getParkingId(parkingAreaDtos.get(0),SPEC_EXT_PARKING_ID));
+        postParameters.put("parkKey", getParkingId(parkingAreaDtos.get(0), SPEC_EXT_PARKING_ID));
         postParameters.put("payOrderNo", tempCarPayOrderDto.getOrderId());
         postParameters.put("payedSN", tempCarPayOrderDto.getOrderId());
         postParameters.put("payedMoney", tempCarPayOrderDto.getAmount() + "");
