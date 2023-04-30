@@ -276,6 +276,8 @@ public class AiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
         carInoutDto.setRealCharge(acceptJson.getString("realcharge"));
         carInoutDto.setPayType(acceptJson.getString("pay_type"));
         carInoutDto.setMachineCode(machineDto.getMachineCode());
+        carInoutDto.setPaId(machineDto.getLocationObjId());
+        carInoutDto.setState(CarInoutDto.STATE_OUT);
 
         try {
             carInoutService.saveCarInout(carInoutDto);
@@ -310,6 +312,8 @@ public class AiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
         carInoutDto.setOpenTime(acceptJson.getString("in_time"));
         carInoutDto.setRemark(acceptJson.containsKey("remark") ? acceptJson.getString("remark") : "");
         carInoutDto.setMachineCode(machineDto.getMachineCode());
+        carInoutDto.setPaId(machineDto.getLocationObjId());
+        carInoutDto.setState(CarInoutDto.STATE_OUT);
 
         try {
             carInoutService.saveCarInout(carInoutDto);
