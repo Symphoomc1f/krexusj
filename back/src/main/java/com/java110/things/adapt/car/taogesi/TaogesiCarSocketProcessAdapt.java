@@ -54,6 +54,7 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
     private static Logger logger = LoggerFactory.getLogger(TaogesiCarSocketProcessAdapt.class);
 
     public static final String SPEC_EXT_PARKING_ID = "6185-17861";
+    public static final String SPEC_EXT_DEP_ID = "6185-17861";
     public static final String SPEC_EXT_FEE_ID = "6185-17861";
     public static final String SPEC_EXT_PACKAGE_ID = "6185-17861";
     public static final String SPEC_EXT_DEFAULT_PWD = "6185-17861";
@@ -127,7 +128,7 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
         Map<String, Object> postParameters = new HashMap<>();
         postParameters.put("id", carResultDto.getCarId());
-        postParameters.put("depId", communityDtos.get(0).getExtCommunityId());
+        postParameters.put("depId", getParkingId(parkingAreaDtos.get(0), SPEC_EXT_DEP_ID));
         postParameters.put("groupId", getParkingId(parkingAreaDtos.get(0), SPEC_EXT_PARKING_ID));
         postParameters.put("idcard", carResultDto.getCarId());
         postParameters.put("memo", "物业系统添加");
