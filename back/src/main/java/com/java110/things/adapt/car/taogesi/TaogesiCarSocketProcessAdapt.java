@@ -160,7 +160,7 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         //延期处理
         url = MappingCacheFactory.getValue("TAOGESI_CAR_URL") + CAR_URL;
         postParameters = new HashMap<>();
-        postParameters.put("depId", communityDtos.get(0).getExtCommunityId());
+        postParameters.put("depId", getParkingId(parkingAreaDtos.get(0), SPEC_EXT_DEP_ID));
         postParameters.put("chargeType", "1");
         postParameters.put("nickname", carResultDto.getPersonName());
         postParameters.put("startTime", DateUtil.getFormatTimeString(carResultDto.getStartTime(), DateUtil.DATE_FORMATE_STRING_B));
