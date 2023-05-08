@@ -127,7 +127,7 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         parkingAreaDto.setPaId(carResultDto.getPaId());
         List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
         Map<String, Object> postParameters = new HashMap<>();
-        postParameters.put("id", carResultDto.getCarId());
+        postParameters.put("id", carResultDto.getPersonId());
         postParameters.put("depId", getParkingId(parkingAreaDtos.get(0), SPEC_EXT_DEP_ID));
         postParameters.put("groupId", getParkingId(parkingAreaDtos.get(0), SPEC_EXT_PARKING_ID));
         postParameters.put("idcard", carResultDto.getCarId());
