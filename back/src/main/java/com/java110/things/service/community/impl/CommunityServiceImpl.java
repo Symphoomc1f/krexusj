@@ -110,7 +110,7 @@ public class CommunityServiceImpl implements ICommunityService {
      * @throws Exception
      */
     @Override
-    public List<CommunityDto> queryCommunitys(CommunityDto communityDto) throws Exception {
+    public List<CommunityDto> queryCommunitys(CommunityDto communityDto)  {
         List<CommunityDto> communityDtoList = communityServiceDao.getCommunitys(communityDto);
         return communityDtoList;
     }

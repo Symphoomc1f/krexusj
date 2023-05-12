@@ -24,6 +24,7 @@ import com.java110.things.service.car.ICarInoutService;
 import com.java110.things.service.car.ICarService;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.parkingArea.IParkingAreaService;
+import com.java110.things.util.Assert;
 import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
 import com.java110.things.util.StringUtil;
@@ -130,37 +131,40 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
     }
 
     /**
-     * 响应添加车辆信息
+     * 查询车主是否存在
      *
-     * @param machineDto   设备信息
-     * @param carResultDto 车辆信息
-     * @return 返回响应结果
+     * @param personId
+     * @return
      */
-    @Override
-    public ResultDto addCar(MachineDto machineDto, CarDto carResultDto) {
+    private JSONObject getTaogesiPerson(String personId) {
+        String url = MappingCacheFactory.getValue("TAOGESI_CAR_URL") + QUERY_CAR_PERSON;
+        url += ("?id=" + personId);
+        HttpHeaders httpHeaders = getHeader();
+        HttpEntity httpEntity = new HttpEntity("", httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
+
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            throw new IllegalStateException("请求车辆添加失败" + responseEntity);
+        }
+        String result = responseEntity.getBody();
+        logger.debug("返回内容" + result);
+        JSONObject paramOut = JSONObject.parseObject(result);
+        String msg = "成功";
+        if (!"200".equals(paramOut.getString("code"))) {
+            return null;
+        }
+
+        return paramOut.getJSONObject("result");
+    }
+
+    /**
+     * 添加人员
+     *
+     * @param machineDto
+     * @param carResultDto
+     */
+    private void addTaogesiPerson(MachineDto machineDto, CarDto carResultDto) {
         String url = MappingCacheFactory.getValue("TAOGESI_CAR_URL") + ADD_CAR_PERSON;
-
-        CommunityDto communityDto = new CommunityDto();
-        communityDto.setCommunityId(machineDto.getCommunityId());
-        List<CommunityDto> communityDtos = null;
-        try {
-            communityDtos = communityServiceImpl.queryCommunitys(communityDto);
-        } catch (Exception e) {
-            logger.error("添加车辆时查询小区异常了", e);
-        }
-        if (communityDtos == null || communityDtos.size() < 1) {
-            throw new IllegalArgumentException("添加车辆时未查到小区信息");
-        }
-
-        // TODO: 2021/6/1
-        // 1.根据carResultDto.getPersonId()判断车主是否存在，调用QUERY_CAR_PERSON
-        // 2.如果不存在则调用新增接口，调用ADD_CAR_PERSON，parkingNum取业主关联的车位数量
-        // 3.如果存在则调用更新接口，调用UPDATE_CAR_PERSON，parkingNum取业主关联的车位数量
-
-        // TODO: 2021/6/1
-        // 1.根据carResultDto.getCarId()判断车主是否存在，调用QUERY_CAR_URL
-        // 2.如果不存在则调用新增接口，调用ADD_CAR_URL
-        // 3.如果存在则调用更新接口，先调用UPDATE_CAR_URL（接口本身不支持续期），再调用CHARGE_CAR_URL
 
         ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
         parkingAreaDto.setPaId(carResultDto.getPaId());
@@ -192,9 +196,87 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         if (!"200".equals(paramOut.getString("code")) || !paramOut.getBoolean("success")) {
             throw new IllegalStateException(paramOut.getString("msg"));
         }
+    }
 
-        url = MappingCacheFactory.getValue("TAOGESI_CAR_URL") + ADD_CAR_URL;
-        postParameters = new HashMap<>();
+    /**
+     * 修改人员
+     *
+     * @param machineDto
+     * @param carResultDto
+     */
+    private void updateTaogesiPerson(MachineDto machineDto, CarDto carResultDto) {
+        String url = MappingCacheFactory.getValue("TAOGESI_CAR_URL") + UPDATE_CAR_PERSON;
+
+        ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
+        parkingAreaDto.setPaId(carResultDto.getPaId());
+        List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
+        Map<String, Object> postParameters = new HashMap<>();
+        postParameters.put("id", carResultDto.getPersonId());
+        postParameters.put("depId", getParkingId(parkingAreaDtos.get(0), SPEC_EXT_COMMUNITY_ID));
+        postParameters.put("groupId", getParkingId(parkingAreaDtos.get(0), SPEC_EXT_GROUP_ID));
+        postParameters.put("idcard", carResultDto.getCarId());
+        postParameters.put("memo", "物业系统修改");
+        postParameters.put("money", "0");
+        postParameters.put("name", carResultDto.getPersonName());
+        postParameters.put("normalEnterStatus", "1");
+        postParameters.put("parkingNum", carResultDto.getParkingNum());
+        postParameters.put("password", getParkingId(parkingAreaDtos.get(0), SPEC_EXT_DEFAULT_PWD));
+        postParameters.put("phone", carResultDto.getPersonTel());
+        HttpHeaders httpHeaders = getHeader();
+        HttpEntity httpEntity = new HttpEntity(JSONObject.toJSONString(postParameters), httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), UPDATE_CAR_PERSON, JSONObject.toJSONString(postParameters), responseEntity.getBody());
+
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            throw new IllegalStateException("请求车主修改失败" + responseEntity);
+        }
+        String result = responseEntity.getBody();
+        logger.debug("返回内容" + result);
+        JSONObject paramOut = JSONObject.parseObject(result);
+
+        if (!"200".equals(paramOut.getString("code")) || !paramOut.getBoolean("success")) {
+            throw new IllegalStateException(paramOut.getString("msg"));
+        }
+    }
+
+    /**
+     * 响应添加车辆信息
+     *
+     * @param machineDto   设备信息
+     * @param carResultDto 车辆信息
+     * @return 返回响应结果
+     */
+    @Override
+    public ResultDto addCar(MachineDto machineDto, CarDto carResultDto) {
+
+        CommunityDto communityDto = new CommunityDto();
+        communityDto.setCommunityId(machineDto.getCommunityId());
+        List<CommunityDto> communityDtos = null;
+
+        communityDtos = communityServiceImpl.queryCommunitys(communityDto);
+
+        Assert.listOnlyOne(communityDtos, "添加车辆时未查到小区信息");
+
+        // TODO: 2021/6/1
+        // 1.根据carResultDto.getPersonId()判断车主是否存在，调用QUERY_CAR_PERSON
+        JSONObject person = getTaogesiPerson(carResultDto.getPersonId());
+
+        // 2.如果不存在则调用新增接口，调用ADD_CAR_PERSON，parkingNum取业主关联的车位数量
+        if (person == null) {
+            addTaogesiPerson(machineDto,carResultDto);
+        }else{ // 3.如果存在则调用更新接口，调用UPDATE_CAR_PERSON，parkingNum取业主关联的车位数量
+            updateTaogesiPerson(machineDto,carResultDto);
+        }
+
+        // TODO: 2021/6/1
+        // 1.根据carResultDto.getCarId()判断车主是否存在，调用QUERY_CAR_URL
+        // 2.如果不存在则调用新增接口，调用ADD_CAR_URL
+        // 3.如果存在则调用更新接口，先调用UPDATE_CAR_URL（接口本身不支持续期），再调用CHARGE_CAR_URL
+        ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
+        parkingAreaDto.setPaId(carResultDto.getPaId());
+        List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
+        String url = MappingCacheFactory.getValue("TAOGESI_CAR_URL") + ADD_CAR_URL;
+        Map<String, Object> postParameters = new HashMap<>();
         postParameters.put("depId", getParkingId(parkingAreaDtos.get(0), SPEC_EXT_COMMUNITY_ID));
         postParameters.put("chargeType", "1");
         postParameters.put("nickname", carResultDto.getPersonName());
@@ -215,30 +297,37 @@ public class TaogesiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
                 }).forEach(packageList::add);
         postParameters.put("packageList", packageList);
         postParameters.put("id", carResultDto.getCarId());
-        httpHeaders = getHeader();
-        httpEntity = new HttpEntity(JSONObject.toJSONString(postParameters), httpHeaders);
-        responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        HttpHeaders httpHeaders = getHeader();
+        HttpEntity httpEntity = new HttpEntity(JSONObject.toJSONString(postParameters), httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), ADD_CAR_URL, JSONObject.toJSONString(postParameters), responseEntity.getBody());
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求车辆延期失败" + responseEntity);
         }
 
-        paramOut = JSONObject.parseObject(responseEntity.getBody());
+       JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
         if (!"200".equals(paramOut.getString("code")) || !paramOut.getBoolean("success")) {
             throw new IllegalStateException(paramOut.getString("msg"));
         }
 
-        return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : -1, msg, carResultDto.getCarId());
+        return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : -1, "成功", carResultDto.getCarId());
     }
 
 
     @Override
     public ResultDto updateCar(MachineDto machineDto, CarDto carResultDto) {
         // TODO: 2021/6/1
+
         // 1.根据carResultDto.getPersonId()判断车主是否存在，调用QUERY_CAR_PERSON
+        JSONObject person = getTaogesiPerson(carResultDto.getPersonId());
+
         // 2.如果不存在则调用新增接口，调用ADD_CAR_PERSON，parkingNum取业主关联的车位数量
-        // 3.如果存在则调用更新接口，调用UPDATE_CAR_PERSON，parkingNum取业主关联的车位数量
+        if (person == null) {
+            addTaogesiPerson(machineDto,carResultDto);
+        }else{ // 3.如果存在则调用更新接口，调用UPDATE_CAR_PERSON，parkingNum取业主关联的车位数量
+            updateTaogesiPerson(machineDto,carResultDto);
+        }
 
         // TODO: 2021/6/1
         // 1.根据carResultDto.getCarId()判断车主是否存在，调用QUERY_CAR_URL
