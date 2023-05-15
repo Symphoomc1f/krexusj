@@ -409,6 +409,8 @@ public class CjHttpAssessControlProcessAdapt extends DefaultAbstractAccessContro
                 List<MachineFaceDto> machineFaceDtos = notifyAccessControlService.queryMachineFaces(machineFaceDto);
                 if (machineFaceDtos != null && machineFaceDtos.size() > 0) {
                     userName = machineFaceDtos.get(0).getName();
+                }else{
+                    userName = "未知人员";
                 }
 
             }

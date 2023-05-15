@@ -91,7 +91,6 @@
             and t.ext_person_id = #{extPersonId}
         </if>
         and t.status_cd = '0'
-        order by t.create_time desc
 
     </select>
 

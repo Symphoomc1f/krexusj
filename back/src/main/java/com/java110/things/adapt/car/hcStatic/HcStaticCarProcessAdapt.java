@@ -1,4 +1,4 @@
-package com.java110.things.adapt.car.szymzh;
+package com.java110.things.adapt.car.hcStatic;
 
 
 import com.alibaba.fastjson.JSONObject;
@@ -40,24 +40,22 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * 深圳市云盟智慧科技有限公司停车场对接适配器
- * 参考文档 http://doc.szymzh.com/
+ * HC对外道闸标准协议
+ * 参考文档
  */
-@Service("szymzhCarSocketProcessAdapt")
-public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
+@Service("hcStaticCarProcessAdapt")
+public class HcStaticCarProcessAdapt extends DefaultAbstractCarProcessAdapt {
 
-    private static Logger logger = LoggerFactory.getLogger(SzymzhCarSocketProcessAdapt.class);
+    private static Logger logger = LoggerFactory.getLogger(HcStaticCarProcessAdapt.class);
 
     public static final String SPEC_EXT_PARKING_ID = "6185-17861";
 
-    public static final String GET_TOKEN = "/auth/oauth/token";
     public static final String CAR_URL = "/Api/Inform/AddMthCar";
     //修改车辆
     private static final String UPDATE_CAR_URL = "/Api/Inform/ChargeMonthCar";
     private static final String DELETE_CAR_URL = "/Api/Inform/FailMonthCar";
     public static final String GET_NEED_PAY_ORDER_URL = "/Api/Inquire/GetCarNoOrderFee";
     public static final String NOTIFY_NEED_PAY_ORDER_URL = "/Api/Inform/PayNotify";
-    public static final String ADD_USER_URL = "/Api/Inform/AddPerson";
 
     @Autowired
     private RestTemplate restTemplate;
@@ -98,48 +96,17 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
     @Override
     public ResultDto addCar(MachineDto machineDto, CarDto carResultDto) {
 
-        String url = MappingCacheFactory.getValue("YM_CAR_URL") + ADD_USER_URL;
-        String appId = MappingCacheFactory.getValue("YM_APP_ID");
-
+        String url = MappingCacheFactory.getValue("HC_CAR_URL") + CAR_URL;
         ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
         parkingAreaDto.setPaId(carResultDto.getPaId());
         List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
-        //新增用户
-        Map<String, String> postParameters = new HashMap<>();
-        postParameters.put("parkKey", getParkingId(parkingAreaDtos.get(0)));
-        postParameters.put("userName", carResultDto.getPersonName());
-        postParameters.put("carTypeNo", "3652");
-        postParameters.put("homeAddress", "深圳市某某区某某街道某某号");
-        postParameters.put("mobNumber", "18909711234");
-        postParameters.put("version", "v1.0");
-        postParameters.put("appid", appId);
-        postParameters.put("rand", getRand());
-        postParameters.put("sign", getSign(postParameters));
-        postParameters.put("parkNo", "");
-        postParameters.put("machineNo", "");
-        String paramStr = HttpClient.doPost(url, JSONObject.toJSONString(postParameters), "", "POST");
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), ADD_USER_URL, JSONObject.toJSONString(postParameters), paramStr);
-
-
-        JSONObject paramOut = JSONObject.parseObject(paramStr);
-        if (!"1".equals(paramOut.getString("code"))) {
-            throw new IllegalArgumentException(paramOut.getString("msg"));
-        }
-        String userNo = paramOut.getJSONObject("data").getString("userNo");
-
-        url = MappingCacheFactory.getValue("YM_CAR_URL") + CAR_URL;
-        parkingAreaDto = new ParkingAreaDto();
-        parkingAreaDto.setPaId(carResultDto.getPaId());
-        parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
-        postParameters = new HashMap<>();
+        Map<String,String> postParameters = new HashMap<>();
         postParameters.put("parkKey", getParkingId(parkingAreaDtos.get(0)));
         postParameters.put("carNo", carResultDto.getCarNum());
-        postParameters.put("userNo", userNo);
+        postParameters.put("userName", carResultDto.getPersonName());
         postParameters.put("version", "v1.0");
-        postParameters.put("appid", appId);
-        postParameters.put("rand", getRand());
         postParameters.put("sign", getSign(postParameters));
-        paramStr = HttpClient.doPost(url, JSONObject.toJSONString(postParameters), "", "POST");
+        String paramStr = HttpClient.doPost(url, JSONObject.toJSONString(postParameters), "", "POST");
 
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CAR_URL, JSONObject.toJSONString(postParameters), paramStr);
 
@@ -147,20 +114,15 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
         String result = paramStr;
 
         logger.debug("返回内容" + result);
-        try {
-            logger.debug("返回内容gbk" + new String(result.getBytes(), "GBK"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
 
-        paramOut = JSONObject.parseObject(paramStr);
+        JSONObject paramOut = JSONObject.parseObject(paramStr);
         String msg = "成功";
-        if (!"1".equals(paramOut.getString("code"))) {
+        if (!"0".equals(paramOut.getString("code"))) {
             throw new IllegalStateException(paramOut.getString("msg"));
         }
 
         //延期处理
-        url = MappingCacheFactory.getValue("YM_CAR_URL") + UPDATE_CAR_URL;
+        url = MappingCacheFactory.getValue("HC_CAR_URL") + UPDATE_CAR_URL;
         postParameters = new HashMap<>();
         postParameters.put("parkKey", getParkingId(parkingAreaDtos.get(0)));
         postParameters.put("carNo", carResultDto.getCarNum());
@@ -169,37 +131,19 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
         postParameters.put("endTime", DateUtil.getFormatTimeString(carResultDto.getEndTime(), DateUtil.DATE_FORMATE_STRING_A));
         postParameters.put("isUpdateBeginTime", "1");
         postParameters.put("version", "v1.0");
-        postParameters.put("appid", appId);
-        postParameters.put("rand", getRand());
         postParameters.put("sign", getSign(postParameters));
         paramStr = HttpClient.doPost(url, JSONObject.toJSONString(postParameters), "", "POST");
 
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), UPDATE_CAR_URL, JSONObject.toJSONString(postParameters), paramStr);
 
         paramOut = JSONObject.parseObject(paramStr);
-        if (!"1".equals(paramOut.getString("code"))) {
+        if (!"0".equals(paramOut.getString("code"))) {
             throw new IllegalArgumentException(paramOut.getString("msg"));
         }
 
-        return new ResultDto(paramOut.getIntValue("code") == 1 ? 0 : -1, msg, carResultDto.getCarId());
+        return new ResultDto(paramOut.getIntValue("code") == 0 ? 0 : -1, msg, carResultDto.getCarId());
     }
 
-    public String getRand() {
-
-        long timeSeed = System.nanoTime(); // to get the current date time value
-
-        double randSeed = Math.random() * 1000; // random number generation
-
-        long midSeed = (long) (timeSeed * randSeed); // mixing up the time and
-
-        String s = midSeed + "";
-        String subStr = s.substring(0, 9);
-
-        int finalSeed = Integer.parseInt(subStr); // integer value
-
-        return "9." + finalSeed;
-
-    }
 
     /**
      * {
@@ -218,8 +162,7 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
      */
     @Override
     public ResultDto updateCar(MachineDto machineDto, CarDto carResultDto) {
-        String url = MappingCacheFactory.getValue("YM_CAR_URL") + UPDATE_CAR_URL;
-        String appId = MappingCacheFactory.getValue("YM_APP_ID");
+        String url = MappingCacheFactory.getValue("HC_CAR_URL") + UPDATE_CAR_URL;
         String msg = "成功";
         ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
         parkingAreaDto.setPaId(carResultDto.getPaId());
@@ -233,8 +176,6 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
         postParameters.put("endTime", DateUtil.getFormatTimeString(carResultDto.getEndTime(), DateUtil.DATE_FORMATE_STRING_A));
         postParameters.put("isUpdateBeginTime", "1");
         postParameters.put("version", "v1.0");
-        postParameters.put("appid", appId);
-        postParameters.put("rand", getRand());
         postParameters.put("sign", getSign(postParameters));
 
         String paramStr = HttpClient.doPost(url, JSONObject.toJSONString(postParameters), "", "POST");
@@ -242,17 +183,17 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), UPDATE_CAR_URL, JSONObject.toJSONString(postParameters), paramStr);
 
         JSONObject paramOut = JSONObject.parseObject(paramStr);
-        if (!"1".equals(paramOut.getString("code"))) {
+        if (!"0".equals(paramOut.getString("code"))) {
             throw new IllegalArgumentException(paramOut.getString("msg"));
         }
 
-        return new ResultDto(paramOut.getIntValue("code") == 1 ? 0 : -1, msg, carResultDto.getCarId());
+        return new ResultDto(paramOut.getIntValue("code") == 0 ? 0 : -1, msg, carResultDto.getCarId());
     }
 
     @Override
     public ResultDto deleteCar(MachineDto machineDto, CarDto carResultDto) {
-        String url = MappingCacheFactory.getValue("YM_CAR_URL") + DELETE_CAR_URL;
-        String appId = MappingCacheFactory.getValue("YM_APP_ID");
+        String url = MappingCacheFactory.getValue("HC_CAR_URL") + DELETE_CAR_URL;
+        String appId = MappingCacheFactory.getValue("HC_APP_ID");
 
         ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
         parkingAreaDto.setPaId(carResultDto.getPaId());
@@ -262,7 +203,6 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
         postParameters.put("carNo", carResultDto.getCarNum());
         postParameters.put("version", "v1.0");
         postParameters.put("appid", appId);
-        postParameters.put("rand", getRand());
         postParameters.put("sign", getSign(postParameters));
         String paramStr = HttpClient.doPost(url, JSONObject.toJSONString(postParameters), "", "POST");
 
@@ -270,11 +210,11 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
 
         JSONObject paramOut = JSONObject.parseObject(paramStr);
         String msg = "成功";
-        if (!"1".equals(paramOut.getString("code"))) {
+        if (!"0".equals(paramOut.getString("code"))) {
             msg = paramOut.getString("msg");
         }
 
-        return new ResultDto(paramOut.getIntValue("code") == 1 ? 0 : -1, msg, carResultDto.getCarId());
+        return new ResultDto(paramOut.getIntValue("code") == 0 ? 0 : -1, msg, carResultDto.getCarId());
     }
 
 
@@ -337,7 +277,6 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
         Map<String, String> postParameters = new HashMap<>();
         postParameters.put("code", "0");
         postParameters.put("msg", "成功");
-        postParameters.put("rand", getRand());
         postParameters.put("sign", getSign(postParameters));
         return JSONObject.parseObject(JSONObject.toJSONString(postParameters));
     }
@@ -375,15 +314,14 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
         Map<String, String> postParameters = new HashMap<>();
         postParameters.put("code", "0");
         postParameters.put("msg", "成功");
-        postParameters.put("rand", getRand());
         postParameters.put("sign", getSign(postParameters));
         return JSONObject.parseObject(JSONObject.toJSONString(postParameters));
     }
 
     @Override
     public TempCarPayOrderDto getNeedPayOrder(MachineDto machineDto, CarDto carDto) {
-        String url = MappingCacheFactory.getValue("YM_CAR_URL") + GET_NEED_PAY_ORDER_URL;
-        String appId = MappingCacheFactory.getValue("YM_APP_ID");
+        String url = MappingCacheFactory.getValue("HC_CAR_URL") + GET_NEED_PAY_ORDER_URL;
+        String appId = MappingCacheFactory.getValue("HC_APP_ID");
 
         ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
         parkingAreaDto.setPaId(carDto.getExtPaId());
@@ -392,8 +330,6 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
         postParameters.put("parkKey", getParkingId(parkingAreaDtos.get(0)));
         postParameters.put("carNo", carDto.getCarNum());
         postParameters.put("version", "v1.0");
-        postParameters.put("appid", appId);
-        postParameters.put("rand", getRand());
         postParameters.put("sign", getSign(postParameters));
         HttpHeaders httpHeaders = getHeader();
         HttpEntity httpEntity = new HttpEntity(JSONObject.toJSONString(postParameters), httpHeaders);
@@ -406,7 +342,7 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
 
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
         String msg = "成功";
-        if (!"1".equals(paramOut.getString("code"))) {
+        if (!"0".equals(paramOut.getString("code"))) {
             return null;
         }
 
@@ -448,7 +384,7 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
     @Override
     public ResultDto notifyTempCarFeeOrder(MachineDto machineDto, TempCarPayOrderDto tempCarPayOrderDto) {
         String url = MappingCacheFactory.getValue("ZERO_ONE_CAR_URL") + NOTIFY_NEED_PAY_ORDER_URL;
-        String appId = MappingCacheFactory.getValue("YM_APP_ID");
+        String appId = MappingCacheFactory.getValue("HC_APP_ID");
 
         ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
         parkingAreaDto.setPaId(tempCarPayOrderDto.getExtPaId());
@@ -459,8 +395,6 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
         postParameters.put("payedSN", tempCarPayOrderDto.getOrderId());
         postParameters.put("payedMoney", tempCarPayOrderDto.getAmount() + "");
         postParameters.put("version", "v1.0");
-        postParameters.put("appid", appId);
-        postParameters.put("rand", getRand());
         postParameters.put("sign", getSign(postParameters));
         HttpHeaders httpHeaders = getHeader();
         HttpEntity httpEntity = new HttpEntity(JSONObject.toJSONString(postParameters), httpHeaders);
@@ -474,11 +408,11 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
 
         String msg = "成功";
-        if (paramOut.getIntValue("code") != 1) {
+        if (paramOut.getIntValue("code") != 0) {
             msg = paramOut.getString("msg");
         }
 
-        return new ResultDto(paramOut.getIntValue("code") == 1 ? 0 : -1, msg);
+        return new ResultDto(paramOut.getIntValue("code") == 0 ? 0 : -1, msg);
     }
 
     @Override
@@ -515,13 +449,13 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
     }
 
     /**
-     * 获取accessToken
+     * 获取sign
      *
      * @return
      */
     private String getSign(Map<String, String> reqParamMap) {
 
-        String signKey = MappingCacheFactory.getValue("YM_SIGN_KEY");
+        String signKey = MappingCacheFactory.getValue("HC_SIGN_KEY");
 
         Map<String, String> paramsMap = reqParamMap instanceof TreeMap ? reqParamMap : new TreeMap<>(reqParamMap);
         StringBuilder buf = new StringBuilder(paramsMap.size() * 20);
@@ -551,10 +485,4 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
         return httpHeaders;
     }
 
-    public static void main(String[] args) {
-        String paramOut = "{\"rand\":\"9.140252525\",\"parkNo\":\"\",\"appid\":\"ym5fe91021a2af154b\",\"sign\":\"20774CCB1A47FEE316AD04E957A0F7ED\",\"machineNo\":\"\",\"userName\":\"邓莉\",\"carTypeNo\":\"3652\",\"parkKey\":\"x2d3qqgk\",\"version\":\"v1.0\",\"homeAddress\":\"深圳市某某区某某街道某某号\",\"mobNumber\":\"18909711234\"}";
-        String param = HttpClient.doPost("http://openapi.ymiot.net/Api/Inform/AddPerson", paramOut, "", "POST");
-
-        System.out.printf("param = " + param);
-    }
 }

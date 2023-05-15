@@ -360,10 +360,10 @@ public class BisenHttpAssessControlProcessAdapt extends DefaultAbstractAccessCon
             } else {
                 userName = body.getString("personName");
             }
-            if(StringUtil.isEmpty(userId)){
+            if (StringUtil.isEmpty(userId)) {
                 userId = "-1";
             }
-            if(StringUtil.isEmpty(userName)){
+            if (StringUtil.isEmpty(userName)) {
                 userName = "门禁未上报";
             }
 
@@ -391,7 +391,7 @@ public class BisenHttpAssessControlProcessAdapt extends DefaultAbstractAccessCon
     }
 
     public static void main(String[] args) {
-       String img = ImageFactory.getBase64ByImgUrl("https://bisen-temp-iot.oss-cn-beijing.aliyuncs.com/bisen-temp-iot/bs/face/40230b92623d42b59446a07185a1df2f.jpg");
+        String img = ImageFactory.getBase64ByImgUrl("https://bisen-temp-iot.oss-cn-beijing.aliyuncs.com/bisen-temp-iot/bs/face/40230b92623d42b59446a07185a1df2f.jpg");
         System.out.println(img);
     }
 
@@ -415,103 +415,106 @@ public class BisenHttpAssessControlProcessAdapt extends DefaultAbstractAccessCon
 
     @Override
     public ResultDto addMachine(MachineDto machineDto) {
-        ResultDto resultDto = null;
-        JSONObject postParameters = new JSONObject();
-        String paramOutString = "";
-        try {
-            String url = MappingCacheFactory.getValue("BISEN_URL") + ADD_MACHINE;
-            String appId = MappingCacheFactory.getValue("appId");
-
-            postParameters.put("appId", appId);
-            postParameters.put("deviceNo", machineDto.getMachineCode());
-            postParameters.put("deviceName", machineDto.getMachineName());
-            postParameters.put("tag", machineDto.getMachineId());
-
-            HttpHeaders httpHeaders = getHeader();
-            HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
-            ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
-            saveLog(SeqUtil.getId(), machineDto.getMachineId(), ADD_MACHINE, postParameters.toJSONString(), responseEntity.getBody());
-
-            if (responseEntity.getStatusCode() != HttpStatus.OK) {
-                resultDto = new ResultDto(ResultDto.ERROR, "请求百胜获取token失败" + responseEntity);
-            }
-
-            JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
-            if (paramOut.getIntValue("code") != 0) {
-                resultDto = new ResultDto(ResultDto.ERROR, paramOut.getString("msg"));
-            }
-
-            url = MappingCacheFactory.getValue("BISEN_URL") + CMD_SET_IDENTIFY_CALLBACK;
-
-            postParameters = new JSONObject();
-            postParameters.put("appId", appId);
-            postParameters.put("callbackUrl", MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "IOT_URL") + "/api/accessControl/faceResultBisen");
-            postParameters.put("cbType", 8);
-
-//            httpHeaders = getHeader();
-//            httpEntity = new HttpEntity(postParameters.toJSONString(), httpHeaders);
-//            responseEntity = outRestTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
-            paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "PUT");
-            paramOut = JSONObject.parseObject(paramOutString);
-            saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_IDENTIFY_CALLBACK, paramOutString, responseEntity.getBody());
-
-            if (paramOut.getIntValue("code") != 0) {
-                resultDto = new ResultDto(ResultDto.ERROR, paramOut.getString("msg"));
-            }
-        } catch (Exception e) {
-            logger.error("推送报错" + postParameters, e);
-            throw e;
-        }
-        return resultDto;
+//        ResultDto resultDto = null;
+//        JSONObject postParameters = new JSONObject();
+//        String paramOutString = "";
+//        try {
+//            String url = MappingCacheFactory.getValue("BISEN_URL") + ADD_MACHINE;
+//            String appId = MappingCacheFactory.getValue("appId");
+//
+//            postParameters.put("appId", appId);
+//            postParameters.put("deviceNo", machineDto.getMachineCode());
+//            postParameters.put("deviceName", machineDto.getMachineName());
+//            postParameters.put("tag", machineDto.getMachineId());
+//
+//            HttpHeaders httpHeaders = getHeader();
+//            HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
+//            ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+//            saveLog(SeqUtil.getId(), machineDto.getMachineId(), ADD_MACHINE, postParameters.toJSONString(), responseEntity.getBody());
+//
+//            if (responseEntity.getStatusCode() != HttpStatus.OK) {
+//                resultDto = new ResultDto(ResultDto.ERROR, "请求百胜获取token失败" + responseEntity);
+//            }
+//
+//            JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+//            if (paramOut.getIntValue("code") != 0) {
+//                resultDto = new ResultDto(ResultDto.ERROR, paramOut.getString("msg"));
+//            }
+//
+//            url = MappingCacheFactory.getValue("BISEN_URL") + CMD_SET_IDENTIFY_CALLBACK;
+//
+//            postParameters = new JSONObject();
+//            postParameters.put("appId", appId);
+//            postParameters.put("callbackUrl", MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "IOT_URL") + "/api/accessControl/faceResultBisen");
+//            postParameters.put("cbType", 8);
+//
+////            httpHeaders = getHeader();
+////            httpEntity = new HttpEntity(postParameters.toJSONString(), httpHeaders);
+////            responseEntity = outRestTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
+//            paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "PUT");
+//            paramOut = JSONObject.parseObject(paramOutString);
+//            saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_IDENTIFY_CALLBACK, paramOutString, responseEntity.getBody());
+//
+//            if (paramOut.getIntValue("code") != 0) {
+//                resultDto = new ResultDto(ResultDto.ERROR, paramOut.getString("msg"));
+//            }
+//        } catch (Exception e) {
+//            logger.error("推送报错" + postParameters, e);
+//            throw e;
+//        }
+//        return resultDto;
+        return new ResultDto(ResultDto.SUCCESS, "成功");
     }
 
     @Override
     public ResultDto updateMachine(MachineDto machineDto) {
 
-        ResultDto resultDto = null;
-        String url = MappingCacheFactory.getValue("BISEN_URL") + UPDATE_MACHINE;
-        String appId = MappingCacheFactory.getValue("appId");
-
-        JSONObject postParameters = new JSONObject();
-        postParameters.put("appId", appId);
-        postParameters.put("deviceNo", machineDto.getMachineCode());
-        postParameters.put("deviceName", machineDto.getMachineName());
-        postParameters.put("tag", machineDto.getMachineId());
-
-        HttpHeaders httpHeaders = getHeader();
-        HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
-
-        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
-        if (responseEntity.getStatusCode() != HttpStatus.OK) {
-            resultDto = new ResultDto(ResultDto.ERROR, "请求百胜获取token失败" + responseEntity);
-        }
-
-        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
-        if (paramOut.getIntValue("code") != 0) {
-            resultDto = new ResultDto(ResultDto.ERROR, paramOut.getString("msg"));
-        }
-        return resultDto;
+//        ResultDto resultDto = null;
+//        String url = MappingCacheFactory.getValue("BISEN_URL") + UPDATE_MACHINE;
+//        String appId = MappingCacheFactory.getValue("appId");
+//
+//        JSONObject postParameters = new JSONObject();
+//        postParameters.put("appId", appId);
+//        postParameters.put("deviceNo", machineDto.getMachineCode());
+//        postParameters.put("deviceName", machineDto.getMachineName());
+//        postParameters.put("tag", machineDto.getMachineId());
+//
+//        HttpHeaders httpHeaders = getHeader();
+//        HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
+//
+//        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
+//        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+//            resultDto = new ResultDto(ResultDto.ERROR, "请求百胜获取token失败" + responseEntity);
+//        }
+//
+//        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+//        if (paramOut.getIntValue("code") != 0) {
+//            resultDto = new ResultDto(ResultDto.ERROR, paramOut.getString("msg"));
+//        }
+//        return resultDto;
+        return new ResultDto(ResultDto.SUCCESS, "成功");
     }
 
     @Override
     public ResultDto deleteMachine(MachineDto machineDto) {
-        ResultDto resultDto = null;
-        String url = MappingCacheFactory.getValue("BISEN_URL") + DELETE_MACHINE;
-        String appId = MappingCacheFactory.getValue("appId");
-
-        url += ("?appId=" + appId + "&deviceNo=" + machineDto.getMachineCode());
-        HttpHeaders httpHeaders = getHeader();
-        HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity("", httpHeaders);
-        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.DELETE, httpEntity, String.class);
-        if (responseEntity.getStatusCode() != HttpStatus.OK) {
-            resultDto = new ResultDto(ResultDto.ERROR, "请求百胜获取token失败" + responseEntity);
-        }
-
-        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
-        if (paramOut.getIntValue("code") != 0) {
-            resultDto = new ResultDto(ResultDto.ERROR, paramOut.getString("msg"));
-        }
-        return resultDto;
+//        ResultDto resultDto = null;
+//        String url = MappingCacheFactory.getValue("BISEN_URL") + DELETE_MACHINE;
+//        String appId = MappingCacheFactory.getValue("appId");
+//
+//        url += ("?appId=" + appId + "&deviceNo=" + machineDto.getMachineCode());
+//        HttpHeaders httpHeaders = getHeader();
+//        HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity("", httpHeaders);
+//        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.DELETE, httpEntity, String.class);
+//        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+//            resultDto = new ResultDto(ResultDto.ERROR, "请求百胜获取token失败" + responseEntity);
+//        }
+//
+//        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+//        if (paramOut.getIntValue("code") != 0) {
+//            resultDto = new ResultDto(ResultDto.ERROR, paramOut.getString("msg"));
+//        }
+//        return resultDto;
+        return new ResultDto(ResultDto.SUCCESS, "成功");
     }
 
 

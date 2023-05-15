@@ -253,7 +253,9 @@ public class MachineServiceImpl implements IMachineService {
     @Override
     public ResultDto openDoor(MachineDto machineDto) throws Exception {
         List<MachineDto> machineDtoList = machineServiceDao.getMachines(machineDto);
-        Assert.listOnlyOne(machineDtoList, "设备不存在");
+        if (machineDtoList == null || machineDtoList.size() < 1) {
+            throw new IllegalArgumentException("设备不存在");
+        }
         machineDto = machineDtoList.get(0);
         //初始化设备信息
         if (MachineDto.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {

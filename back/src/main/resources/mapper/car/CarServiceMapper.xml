@@ -24,10 +24,11 @@
         t.person_name personName,
         t.person_tel personTel,
         t.pa_id paId,
-        t.card_id cardId
+        t.card_id cardId,
+        pa.ext_pa_id extPaId
         from car t
+        left join parking_area pa on t.pa_id = pa.pa_id and pa.status_cd = '0'
         where 1=1
-        and t.status_cd = '0'
         <if test="carId != null and carId != ''">
             and t.car_id = #{carId}
         </if>
