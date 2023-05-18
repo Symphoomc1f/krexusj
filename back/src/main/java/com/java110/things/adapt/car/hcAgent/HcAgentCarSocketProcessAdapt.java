@@ -9,6 +9,7 @@ import com.java110.things.entity.car.CarBlackWhiteDto;
 import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.car.CarInoutDto;
 import com.java110.things.entity.cloud.MachineHeartbeatDto;
+import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.fee.TempCarPayOrderDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.parkingArea.ParkingAreaAttrDto;
@@ -21,7 +22,9 @@ import com.java110.things.factory.NotifyAccessControlFactory;
 import com.java110.things.netty.Java110CarProtocol;
 import com.java110.things.service.car.ICarInoutService;
 import com.java110.things.service.car.ICarService;
+import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.parkingArea.IParkingAreaService;
+import com.java110.things.util.Assert;
 import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
 import com.java110.things.util.StringUtil;
@@ -52,6 +55,8 @@ public class HcAgentCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
 
     public static final String SPEC_EXT_PARKING_ID = "6185-17861";
 
+    public static final String SPEC_EXT_VID_ID = "7185-17861";
+
     public static final String GET_TOKEN = "/auth/oauth/token";
     public static final String CAR_URL = "/api/park/freecar";
     public static final String GET_NEED_PAY_ORDER_URL = "/api/pay/car";
@@ -71,6 +76,9 @@ public class HcAgentCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
 
     @Autowired
     private ICarService carService;
+
+    @Autowired
+    private ICommunityService communityServiceImpl;
 
     @Override
     public String getCar(CarResultDto carResultDto) {
@@ -93,11 +101,35 @@ public class HcAgentCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         return "";
     }
 
+    public String getVId(ParkingAreaDto parkingAreaDto) {
+        List<ParkingAreaAttrDto> parkingAreaAttrDtos = parkingAreaDto.getAttrs();
+
+        if (parkingAreaAttrDtos == null || parkingAreaAttrDtos.size() < 1) {
+            return "";
+        }
+
+        for (ParkingAreaAttrDto parkingAreaAttrDto : parkingAreaAttrDtos) {
+            if (SPEC_EXT_VID_ID.equals(parkingAreaAttrDto.getSpecCd())) {
+                return parkingAreaAttrDto.getValue();
+            }
+        }
+
+        return "";
+    }
+
     /**
      * @param carResultDto 用户人脸信息
      */
     @Override
     public ResultDto addCar(MachineDto machineDto, CarDto carResultDto) {
+
+        CommunityDto communityDto = new CommunityDto();
+        communityDto.setCommunityId(machineDto.getCommunityId());
+        List<CommunityDto> communityDtos = null;
+
+        communityDtos = communityServiceImpl.queryCommunitys(communityDto);
+
+        Assert.listOnlyOne(communityDtos, "添加车辆时未查到小区信息");
 
         ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
         parkingAreaDto.setPaId(carResultDto.getPaId());
@@ -106,13 +138,18 @@ public class HcAgentCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         postParameters.put("adaptName", "smartServiceAdapt");
         postParameters.put("action", "ADD_CAR");
         postParameters.put("parkingId", getParkingId(parkingAreaDtos.get(0)));
+        postParameters.put("personId", carResultDto.getPersonId());
         postParameters.put("personName", carResultDto.getPersonName());
         postParameters.put("personTel", carResultDto.getPersonTel());
         postParameters.put("carNum", carResultDto.getCarNum());
+        postParameters.put("carId", carResultDto.getCarId());
         postParameters.put("startTime", DateUtil.getFormatTimeString(carResultDto.getStartTime(), DateUtil.DATE_FORMATE_STRING_A));
         postParameters.put("endTime", DateUtil.getFormatTimeString(carResultDto.getEndTime(), DateUtil.DATE_FORMATE_STRING_A));
+        postParameters.put("communityId",getVId(parkingAreaDtos.get(0)));
+        postParameters.put("carTypeId","5720194218816441884");
+        postParameters.put("carModelID","4692197192354628555");
         MqttFactory.publish(TOPIC_REQUEST,postParameters.toJSONString());
-        return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG);
+        return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG,carResultDto.getCarId());
     }
 
     /**
@@ -139,13 +176,15 @@ public class HcAgentCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         postParameters.put("adaptName", "smartServiceAdapt");
         postParameters.put("action", "EDIT_CAR");
         postParameters.put("parkingId", getParkingId(parkingAreaDtos.get(0)));
+        postParameters.put("personId", carResultDto.getPersonId());
         postParameters.put("personName", carResultDto.getPersonName());
         postParameters.put("personTel", carResultDto.getPersonTel());
         postParameters.put("carNum", carResultDto.getCarNum());
+        postParameters.put("carId", carResultDto.getCarId());
         postParameters.put("startTime", DateUtil.getFormatTimeString(carResultDto.getStartTime(), DateUtil.DATE_FORMATE_STRING_A));
         postParameters.put("endTime", DateUtil.getFormatTimeString(carResultDto.getEndTime(), DateUtil.DATE_FORMATE_STRING_A));
         MqttFactory.publish(TOPIC_REQUEST,postParameters.toJSONString());
-        return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG);
+        return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG,carResultDto.getCarId());
     }
 
     @Override
@@ -158,8 +197,9 @@ public class HcAgentCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         postParameters.put("action", "DELETE_CAR");
         postParameters.put("parkingId", getParkingId(parkingAreaDtos.get(0)));
         postParameters.put("carNum", carResultDto.getCarNum());
+        postParameters.put("carId", carResultDto.getCarId());
         MqttFactory.publish(TOPIC_REQUEST,postParameters.toJSONString());
-        return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG);
+        return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG,carResultDto.getCarId());
     }
 
 

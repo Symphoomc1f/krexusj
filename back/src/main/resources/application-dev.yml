@@ -65,9 +65,9 @@ spring :
     completionTimeout: 3000
     default:
       topic: topic
-    password: password
-    url: tcp://101.37.174.37:61613
-    username: admin
+    password: wuxw
+    url: tcp://proxy.homecommunity.cn:9020
+    username: wuxw
     keepalive: 10
 
 netty:
