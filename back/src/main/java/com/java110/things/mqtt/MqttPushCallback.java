@@ -1,6 +1,7 @@
 package com.java110.things.mqtt;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.factory.AccessControlProcessFactory;
 import com.java110.things.factory.ApplicationContextFactory;
@@ -98,15 +99,23 @@ public class MqttPushCallback implements MqttCallback {
      * @return
      */
     private String getHmIdByYld(String topic, MqttMessage message) {
-        String hmId = "";
-        if (!topic.startsWith("face.") || !topic.endsWith(".response")) {
-            return hmId;
-        }
-        if (topic.length() < 5) {
-            return hmId;
+        String msg = new String(message.getPayload());
+
+        if(!Assert.isJsonObject(msg)){
+            return "";
         }
 
-        String machineCode = topic.substring(5, topic.lastIndexOf("."));
+        String hmId = "";
+
+        JSONObject msgObj = JSONObject.parseObject(msg);
+        String machineCode = "";
+        if(msgObj.containsKey("sn")){
+            machineCode = msgObj.getString("sn");
+        }
+
+        if(msgObj.containsKey("body")){
+            machineCode = msgObj.getJSONObject("body").getString("sn");
+        }
 
         IMachineService machineService = ApplicationContextFactory.getBean("machineServiceImpl", IMachineService.class);
 

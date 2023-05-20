@@ -1,13 +1,18 @@
 package com.java110.things.init;
 
-import com.java110.things.quartz.accessControl.HeartbeatCloudApiThread;
-import com.java110.things.quartz.accessControl.ScanAccessControlThread;
+import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.factory.ApplicationContextFactory;
 import com.java110.things.factory.MappingCacheFactory;
+import com.java110.things.factory.MqttFactory;
+import com.java110.things.quartz.accessControl.HeartbeatCloudApiThread;
+import com.java110.things.quartz.accessControl.ScanAccessControlThread;
+import com.java110.things.service.machine.IMachineService;
 import com.java110.things.thread.ClearExpireJwtThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+
+import java.util.List;
 
 /**
  * 服务启动加载类
@@ -31,11 +36,36 @@ public class ServiceStartInit {
             //清理会话
             startClearJwtThread();
 
+            //mqtt 注册
+            initMqttClientSubscribe();
+
             //刷入缓存
             freshCache();
         } catch (Exception ex) {
             logger.error("系统初始化失败", ex);
             throw new IllegalStateException("系统初始化失败", ex);
+        }
+    }
+
+    private static void initMqttClientSubscribe() {
+        //注册设备上线 topic
+        MqttFactory.subscribe("online.response");
+        //推送人脸识别结果
+        MqttFactory.subscribe("face.response");
+
+
+        //注册伊兰度设备
+        IMachineService machineService = ApplicationContextFactory.getBean("machineServiceImpl", IMachineService.class);
+
+        MachineDto machineDto = new MachineDto();
+        machineDto.setHmId("3");
+        List<MachineDto> machineDtos = machineService.queryMachines(machineDto);
+        if (machineDtos == null || machineDtos.size() < 1) {
+            return;
+        }
+
+        for (MachineDto machineDto1 : machineDtos) {
+            MqttFactory.subscribe("face." + machineDto1.getMachineCode() + ".response");
         }
     }
 

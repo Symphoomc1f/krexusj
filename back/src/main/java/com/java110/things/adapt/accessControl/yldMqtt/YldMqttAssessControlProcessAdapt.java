@@ -2,29 +2,25 @@ package com.java110.things.adapt.accessControl.yldMqtt;
 
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.adapt.accessControl.DefaultAbstractAccessControlAdapt;
+import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.cloud.MachineCmdResultDto;
-import com.java110.things.entity.fee.FeeDto;
 import com.java110.things.entity.machine.MachineDto;
-import com.java110.things.entity.machine.OperateLogDto;
 import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.response.ResultDto;
-import com.java110.things.entity.room.RoomDto;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.MqttFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
-import com.java110.things.adapt.accessControl.IAssessControlProcess;
-import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.SeqUtil;
+import com.java110.things.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -128,7 +124,7 @@ public class YldMqttAssessControlProcessAdapt extends DefaultAbstractAccessContr
         param.put("face_id", userFaceDto.getUserId());
         param.put("per_name", userFaceDto.getName());
         param.put("idcardNum", userFaceDto.getIdNumber());
-        param.put("img_url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
+        param.put("img_url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
         param.put("idcardper", userFaceDto.getIdNumber());
         param.put("s_time", START_TIME);
         param.put("e_time", END_TIME);
@@ -139,7 +135,7 @@ public class YldMqttAssessControlProcessAdapt extends DefaultAbstractAccessContr
 
         saveLog(cmdId, machineDto.getMachineId(), CMD_ADD_FACE, param.toJSONString(), "", "", userFaceDto.getUserId(), userFaceDto.getName());
 
-        return null;
+        return new ResultDto(ResultDto.SUCCESS, "推送成功");
     }
 
     @Override
@@ -156,7 +152,7 @@ public class YldMqttAssessControlProcessAdapt extends DefaultAbstractAccessContr
         param.put("face_id", userFaceDto.getUserId());
         param.put("per_name", userFaceDto.getName());
         param.put("idcardNum", userFaceDto.getIdNumber());
-        param.put("img_url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getMachineCode() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
+        param.put("img_url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
         param.put("idcardper", userFaceDto.getIdNumber());
         param.put("s_time", START_TIME);
         param.put("e_time", END_TIME);
@@ -164,7 +160,7 @@ public class YldMqttAssessControlProcessAdapt extends DefaultAbstractAccessContr
         param.put("usr_type", 0);
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
         saveLog(cmdId, machineDto.getMachineId(), CMD_UPDATE_FACE, param.toJSONString(), "", "", userFaceDto.getUserId(), userFaceDto.getName());
-        return null;
+        return new ResultDto(ResultDto.SUCCESS, "推送成功");
     }
 
     @Override
@@ -180,7 +176,7 @@ public class YldMqttAssessControlProcessAdapt extends DefaultAbstractAccessContr
         param.put("per_id", heartbeatTaskDto.getTaskinfo());
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
         saveLog(cmdId, machineDto.getMachineId(), CMD_DELETE_FACE, param.toJSONString(), "", "", heartbeatTaskDto.getTaskinfo(), "");
-        return null;
+        return new ResultDto(ResultDto.SUCCESS, "推送成功");
     }
 
     @Override
@@ -193,7 +189,7 @@ public class YldMqttAssessControlProcessAdapt extends DefaultAbstractAccessContr
         param.put("type", 4);
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
         saveLog(param.getString("cmd_id"), machineDto.getMachineId(), CMD_DELETE_FACE, param.toJSONString(), "");
-        return null;
+        return new ResultDto(ResultDto.SUCCESS, "推送成功");
     }
 
     /**
@@ -297,7 +293,7 @@ public class YldMqttAssessControlProcessAdapt extends DefaultAbstractAccessContr
             }
             String msg = resultCmd.containsKey("reply") ? resultCmd.getString("reply") : "";
             ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
-            MachineCmdResultDto machineCmdResultDto = new MachineCmdResultDto(code, msg, taskId, machineCode,resultCmd.toJSONString());
+            MachineCmdResultDto machineCmdResultDto = new MachineCmdResultDto(code, msg, taskId, machineCode, resultCmd.toJSONString());
             notifyAccessControlService.machineCmdResult(machineCmdResultDto);
         } catch (Exception e) {
             logger.error("上报执行命令失败", e);
@@ -329,6 +325,7 @@ public class YldMqttAssessControlProcessAdapt extends DefaultAbstractAccessContr
 
     }
 
+
     /**
      * {
      * "body" : {
@@ -354,8 +351,56 @@ public class YldMqttAssessControlProcessAdapt extends DefaultAbstractAccessContr
      * @param data 这个为设备人脸推送协议，请参考设备协议文档
      * @return
      */
+
+    public void openDoorResult(String data) {
+
+
+        ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
+        JSONObject resultParam = new JSONObject();
+        try {
+            JSONObject param = JSONObject.parseObject(data);
+            if (param.containsKey("type") && !FACE_RESULT.equals(param.getString("type"))) {
+                return;
+            }
+            JSONObject body = param.getJSONObject("body");
+            MachineDto machineDto = new MachineDto();
+            machineDto.setMachineCode(body.getString("sn"));
+            List<MachineDto> machineDtos = notifyAccessControlService.queryMachines(machineDto);
+
+            if (machineDtos.size() < 0) {
+                return;//未找到设备
+            }
+
+
+            String userId = body.containsKey("per_id") ? body.getString("per_id") : "";
+            String userName = body.containsKey("name") ? body.getString("name") : "未知人员";
+
+
+            OpenDoorDto openDoorDto = new OpenDoorDto();
+
+            openDoorDto.setFace(body.getString("face_imgdata"));
+            openDoorDto.setUserName(userName);
+            openDoorDto.setHat(body.getString("hat"));
+            openDoorDto.setMachineCode(body.getString("sn"));
+            openDoorDto.setUserId(userId);
+            openDoorDto.setOpenId(SeqUtil.getId());
+            openDoorDto.setOpenTypeCd(OPEN_TYPE_FACE);
+            openDoorDto.setSimilarity(body.containsKey("matched") ? body.getString("matched") : "0");
+            openDoorDto.setIdNumber(body.getString("idCard"));
+            openDoorDto.setTel("11111111111");
+
+            freshOwnerFee(openDoorDto);
+
+            notifyAccessControlService.saveFaceResult(openDoorDto);
+
+        } catch (Exception e) {
+            logger.error("推送人脸失败", e);
+        }
+
+    }
+
     @Override
-    public String httpFaceResult(MachineDto machineDto,String data) {
+    public String httpFaceResult(MachineDto machineDto, String data) {
         ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
         try {
             JSONObject param = JSONObject.parseObject(data);
@@ -390,7 +435,6 @@ public class YldMqttAssessControlProcessAdapt extends DefaultAbstractAccessContr
     public String heartbeat(String data, String machineCode) throws Exception {
         return null;
     }
-
 
 
     /**

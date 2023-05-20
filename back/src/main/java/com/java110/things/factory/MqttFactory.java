@@ -44,8 +44,13 @@ public class MqttFactory {
      * @param qos
      */
     public static void subscribe(String topic, int qos) {
+        MqttClient mqttClient = null;
         try {
-            getMqttClient().subscribe(topic, qos);
+            mqttClient = getMqttClient();
+            if(mqttClient == null || !mqttClient.isConnected()){
+                return ;
+            }
+            mqttClient.subscribe(topic, qos);
         } catch (Exception e) {
             logger.error("订阅失败", e);
         }
