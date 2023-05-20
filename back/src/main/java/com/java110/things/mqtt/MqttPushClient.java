@@ -58,7 +58,7 @@ public class MqttPushClient {
             option.setKeepAliveInterval(MQTT_KEEPALIVE);
             option.setAutomaticReconnect(true);
             try {
-                client.setCallback(new MqttPushCallback());
+                client.setCallback(new MqttPushCallback(client,option));
                 client.connect(option);
             } catch (Exception e) {
                 e.printStackTrace();

@@ -65,8 +65,8 @@ spring :
     completionTimeout: 3000
     default:
       topic: topic
-    password: wuxw
-    url: tcp://proxy.homecommunity.cn:9020
+    password: wuxw2015
+    url: tcp://mqtt.homecommunity.cn:1883
     username: wuxw
     keepalive: 10
 
