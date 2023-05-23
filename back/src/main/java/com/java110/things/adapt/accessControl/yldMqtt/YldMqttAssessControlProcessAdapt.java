@@ -70,7 +70,7 @@ public class YldMqttAssessControlProcessAdapt extends DefaultAbstractAccessContr
     public static final String TOPIC_FACE_SN_RESPONSE = "face.{sn}.response";
 
     //识别结果上报
-    public static final String TOPIC_FACE_RESPONSE = "face.response";
+    public static final String TOPIC_FACE_RESPONSE = "face/response";
 
     //硬件上线上报
     public static final String TOPIC_ONLINE_RESPONSE = "online/response";
@@ -273,6 +273,7 @@ public class YldMqttAssessControlProcessAdapt extends DefaultAbstractAccessContr
                 doCmdResultCloud(resultCmd);
                 break;
             case CMD_UPDATE_FACE:
+                doCmdResultCloud(resultCmd);
                 break;
             case CMD_DELETE_FACE:
                 break;
@@ -284,16 +285,15 @@ public class YldMqttAssessControlProcessAdapt extends DefaultAbstractAccessContr
     private void doCmdResultCloud(JSONObject resultCmd) {
         try {
             String taskId = resultCmd.getString("cmd_id");
-            String machineCode = resultCmd.getString("sn");
             int code = -1;
             if (!resultCmd.containsKey("code")) {
                 code = -1;
             } else {
-                code = resultCmd.getIntValue("code") != 0 ? -1 : 0;
+                code = resultCmd.getIntValue("code");
             }
-            String msg = resultCmd.containsKey("reply") ? resultCmd.getString("reply") : "";
+            String msg = resultCmd.getString("reply");
             ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
-            MachineCmdResultDto machineCmdResultDto = new MachineCmdResultDto(code, msg, taskId, machineCode, resultCmd.toJSONString());
+            MachineCmdResultDto machineCmdResultDto = new MachineCmdResultDto(code, msg, taskId, "", resultCmd.toJSONString());
             notifyAccessControlService.machineCmdResult(machineCmdResultDto);
         } catch (Exception e) {
             logger.error("上报执行命令失败", e);
@@ -372,13 +372,17 @@ public class YldMqttAssessControlProcessAdapt extends DefaultAbstractAccessContr
             }
 
 
-            String userId = body.containsKey("per_id") ? body.getString("per_id") : "";
+            String userId = body.containsKey("per_id") ? body.getString("per_id") : "-1";
             String userName = body.containsKey("name") ? body.getString("name") : "未知人员";
+
+            if (StringUtil.isEmpty(userId)) {
+                userId = "-1";
+            }
 
 
             OpenDoorDto openDoorDto = new OpenDoorDto();
 
-            openDoorDto.setFace(body.getString("face_imgdata"));
+            openDoorDto.setFace(body.getString("img_data"));
             openDoorDto.setUserName(userName);
             openDoorDto.setHat(body.getString("hat"));
             openDoorDto.setMachineCode(body.getString("sn"));
