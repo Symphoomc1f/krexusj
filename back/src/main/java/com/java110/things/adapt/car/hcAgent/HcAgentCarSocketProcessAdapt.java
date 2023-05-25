@@ -54,8 +54,13 @@ public class HcAgentCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
     private static Logger logger = LoggerFactory.getLogger(HcAgentCarSocketProcessAdapt.class);
 
     public static final String SPEC_EXT_PARKING_ID = "6185-17861";
-
+    //postParameters.put("carTypeId","5720194218816441884");
+    //postParameters.put("carModelID","4692197192354628555");
     public static final String SPEC_EXT_VID_ID = "7185-17861";
+    public static final String SPEC_EXT_CAR_TYPE_ID = "8185-17861";
+    public static final String SPEC_EXT_CAR_MODEL_ID = "9185-17861";
+
+
 
     public static final String GET_TOKEN = "/auth/oauth/token";
     public static final String CAR_URL = "/api/park/freecar";
@@ -101,7 +106,7 @@ public class HcAgentCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         return "";
     }
 
-    public String getVId(ParkingAreaDto parkingAreaDto) {
+    public String getVId(ParkingAreaDto parkingAreaDto,String ext) {
         List<ParkingAreaAttrDto> parkingAreaAttrDtos = parkingAreaDto.getAttrs();
 
         if (parkingAreaAttrDtos == null || parkingAreaAttrDtos.size() < 1) {
@@ -109,7 +114,7 @@ public class HcAgentCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         }
 
         for (ParkingAreaAttrDto parkingAreaAttrDto : parkingAreaAttrDtos) {
-            if (SPEC_EXT_VID_ID.equals(parkingAreaAttrDto.getSpecCd())) {
+            if (ext.equals(parkingAreaAttrDto.getSpecCd())) {
                 return parkingAreaAttrDto.getValue();
             }
         }
@@ -145,9 +150,9 @@ public class HcAgentCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         postParameters.put("carId", carResultDto.getCarId());
         postParameters.put("startTime", DateUtil.getFormatTimeString(carResultDto.getStartTime(), DateUtil.DATE_FORMATE_STRING_A));
         postParameters.put("endTime", DateUtil.getFormatTimeString(carResultDto.getEndTime(), DateUtil.DATE_FORMATE_STRING_A));
-        postParameters.put("communityId",getVId(parkingAreaDtos.get(0)));
-        postParameters.put("carTypeId","5720194218816441884");
-        postParameters.put("carModelID","4692197192354628555");
+        postParameters.put("communityId",getVId(parkingAreaDtos.get(0),SPEC_EXT_VID_ID));
+        postParameters.put("carTypeId",getVId(parkingAreaDtos.get(0),SPEC_EXT_CAR_TYPE_ID));
+        postParameters.put("carModelID",getVId(parkingAreaDtos.get(0),SPEC_EXT_CAR_MODEL_ID));
         MqttFactory.publish(TOPIC_REQUEST,postParameters.toJSONString());
         return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG,carResultDto.getCarId());
     }
