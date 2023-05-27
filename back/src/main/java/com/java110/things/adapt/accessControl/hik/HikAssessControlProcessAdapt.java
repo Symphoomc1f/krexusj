@@ -6,15 +6,17 @@ import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.cloud.MachineHeartbeatDto;
+import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.MachineFaceDto;
 import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.response.ResultDto;
-import com.java110.things.factory.*;
-import com.java110.things.util.DateUtil;
-import com.java110.things.util.HttpClient;
-import com.java110.things.util.SeqUtil;
-import com.java110.things.util.StringUtil;
+import com.java110.things.factory.ImageFactory;
+import com.java110.things.factory.LocalCacheFactory;
+import com.java110.things.factory.MappingCacheFactory;
+import com.java110.things.factory.NotifyAccessControlFactory;
+import com.java110.things.service.community.ICommunityService;
+import com.java110.things.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +51,9 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
     @Autowired
     private ICallAccessControlService callAccessControlServiceImpl;
 
+    @Autowired
+    private ICommunityService communityServiceImpl;
+
     public static final long START_TIME = new Date().getTime() - 1000 * 60 * 60;
     public static final long END_TIME = new Date().getTime() + 1000 * 60 * 60 * 24 * 365;
 
@@ -72,10 +77,10 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
     public static final String CMD_REBOOT = "/api/device/bs/face/deviceReboot";// 重启设备
 
     public static final String CMD_ADD_USER = "/api/v1/estate/system/person"; // 添加人员
-    public static final String CMD_SINGLE_PERSON_AUTH = "/api/device/bs/face/auth/singlePersonAuth"; // 添加人员
-    public static final String CMD_UPDATE_USER = "/api/device/hqvtPerson/alter"; // 修改人员
+    public static final String CMD_SINGLE_PERSON_AUTH = "/api/v1/estate/entranceGuard/permissions/actions/authorityIssued"; // 添加人员
+    public static final String CMD_UPDATE_USER = "/api/v1/estate/system/person/actions/updatePerson"; // 修改人员
 
-    public static final String CMD_DELETE_PERSION_FACE = "/face/deletePerson"; //修改人脸
+    public static final String CMD_DELETE_PERSION_FACE = "/api/v1/estate/entranceGuard/permissions/actions/authorityDelete"; //修改人脸
 
     public static final String CMD_DELETE_FACE = "/person/delete"; //删除人脸
     public static final String CMD_RESET = "/device/reset"; //设备重置
@@ -127,9 +132,17 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
     public ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
         JSONObject postParameters = new JSONObject();
         String paramOutString = "";
+        CommunityDto communityDto = new CommunityDto();
+        communityDto.setCommunityId(machineDto.getCommunityId());
+        List<CommunityDto> communityDtos = null;
+
+        communityDtos = communityServiceImpl.queryCommunitys(communityDto);
+
+        Assert.listOnlyOne(communityDtos, "添加车辆时未查到小区信息");
+
         try {
             String url = MappingCacheFactory.getValue("HIK_URL") + CMD_ADD_USER;
-            String appId = MappingCacheFactory.getValue("appId");
+
             postParameters.put("personName", userFaceDto.getName());
             postParameters.put("credentialType", 1);
             postParameters.put("credentialNumber", userFaceDto.getIdNumber());
@@ -144,23 +157,26 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
             saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_USER, postParameters.toJSONString(), paramOutString);
 
             JSONObject paramOut = JSONObject.parseObject(paramOutString);
-            if (paramOut.getIntValue("code") == 0) {
-                userFaceDto.setExtUserId(paramOut.getJSONObject("data").getString("personGuid"));
+            if (paramOut.getIntValue("code") == 200) {
+                userFaceDto.setExtUserId(paramOut.getJSONObject("data").getString("personId"));
+            } else if (paramOut.getIntValue("code") == 511021) { // 说明业主已经存在
+
             } else {
                 //刷入外部编码
                 throw new IllegalArgumentException(paramOut.getString("msg"));
             }
 
-            url = MappingCacheFactory.getValue("BISEN_URL") + CMD_SINGLE_PERSON_AUTH;
+            url = MappingCacheFactory.getValue("HIK_URL") + CMD_SINGLE_PERSON_AUTH;
             postParameters = new JSONObject();
-            postParameters.put("appId", appId);
-            postParameters.put("deviceNo", machineDto.getMachineCode());
-            postParameters.put("personGuid", userFaceDto.getExtUserId());
+            postParameters.put("communityId", communityDtos.get(0).getExtCommunityId());
+            postParameters.put("deviceId", machineDto.getMachineCode());
+            postParameters.put("personType", 1);
+            postParameters.put("personId", userFaceDto.getExtUserId());
 
             paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "POST");
             paramOut = JSONObject.parseObject(paramOutString);
             saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SINGLE_PERSON_AUTH, postParameters.toJSONString(), paramOutString);
-            return new ResultDto(paramOut.getIntValue("code"), paramOut.getString("msg"));
+            return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("msg"));
         } catch (Exception e) {
             logger.error("出现异常了" + postParameters + ",返回" + paramOutString, e);
 
@@ -171,6 +187,12 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
 
     @Override
     public ResultDto updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
+
+        CommunityDto communityDto = new CommunityDto();
+        communityDto.setCommunityId(machineDto.getCommunityId());
+        List<CommunityDto> communityDtos = null;
+        communityDtos = communityServiceImpl.queryCommunitys(communityDto);
+        Assert.listOnlyOne(communityDtos, "添加车辆时未查到小区信息");
 
         //刷入外部编码
         String paramOutString = "";
@@ -183,26 +205,30 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
         }
         userFaceDto.setExtUserId(faceDtos.get(0).getExtUserId());
 
-        String url = MappingCacheFactory.getValue("BISEN_URL") + CMD_UPDATE_USER;
-        String appId = MappingCacheFactory.getValue("appId");
+        String url = MappingCacheFactory.getValue("HIK_URL") + CMD_UPDATE_USER;
         JSONObject postParameters = new JSONObject();
-        postParameters.put("appId", appId);
+        postParameters.put("personId", userFaceDto.getExtUserId());
         postParameters.put("personName", userFaceDto.getName());
-        postParameters.put("personGuid", userFaceDto.getExtUserId());
-        postParameters.put("tag", userFaceDto.getUserId());
-        postParameters.put("certificateType", 0);
-        postParameters.put("personIdCard", userFaceDto.getIdNumber());
+        postParameters.put("credentialType", 1);
+        postParameters.put("credentialNumber", userFaceDto.getIdNumber());
+        postParameters.put("mobile", "18909711234");
         postParameters.put("faceUrl", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
 
         paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "PUT");
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_UPDATE_USER, postParameters.toJSONString(), paramOutString);
 
         JSONObject paramOut = JSONObject.parseObject(paramOutString);
-        return new ResultDto(paramOut.getIntValue("code"), paramOut.getString("msg"));
+        return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("msg"));
     }
 
     @Override
     public ResultDto deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
+
+        CommunityDto communityDto = new CommunityDto();
+        communityDto.setCommunityId(machineDto.getCommunityId());
+        List<CommunityDto> communityDtos = null;
+        communityDtos = communityServiceImpl.queryCommunitys(communityDto);
+        Assert.listOnlyOne(communityDtos, "添加车辆时未查到小区信息");
         //刷入外部编码
         MachineFaceDto machineFaceDto = new MachineFaceDto();
         machineFaceDto.setUserId(heartbeatTaskDto.getTaskinfo());
@@ -211,40 +237,26 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
         if (faceDtos.size() < 1) {
             throw new IllegalArgumentException("该人脸还没有添加");
         }
-        String appId = MappingCacheFactory.getValue("appId");
-        HttpHeaders httpHeaders = getHeader();
-        HttpEntity httpEntity = new HttpEntity("", httpHeaders);
+
         //判断人员是否存在
-        String url = MappingCacheFactory.getValue("BISEN_URL")
-                + "/api/device/hqvtPerson/page?appId=" + appId + "&personGuid=" + faceDtos.get(0).getExtUserId();
+        String url = MappingCacheFactory.getValue("HIK_URL")
+                + CMD_DELETE_PERSION_FACE;
         logger.debug("判断人员是否存在" + url);
+        JSONObject postParameters = new JSONObject();
+        postParameters = new JSONObject();
+        postParameters.put("communityId", communityDtos.get(0).getExtCommunityId());
+        postParameters.put("deviceId", machineDto.getMachineCode());
+        postParameters.put("personType", 1);
+        postParameters.put("personId", faceDtos.get(0).getExtUserId());
 
-        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
+        String paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "POST");
+        JSONObject paramOut = JSONObject.parseObject(paramOutString);
 
-        if (responseEntity.getStatusCode() != HttpStatus.OK) {
-            return new ResultDto(ResultDto.ERROR, "调用设备失败");
-        }
-
-        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
-
-        if (paramOut.getIntValue("code") != 0) {
+        if (paramOut.getIntValue("code") != 200) {
             return new ResultDto(paramOut.getIntValue("code"), paramOut.getString("msg"));
         }
 
-        int total = paramOut.getJSONObject("data").getIntValue("total");
-
-        if (total < 1) {
-            return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG);
-        }
-
-        url = MappingCacheFactory.getValue("BISEN_URL")
-                + "/api/device/hqvtPerson/delete/appId/" + appId + "/personGuid/" + faceDtos.get(0).getExtUserId();
-        logger.debug("删除人员" + url);
-        responseEntity = outRestTemplate.exchange(url, HttpMethod.DELETE, httpEntity, String.class);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_UPDATE_USER, url, responseEntity.getBody());
-        logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
-        paramOut = JSONObject.parseObject(responseEntity.getBody());
-        return new ResultDto(paramOut.getIntValue("code"), paramOut.getString("msg"));
+        return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("msg"));
     }
 
     @Override
@@ -276,7 +288,7 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
 
     @Override
     public void restartMachine(MachineDto machineDto) {
-        String url = MappingCacheFactory.getValue("BISEN_URL") + CMD_REBOOT;
+        String url = MappingCacheFactory.getValue("HIK_URL") + CMD_REBOOT;
         String appId = MappingCacheFactory.getValue("appId");
         JSONObject postParameters = new JSONObject();
         postParameters.put("appId", appId);
@@ -290,7 +302,7 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
 
     @Override
     public void openDoor(MachineDto machineDto) {
-        String url = MappingCacheFactory.getValue("BISEN_URL") + CMD_OPEN_DOOR;
+        String url = MappingCacheFactory.getValue("HIK_URL") + CMD_OPEN_DOOR;
         String appId = MappingCacheFactory.getValue("appId");
 
         JSONObject postParameters = new JSONObject();
