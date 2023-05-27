@@ -72,7 +72,7 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
     public static final String CMD_ADD_FACE = "/face"; // 创建人脸
     public static final String CMD_ADD_FACE_FIND = "/face/find"; // 创建人脸
 
-    public static final String CMD_OPEN_DOOR = "/api/device/bs/face/remoteOpenDoor"; // 开门
+    public static final String CMD_OPEN_DOOR = "/api/v1/estate/entranceGuard/remoteControl/actions/gateControl"; // 开门
 
     public static final String CMD_REBOOT = "/api/device/bs/face/deviceReboot";// 重启设备
 
@@ -146,7 +146,7 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
             postParameters.put("personName", userFaceDto.getName());
             postParameters.put("credentialType", 1);
             postParameters.put("credentialNumber", userFaceDto.getIdNumber());
-            postParameters.put("mobile", "18909711234");
+            postParameters.put("mobile", userFaceDto.getLink());
             postParameters.put("faceUrl", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
 
             logger.debug("人员创建请求：,url:" + url);
@@ -211,7 +211,7 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
         postParameters.put("personName", userFaceDto.getName());
         postParameters.put("credentialType", 1);
         postParameters.put("credentialNumber", userFaceDto.getIdNumber());
-        postParameters.put("mobile", "18909711234");
+        postParameters.put("mobile", userFaceDto.getLink());
         postParameters.put("faceUrl", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
 
         paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "PUT");
@@ -288,11 +288,22 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
 
     @Override
     public void restartMachine(MachineDto machineDto) {
+
+        MachineFaceDto machineFaceDto = new MachineFaceDto();
+        machineFaceDto.setPage(1);
+        machineFaceDto.setRow(1);
+        machineFaceDto.setMachineCode(machineDto.getMachineCode());
+        List<MachineFaceDto> faceDtos = callAccessControlServiceImpl.queryMachineFaces(machineFaceDto);
+        if (faceDtos.size() < 1) {
+            throw new IllegalArgumentException("该人脸还没有添加");
+        }
+
         String url = MappingCacheFactory.getValue("HIK_URL") + CMD_REBOOT;
-        String appId = MappingCacheFactory.getValue("appId");
+
         JSONObject postParameters = new JSONObject();
-        postParameters.put("appId", appId);
-        postParameters.put("deviceNo", machineDto.getMachineCode());
+        postParameters.put("personId", faceDtos.get(0).getExtUserId());
+        postParameters.put("deviceId", machineDto.getMachineCode());
+        postParameters.put("command", "open");
         HttpHeaders httpHeaders = getHeader();
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
         ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
@@ -309,12 +320,10 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
         postParameters.put("appId", appId);
         postParameters.put("deviceNo", machineDto.getMachineCode());
 
-        HttpHeaders httpHeaders = getHeader();
-        HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
-        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        String paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "POST");
 
-        logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_OPEN_DOOR, postParameters.toJSONString(), responseEntity.getBody());
+        logger.debug("请求信息 ： " + postParameters + "，返回信息:" + paramOutString);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_OPEN_DOOR, postParameters.toJSONString(), paramOutString);
     }
 
     @Override

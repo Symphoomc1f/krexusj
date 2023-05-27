@@ -37,6 +37,7 @@ public class UserFaceDto extends PageDto implements Serializable {
     private String departmentId;
     private String departmentName;
     private String personType;
+    private String link;
 
     private String extUserId;
 
@@ -184,5 +185,13 @@ public class UserFaceDto extends PageDto implements Serializable {
 
     public void setExtUserId(String extUserId) {
         this.extUserId = extUserId;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
     }
 }
