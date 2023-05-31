@@ -30,6 +30,7 @@
         t.state,
         t.message,
         t.community_id communityId
+        ,t.card_id cardId,t.card_number cardNumber
         from machine_face t,machine m
         where 1=1
         and t.machine_id = m.machine_id
@@ -147,6 +148,12 @@
             </if>
             <if test="extUserId != null and extUserId != ''">
                 t.ext_user_id = #{extUserId},
+            </if>
+            <if test="cardId != null and cardId != ''">
+                t.card_id = #{cardId},
+            </if>
+            <if test="cardNumber != null and cardNumber != ''">
+                t.card_number = #{cardNumber},
             </if>
         </trim>
         where 1=1

@@ -17,6 +17,7 @@ package com.java110.things.extApi.machine;
 
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
+import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
@@ -181,6 +182,31 @@ public class MachineExtController extends BaseController {
 
         MachineDto machineDto = BeanConvertUtil.covertBean(reqJson, MachineDto.class);
         ResultDto result = machineServiceImpl.openDoor(machineDto);
+
+        return ResultDto.createResponseEntity(result);
+    }
+
+    /**
+     * 获取二维码
+     * <p>
+     *
+     * @param reqParam {
+     *                 "extMachineId": "702020042194860039"
+     *                 }
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/getQRcode", method = RequestMethod.POST)
+    public ResponseEntity<String> getQRcode(@RequestBody String reqParam) throws Exception {
+
+        JSONObject reqJson = JSONObject.parseObject(reqParam);
+
+        Assert.hasKeyAndValue(reqJson, "userId", "未包含人员ID");
+        Assert.hasKeyAndValue(reqJson, "machineCode", "未包含人员设备");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
+
+        UserFaceDto userFaceDto = BeanConvertUtil.covertBean(reqJson, UserFaceDto.class);
+        ResultDto result = machineServiceImpl.getQRcode(userFaceDto);
 
         return ResultDto.createResponseEntity(result);
     }

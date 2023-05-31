@@ -6,6 +6,7 @@ import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.dao.IMachineServiceDao;
 import com.java110.things.entity.PageDto;
+import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineAttrDto;
 import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
@@ -289,6 +290,25 @@ public class MachineServiceImpl implements IMachineService {
         List<MachineAttrDto> machineDtoList = null;
         machineDtoList = machineServiceDao.getMachineAttrs(machineDto);
         return machineDtoList;
+    }
+
+    @Override
+    public ResultDto getQRcode(UserFaceDto userFaceDto) throws Exception {
+        MachineDto machineDto = new MachineDto();
+        machineDto.setMachineCode(userFaceDto.getMachineCode());
+        List<MachineDto> machineDtoList = machineServiceDao.getMachines(machineDto);
+        if (machineDtoList == null || machineDtoList.size() < 1) {
+            throw new IllegalArgumentException("设备不存在");
+        }
+        machineDto = machineDtoList.get(0);
+        ResultDto resultDto = null;
+        //初始化设备信息
+        if (MachineDto.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
+            resultDto = AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).getQRcode(userFaceDto);
+        } else {
+            resultDto = new ResultDto(ResponseConstant.ERROR, "该设备不支持");
+        }
+        return resultDto;
     }
 
 

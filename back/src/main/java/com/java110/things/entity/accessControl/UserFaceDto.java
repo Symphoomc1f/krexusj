@@ -41,6 +41,10 @@ public class UserFaceDto extends PageDto implements Serializable {
 
     private String extUserId;
 
+    private String cardId;
+
+    private String cardNumber;
+
     private List<UserAttrDto> userAttrDtos;
 
     public String getUserId() {
@@ -193,5 +197,21 @@ public class UserFaceDto extends PageDto implements Serializable {
 
     public void setLink(String link) {
         this.link = link;
+    }
+
+    public String getCardId() {
+        return cardId;
+    }
+
+    public void setCardId(String cardId) {
+        this.cardId = cardId;
+    }
+
+    public String getCardNumber() {
+        return cardNumber;
+    }
+
+    public void setCardNumber(String cardNumber) {
+        this.cardNumber = cardNumber;
     }
 }

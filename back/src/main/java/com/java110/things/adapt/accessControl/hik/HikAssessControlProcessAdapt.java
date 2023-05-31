@@ -27,6 +27,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -85,8 +86,8 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
     public static final String CMD_DELETE_FACE = "/person/delete"; //删除人脸
     public static final String CMD_RESET = "/device/reset"; //设备重置
 
-    public static final String CMD_UI_TITLE = "set_ui_title";// 设置名称
-    public static final String CMD_FACE_SEARCH = "face_search";// 搜素设备
+    public static final String CMD_CHANGE_CARD = "/api/v1/estate/system/cards/actions/changeCard";// 设置名称
+    public static final String CMD_QRCODE = "/api/v1/estate/entranceGuard/permissions/actions/getQRcode";// 获取二维码
     public static final String CMD_SET_PASSWORD = "/setPassWord";// 设置密码
     public static final String CMD_SET_SYSTEMMODE = "/device/systemMode";// 设置模式
     public static final String CMD_SET_IDENTIFY_CALLBACK = "/api/callback/deviceCallback/updateCallback";// 设置回调地址
@@ -140,6 +141,8 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
 
         Assert.listOnlyOne(communityDtos, "添加车辆时未查到小区信息");
 
+        //查询用户信息
+
         try {
             String url = MappingCacheFactory.getValue("HIK_URL") + CMD_ADD_USER;
 
@@ -149,6 +152,9 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
             postParameters.put("mobile", userFaceDto.getLink());
             postParameters.put("faceUrl", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
 
+            List<String> cardNumbers = new ArrayList<>();
+            cardNumbers.add(getIdNumber(userFaceDto));
+            postParameters.put("cardNumbers", cardNumbers);
             logger.debug("人员创建请求：,url:" + url);
             //responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
             paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "POST");
@@ -158,9 +164,19 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
 
             JSONObject paramOut = JSONObject.parseObject(paramOutString);
             if (paramOut.getIntValue("code") == 200) {
-                userFaceDto.setExtUserId(paramOut.getJSONObject("data").getString("personId"));
+                userFaceDto.setExtUserId(paramOut.getString("personId"));
+                userFaceDto.setCardId(paramOut.getJSONArray("cardNumbers").getString(0));
+                userFaceDto.setCardNumber(getIdNumber(userFaceDto));
             } else if (paramOut.getIntValue("code") == 511021) { // 说明业主已经存在
-
+                MachineFaceDto machineFaceDto = new MachineFaceDto();
+                machineFaceDto.setUserId(userFaceDto.getUserId());
+                List<MachineFaceDto> faceDtos = callAccessControlServiceImpl.queryMachineFaces(machineFaceDto);
+                if (faceDtos.size() < 1) {
+                    throw new IllegalArgumentException("该人脸还没有添加");
+                }
+                userFaceDto.setExtUserId(faceDtos.get(0).getExtUserId());
+                userFaceDto.setCardId(faceDtos.get(0).getCardId());
+                userFaceDto.setCardNumber(faceDtos.get(0).getCardNumber());
             } else {
                 //刷入外部编码
                 throw new IllegalArgumentException(paramOut.getString("msg"));
@@ -216,8 +232,34 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
 
         paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "PUT");
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_UPDATE_USER, postParameters.toJSONString(), paramOutString);
-
         JSONObject paramOut = JSONObject.parseObject(paramOutString);
+
+        if (paramOut.getIntValue("code") != 200) {
+            return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("msg"));
+        }
+
+        // 判断 门禁卡是否 有变动
+        String cardNumber = getIdNumber(userFaceDto);
+        if (cardNumber.equals(faceDtos.get(0).getCardNumber())) { // 没有变动
+            return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("msg"));
+        }
+
+        //换卡
+        url = MappingCacheFactory.getValue("HIK_URL") + CMD_CHANGE_CARD;
+        postParameters = new JSONObject();
+        postParameters.put("cardId", faceDtos.get(0).getCardId());
+        postParameters.put("cardNumber", getIdNumber(userFaceDto));
+
+        paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "PUT");
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_CHANGE_CARD, postParameters.toJSONString(), paramOutString);
+        paramOut = JSONObject.parseObject(paramOutString);
+
+        if (paramOut.getIntValue("code") != 200) {
+            return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("msg"));
+        }
+
+        userFaceDto.setCardId(paramOut.getString("cardId"));
+        userFaceDto.setCardNumber(getIdNumber(userFaceDto));
         return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("msg"));
     }
 
@@ -314,16 +356,43 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
     @Override
     public void openDoor(MachineDto machineDto) {
         String url = MappingCacheFactory.getValue("HIK_URL") + CMD_OPEN_DOOR;
-        String appId = MappingCacheFactory.getValue("appId");
-
+        MachineFaceDto machineFaceDto = new MachineFaceDto();
+        machineFaceDto.setPage(1);
+        machineFaceDto.setRow(1);
+        machineFaceDto.setMachineCode(machineDto.getMachineCode());
+        List<MachineFaceDto> faceDtos = callAccessControlServiceImpl.queryMachineFaces(machineFaceDto);
+        if (faceDtos.size() < 1) {
+            throw new IllegalArgumentException("该人脸还没有添加");
+        }
         JSONObject postParameters = new JSONObject();
-        postParameters.put("appId", appId);
-        postParameters.put("deviceNo", machineDto.getMachineCode());
+        postParameters.put("personId", faceDtos.get(0).getExtUserId());
+        postParameters.put("deviceId", machineDto.getMachineCode());
+        postParameters.put("command", "open");
 
         String paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "POST");
 
         logger.debug("请求信息 ： " + postParameters + "，返回信息:" + paramOutString);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_OPEN_DOOR, postParameters.toJSONString(), paramOutString);
+    }
+
+    @Override
+    public ResultDto getQRcode(UserFaceDto userFaceDto) {
+        String url = MappingCacheFactory.getValue("HIK_URL") + CMD_QRCODE;
+
+        JSONObject postParameters = new JSONObject();
+        postParameters.put("personId", userFaceDto.getExtUserId());
+        postParameters.put("personType", 1);
+
+        String paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "POST");
+
+        logger.debug("请求信息 ： " + postParameters + "，返回信息:" + paramOutString);
+        JSONObject paramOut = JSONObject.parseObject(paramOutString);
+        //saveLog(SeqUtil.getId(), userFaceDto.getMachineId(), CMD_OPEN_DOOR, postParameters.toJSONString(), paramOutString);
+        if (paramOut.getIntValue("code") != 200) {
+            return new ResultDto(paramOut.getIntValue("code"), paramOut.getString("msg"));
+        }
+
+        return new ResultDto(ResultDto.SUCCESS, paramOut.getString("msg"), paramOut.getJSONObject("data").getString("qrCode"));
     }
 
     @Override

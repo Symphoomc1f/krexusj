@@ -28,6 +28,10 @@ public class MachineFaceDto extends UserFaceDto implements Serializable {
 
     private String communityId;
 
+    private String cardId;
+
+    private String cardNumber;
+
     public String getId() {
         return id;
     }
@@ -92,5 +96,21 @@ public class MachineFaceDto extends UserFaceDto implements Serializable {
 
     public void setCommunityId(String communityId) {
         this.communityId = communityId;
+    }
+
+    public String getCardId() {
+        return cardId;
+    }
+
+    public void setCardId(String cardId) {
+        this.cardId = cardId;
+    }
+
+    public String getCardNumber() {
+        return cardNumber;
+    }
+
+    public void setCardNumber(String cardNumber) {
+        this.cardNumber = cardNumber;
     }
 }

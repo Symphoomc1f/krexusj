@@ -52,6 +52,11 @@ public abstract class DefaultAbstractAccessControlAdapt implements IAssessContro
     }
 
     @Override
+    public ResultDto getQRcode(UserFaceDto userFaceDto) {
+        return new ResultDto(ResultDto.ERROR, "该设备不支持");
+    }
+
+    @Override
     public void mqttMessageArrived(String topic, String data) {
 
     }
@@ -61,7 +66,7 @@ public abstract class DefaultAbstractAccessControlAdapt implements IAssessContro
         List<UserAttrDto> userAttrDtos = userFaceDto.getUserAttrDtos();
 
         if (userAttrDtos == null) {
-            return userFaceDto.getIdNumber();
+            return userFaceDto.getLink();
         }
 
         for (UserAttrDto userAttrDto : userAttrDtos) {
@@ -69,7 +74,7 @@ public abstract class DefaultAbstractAccessControlAdapt implements IAssessContro
                 return userAttrDto.getValue();
             }
         }
-        return userFaceDto.getIdNumber();
+        return userFaceDto.getLink();
     }
 
     /**

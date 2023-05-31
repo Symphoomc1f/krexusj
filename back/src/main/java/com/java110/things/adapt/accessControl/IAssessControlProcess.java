@@ -139,6 +139,10 @@ public interface IAssessControlProcess {
     String heartbeat(String data,String machineCode) throws Exception;
 
 
-
-
+    /**
+     * 获取二维码
+     * @param userFaceDto
+     * @return
+     */
+    ResultDto getQRcode(UserFaceDto userFaceDto);
 }

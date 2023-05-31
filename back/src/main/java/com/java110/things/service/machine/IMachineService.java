@@ -1,5 +1,6 @@
 package com.java110.things.service.machine;
 
+import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineAttrDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
@@ -97,4 +98,11 @@ public interface IMachineService {
      * @throws Exception
      */
     List<MachineAttrDto> queryMachineAttrs(MachineAttrDto machineAttrDto) throws Exception;
+
+    /**
+     * 获取二维码
+     * @param userFaceDto
+     * @return
+     */
+    ResultDto getQRcode(UserFaceDto userFaceDto) throws Exception;
 }

@@ -115,6 +115,7 @@
             <if test="personType != null and personType != ''">
                 t.person_type = #{personType},
             </if>
+
             <if test="statusCd != null and statusCd != ''">
                 t.status_cd = #{statusCd}
             </if>
