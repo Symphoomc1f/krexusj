@@ -32,6 +32,8 @@ public class MachineFaceDto extends UserFaceDto implements Serializable {
 
     private String cardNumber;
 
+    private String hasExtUserId;
+
     public String getId() {
         return id;
     }
@@ -112,5 +114,13 @@ public class MachineFaceDto extends UserFaceDto implements Serializable {
 
     public void setCardNumber(String cardNumber) {
         this.cardNumber = cardNumber;
+    }
+
+    public String getHasExtUserId() {
+        return hasExtUserId;
+    }
+
+    public void setHasExtUserId(String hasExtUserId) {
+        this.hasExtUserId = hasExtUserId;
     }
 }

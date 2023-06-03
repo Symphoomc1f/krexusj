@@ -66,9 +66,9 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
     public static final String VERSION = "0.2";
 
     public static final String GET_TOKEN = "/oauth/token";
-    public static final String ADD_MACHINE = "/api/device/bs/face/save";
+    public static final String ADD_MACHINE = "/api/v1/estate/devices";
     public static final String UPDATE_MACHINE = "/api/device/bs/face/modify";
-    public static final String DELETE_MACHINE = "/api/device/bs/face/remoteOpenDoor";
+    public static final String DELETE_MACHINE = "/api/v1/estate/devices/actions/deleteDevice";
 
     public static final String CMD_ADD_FACE = "/face"; // 创建人脸
     public static final String CMD_ADD_FACE_FIND = "/face/find"; // 创建人脸
@@ -129,6 +129,7 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
         return null;
     }
 
+
     @Override
     public ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
         JSONObject postParameters = new JSONObject();
@@ -164,8 +165,9 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
 
             JSONObject paramOut = JSONObject.parseObject(paramOutString);
             if (paramOut.getIntValue("code") == 200) {
-                userFaceDto.setExtUserId(paramOut.getString("personId"));
-                userFaceDto.setCardId(paramOut.getJSONArray("cardNumbers").getString(0));
+                JSONObject data = paramOut.getJSONObject("data");
+                userFaceDto.setExtUserId(data.getString("personId"));
+                userFaceDto.setCardId(data.getJSONArray("cardIds").getString(0));
                 userFaceDto.setCardNumber(getIdNumber(userFaceDto));
             } else if (paramOut.getIntValue("code") == 511021) { // 说明业主已经存在
                 MachineFaceDto machineFaceDto = new MachineFaceDto();
@@ -184,15 +186,15 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
 
             url = MappingCacheFactory.getValue("HIK_URL") + CMD_SINGLE_PERSON_AUTH;
             postParameters = new JSONObject();
-            postParameters.put("communityId", communityDtos.get(0).getExtCommunityId());
-            postParameters.put("deviceId", machineDto.getMachineCode());
+            postParameters.put("communityId", communityDtos.get(0).getThirdCommunityId());
+            postParameters.put("deviceId", machineDto.getThirdMachineId());
             postParameters.put("personType", 1);
             postParameters.put("personId", userFaceDto.getExtUserId());
 
             paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "POST");
             paramOut = JSONObject.parseObject(paramOutString);
             saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SINGLE_PERSON_AUTH, postParameters.toJSONString(), paramOutString);
-            return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("msg"));
+            return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("message"));
         } catch (Exception e) {
             logger.error("出现异常了" + postParameters + ",返回" + paramOutString, e);
 
@@ -230,18 +232,18 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
         postParameters.put("mobile", userFaceDto.getLink());
         postParameters.put("faceUrl", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
 
-        paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "PUT");
+        paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "POST");
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_UPDATE_USER, postParameters.toJSONString(), paramOutString);
         JSONObject paramOut = JSONObject.parseObject(paramOutString);
 
         if (paramOut.getIntValue("code") != 200) {
-            return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("msg"));
+            return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("message"));
         }
 
         // 判断 门禁卡是否 有变动
         String cardNumber = getIdNumber(userFaceDto);
         if (cardNumber.equals(faceDtos.get(0).getCardNumber())) { // 没有变动
-            return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("msg"));
+            return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("message"));
         }
 
         //换卡
@@ -250,17 +252,19 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
         postParameters.put("cardId", faceDtos.get(0).getCardId());
         postParameters.put("cardNumber", getIdNumber(userFaceDto));
 
-        paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "PUT");
+        paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "POST");
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_CHANGE_CARD, postParameters.toJSONString(), paramOutString);
         paramOut = JSONObject.parseObject(paramOutString);
 
         if (paramOut.getIntValue("code") != 200) {
-            return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("msg"));
+            return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("message"));
         }
 
-        userFaceDto.setCardId(paramOut.getString("cardId"));
+        JSONObject data = paramOut.getJSONObject("data");
+
+        userFaceDto.setCardId(data.getString("cardId"));
         userFaceDto.setCardNumber(getIdNumber(userFaceDto));
-        return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("msg"));
+        return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("message"));
     }
 
     @Override
@@ -286,8 +290,8 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
         logger.debug("判断人员是否存在" + url);
         JSONObject postParameters = new JSONObject();
         postParameters = new JSONObject();
-        postParameters.put("communityId", communityDtos.get(0).getExtCommunityId());
-        postParameters.put("deviceId", machineDto.getMachineCode());
+        postParameters.put("communityId", communityDtos.get(0).getThirdCommunityId());
+        postParameters.put("deviceId", machineDto.getThirdMachineId());
         postParameters.put("personType", 1);
         postParameters.put("personId", faceDtos.get(0).getExtUserId());
 
@@ -295,10 +299,10 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
         JSONObject paramOut = JSONObject.parseObject(paramOutString);
 
         if (paramOut.getIntValue("code") != 200) {
-            return new ResultDto(paramOut.getIntValue("code"), paramOut.getString("msg"));
+            return new ResultDto(paramOut.getIntValue("code"), paramOut.getString("message"));
         }
 
-        return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("msg"));
+        return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("message"));
     }
 
     @Override
@@ -357,16 +361,17 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
     public void openDoor(MachineDto machineDto) {
         String url = MappingCacheFactory.getValue("HIK_URL") + CMD_OPEN_DOOR;
         MachineFaceDto machineFaceDto = new MachineFaceDto();
-        machineFaceDto.setPage(1);
+        machineFaceDto.setPage(0);
         machineFaceDto.setRow(1);
         machineFaceDto.setMachineCode(machineDto.getMachineCode());
+        machineFaceDto.setHasExtUserId("Y");
         List<MachineFaceDto> faceDtos = callAccessControlServiceImpl.queryMachineFaces(machineFaceDto);
         if (faceDtos.size() < 1) {
             throw new IllegalArgumentException("该人脸还没有添加");
         }
         JSONObject postParameters = new JSONObject();
         postParameters.put("personId", faceDtos.get(0).getExtUserId());
-        postParameters.put("deviceId", machineDto.getMachineCode());
+        postParameters.put("deviceId", machineDto.getThirdMachineId());
         postParameters.put("command", "open");
 
         String paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "POST");
@@ -378,9 +383,17 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
     @Override
     public ResultDto getQRcode(UserFaceDto userFaceDto) {
         String url = MappingCacheFactory.getValue("HIK_URL") + CMD_QRCODE;
-
+        MachineFaceDto machineFaceDto = new MachineFaceDto();
+        machineFaceDto.setPage(0);
+        machineFaceDto.setRow(1);
+        machineFaceDto.setMachineCode(userFaceDto.getMachineCode());
+        machineFaceDto.setHasExtUserId("Y");
+        List<MachineFaceDto> faceDtos = callAccessControlServiceImpl.queryMachineFaces(machineFaceDto);
+        if (faceDtos.size() < 1) {
+            throw new IllegalArgumentException("该人脸还没有添加");
+        }
         JSONObject postParameters = new JSONObject();
-        postParameters.put("personId", userFaceDto.getExtUserId());
+        postParameters.put("personId", faceDtos.get(0).getExtUserId());
         postParameters.put("personType", 1);
 
         String paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "POST");
@@ -389,10 +402,10 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
         JSONObject paramOut = JSONObject.parseObject(paramOutString);
         //saveLog(SeqUtil.getId(), userFaceDto.getMachineId(), CMD_OPEN_DOOR, postParameters.toJSONString(), paramOutString);
         if (paramOut.getIntValue("code") != 200) {
-            return new ResultDto(paramOut.getIntValue("code"), paramOut.getString("msg"));
+            return new ResultDto(paramOut.getIntValue("code"), paramOut.getString("message"));
         }
 
-        return new ResultDto(ResultDto.SUCCESS, paramOut.getString("msg"), paramOut.getJSONObject("data").getString("qrCode"));
+        return new ResultDto(ResultDto.SUCCESS, paramOut.getString("message"), paramOut.getJSONObject("data").getString("qrCode"));
     }
 
     @Override
@@ -466,7 +479,29 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
 
     @Override
     public ResultDto addMachine(MachineDto machineDto) {
-        return new ResultDto(ResultDto.SUCCESS, "成功");
+        String url = MappingCacheFactory.getValue("HIK_URL") + ADD_MACHINE;
+        CommunityDto communityDto = new CommunityDto();
+        communityDto.setCommunityId(machineDto.getCommunityId());
+        List<CommunityDto> communityDtos = null;
+        communityDtos = communityServiceImpl.queryCommunitys(communityDto);
+        Assert.listOnlyOne(communityDtos, "添加车辆时未查到小区信息");
+
+        JSONObject postParameters = new JSONObject();
+        postParameters.put("communityId", communityDtos.get(0).getThirdCommunityId());
+        postParameters.put("deviceSerial", machineDto.getMachineCode());
+        postParameters.put("validateCode", machineDto.getMachineVersion());
+        postParameters.put("deviceName", machineDto.getMachineName());
+
+        String paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "POST");
+        JSONObject paramOut = JSONObject.parseObject(paramOutString);
+
+        if (paramOut.getIntValue("code") != 200) {
+            return new ResultDto(paramOut.getIntValue("code"), paramOut.getString("message"));
+        }
+
+        JSONObject data = paramOut.getJSONObject("data");
+        machineDto.setThirdMachineId(data.getString("deviceId"));
+        return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("message"));
     }
 
     @Override
@@ -476,7 +511,27 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
 
     @Override
     public ResultDto deleteMachine(MachineDto machineDto) {
-        return new ResultDto(ResultDto.SUCCESS, "成功");
+        String url = MappingCacheFactory.getValue("HIK_URL") + DELETE_MACHINE;
+
+        List<MachineDto> machineDtos = null;
+        try {
+            machineDtos = callAccessControlServiceImpl.queryMachines(machineDto);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("设备不存在");
+        }
+        if (machineDtos == null || machineDtos.size() < 1) {
+            throw new IllegalArgumentException("设备不存在");
+        }
+        JSONObject postParameters = new JSONObject();
+        postParameters.put("deviceId", machineDtos.get(0).getThirdMachineId());
+
+        String paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "POST");
+        JSONObject paramOut = JSONObject.parseObject(paramOutString);
+
+        if (paramOut.getIntValue("code") != 200) {
+            return new ResultDto(paramOut.getIntValue("code"), paramOut.getString("message"));
+        }
+        return new ResultDto(paramOut.getIntValue("code") == 200 ? 0 : paramOut.getIntValue("code"), paramOut.getString("message"));
     }
 
 

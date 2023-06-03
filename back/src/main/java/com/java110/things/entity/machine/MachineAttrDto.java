@@ -16,6 +16,7 @@ import java.io.Serializable;
 public class MachineAttrDto extends PageDto implements Serializable {
 
     public static final String SPEC_VEDIO_URL = "19089001";
+    public static final String SPEC_THIRD_MACHINE_ID = "29089001";
 
     private String machineId;
     private String[] machineIds;

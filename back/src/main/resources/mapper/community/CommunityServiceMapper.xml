@@ -54,6 +54,7 @@
         t.create_time createTime,
         t.ext_community_id extCommunityId,
         t.app_id appId,
+        t.third_community_id thirdCommunityId,
         ca.area_name areaName,
         ca.parent_area_name cityName,
         ca1.parent_area_name provName
@@ -101,6 +102,9 @@
             </if>
             <if test="statusCd != null and statusCd != ''">
                 t.status_cd = #{statusCd},
+            </if>
+            <if test="thirdCommunityId != null and thirdCommunityId != ''">
+                t.third_community_id = #{thirdCommunityId},
             </if>
             <if test="extCommunityId != null and extCommunityId != ''">
                 t.ext_community_id = #{extCommunityId}

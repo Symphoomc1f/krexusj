@@ -144,6 +144,10 @@ public class MachineServiceImpl implements IMachineService {
             return resultDto;
         }
         machineDto.setHeartbeatTime(DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
+
+        if(StringUtil.isEmpty(machineDto.getThirdMachineId())){
+            machineDto.setThirdMachineId("-1");
+        }
         int count = machineServiceDao.saveMachine(machineDto);
 
         JSONObject data = new JSONObject();

@@ -49,6 +49,7 @@ public class MachineDto extends PageDto implements Serializable {
     private String locationObjId;
     private String locationType;
     private String direction;
+    private String thirdMachineId;
 
 
     private List<MachineAttrDto> machineAttrDtos;
@@ -217,5 +218,13 @@ public class MachineDto extends PageDto implements Serializable {
 
     public void setMachineAttrDtos(List<MachineAttrDto> machineAttrDtos) {
         this.machineAttrDtos = machineAttrDtos;
+    }
+
+    public String getThirdMachineId() {
+        return thirdMachineId;
+    }
+
+    public void setThirdMachineId(String thirdMachineId) {
+        this.thirdMachineId = thirdMachineId;
     }
 }

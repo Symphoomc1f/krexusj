@@ -57,6 +57,10 @@
         <if test="extUserId != null and extUserId != ''">
             and t.ext_user_id = #{extUserId}
         </if>
+        <if test='hasExtUserId != null and hasExtUserId == "Y"'>
+            and t.ext_user_id is not null
+        </if>
+
         <if test="name != null and name != ''">
             and t.name = #{name}
         </if>
