@@ -81,6 +81,9 @@
         <if test="direction != null and direction != ''">
             and t.direction = #{direction}
         </if>
+        <if test="thirdMachineId != null and thirdMachineId != ''">
+            and t.third_machine_id = #{thirdMachineId}
+        </if>
         and t.status_cd = '0'
         order by t.create_time desc
         <if test="page != -1 and page != null ">

@@ -88,7 +88,7 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
 
     public static final String CMD_CHANGE_CARD = "/api/v1/estate/system/cards/actions/changeCard";// 设置名称
     public static final String CMD_QRCODE = "/api/v1/estate/entranceGuard/permissions/actions/getQRcode";// 获取二维码
-    public static final String CMD_SET_PASSWORD = "/setPassWord";// 设置密码
+    public static final String CMD_ADD_COMMUNITY_RELATION = "/api/v1/estate/system/person/actions/addCommunityRelation";// 设置密码
     public static final String CMD_SET_SYSTEMMODE = "/device/systemMode";// 设置模式
     public static final String CMD_SET_IDENTIFY_CALLBACK = "/api/callback/deviceCallback/updateCallback";// 设置回调地址
     public static final String CMD_SET_HEARTBREAT = "/setDeviceHeartBeat";// 设置回调地址
@@ -183,6 +183,14 @@ public class HikAssessControlProcessAdapt extends DefaultAbstractAccessControlAd
                 //刷入外部编码
                 throw new IllegalArgumentException(paramOut.getString("msg"));
             }
+
+            //设置人员所在小区
+            url = MappingCacheFactory.getValue("HIK_URL") + CMD_ADD_COMMUNITY_RELATION;
+            postParameters = new JSONObject();
+            postParameters.put("communityId", communityDtos.get(0).getThirdCommunityId());
+            postParameters.put("personId", userFaceDto.getExtUserId());
+            paramOutString = HttpClient.doPost(url, postParameters.toJSONString(), "Bearer " + getToken(), "POST");
+
 
             url = MappingCacheFactory.getValue("HIK_URL") + CMD_SINGLE_PERSON_AUTH;
             postParameters = new JSONObject();
