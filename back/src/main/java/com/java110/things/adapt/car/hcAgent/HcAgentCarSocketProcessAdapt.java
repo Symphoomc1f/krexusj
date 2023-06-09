@@ -188,7 +188,11 @@ public class HcAgentCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         postParameters.put("carId", carResultDto.getCarId());
         postParameters.put("startTime", DateUtil.getFormatTimeString(carResultDto.getStartTime(), DateUtil.DATE_FORMATE_STRING_A));
         postParameters.put("endTime", DateUtil.getFormatTimeString(carResultDto.getEndTime(), DateUtil.DATE_FORMATE_STRING_A));
+        postParameters.put("communityId",getVId(parkingAreaDtos.get(0),SPEC_EXT_VID_ID));
+        postParameters.put("carTypeId",getVId(parkingAreaDtos.get(0),SPEC_EXT_CAR_TYPE_ID));
+        postParameters.put("carModelID",getVId(parkingAreaDtos.get(0),SPEC_EXT_CAR_MODEL_ID));
         MqttFactory.publish(TOPIC_REQUEST,postParameters.toJSONString());
+
         return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG,carResultDto.getCarId());
     }
 
