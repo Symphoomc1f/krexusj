@@ -174,6 +174,8 @@ public class ZhenshiCarMachineAdapt extends BaseMachineAdapt implements ICarMach
 
             if (ResultDto.SUCCESS != resultDto.getCode()) {
                 logger.debug("不开门原因" + resultDto.getMsg());
+                String[] msgs = resultDto.getMsg().split("\n");
+                JinjieScreenFactory.viewText(machineDto,msgs);
                 return; //不开门
             }
 

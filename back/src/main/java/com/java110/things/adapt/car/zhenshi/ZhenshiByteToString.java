@@ -5,13 +5,7 @@ import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.netty.client.CarNettyClient;
 import sun.misc.BASE64Encoder;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 
 /**
  * 臻识 道闸摄像头 字节和 字符串转换处理类
@@ -216,6 +210,23 @@ public class ZhenshiByteToString {
         } finally {
             swapStream.close();
         }
+    }
+
+    /**
+     * 发送指令
+     *
+     * @param machineDto
+     * @param cmd
+     * @return
+     */
+    public static boolean sendScreenCmd(MachineDto machineDto, byte[] cmd) {
+        try {
+            CarNettyClient.sendScreenMsg(machineDto, cmd);
+        } catch (Exception e) {
+            System.out.println("Error:" + e.getMessage());
+            return false;
+        }
+        return true;
     }
 
     /**

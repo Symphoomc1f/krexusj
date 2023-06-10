@@ -1,11 +1,7 @@
 package com.java110.things.adapt.car;
 
 import com.java110.things.adapt.car.compute.IComputeTempCarFee;
-import com.java110.things.entity.car.CarBlackWhiteDto;
-import com.java110.things.entity.car.CarDto;
-import com.java110.things.entity.car.CarInoutDto;
-import com.java110.things.entity.car.TempCarFeeConfigDto;
-import com.java110.things.entity.car.TempCarFeeResult;
+import com.java110.things.entity.car.*;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.parkingArea.ParkingAreaDto;
 import com.java110.things.entity.response.ResultDto;
@@ -226,7 +222,7 @@ public class CallCarServiceImpl implements ICallCarService {
 
         //黑名单车辆不能进入
         if (blackWhiteDtos != null && blackWhiteDtos.size() > 0) {
-            return new ResultDto(ResultDto.ERROR, "黑名单车辆(" + carNum + ")不能进入");
+            return new ResultDto(ResultDto.ERROR, "黑名单车辆\n" + carNum + "\n不能进入");
         }
 
 
@@ -238,7 +234,7 @@ public class CallCarServiceImpl implements ICallCarService {
         List<CarInoutDto> carInoutDtos = carInoutServiceImpl.queryCarInout(inoutDto);
         //黑名单车辆不能进入
         if (carInoutDtos != null && carInoutDtos.size() > 0) {
-            return new ResultDto(ResultDto.ERROR, carNum + "车辆已在场内");
+            return new ResultDto(ResultDto.ERROR, carNum + "\n车辆已在场内");
         }
 
         //2.0 进场
@@ -262,7 +258,7 @@ public class CallCarServiceImpl implements ICallCarService {
         if (resultDto.getCode() != ResultDto.SUCCESS) {
             return resultDto;
         }
-        return new ResultDto(ResultDto.SUCCESS, "开门");
+        return new ResultDto(ResultDto.SUCCESS, "月租车\n" + carNum + "\n欢迎光临");
     }
 
 

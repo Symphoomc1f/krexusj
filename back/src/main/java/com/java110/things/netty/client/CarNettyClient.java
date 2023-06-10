@@ -142,6 +142,28 @@ public class CarNettyClient {
     }
 
     //发送消息
+    public static boolean sendScreenMsg(MachineDto machineDto, byte[] bytes) throws Exception {
+        if (!channels.containsKey(machineDto.getMachineCode())) {
+            logger.debug("设备[" + machineDto.getMachineCode() + "]未连接");
+            return false;
+        }
+        ChannelFuture future = channels.get(machineDto.getMachineCode());
+        if (future != null && future.channel().isActive()) {
+            Channel channel = future.channel();
+            InetSocketAddress ipSocket = (InetSocketAddress) channel.remoteAddress();
+            String host = ipSocket.getHostString();
+            int port = ipSocket.getPort();
+            logger.debug("向设备" + host + ":" + port + "发送数据");
+            //项目封装的util类
+            ByteBuf buf = Unpooled.buffer();
+            buf.writeBytes(bytes);
+            // 2.写数据
+            future.channel().writeAndFlush(buf).sync();
+        }
+        return true;
+    }
+
+    //发送消息
     public static boolean sendMsg(MachineDto machineDto, byte[] bytes) throws Exception {
         if (!channels.containsKey(machineDto.getMachineCode())) {
             logger.debug("设备[" + machineDto.getMachineCode() + "]未连接");

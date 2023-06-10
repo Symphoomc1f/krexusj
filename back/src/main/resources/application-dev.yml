@@ -31,8 +31,8 @@ spring :
 
   datasource:
     username: hc_thing
-    password: hc05162859
-    url: jdbc:mysql://things.homecommunity.cn:3307/hc_thing?useUnicode=true&characterEncoding=gbk&zeroDateTimeBehavior=convertToNull&useSSL=false
+    password: hc_thing123456
+    url: jdbc:mysql://things.homecommunity.cn:3306/hc_things?useUnicode=true&characterEncoding=gbk&zeroDateTimeBehavior=convertToNull&useSSL=false
     driver-class-name: com.mysql.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     initialSize: 5
