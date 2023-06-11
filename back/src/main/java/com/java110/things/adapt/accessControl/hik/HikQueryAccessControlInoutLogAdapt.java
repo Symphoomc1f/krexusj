@@ -78,14 +78,14 @@ public class HikQueryAccessControlInoutLogAdapt {
         httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
         httpHeaders.add("Authorization", "Bearer " + getToken());
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
-        logger.debug("------请求信息："+httpEntity.toString());
+        logger.debug("------请求信息：" + httpEntity.toString());
         ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
 
         if (paramOut.getIntValue("code") != 200) {
             throw new IllegalArgumentException("创建通道失败");
         }
-        logger.debug("------返回信息："+paramOut);
+        logger.debug("------返回信息：" + paramOut);
 
         JSONArray data = paramOut.getJSONArray("data");
 
@@ -166,7 +166,7 @@ public class HikQueryAccessControlInoutLogAdapt {
             openDoorDto.setFace(ImageFactory.encodeImageToBase64(body.getString("pictureURL")));
             openDoorDto.setUserName(userName);
             openDoorDto.setHat("3");
-            openDoorDto.setMachineCode(machineDto.getMachineCode());
+            openDoorDto.setMachineCode(machineDtos.get(0).getMachineCode());
             openDoorDto.setUserId(userId);
             openDoorDto.setOpenId(SeqUtil.getId());
             openDoorDto.setOpenTypeCd(OPEN_TYPE_FACE);

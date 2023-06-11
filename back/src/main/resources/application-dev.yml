@@ -30,8 +30,8 @@ spring :
     static-path-pattern : /static/**
 
   datasource:
-    username: hc_thing
-    password: hc_thing123456
+    username: hc_things
+    password: hc_things12345678
     url: jdbc:mysql://things.homecommunity.cn:3306/hc_things?useUnicode=true&characterEncoding=gbk&zeroDateTimeBehavior=convertToNull&useSSL=false
     driver-class-name: com.mysql.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
