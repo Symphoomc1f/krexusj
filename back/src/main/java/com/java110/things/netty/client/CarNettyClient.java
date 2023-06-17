@@ -60,7 +60,7 @@ public class CarNettyClient {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
                         //socketChannel.pipeline().addLast(new LineBasedFrameDecoder(1024*1024));
-                        socketChannel.pipeline().addLast("framedecoder",new LengthFieldBasedFrameDecoder(5*1024*1024, 4, 4,0,0));
+                        socketChannel.pipeline().addLast("framedecoder", new LengthFieldBasedFrameDecoder(5 * 1024 * 1024, 4, 4, 0, 0));
                         socketChannel.pipeline().addLast(new CarNettyClientHandler());
                     }
                 });
@@ -130,7 +130,7 @@ public class CarNettyClient {
             InetSocketAddress ipSocket = (InetSocketAddress) channel.remoteAddress();
             String host = ipSocket.getHostString();
             int port = ipSocket.getPort();
-            logger.debug("向设备" + host + ":" + port + "发送数据");
+            logger.debug("向设备" + host + ":" + port + "发送数据" + bytes);
             //项目封装的util类
             ByteBuf buf = Unpooled.buffer();
             buf.writeBytes(headerBytes);

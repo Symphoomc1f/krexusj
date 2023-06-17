@@ -254,20 +254,7 @@ export default {
         direction: "",
       },
       rules: {
-        type: [
-          { required: true, message: "type is required", trigger: "change" },
-        ],
-        timestamp: [
-          {
-            type: "date",
-            required: true,
-            message: "timestamp is required",
-            trigger: "change",
-          },
-        ],
-        title: [
-          { required: true, message: "title is required", trigger: "blur" },
-        ],
+        
       },
     };
   },

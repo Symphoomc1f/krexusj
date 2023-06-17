@@ -2,22 +2,20 @@ package com.java110.things.Controller.parkingArea;
 
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
+import com.java110.things.entity.parkingArea.ParkingAreaAttrDto;
 import com.java110.things.entity.parkingArea.ParkingAreaDto;
 import com.java110.things.entity.response.ResultDto;
-import com.java110.things.entity.user.UserDto;
 import com.java110.things.service.parkingArea.IParkingAreaService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
 import com.java110.things.util.SeqUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @ClassName ParkingAreaController
@@ -49,9 +47,20 @@ public class ParkingAreaController extends BaseController {
         Assert.hasKeyAndValue(paramObj, "num", "请求报文中未包含停车场编号");
         Assert.hasKeyAndValue(paramObj, "communityId", "请求报文中未包含小区信息");
 
+        List<ParkingAreaAttrDto> parkingAreaAttrDtos = new ArrayList<ParkingAreaAttrDto>();
         ParkingAreaDto parkingAreaDto = BeanConvertUtil.covertBean(paramObj, ParkingAreaDto.class);
-
         parkingAreaDto.setPaId(SeqUtil.getId());
+        if (paramObj.containsKey("extPaId")) {
+            ParkingAreaAttrDto parkingAreaAttrDto = new ParkingAreaAttrDto();
+            parkingAreaAttrDto.setPaId(parkingAreaDto.getPaId());
+            parkingAreaAttrDto.setAttrId(SeqUtil.getId());
+            parkingAreaAttrDto.setCommunityId(parkingAreaDto.getCommunityId());
+            parkingAreaAttrDto.setSpecCd(ParkingAreaAttrDto.SPEC_EXT_PA_ID);
+            parkingAreaAttrDto.setValue(paramObj.getString("extPaId"));
+            parkingAreaAttrDtos.add(parkingAreaAttrDto);
+            parkingAreaDto.setAttrs(parkingAreaAttrDtos);
+        }
+
 
         ResultDto resultDto = parkingAreaServiceImpl.saveParkingArea(parkingAreaDto);
         return super.createResponseEntity(resultDto);
@@ -75,7 +84,6 @@ public class ParkingAreaController extends BaseController {
     }
 
 
-
     /**
      * 添加停车场接口类
      *
@@ -84,7 +92,7 @@ public class ParkingAreaController extends BaseController {
      * @throws Exception
      */
     @RequestMapping(path = "/getParkingAreas", method = RequestMethod.GET)
-    public ResponseEntity<String> getParkingAreas(@RequestParam(value = "paId",required = false) String paId,
+    public ResponseEntity<String> getParkingAreas(@RequestParam(value = "paId", required = false) String paId,
                                                   @RequestParam(value = "communityId") String communityId,
                                                   HttpServletRequest request) throws Exception {
 
