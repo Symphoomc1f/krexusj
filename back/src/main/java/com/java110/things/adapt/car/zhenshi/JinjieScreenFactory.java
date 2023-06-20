@@ -3,6 +3,8 @@ package com.java110.things.adapt.car.zhenshi;
 
 import com.java110.things.entity.machine.MachineDto;
 import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -16,6 +18,8 @@ import java.util.List;
  * @Date 2019/10/14 17:41
  */
 public class JinjieScreenFactory {
+    private static Logger logger = LoggerFactory.getLogger(JinjieScreenFactory.class);
+
     /**
      * 0x00 连接 PSWD[6~32] RET + HVR[3] + SVR[3] + CPVR[3]
      * 1.0.0
@@ -86,12 +90,16 @@ public class JinjieScreenFactory {
         sendData(machineDto, CMD_PLAY, data);
     }
 
-    public static void viewText(MachineDto machineDto, String[] msgs) throws UnsupportedEncodingException {
+    public static void viewText(MachineDto machineDto, String[] msgs) {
         List<String> tmpMsgs = new ArrayList<>();
         for (String msg : msgs) {
             tmpMsgs.add(msg);
         }
-        viewText(machineDto, tmpMsgs);
+        try {
+            viewText(machineDto, tmpMsgs);
+        } catch (Exception e) {
+            logger.error("发送文字失败", e);
+        }
     }
 
     /**
@@ -222,8 +230,8 @@ public class JinjieScreenFactory {
         newData = ArrayUtils.addAll(newData, data);
         byte[] crc = getCrc(newData);
         newData = ArrayUtils.addAll(newData, crc);
+        System.out.println("语音数据" + bytes2hex03(newData));
         if (machineDto == null) {
-            System.out.println(bytes2hex03(newData));
             System.out.println("设备为空，未向设备发送");
             return;
         }

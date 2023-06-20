@@ -223,6 +223,12 @@ public class ZhenshiCarMachineAdapt extends BaseMachineAdapt implements ICarMach
         // 发送开闸命令
         String triggerCmd = "{\"cmd\":\"ioctl\",\"io\" :0,\"value\":2,\"delay\":500}";
         ZhenshiByteToString.sendCmd(machineDto, triggerCmd);
+
+        // 发送欢迎光临
+        String[] msgs = new String[]{
+                "欢迎光临","欢迎光临","欢迎光临","欢迎光临"
+        };
+        JinjieScreenFactory.viewText(machineDto,msgs);
     }
 
     @Override

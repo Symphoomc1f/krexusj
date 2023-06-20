@@ -220,9 +220,25 @@ public class ZhenshiByteToString {
      * @return
      */
     public static boolean sendScreenCmd(MachineDto machineDto, byte[] cmd) {
+//        try {
+//            CarNettyClient.sendScreenMsg(machineDto, cmd);
+//        } catch (Exception e) {
+//            System.out.println("Error:" + e.getMessage());
+//            return false;
+//        }
+//        return true;
+
         try {
-            CarNettyClient.sendScreenMsg(machineDto, cmd);
+            int len = cmd.length;
+            byte[] header = {'V', 'Z', 0, 0, 0, 0, 0, 0};
+            header[4] += (byte) ((len >> 24) & 0xFF);
+            header[5] += (byte) ((len >> 16) & 0xFF);
+            header[6] += (byte) ((len >> 8) & 0xFF);
+            header[7] += (byte) (len & 0xFF);
+            //CarNettyClient.sendMsg(machineDto, header);
+            CarNettyClient.sendMsg(machineDto, header, cmd);
         } catch (Exception e) {
+            e.printStackTrace();
             System.out.println("Error:" + e.getMessage());
             return false;
         }
