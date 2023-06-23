@@ -53,5 +53,19 @@ public class Base64Convert {
         return bytes;
     }
 
+    /**
+     * 将base64 转为字节
+     *
+     * @param strBase64
+     * @return
+     * @throws IOException
+     */
+    public static String  byteTobase64(byte[] strBase64)  {
+        // 解码，然后将字节转换为文件
+
+        String bytes = new BASE64Encoder().encode(strBase64);   //将字符串转换为byte数组
+        return bytes;
+    }
+
 
 }

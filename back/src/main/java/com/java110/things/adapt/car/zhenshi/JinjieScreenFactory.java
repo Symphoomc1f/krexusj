@@ -1,7 +1,10 @@
 package com.java110.things.adapt.car.zhenshi;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.util.Base64Convert;
+import com.java110.things.util.SeqUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +68,9 @@ public class JinjieScreenFactory {
     public static final byte[] VR = {0x64};
     public static final byte[] PN = {(byte) 0xFF, (byte) 0xFF};
     public static final byte[] COLOR_RED = {(byte) 0xFF, 0x00, 0x00, 0x00};
+    public static final byte[] GB_COLOR = {0x00, 0x00, 0x00, 0x00};
     public static final byte[] COLOR_GREEN = {0x00, (byte) 0xFF, 0x00, 0x00};
+
 
     //语音变量
 
@@ -82,12 +87,16 @@ public class JinjieScreenFactory {
     /**
      * 播放声音
      */
-    public static void pay(MachineDto machineDto, String msg) throws UnsupportedEncodingException {
-        byte[] data = msg.getBytes("GBK");
-        int textLen = data.length;
-        byte[] datalength = {(byte) (1 + textLen), 0x01};
-        data = ArrayUtils.addAll(datalength, data);
-        sendData(machineDto, CMD_PLAY, data);
+    public static void pay(MachineDto machineDto, String msg) {
+        try {
+            byte[] data = msg.getBytes("GBK");
+            int textLen = data.length;
+            byte[] datalength = {(byte) (1 + textLen), 0x01};
+            data = ArrayUtils.addAll(datalength, data);
+            sendData(machineDto, CMD_PLAY, data);
+        } catch (Exception e) {
+            logger.error("发送语音失败", e);
+        }
     }
 
     public static void viewText(MachineDto machineDto, String[] msgs) {
@@ -100,6 +109,85 @@ public class JinjieScreenFactory {
         } catch (Exception e) {
             logger.error("发送文字失败", e);
         }
+    }
+
+    /**
+     * 下载临时文本的功能是用来显示临时文字信息。
+     * 请求格式: DA + VR + PN[2] + 0x62+ DL +TWID + ETM + ETS + DM + DT + EXM + EXS + FINDEX + DRS +
+     * TC[4] + BC[4] + TL[2] + TEXT[...]+ CRC[2]
+     * 请求参数描述: DL 等于 19 个字节再加上文本长度。
+     * TWID:为窗口的 ID(表示第几行),用于标识创建的窗口身份。
+     * ETM:文字进入窗口的方式。 取值范围及含义见下表:
+     * ETM 取值含义
+     * 编码 描述
+     * 0x00 立即显示
+     * 0x01 从右向左移动
+     * 0x02 从左向右移动
+     * 0x03 从下向上移动
+     * 0x04 从上向下移动
+     * 0x05 向下拉窗
+     * 0x06 向上拉窗
+     * 0x07 向左拉窗
+     * 0x08 向右拉窗
+     * 0x0D 逐字显示
+     * 0x15 连续左移
+     * ETS:为文字进入的速度。取值范围为 1~32。时基取决于当前的扫描周期。
+     * DM:为文字停留的方式。 目前作为保留值固定为 0。
+     * DT:为文字停留的时间。取值范围为 0 ~255。
+     * EXM:为文字退场的方式。取值范围及含义参考 ETM:
+     * EXS:为文字退场的速度。取值范围为 1~32。时基取决于当前的扫描周期。
+     * FINDEX:为文字的字体索引值,目前作为保留值固定为 3。
+     * DRS:为显示的次数。取值范围为 0~255,当为 0 的时，表示无限循环显示。
+     * TC:为文字的颜色值。 存储结构为 R G B A 三基色，各占 8 位， R 表示红色分量， G 表示
+     * 绿色分量,B 表示蓝色分量， A 目前没用使用，作为保留字。各取值范围为 0~255。
+     * BC: 为背景的颜色值。存储结构为 R G B A 三基色，各占 8 位， R 表示红色分量， G 表
+     * 示绿色分量,B 表示蓝色分量， A 目前没用使用，作为保留字。各取值范围为 0~255。
+     * TL:为文字的长度。 16 位数据类型，小端模式。 目前最大长度为 2K 字节。可以存储 1000
+     * 个汉字信息。
+     * TEXT:为显示的文字内容，支持 ASCII 和 GBK2312 编码。 单包最大长度为 255,超出单包
+     * 最大长度时，需要分包传输。
+     * 回复格式: DA + VR + PN[2] + 0x62+ DL + ACK + CRC[2]
+     * 回复参数描述: 包含 1 个字节的参数， DL 取值为 1， ACK 是显示屏返回的结果，取值为 0 表示成
+     * 功，非 0 表示不成功。
+     * 使用例子： 设置地址为 0 的显示屏的 0 号窗口的文本为"欢迎光临请入场停车"，进入模式为连续
+     * 移动，进入速度为 1，停留模式为正常停留，停留时间为 2 秒，退出模式为连续移动，退出速度
+     * 为 1，字体为宋体 16，字体颜色为红色，背景颜色为黑色。显示屏通信协议-v1.08
+     * 主机发送: 00 64 FF FF 62 25 00 15 01 00 02 15 01 03 00 FF 00 00 00 00 00 00 00 12 00 BB B6 D3 AD
+     * B9 E2 C1 D9 C7 EB C8 EB B3 A1 CD A3 B3 B5 F4 F5
+     * 设备回复: 00 64 FF FF 62 01 00 97 6A
+     *
+     * @param machineDto
+     * @param msgs
+     * @throws UnsupportedEncodingException
+     */
+    public static void downloadTempTexts(MachineDto machineDto, List<String> msgs) throws UnsupportedEncodingException {
+        for (int msgIndex = 0; msgIndex < msgs.size(); msgIndex++) {
+            downloadTempTexts(machineDto, msgIndex, msgs.get(msgIndex));
+        }
+    }
+
+    public static void downloadTempTexts(MachineDto machineDto, int line, String msg) {
+        try {
+            //0x00, 0x04
+            byte[] data = new byte[]{};
+            //演示 红色 绿色
+            byte[] color = line % 2 == 0 ? COLOR_RED : COLOR_GREEN;
+            // 设置  TWID + ETM + ETS + DM + DT + EXM + EXS + FINDEX + DRS + TC[4] + BC[4] + TL[2] + TEXT[...]
+            byte[] tmpDate = new byte[]{(byte) line, 0x01, 0x01, 0x00, 0x05, 0x01, 0x01, 0x03, 0x01};
+            tmpDate = ArrayUtils.addAll(tmpDate, color); //tc
+            tmpDate = ArrayUtils.addAll(tmpDate, GB_COLOR); //BC
+            tmpDate = ArrayUtils.addAll(tmpDate, intCovertByte(msg.getBytes("GBK").length));
+            tmpDate = ArrayUtils.addAll(tmpDate, msg.getBytes("GBK"));
+            data = ArrayUtils.addAll(data, tmpDate);
+            int textLen = data.length;
+            byte[] datalength = {(byte) (textLen)};
+            data = ArrayUtils.addAll(datalength, data);
+
+            sendData(machineDto, CMD_DOWNLOAD_TEMP_INFO, data);
+        } catch (Exception e) {
+            logger.error("发送文件失败", e);
+        }
+
     }
 
     /**
@@ -152,10 +240,24 @@ public class JinjieScreenFactory {
 
         }
         int textLen = data.length;
-        byte[] datalength = {(byte) (textLen)};
+        byte[] datalength = new byte[]{(byte)(textLen)};
         data = ArrayUtils.addAll(datalength, data);
         sendData(machineDto, CMD_VIEW_PLAY, data);
     }
+
+    /**
+     * int类型转换成byte数组
+     *
+     * @param param int int类型的参数
+     */
+
+    public static byte[] intCovertByte(int param) {
+        byte[] arr = new byte[2];
+        arr[0] = (byte) ((param >> 8) & 0xff);
+        arr[1] = (byte) (param & 0xff);
+        return arr;
+    }
+
 
     /**
      * 显示文字并播放
@@ -235,7 +337,17 @@ public class JinjieScreenFactory {
             System.out.println("设备为空，未向设备发送");
             return;
         }
-        ZhenshiByteToString.sendScreenCmd(machineDto, newData);
+        //ZhenshiByteToString.sendScreenCmd(machineDto, newData);
+        String logId = SeqUtil.getMachineSeq();
+        JSONObject paramIn = new JSONObject();
+        paramIn.put("cmd", "ttransmission");
+        paramIn.put("id", logId);
+        paramIn.put("subcmd", "send");
+        paramIn.put("datalen", newData.length);
+        paramIn.put("data", Base64Convert.byteTobase64(newData));
+        paramIn.put("comm", "rs485-1");
+        ZhenshiByteToString.sendCmd(machineDto, paramIn.toJSONString());
+
     }
 
 

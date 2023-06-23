@@ -228,7 +228,12 @@ public class ZhenshiCarMachineAdapt extends BaseMachineAdapt implements ICarMach
         String[] msgs = new String[]{
                 "欢迎光临","欢迎光临","欢迎光临","欢迎光临"
         };
-        JinjieScreenFactory.viewText(machineDto,msgs);
+        JinjieScreenFactory.pay(machineDto,"青AGK916，欢迎光临");
+        JinjieScreenFactory.downloadTempTexts(machineDto,0,"欢迎光临欢迎光临");
+        JinjieScreenFactory.downloadTempTexts(machineDto,1,"青AGK916青AGK916");
+        JinjieScreenFactory.downloadTempTexts(machineDto,2,"青AGK916青AGK916");
+        JinjieScreenFactory.downloadTempTexts(machineDto,3,"欢迎光临欢迎光临");
+
     }
 
     @Override

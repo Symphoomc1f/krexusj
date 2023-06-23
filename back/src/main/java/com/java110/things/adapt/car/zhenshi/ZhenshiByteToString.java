@@ -236,7 +236,7 @@ public class ZhenshiByteToString {
             header[6] += (byte) ((len >> 8) & 0xFF);
             header[7] += (byte) (len & 0xFF);
             //CarNettyClient.sendMsg(machineDto, header);
-            CarNettyClient.sendMsg(machineDto, header, cmd);
+            CarNettyClient.sendMsg(machineDto, null, cmd);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Error:" + e.getMessage());

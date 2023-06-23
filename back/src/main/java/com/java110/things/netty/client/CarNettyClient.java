@@ -133,7 +133,9 @@ public class CarNettyClient {
             logger.debug("向设备" + host + ":" + port + "发送数据" + bytes);
             //项目封装的util类
             ByteBuf buf = Unpooled.buffer();
-            buf.writeBytes(headerBytes);
+            if (headerBytes != null) {
+                buf.writeBytes(headerBytes);
+            }
             buf.writeBytes(bytes);
             // 2.写数据
             future.channel().writeAndFlush(buf).sync();
