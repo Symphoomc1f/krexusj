@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java110.things.dao.IParkingAreaTextServiceDao">
+
+    <insert id="saveParkingAreaText" parameterType="com.java110.things.entity.parkingArea.ParkingAreaTextDto">
+        INSERT INTO parking_area_text(`text_id`, `pa_id`, `community_id`, `type_cd`, `text1`, `text2`, `text3`, `text4`,
+        `voice`)
+        VALUES (#{textId}, #{paId}, #{communityId}, #{typeCd}, #{text1}, #{text2}, #{text3}, #{text4}, #{voice})
+    </insert>
+    <!--
+        查询设备信息
+    -->
+    <select id="getParkingAreaTexts" parameterType="com.java110.things.entity.parkingArea.ParkingAreaTextDto"
+            resultType="com.java110.things.entity.parkingArea.ParkingAreaTextDto">
+        select
+        t.pa_id paId,
+        t.community_id communityId,
+        t.text_id textId,
+        t.type_cd typeCd,
+        t.text1,
+        t.text2,
+        t.text3,
+        t.text4,
+        t.voice,
+        t.create_time createTime
+        from parking_area_text t
+        where 1=1
+        and t.status_cd = '0'
+        <if test="paId != null and paId != ''">
+            and t.pa_id = #{paId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="textId != null and textId != ''">
+            and t.text_id = #{textId}
+        </if>
+        order by t.create_time desc
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+
+    </select>
+
+    <select id="getParkingAreaTextCount" parameterType="com.java110.things.entity.parkingArea.ParkingAreaTextDto"
+            resultType="long">
+        select
+        count(1) count
+        from parking_area_text t
+        where 1=1
+        and t.status_cd = '0'
+        <if test="paId != null and paId != ''">
+            and t.pa_id = #{paId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="textId != null and textId != ''">
+            and t.text_id = #{textId}
+        </if>
+
+    </select>
+
+    <update id="updateParkingAreaText" parameterType="com.java110.things.entity.parkingArea.ParkingAreaTextDto">
+        UPDATE parking_area_text t
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="typeCd != null and typeCd != ''">
+                t.type_cd = #{typeCd},
+            </if>
+            <if test="text1 != null and text1 != ''">
+                t.text1 = #{text1},
+            </if>
+            <if test="text2 != null and text2 != ''">
+                t.text2 = #{text2},
+            </if>
+            <if test="text3 != null and text3 != ''">
+                t.text3 = #{text3},
+            </if>
+            <if test="text4 != null and text4 != ''">
+                t.text4 = #{text4},
+            </if>
+            <if test="voice != null and voice != ''">
+                t.voice = #{voice}
+            </if>
+        </trim>
+        where 1=1
+        <if test="paId != null and paId != ''">
+            and t.pa_id = #{paId}
+        </if>
+        <if test="textId != null and textId != ''">
+            and t.`text_id` = #{textId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+
+    </update>
+
+    <delete id="delete" parameterType="com.java110.things.entity.parkingArea.ParkingAreaTextDto">
+        delete from parking_area_text where text_id = #{textId}
+    </delete>
+
+</mapper>
