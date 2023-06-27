@@ -25,7 +25,10 @@ public abstract class BaseComputeTempCarFee implements IComputeTempCarFee {
         TempCarFeeResult result = doCompute(carInoutDto, tempCarFeeConfigDto, tempCarFeeConfigAttrDtos);
         //获取停车时间
         long min = TempCarFeeFactory.getTempCarMin(carInoutDto);
-        result.setMin(min);
+        long hours = min / 60; //因为两者都是整数，你得到一个int
+        long minutes = min%60;
+        result.setMin(minutes);
+        result.setHours(hours);
         return result;
     }
 

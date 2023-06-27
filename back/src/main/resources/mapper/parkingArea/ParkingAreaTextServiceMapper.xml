@@ -35,6 +35,9 @@
         <if test="textId != null and textId != ''">
             and t.text_id = #{textId}
         </if>
+        <if test="typeCd != null and typeCd != ''">
+            and t.type_cd = #{typeCd}
+        </if>
         order by t.create_time desc
         <if test="page != -1 and page != null ">
             limit #{page}, #{row}

@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.util.Base64Convert;
 import com.java110.things.util.SeqUtil;
+import com.java110.things.util.StringUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,6 +168,9 @@ public class JinjieScreenFactory {
     }
 
     public static void downloadTempTexts(MachineDto machineDto, int line, String msg) {
+        if (StringUtil.isEmpty(msg)) {
+            return;
+        }
         try {
             //0x00, 0x04
             byte[] data = new byte[]{};
@@ -240,7 +244,7 @@ public class JinjieScreenFactory {
 
         }
         int textLen = data.length;
-        byte[] datalength = new byte[]{(byte)(textLen)};
+        byte[] datalength = new byte[]{(byte) (textLen)};
         data = ArrayUtils.addAll(datalength, data);
         sendData(machineDto, CMD_VIEW_PLAY, data);
     }

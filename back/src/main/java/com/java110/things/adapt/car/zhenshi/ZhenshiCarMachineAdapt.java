@@ -21,6 +21,7 @@ import com.java110.things.adapt.car.ICallCarService;
 import com.java110.things.adapt.car.ICarMachineProcess;
 import com.java110.things.entity.machine.MachineAttrDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.parkingArea.ResultParkingAreaTextDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.SeqUtil;
@@ -170,15 +171,16 @@ public class ZhenshiCarMachineAdapt extends BaseMachineAdapt implements ICarMach
 
             String license = plateResult.getString("license");
 
-            ResultDto resultDto = callCarServiceImpl.ivsResult(type, license, machineDto);
+            ResultParkingAreaTextDto resultParkingAreaTextDto = callCarServiceImpl.ivsResult(type, license, machineDto);
+            JinjieScreenFactory.pay(machineDto,resultParkingAreaTextDto.getVoice());
+            JinjieScreenFactory.downloadTempTexts(machineDto,1,resultParkingAreaTextDto.getText1());
+            JinjieScreenFactory.downloadTempTexts(machineDto,2,resultParkingAreaTextDto.getText2());
+            JinjieScreenFactory.downloadTempTexts(machineDto,3,resultParkingAreaTextDto.getText3());
+            JinjieScreenFactory.downloadTempTexts(machineDto,4,resultParkingAreaTextDto.getText4());
 
-            if (ResultDto.SUCCESS != resultDto.getCode()) {
-                logger.debug("不开门原因" + resultDto.getMsg());
-                String[] msgs = resultDto.getMsg().split("\n");
-                JinjieScreenFactory.viewText(machineDto,msgs);
+            if (ResultDto.SUCCESS != resultParkingAreaTextDto.getCode()) {
                 return; //不开门
             }
-
             openDoor(machineDto);
 
         } catch (Exception e) {

@@ -21,6 +21,8 @@ public class TempCarFeeResult implements Serializable {
 
     private Double payCharge;
 
+    private long hours;
+
     private long min;
 
     public String getCarNum() {
@@ -45,5 +47,13 @@ public class TempCarFeeResult implements Serializable {
 
     public void setMin(long min) {
         this.min = min;
+    }
+
+    public long getHours() {
+        return hours;
+    }
+
+    public void setHours(long hours) {
+        this.hours = hours;
     }
 }

@@ -4,6 +4,7 @@ import com.java110.things.adapt.car.compute.IComputeTempCarFee;
 import com.java110.things.entity.car.*;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.parkingArea.ParkingAreaDto;
+import com.java110.things.entity.parkingArea.ResultParkingAreaTextDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.ApplicationContextFactory;
 import com.java110.things.factory.TempCarFeeFactory;
@@ -46,22 +47,22 @@ public class CallCarServiceImpl implements ICallCarService {
     private IParkingAreaService parkingAreaServiceImpl;
 
     @Override
-    public ResultDto ivsResult(String type, String carNum, MachineDto machineDto) throws Exception {
+    public ResultParkingAreaTextDto ivsResult(String type, String carNum, MachineDto machineDto) throws Exception {
 
         String machineDirection = machineDto.getDirection();
-        ResultDto resultDto = null;
+        ResultParkingAreaTextDto resultParkingAreaTextDto = null;
         switch (machineDirection) {
             case MachineDto.MACHINE_DIRECTION_ENTER: // 车辆进场
-                resultDto = enterParkingArea(type, carNum, machineDto);
+                resultParkingAreaTextDto = enterParkingArea(type, carNum, machineDto);
                 break;
             case MachineDto.MACHINE_DIRECTION_OUT://车辆出场
-                resultDto = outParkingArea(type, carNum, machineDto);
+                resultParkingAreaTextDto = outParkingArea(type, carNum, machineDto);
                 break;
             default:
-                resultDto = new ResultDto(ResultDto.ERROR, "设备信息有误");
+                resultParkingAreaTextDto = new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, "系统异常");
         }
 
-        return resultDto;
+        return resultParkingAreaTextDto;
     }
 
     /**
@@ -72,7 +73,7 @@ public class CallCarServiceImpl implements ICallCarService {
      * @param machineDto 设备信息
      * @return
      */
-    private ResultDto outParkingArea(String type, String carNum, MachineDto machineDto) throws Exception {
+    private ResultParkingAreaTextDto outParkingArea(String type, String carNum, MachineDto machineDto) throws Exception {
 
         ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
         parkingAreaDto.setExtPaId(machineDto.getLocationObjId());
@@ -90,22 +91,22 @@ public class CallCarServiceImpl implements ICallCarService {
         List<CarInoutDto> carInoutDtos = carInoutServiceImpl.queryCarInout(carInoutDto);
 
         if (carInoutDtos == null || carInoutDtos.size() < 1) {
-            return new ResultDto(ResultDto.ERROR, "车辆未进场");
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, carNum, "未进场", "", "", carNum + "未进场");
         }
 
         //判断是否为白名单
         if (judgeWhiteCar(machineDto, carNum, parkingAreaDtos.get(0), type, carInoutDtos)) {
-            return new ResultDto(ResultDto.SUCCESS, "车辆为白名单");
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, carNum, "白名单车辆", "", "", carNum + "白名单车辆");
         }
 
         //判断车辆是否为月租车
         if (judgeOwnerCar(machineDto, carNum, parkingAreaDtos.get(0), type, carInoutDtos)) {
-            return new ResultDto(ResultDto.SUCCESS, "车辆为白名单");
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, carNum, "月租车车辆", "", "", carNum + "月租车车辆");
         }
 
         //检查是否支付完成
         if (TempCarFeeFactory.judgeFinishPayTempCarFee(carInoutDtos.get(0))) {
-            return new ResultDto(ResultDto.SUCCESS, "已经支付完成");
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, carNum, "临时车，欢迎光临", "", "", carNum + "临时车，欢迎光临");
         }
 
         TempCarFeeConfigDto tempCarFeeConfigDto = new TempCarFeeConfigDto();
@@ -114,13 +115,14 @@ public class CallCarServiceImpl implements ICallCarService {
         List<TempCarFeeConfigDto> tempCarFeeConfigDtos = tempCarFeeConfigServiceImpl.queryTempCarFeeConfigs(tempCarFeeConfigDto);
 
         if (tempCarFeeConfigDtos == null || tempCarFeeConfigDtos.size() < 1) {
-            return new ResultDto(ResultDto.SUCCESS, "未找到收费标准");
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, "错误");
         }
 
         IComputeTempCarFee computeTempCarFee = ApplicationContextFactory.getBean(tempCarFeeConfigDtos.get(0).getRuleId(), IComputeTempCarFee.class);
         TempCarFeeResult result = computeTempCarFee.computeTempCarFee(carInoutDtos.get(0), tempCarFeeConfigDtos.get(0));
 
-        return new ResultDto(ResultDto.NO_PAY, "未支付", result);
+        return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, "停车" + result.getHours() + "小时" + result.getMin() + "分钟", "请缴费" + result.getPayCharge() + "元", "", "",
+                carNum + "停车" + result.getHours() + "小时" + result.getMin() + "分钟,请缴费" + result.getPayCharge() + "元");
     }
 
     /**
@@ -203,7 +205,7 @@ public class CallCarServiceImpl implements ICallCarService {
      * @param machineDto 设备信息
      * @return
      */
-    private ResultDto enterParkingArea(String type, String carNum, MachineDto machineDto) throws Exception {
+    private ResultParkingAreaTextDto enterParkingArea(String type, String carNum, MachineDto machineDto) throws Exception {
 
         ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
         parkingAreaDto.setExtPaId(machineDto.getLocationObjId());
@@ -222,7 +224,7 @@ public class CallCarServiceImpl implements ICallCarService {
 
         //黑名单车辆不能进入
         if (blackWhiteDtos != null && blackWhiteDtos.size() > 0) {
-            return new ResultDto(ResultDto.ERROR, "黑名单车辆\n" + carNum + "\n不能进入");
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, "黑名单车辆", carNum + "不能进入", "", "", "黑名单车辆" + carNum + "不能进入");
         }
 
 
@@ -234,7 +236,7 @@ public class CallCarServiceImpl implements ICallCarService {
         List<CarInoutDto> carInoutDtos = carInoutServiceImpl.queryCarInout(inoutDto);
         //黑名单车辆不能进入
         if (carInoutDtos != null && carInoutDtos.size() > 0) {
-            return new ResultDto(ResultDto.ERROR, carNum + "\n车辆已在场内");
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, carNum, "车辆已在场内", "", "", carNum + "车辆已在场内");
         }
 
         //2.0 进场
@@ -254,11 +256,10 @@ public class CallCarServiceImpl implements ICallCarService {
         //异步上报HC小区管理系统
         carCallHcServiceImpl.carInout(carInoutDto);
 
-
         if (resultDto.getCode() != ResultDto.SUCCESS) {
-            return resultDto;
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, carNum, "入场失败", "", "", carNum + "入场失败");
         }
-        return new ResultDto(ResultDto.SUCCESS, "月租车\n" + carNum + "\n欢迎光临");
+        return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, "月租车", carNum + "欢迎光临", "", "", "月租车" + carNum + "欢迎光临");
     }
 
 

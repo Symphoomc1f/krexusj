@@ -17,6 +17,7 @@ public class ParkingAreaTextDto extends PageDto implements Serializable {
     private String text4;
     private String createTime;
     private String statusCd;
+    private String voice;
 
     public String getPaId() {
         return paId;
@@ -96,5 +97,13 @@ public class ParkingAreaTextDto extends PageDto implements Serializable {
 
     public void setStatusCd(String statusCd) {
         this.statusCd = statusCd;
+    }
+
+    public String getVoice() {
+        return voice;
+    }
+
+    public void setVoice(String voice) {
+        this.voice = voice;
     }
 }
