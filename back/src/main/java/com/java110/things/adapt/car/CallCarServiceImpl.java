@@ -4,9 +4,11 @@ import com.java110.things.adapt.car.compute.IComputeTempCarFee;
 import com.java110.things.entity.car.*;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.parkingArea.ParkingAreaDto;
+import com.java110.things.entity.parkingArea.ParkingAreaTextCacheDto;
 import com.java110.things.entity.parkingArea.ResultParkingAreaTextDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.ApplicationContextFactory;
+import com.java110.things.factory.ParkingAreaTextFactory;
 import com.java110.things.factory.TempCarFeeFactory;
 import com.java110.things.service.car.ICarBlackWhiteService;
 import com.java110.things.service.car.ICarInoutService;
@@ -17,6 +19,7 @@ import com.java110.things.service.parkingArea.IParkingAreaService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
+import com.java110.things.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -100,12 +103,25 @@ public class CallCarServiceImpl implements ICallCarService {
         }
 
         //判断车辆是否为月租车
-        if (judgeOwnerCar(machineDto, carNum, parkingAreaDtos.get(0), type, carInoutDtos)) {
-            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, carNum, "月租车车辆", "", "", carNum + "月租车车辆");
+        ParkingAreaTextCacheDto parkingAreaTextCacheDto = ParkingAreaTextFactory.getText(parkingAreaDtos.get(0).getPaId(), ParkingAreaTextFactory.TYPE_CD_MONTH_CAR_OUT);
+        int day = judgeOwnerCar(machineDto, carNum, parkingAreaDtos.get(0), type, carInoutDtos);
+        //替换脚本中信息
+        replaceParkingAreaTextCache(parkingAreaTextCacheDto, carNum, "", "", "", day + "");
+        if (day > 0) {
+            if (parkingAreaTextCacheDto != null) {
+                return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, parkingAreaTextCacheDto);
+            }
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, carNum, "月租车车辆,剩余" + day + "天", "", "", carNum + "月租车车辆");
         }
 
         //检查是否支付完成
+        parkingAreaTextCacheDto = ParkingAreaTextFactory.getText(parkingAreaDtos.get(0).getPaId(), ParkingAreaTextFactory.TYPE_CD_TEMP_CAR_OUT);
+        //替换脚本中信息
+        replaceParkingAreaTextCache(parkingAreaTextCacheDto, carNum, "", "", "", "");
         if (TempCarFeeFactory.judgeFinishPayTempCarFee(carInoutDtos.get(0))) {
+            if (parkingAreaTextCacheDto != null) {
+                return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, parkingAreaTextCacheDto);
+            }
             return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, carNum, "临时车，欢迎光临", "", "", carNum + "临时车，欢迎光临");
         }
 
@@ -121,8 +137,85 @@ public class CallCarServiceImpl implements ICallCarService {
         IComputeTempCarFee computeTempCarFee = ApplicationContextFactory.getBean(tempCarFeeConfigDtos.get(0).getRuleId(), IComputeTempCarFee.class);
         TempCarFeeResult result = computeTempCarFee.computeTempCarFee(carInoutDtos.get(0), tempCarFeeConfigDtos.get(0));
 
+        parkingAreaTextCacheDto = ParkingAreaTextFactory.getText(parkingAreaDtos.get(0).getPaId(), ParkingAreaTextFactory.TYPE_CD_TEMP_CAR_NO_PAY);
+
+        //替换脚本中信息
+        replaceParkingAreaTextCache(parkingAreaTextCacheDto, carNum, result.getHours() + "", result.getMin() + "", result.getPayCharge() + "", "");
+
+        if (parkingAreaTextCacheDto != null) {
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, parkingAreaTextCacheDto);
+        }
         return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, "停车" + result.getHours() + "小时" + result.getMin() + "分钟", "请缴费" + result.getPayCharge() + "元", "", "",
                 carNum + "停车" + result.getHours() + "小时" + result.getMin() + "分钟,请缴费" + result.getPayCharge() + "元");
+    }
+
+
+    /**
+     * 替换配置中的配置
+     *
+     * @param parkingAreaTextCacheDto
+     * @param carNum
+     * @param hours
+     * @param min
+     * @param payCharge
+     */
+    private void replaceParkingAreaTextCache(ParkingAreaTextCacheDto parkingAreaTextCacheDto, String carNum, String hours, String min, String payCharge, String day) {
+
+        if (parkingAreaTextCacheDto == null) {
+            return;
+        }
+        String replaceAfter = "";
+        if (!StringUtil.isEmpty(parkingAreaTextCacheDto.getText1())) {
+            replaceAfter = parkingAreaTextCacheDto.getText1()
+                    .replaceAll("carNum", carNum)
+                    .replaceAll("hours", hours)
+                    .replaceAll("min", min)
+                    .replaceAll("day", day)
+                    .replaceAll("payCharge", payCharge);
+            parkingAreaTextCacheDto.setText1(replaceAfter);
+        }
+
+        if (!StringUtil.isEmpty(parkingAreaTextCacheDto.getText2())) {
+            replaceAfter = parkingAreaTextCacheDto.getText2()
+                    .replaceAll("carNum", carNum)
+                    .replaceAll("hours", hours)
+                    .replaceAll("min", min)
+                    .replaceAll("day", day)
+                    .replaceAll("payCharge", payCharge)
+            ;
+            parkingAreaTextCacheDto.setText2(replaceAfter);
+        }
+
+        if (!StringUtil.isEmpty(parkingAreaTextCacheDto.getText3())) {
+            replaceAfter = parkingAreaTextCacheDto.getText3()
+                    .replaceAll("carNum", carNum)
+                    .replaceAll("hours", hours)
+                    .replaceAll("min", min)
+                    .replaceAll("day", day)
+                    .replaceAll("payCharge", payCharge)
+            ;
+            parkingAreaTextCacheDto.setText3(replaceAfter);
+        }
+        if (!StringUtil.isEmpty(parkingAreaTextCacheDto.getText4())) {
+            replaceAfter = parkingAreaTextCacheDto.getText4()
+                    .replaceAll("carNum", carNum)
+                    .replaceAll("hours", hours)
+                    .replaceAll("min", min)
+                    .replaceAll("day", day)
+                    .replaceAll("payCharge", payCharge)
+            ;
+            parkingAreaTextCacheDto.setText4(replaceAfter);
+        }
+        if (!StringUtil.isEmpty(parkingAreaTextCacheDto.getVoice())) {
+            replaceAfter = parkingAreaTextCacheDto.getVoice()
+                    .replaceAll("carNum", carNum)
+                    .replaceAll("hours", hours)
+                    .replaceAll("min", min)
+                    .replaceAll("day", day)
+                    .replaceAll("payCharge", payCharge)
+            ;
+            parkingAreaTextCacheDto.setVoice(replaceAfter);
+        }
     }
 
     /**
@@ -133,9 +226,9 @@ public class CallCarServiceImpl implements ICallCarService {
      * @param parkingAreaDto
      * @param type
      * @param carInoutDtos
-     * @return
+     * @return -1 表示临时车
      */
-    private boolean judgeOwnerCar(MachineDto machineDto, String carNum, ParkingAreaDto parkingAreaDto, String type, List<CarInoutDto> carInoutDtos) throws Exception {
+    private int judgeOwnerCar(MachineDto machineDto, String carNum, ParkingAreaDto parkingAreaDto, String type, List<CarInoutDto> carInoutDtos) throws Exception {
 
         CarDto carDto = new CarDto();
         carDto.setPaId(parkingAreaDto.getPaId());
@@ -143,14 +236,15 @@ public class CallCarServiceImpl implements ICallCarService {
         List<CarDto> carDtos = carServiceImpl.queryCars(carDto);
 
         if (carDtos == null || carDtos.size() < 1) {
-            return false;
+            return -1;
         }
 
-        if (carDtos.get(0).getEndTime().getTime() > DateUtil.getCurrentDate().getTime()) {
-            return true;
-        }
+        int day = DateUtil.differentDays(carDtos.get(0).getEndTime(), DateUtil.getCurrentDate());
 
-        return false;
+        if (day < 0) {
+            return 0;
+        }
+        return day;
     }
 
 
@@ -259,7 +353,23 @@ public class CallCarServiceImpl implements ICallCarService {
         if (resultDto.getCode() != ResultDto.SUCCESS) {
             return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, carNum, "入场失败", "", "", carNum + "入场失败");
         }
-        return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, "月租车", carNum + "欢迎光临", "", "", "月租车" + carNum + "欢迎光临");
+
+        //判断车辆是否为月租车
+        int day = judgeOwnerCar(machineDto, carNum, parkingAreaDtos.get(0), type, carInoutDtos);
+        ParkingAreaTextCacheDto parkingAreaTextCacheDto = ParkingAreaTextFactory.getText(parkingAreaDtos.get(0).getPaId(), ParkingAreaTextFactory.TYPE_CD_MONTH_CAR_IN);
+        //替换脚本中信息
+        replaceParkingAreaTextCache(parkingAreaTextCacheDto, carNum, "", "", "", day + "");
+        if (day > -1 && parkingAreaTextCacheDto != null) {
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, parkingAreaTextCacheDto);
+        }
+        parkingAreaTextCacheDto = ParkingAreaTextFactory.getText(parkingAreaDtos.get(0).getPaId(), ParkingAreaTextFactory.TYPE_CD_TEMP_CAR_IN);
+        //替换脚本中信息
+        replaceParkingAreaTextCache(parkingAreaTextCacheDto, carNum, "", "", "", "");
+        if (day < 0 && parkingAreaTextCacheDto != null) {
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, parkingAreaTextCacheDto);
+        }
+
+        return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, carNum, "欢迎光临", "", "", carNum + "欢迎光临");
     }
 
 

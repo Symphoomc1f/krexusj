@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ParkAreaTextFactory {
+public class ParkingAreaTextFactory {
 
     //类型：1001 月租车进场，2002 月租车出场，3003 月租车到期，4004 临时车进场 5005 临时车出场 6006 临时车未缴费
     public static final String TYPE_CD_MONTH_CAR_IN = "1001";
@@ -22,7 +22,7 @@ public class ParkAreaTextFactory {
 
     public static final Map<String, ParkingAreaTextCacheDto> cache = new HashMap<>();
 
-    public static ParkingAreaTextDto getText(String paId, String typeCd) {
+    public static ParkingAreaTextCacheDto getText(String paId, String typeCd) {
         if (cache.containsKey(paId + typeCd)) {
             return cache.get(paId + typeCd);
         }
@@ -38,7 +38,7 @@ public class ParkAreaTextFactory {
      * @param typeCd
      * @return
      */
-    private static synchronized ParkingAreaTextDto getParkingAreaTextByDb(String paId, String typeCd) {
+    private static synchronized ParkingAreaTextCacheDto getParkingAreaTextByDb(String paId, String typeCd) {
 
         IParkingAreaTextService parkingAreaTextService = ApplicationContextFactory.getBean("parkingAreaTextServiceImpl", IParkingAreaTextService.class);
         ParkingAreaTextDto parkingAreaTextDto = new ParkingAreaTextDto();
