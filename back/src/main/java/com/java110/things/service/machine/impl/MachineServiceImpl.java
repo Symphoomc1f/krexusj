@@ -104,6 +104,11 @@ public class MachineServiceImpl implements IMachineService {
         List<String> machineIds = new ArrayList<>();
         for (MachineDto machineDto : machineDtoList) {
             machineIds.add(machineDto.getMachineId());
+            if(!StringUtil.isEmpty(machineDto.getMachineVersion()) && machineDto.getMachineVersion().contains("300")) {
+                machineDto.setWsUrl("ws://" + machineDto.getMachineIp().replace("8131", "9080") + "/ws.flv");
+            }else {
+                machineDto.setWsUrl("ws://" + machineDto.getMachineIp().replace("8131", "9080") + "/ws");
+            }
         }
 
         MachineAttrDto machineAttrDto = new MachineAttrDto();

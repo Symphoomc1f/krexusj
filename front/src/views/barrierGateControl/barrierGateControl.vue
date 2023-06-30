@@ -9,7 +9,11 @@
               <el-row>
                 <el-col :span="18">
                   入场视频:
-                  <el-select v-model="enterMachineId" placeholder="请选择">
+                  <el-select
+                    v-model="enterMachineId"
+                    placeholder="请选择"
+                    @change="_swatchVedio()"
+                  >
                     <el-option
                       v-for="item in inMachines"
                       :key="item.machineId"
@@ -26,16 +30,20 @@
                 </el-col>
               </el-row>
             </div>
-            <video src="movie.ogg" width="100%" controls="controls">
-              您的浏览器不支持 video 标签。
-            </video>
+            <div style="height: 500px" id="receiver1Div">
+              <img id="receiver1" style="width: 100%; height: 100%" />
+            </div>
           </el-col>
           <el-col :span="12">
             <div style="margin-bottom: 20px">
               <el-row>
                 <el-col :span="18">
                   出场视频:
-                  <el-select v-model="outMachineId" placeholder="请选择">
+                  <el-select
+                    v-model="outMachineId"
+                    placeholder="请选择"
+                    @change="_swatchOutVedio()"
+                  >
                     <el-option
                       v-for="item in outMachines"
                       :key="item.machineId"
@@ -52,9 +60,9 @@
                 </el-col>
               </el-row>
             </div>
-            <video src="movie.ogg" width="100%" controls="controls">
-              您的浏览器不支持 video 标签。
-            </video>
+            <div style="height: 500px" id="receiver2Div">
+              <img id="receiver2" style="width: 100%; height: 100%" />
+            </div>
           </el-col>
         </el-row>
         <!-- 进出场记录--->
@@ -253,6 +261,81 @@ export default {
 
         this.listLoading = false;
       });
+    },
+    _swatchVedio: function () {
+      //创建一个socket实例
+      let wsUrl = "";
+      let _enterMachineId = this.enterMachineId;
+      this.inMachines.forEach((item) => {
+        if (item.machineId == _enterMachineId) {
+          wsUrl = item.wsUrl;
+        }
+      });
+
+      let image = document.getElementById("receiver1");
+      if (wsUrl.endsWith(".flv")) {
+        image = document.getElementById("receiver1Div");
+        let jessibuca = new Jessibuca({
+          container:image,
+          videoBuffer: 0.2,
+          isResize: false,
+        });
+        jessibuca.onLoad = function () {
+          this.play(wsUrl);
+        };
+        return;
+      }
+      let receiver_socket = new WebSocket(wsUrl);
+      // 监听消息
+      receiver_socket.onmessage = function (data) {
+        //image.src = 'data:image/png;' + data.data;
+
+        let reader = new FileReader();
+        reader.onload = function (evt) {
+          if (evt.target.readyState == FileReader.DONE) {
+            let url = evt.target.result;
+            image.src = "data:image/png;" + url;
+          }
+        };
+        reader.readAsDataURL(data.data);
+      };
+    },
+    _swatchOutVedio: function () {
+      //创建一个socket实例
+      let wsUrl = "";
+      let _outMachineId = this.outMachineId;
+      this.outMachines.forEach((item) => {
+        if (item.machineId == _outMachineId) {
+          wsUrl = item.wsUrl;
+        }
+      });
+
+      let image = document.getElementById("receiver2");
+      if (wsUrl.endsWith(".flv")) {
+        image = document.getElementById("receiver2Div");
+        let jessibuca = new Jessibuca({
+          container:image,
+          videoBuffer: 0.2,
+          isResize: false,
+        });
+        jessibuca.onLoad = function () {
+          this.play(wsUrl);
+        };
+        return;
+      }
+      let receiver_socket = new WebSocket(wsUrl);
+      // 监听消息
+      receiver_socket.onmessage = function (data) {
+        //image.src = 'data:image/png;' + data.data;
+        let reader = new FileReader();
+        reader.onload = function (evt) {
+          if (evt.target.readyState == FileReader.DONE) {
+            let url = evt.target.result;
+            image.src = "data:image/png;" + url;
+          }
+        };
+        reader.readAsDataURL(data.data);
+      };
     },
     restartAccessControl(_row, _index) {
       this.listLoading = true;
