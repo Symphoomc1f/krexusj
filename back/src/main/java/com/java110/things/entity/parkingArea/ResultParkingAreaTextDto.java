@@ -8,6 +8,7 @@ import java.io.Serializable;
 public class ResultParkingAreaTextDto extends ParkingAreaTextDto implements Serializable {
     public static final int CODE_SUCCESS = 0;
     public static final int CODE_ERROR = -1;
+    public static final int CODE_CAR_NO_IN = -2; // 车辆未进场
     private int code;
 
     public ResultParkingAreaTextDto() {

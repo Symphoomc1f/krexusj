@@ -30,6 +30,7 @@ public class MachineDto extends PageDto implements Serializable {
 
     // 考勤机
     public static final String MACHINE_TYPE_ATTENDANCE = "9997";
+    private String photoJpg;
     private String machineMac;
     private String machineId;
     private String machineCode;
@@ -235,5 +236,13 @@ public class MachineDto extends PageDto implements Serializable {
 
     public void setWsUrl(String wsUrl) {
         this.wsUrl = wsUrl;
+    }
+
+    public String getPhotoJpg() {
+        return photoJpg;
+    }
+
+    public void setPhotoJpg(String photoJpg) {
+        this.photoJpg = photoJpg;
     }
 }

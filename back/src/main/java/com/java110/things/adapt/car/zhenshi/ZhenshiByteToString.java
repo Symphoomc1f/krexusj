@@ -53,7 +53,7 @@ public class ZhenshiByteToString {
             dataObj = onIVSResultRecv(data, len);
         } else {
             //普通的指令响应
-            String ivs = new String(data, "UTF-8");
+            String ivs = new String(data, "gb2312");
 
             dataObj = JSONObject.parseObject(ivs);
         }
@@ -71,7 +71,12 @@ public class ZhenshiByteToString {
         }
 
 
-        String ivs = new String(data, 0, pos);
+        String ivs = null;
+        try {
+            ivs = new String(data, 0, pos,"gb2312");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
         JSONObject dataObj = JSONObject.parseObject(ivs);
 
