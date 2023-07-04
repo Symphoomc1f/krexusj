@@ -98,7 +98,7 @@
             <if test="state != null and inoutType != ''">
                 t.state = #{state},
             </if>
-            <if test="payTime != null and payTime != ''">
+            <if test="payTime != null">
                 t.pay_time = #{payTime},
             </if>
             <if test="payCharge != null and payCharge != ''">

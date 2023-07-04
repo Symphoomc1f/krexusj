@@ -129,7 +129,6 @@ public class MachineExtController extends BaseController {
         Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
 
 
-
         MachineDto machineDto = BeanConvertUtil.covertBean(reqJson, MachineDto.class);
 
 
@@ -181,7 +180,7 @@ public class MachineExtController extends BaseController {
         Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
 
         MachineDto machineDto = BeanConvertUtil.covertBean(reqJson, MachineDto.class);
-        ResultDto result = machineServiceImpl.openDoor(machineDto);
+        ResultDto result = machineServiceImpl.openDoor(machineDto, null);
 
         return ResultDto.createResponseEntity(result);
     }

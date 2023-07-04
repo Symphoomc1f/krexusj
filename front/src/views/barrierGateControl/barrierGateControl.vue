@@ -24,9 +24,7 @@
                   </el-select>
                 </el-col>
                 <el-col :span="4" style="text-align: center; margin-right: 5px">
-                  <el-button @click="openDoor(enterMachineId)"
-                    >手工进场</el-button
-                  >
+                  <el-button @click="openDoorCarIn()">手工进场</el-button>
                 </el-col>
                 <el-col :span="3" style="text-align: right">
                   <el-button type="primary" @click="openDoor(enterMachineId)"
@@ -59,7 +57,7 @@
                   </el-select>
                 </el-col>
                 <el-col :span="4" style="text-align: center; margin-right: 5px">
-                  <el-button @click="openDoor(enterMachineId)"
+                  <el-button @click="openDoorCarOut(enterMachineId)"
                     >手工出场</el-button
                   >
                 </el-col>
@@ -223,6 +221,33 @@
         </div>
       </el-col>
     </el-row>
+    <el-dialog
+      :title="carInOut.type == '1101' ? '手工入场' : '手工出场'"
+      :visible.sync="dialogFormVisible"
+    >
+      <el-form
+        ref="dataForm"
+        :model="temp"
+        label-position="left"
+        label-width="70px"
+        style="width: 400px; margin-left: 50px"
+      >
+        <el-form-item label="车牌号" prop="type">
+          <el-input v-model="carInOut.carNum" placeholder="请输入车牌号" />
+        </el-form-item>
+        <el-form-item
+          label="出场收费"
+          prop="type"
+          v-if="carInOut.type == '1102'"
+        >
+          <el-input v-model="carInOut.amount" placeholder="请输入出场收费" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取消</el-button>
+        <el-button type="primary" @click="_customOpenDoor()">确定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -231,6 +256,7 @@ import {
   getAccessControlsByCondition,
   restartAccessControls,
   openDoor,
+  customCarInOut,
 } from "@/api/barrierGate";
 import { getCarInouts } from "@/api/car.js";
 import Pagination from "@/components/Pagination";
@@ -277,6 +303,12 @@ export default {
       outImage:
         "https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=2576718747,3658011797&fm=26&gp=0.jpg",
       inoutMsg: [],
+      dialogFormVisible: false,
+      carInOut: {
+        type: "1101", //1101 手动入场 1102 手动出场
+        carNum: "",
+        amount: 0.0,
+      },
     };
   },
   created() {
@@ -446,6 +478,53 @@ export default {
       var uuid = s.join("");
       return uuid;
     },
+    openDoorCarIn: function () {
+      this.dialogFormVisible = true;
+      this.carInOut.type = "1101";
+      this.carInOut.machineId = this.enterMachineId;
+    },
+    openDoorCarOut: function () {
+      this.dialogFormVisible = true;
+      this.carInOut.type = "1102";
+      this.carInOut.machineId = this.outMachineId;
+    },
+    _customOpenDoor: function () {
+      let _that = this;
+      customCarInOut(this.carInOut).then((res) => {
+        _that.dialogFormVisible = false;
+        this.$message({
+          type: "info",
+          message: "开门成功",
+        });
+        _that.carInOut = {
+          type: "1101", //1101 手动入场 1102 手动出场
+          carNum: "",
+          amount: 0.0,
+        };
+      });
+    },
+    onSubmit: function () {
+      customCarInOut({
+        type: "1102", //1101 手动入场 1102 手动出场
+        carNum: this.fee.carNum,
+        amount: this.fee.pay,
+        payCharge: this.fee.payCharge,
+      }).then((res) => {
+        this.$message({
+          type: "info",
+          message: "开门成功",
+        });
+        _that.fee = {
+          carNum: "",
+          time: "",
+          payCharge: 0.0,
+          pay: 0.0,
+          remark: "",
+          open: "",
+          openMsg: "",
+        };
+      });
+    },
     _initCarInOutMessage: function (_paId) {
       let _that = this;
 
@@ -492,7 +571,7 @@ export default {
           }
           if (_that.outMachineId == _data.machineId) {
             _that.outImage = "data:image/png;base64," + _data.img;
-          }   
+          }
         } else {
           if (
             _that.enterMachineId != _data.machineId &&
@@ -507,8 +586,8 @@ export default {
           _that.fee.openMsg = _data.remark;
           _that.fee.open = _data.open;
 
-          if(_data.open != '开门成功'){
-              return;
+          if (_data.open != "开门成功") {
+            return;
           }
           let _msg = _data.inOutTime + " " + _data.carNum;
           if (_that.enterMachineId == _data.machineId) {

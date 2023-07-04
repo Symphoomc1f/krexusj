@@ -141,6 +141,14 @@ export function openDoor(params) {
         data:params
     })
 }
+export function customCarInOut(params) {
+    return request({
+        url: '/api/machine/customCarInOut',
+        method: 'post',
+        data:params
+    })
+}
+
 
 export function getAccessControlsLog(params) {
     let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));

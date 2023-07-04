@@ -10,6 +10,7 @@ import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineAttrDto;
 import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.parkingArea.ParkingAreaTextDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.AccessControlProcessFactory;
 import com.java110.things.factory.CarMachineProcessFactory;
@@ -261,7 +262,7 @@ public class MachineServiceImpl implements IMachineService {
     }
 
     @Override
-    public ResultDto openDoor(MachineDto machineDto) throws Exception {
+    public ResultDto openDoor(MachineDto machineDto, ParkingAreaTextDto parkingAreaTextDto) throws Exception {
         List<MachineDto> machineDtoList = machineServiceDao.getMachines(machineDto);
         if (machineDtoList == null || machineDtoList.size() < 1) {
             throw new IllegalArgumentException("设备不存在");
@@ -271,7 +272,7 @@ public class MachineServiceImpl implements IMachineService {
         if (MachineDto.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
             AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).openDoor(machineDto);
         } else if (MachineDto.MACHINE_TYPE_CAR.equals(machineDto.getMachineTypeCd())) {
-            CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).openDoor(machineDto);
+            CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).openDoor(machineDto,parkingAreaTextDto);
         }
         JSONObject data = new JSONObject();
         if (StringUtil.isEmpty(machineDto.getTaskId())) {

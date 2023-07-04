@@ -69,12 +69,59 @@ public class CallCarServiceImpl implements ICallCarService {
                 break;
             case MachineDto.MACHINE_DIRECTION_OUT://车辆出场
                 resultParkingAreaTextDto = outParkingArea(type, carNum, machineDto);
+                if (resultParkingAreaTextDto.getCode() == ResultParkingAreaTextDto.CODE_SUCCESS) {
+                    carOut(carNum, machineDto);
+                }
                 break;
             default:
                 resultParkingAreaTextDto = new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, "系统异常");
         }
 
         return resultParkingAreaTextDto;
+    }
+
+    /**
+     * 车辆出场 记录
+     *
+     * @param carNum
+     */
+    private void carOut(String carNum, MachineDto machineDto) throws Exception {
+        //查询是否有入场数据
+        CarInoutDto carInoutDto = new CarInoutDto();
+        carInoutDto.setCarNum(carNum);
+        carInoutDto.setPaId(machineDto.getLocationObjId());
+        carInoutDto.setStates(new String[]{CarInoutDto.STATE_IN, CarInoutDto.STATE_PAY});
+        carInoutDto.setInoutType(CarInoutDto.INOUT_TYPE_IN);
+        List<CarInoutDto> carInoutDtos = carInoutServiceImpl.queryCarInout(carInoutDto);
+
+        if (carInoutDtos != null && carInoutDtos.size() > 0) {
+            carInoutDto.setState(CarInoutDto.STATE_OUT);
+            carInoutServiceImpl.updateCarInout(carInoutDto);
+        }
+        carInoutDto = new CarInoutDto();
+        carInoutDto.setCarNum(carNum);
+        carInoutDto.setCarType("1");
+        carInoutDto.setCommunityId(machineDto.getCommunityId());
+        carInoutDto.setGateName(machineDto.getMachineName());
+        carInoutDto.setInoutId(SeqUtil.getId());
+        carInoutDto.setInoutType(CarInoutDto.INOUT_TYPE_OUT);
+        carInoutDto.setMachineCode(machineDto.getMachineCode());
+        carInoutDto.setOpenTime(DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
+        carInoutDto.setPaId(machineDto.getLocationObjId());
+        carInoutDto.setState("3");
+        carInoutDto.setRemark("正常出场");
+        if (carInoutDtos != null && carInoutDtos.size() > 0) {
+            carInoutDto.setPayCharge(carInoutDtos.get(0).getPayCharge());
+            carInoutDto.setRealCharge(carInoutDtos.get(0).getRealCharge());
+            carInoutDto.setPayType(carInoutDtos.get(0).getPayType());
+        } else {
+            carInoutDto.setPayCharge("0");
+            carInoutDto.setRealCharge("0");
+            carInoutDto.setPayType("1");
+        }
+        carInoutDto.setMachineCode(machineDto.getMachineCode());
+        carInoutServiceImpl.saveCarInout(carInoutDto);
+
     }
 
     /**

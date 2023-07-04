@@ -3,6 +3,7 @@ package com.java110.things.service.machine;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineAttrDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.parkingArea.ParkingAreaTextDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.UserDto;
 
@@ -73,7 +74,7 @@ public interface IMachineService {
      * @return
      * @throws Exception
      */
-    ResultDto openDoor(MachineDto machineDto) throws Exception;
+    ResultDto openDoor(MachineDto machineDto, ParkingAreaTextDto parkingAreaTextDto) throws Exception;
 
     /**
      * 保存设备属性信息
