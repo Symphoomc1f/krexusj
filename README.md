@@ -70,6 +70,12 @@ https://www.bilibili.com/video/bv1fv411j7vr
 ![image](docs/img/menjingxiyi.png)
 ![image](docs/img/settings.png)
 
+### 8.1 道闸部分截图
+
+![image](docs/img/car1.png)
+![image](docs/img/car2.jpg)
+![image](docs/img/car3.jpg)
+
 
 ## 9. 更新日志
 
