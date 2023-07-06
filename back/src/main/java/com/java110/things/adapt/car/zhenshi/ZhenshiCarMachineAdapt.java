@@ -229,10 +229,6 @@ public class ZhenshiCarMachineAdapt extends BaseMachineAdapt implements ICarMach
         String triggerCmd = "{\"cmd\":\"ioctl\",\"io\" :0,\"value\":2,\"delay\":500}";
         ZhenshiByteToString.sendCmd(machineDto, triggerCmd);
 
-        // 发送欢迎光临
-        String[] msgs = new String[]{
-                "欢迎光临", "欢迎光临", "欢迎光临", "欢迎光临"
-        };
         if (parkingAreaTextDto == null) {
             JinjieScreenFactory.pay(machineDto, "欢迎光临");
             JinjieScreenFactory.downloadTempTexts(machineDto, 0, "欢迎光临");
