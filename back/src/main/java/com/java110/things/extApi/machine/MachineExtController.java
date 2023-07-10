@@ -17,14 +17,20 @@ package com.java110.things.extApi.machine;
 
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
+import com.java110.things.Controller.car.BarrierGateControlWebSocketServer;
 import com.java110.things.entity.accessControl.UserFaceDto;
+import com.java110.things.entity.car.BarrierGateControlDto;
+import com.java110.things.entity.car.CarInoutDto;
 import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.parkingArea.ResultParkingAreaTextDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.service.car.ICarInoutService;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
+import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +57,9 @@ public class MachineExtController extends BaseController {
 
     @Autowired
     ICommunityService communityServiceImpl;
+
+    @Autowired
+    private ICarInoutService carInoutServiceImpl;
 
     /**
      * 添加设备信息
@@ -232,5 +241,136 @@ public class MachineExtController extends BaseController {
         ResultDto result = machineServiceImpl.restartMachine(machineDto);
 
         return ResultDto.createResponseEntity(result);
+    }
+
+    /**
+     * 重启设备
+     * <p>
+     *
+     * @param reqParam {
+     *                 "extMachineId": "702020042194860039"
+     *                 }
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/customCarInOut", method = RequestMethod.POST)
+    public ResponseEntity<String> customCarInOut(@RequestBody String reqParam) throws Exception {
+
+        JSONObject paramObj = JSONObject.parseObject(reqParam);
+        Assert.hasKeyAndValue(paramObj, "extMachineId", "请求报文中未包含设备ID");
+        Assert.hasKeyAndValue(paramObj, "carNum", "请求报文中未包含车辆编号");
+        Assert.hasKeyAndValue(paramObj, "type", "请求报文中未包含类型");
+
+        MachineDto machineDto = new MachineDto();
+        machineDto.setExtMachineId(paramObj.getString("extMachineId"));
+        List<MachineDto> machineDtos = machineServiceImpl.queryMachines(machineDto);
+
+        Assert.listOnlyOne(machineDtos, "设备不存在");
+        machineDto = machineDtos.get(0);
+        ResultDto resultDto = null;
+        ResultParkingAreaTextDto parkingAreaTextDto = null;
+        if ("1101".equals(paramObj.getString("type"))) {
+            uploadcarin(machineDto, paramObj);
+            parkingAreaTextDto
+                    = new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, paramObj.getString("carNum"),
+                    "欢迎光临", "", "", paramObj.getString("carNum") + ",欢迎光临");
+        } else {
+            uploadcarout(machineDto, paramObj);
+            parkingAreaTextDto
+                    = new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, paramObj.getString("carNum"),
+                    "一路平安", "", "", paramObj.getString("carNum") + ",一路平安");
+        }
+        resultDto = machineServiceImpl.openDoor(machineDto, parkingAreaTextDto);
+
+        return ResultDto.createResponseEntity(resultDto);
+    }
+
+    /**
+     * 出场上报
+     *
+     * @param machineDto
+     * @param acceptJson
+     * @return
+     */
+    private JSONObject uploadcarout(MachineDto machineDto, JSONObject acceptJson) throws Exception {
+        //查询是否有入场数据
+        CarInoutDto carInoutDto = new CarInoutDto();
+        carInoutDto.setCarNum(acceptJson.getString("carNum"));
+        carInoutDto.setPaId(machineDto.getLocationObjId());
+        carInoutDto.setState(CarInoutDto.STATE_IN);
+        carInoutDto.setInoutType(CarInoutDto.INOUT_TYPE_IN);
+        List<CarInoutDto> carInoutDtos = carInoutServiceImpl.queryCarInout(carInoutDto);
+
+        if (carInoutDtos != null && carInoutDtos.size() > 0) {
+            carInoutDto.setState(CarInoutDto.STATE_OUT);
+            carInoutDto.setPayType(CarInoutDto.PAY_TYPE_CASH);
+            carInoutDto.setPayCharge(acceptJson.getString("amount"));
+            carInoutDto.setRealCharge(acceptJson.getString("amount"));
+            carInoutDto.setPayTime(DateUtil.getCurrentDate());
+            carInoutServiceImpl.updateCarInout(carInoutDto);
+        }
+        carInoutDto = new CarInoutDto();
+        carInoutDto.setCarNum(acceptJson.getString("carNum"));
+        carInoutDto.setCarType("1");
+        carInoutDto.setCommunityId(machineDto.getCommunityId());
+        carInoutDto.setGateName(machineDto.getMachineName());
+        carInoutDto.setInoutId(SeqUtil.getId());
+        carInoutDto.setInoutType(CarInoutDto.INOUT_TYPE_OUT);
+        carInoutDto.setMachineCode(machineDto.getMachineCode());
+        carInoutDto.setOpenTime(DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
+        carInoutDto.setPaId(machineDto.getLocationObjId());
+        carInoutDto.setState("3");
+        carInoutDto.setRemark("手工出场");
+        if(acceptJson.containsKey("payCharge")){
+            carInoutDto.setPayCharge(acceptJson.getString("payCharge"));
+        }else{
+            carInoutDto.setPayCharge(acceptJson.getString("amount"));
+        }
+        carInoutDto.setRealCharge(acceptJson.getString("amount"));
+        carInoutDto.setPayType("1");
+        carInoutDto.setMachineCode(machineDto.getMachineCode());
+        carInoutServiceImpl.saveCarInout(carInoutDto);
+
+        BarrierGateControlDto barrierGateControlDto
+                = new BarrierGateControlDto(BarrierGateControlDto.ACTION_FEE_INFO, acceptJson.getString("carNum"), machineDto, 0, null, acceptJson.getString("carNum") + "手工出场", "开门成功");
+        BarrierGateControlWebSocketServer.sendInfo(barrierGateControlDto.toString(), machineDto.getLocationObjId());
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("code", 0);
+        jsonObject.put("msg", "成功");
+        return jsonObject;
+    }
+
+    /**
+     * 车辆进场记录
+     *
+     * @param acceptJson
+     * @return
+     */
+    private JSONObject uploadcarin(MachineDto machineDto, JSONObject acceptJson) throws Exception {
+        //2.0 手工进场
+        CarInoutDto carInoutDto = new CarInoutDto();
+        carInoutDto.setCarNum(acceptJson.getString("carNum"));
+        carInoutDto.setCarType("1");
+        carInoutDto.setCommunityId(machineDto.getCommunityId());
+        carInoutDto.setGateName(machineDto.getMachineName());
+        carInoutDto.setInoutId(SeqUtil.getId());
+        carInoutDto.setInoutType(CarInoutDto.INOUT_TYPE_OUT);
+        carInoutDto.setMachineCode(machineDto.getMachineCode());
+        carInoutDto.setOpenTime(DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
+        carInoutDto.setPaId(machineDto.getLocationObjId());
+        carInoutDto.setState("1");
+        carInoutDto.setInoutType(CarInoutDto.INOUT_TYPE_IN);
+        carInoutDto.setRemark("手工进场");
+        carInoutServiceImpl.saveCarInout(carInoutDto);
+
+        BarrierGateControlDto barrierGateControlDto
+                = new BarrierGateControlDto(BarrierGateControlDto.ACTION_FEE_INFO, acceptJson.getString("carNum"), machineDto, 0, null, acceptJson.getString("carNum") + "手工进场", "开门成功");
+        BarrierGateControlWebSocketServer.sendInfo(barrierGateControlDto.toString(), machineDto.getLocationObjId());
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("code", 0);
+        jsonObject.put("msg", "成功");
+        return jsonObject;
     }
 }

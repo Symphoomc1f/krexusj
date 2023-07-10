@@ -1253,3 +1253,45 @@
     }
 }
 ```
+
+
+### 9.2 手工进出场
+
+请求方式： POST
+
+请求地址：/extApi/machine/customCarInOut
+
+请求参数：
+
+| 名称 | 类型 | 是否必填 | 示例值 | 描述 |
+| :----:| :----: | :----: | :----: | :----: |
+| extMachineId | String | 是 | 702020042194860037 | 外部设备编码 |
+| carNum | String | 是 | 青AGK123 | 车牌号 |
+| type | String | 是 | 1101 | 类型 1101 进场 1102 出场 |
+| amount | String | 否 | 10 | 出场金额 |
+| payCharge | String | 否 | 10 | 出场应收 |
+| extPaId | String | 是 | 602020042194860039 | 停车场外部编码 |
+| taskId | String | 是 | 102020042194860045 | 任务ID，第三方生成唯一值 |
+
+请求示例：
+```json
+{
+    "extMachineId": "123123123",
+    "carNum": "青AGK123",
+    "type": "1102",
+    "amount": "10",
+    "payCharge": "10",
+    "taskId": "102020042194860045"
+}
+```
+
+返回示例：
+```json
+{
+    "code":0,
+    "msg":"成功",
+    "data":{
+       "taskId": "102020042194860045"
+    }
+}
+```
