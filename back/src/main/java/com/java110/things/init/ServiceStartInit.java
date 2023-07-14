@@ -53,6 +53,9 @@ public class ServiceStartInit {
         //推送人脸识别结果
         MqttFactory.subscribe("face.response");
 
+        // 臻识mqtt订阅
+        MqttFactory.subscribe("/device/push/result");
+
 
         //注册伊兰度设备
         IMachineService machineService = ApplicationContextFactory.getBean("machineServiceImpl", IMachineService.class);

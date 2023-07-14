@@ -48,4 +48,5 @@ public interface ICarMachineProcess {
     void sendKeepAlive(MachineDto machineDto);
 
 
+    void mqttMessageArrived(String topic, String s);
 }

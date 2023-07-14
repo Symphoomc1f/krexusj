@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.factory.AccessControlProcessFactory;
 import com.java110.things.factory.ApplicationContextFactory;
+import com.java110.things.factory.CarMachineProcessFactory;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.StringUtil;
@@ -62,7 +63,11 @@ public class MqttPushCallback implements MqttCallback {
         try {
             log.info("Topic: " + topic);
             log.info("Message: " + new String(message.getPayload()));
-            AccessControlProcessFactory.getAssessControlProcessImpl(getHmId(topic, message)).mqttMessageArrived(topic, new String(message.getPayload()));
+            if("/device/push/result".equals(topic)){ //臻识的摄像头
+                CarMachineProcessFactory.getCarImpl("17").mqttMessageArrived(topic, new String(message.getPayload()));
+            }else {
+                AccessControlProcessFactory.getAssessControlProcessImpl(getHmId(topic, message)).mqttMessageArrived(topic, new String(message.getPayload()));
+            }
         } catch (Exception e) {
             log.error("处理订阅消息失败", e);
         }

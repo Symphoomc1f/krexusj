@@ -77,7 +77,7 @@ public class MachineServiceImpl implements IMachineService {
      * @throws Exception
      */
     @Override
-    public ResultDto getMachine(MachineDto machineDto) throws Exception {
+    public ResultDto getMachine(MachineDto machineDto) {
         int page = machineDto.getPage();
 
         if (page != PageDto.DEFAULT_PAGE) {
@@ -105,9 +105,9 @@ public class MachineServiceImpl implements IMachineService {
         List<String> machineIds = new ArrayList<>();
         for (MachineDto machineDto : machineDtoList) {
             machineIds.add(machineDto.getMachineId());
-            if(!StringUtil.isEmpty(machineDto.getMachineVersion()) && machineDto.getMachineVersion().contains("300")) {
+            if (!StringUtil.isEmpty(machineDto.getMachineVersion()) && machineDto.getMachineVersion().contains("300")) {
                 machineDto.setWsUrl("ws://" + machineDto.getMachineIp().replace("8131", "9080") + "/ws.flv");
-            }else {
+            } else {
                 machineDto.setWsUrl("ws://" + machineDto.getMachineIp().replace("8131", "9080") + "/ws");
             }
         }
@@ -151,7 +151,7 @@ public class MachineServiceImpl implements IMachineService {
         }
         machineDto.setHeartbeatTime(DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
 
-        if(StringUtil.isEmpty(machineDto.getThirdMachineId())){
+        if (StringUtil.isEmpty(machineDto.getThirdMachineId())) {
             machineDto.setThirdMachineId("-1");
         }
         int count = machineServiceDao.saveMachine(machineDto);
@@ -272,7 +272,7 @@ public class MachineServiceImpl implements IMachineService {
         if (MachineDto.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
             AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).openDoor(machineDto);
         } else if (MachineDto.MACHINE_TYPE_CAR.equals(machineDto.getMachineTypeCd())) {
-            CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).openDoor(machineDto,parkingAreaTextDto);
+            CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).openDoor(machineDto, parkingAreaTextDto);
         }
         JSONObject data = new JSONObject();
         if (StringUtil.isEmpty(machineDto.getTaskId())) {

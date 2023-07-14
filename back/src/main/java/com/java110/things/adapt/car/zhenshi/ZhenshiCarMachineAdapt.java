@@ -246,4 +246,9 @@ public class ZhenshiCarMachineAdapt extends BaseMachineAdapt implements ICarMach
         ZhenshiByteToString.sendKeepAlive(machineDto);
 
     }
+
+    @Override
+    public void mqttMessageArrived(String topic, String s) {
+
+    }
 }

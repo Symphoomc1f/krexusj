@@ -41,7 +41,7 @@ public interface IMachineService {
      * @return
      * @throws Exception
      */
-    ResultDto getMachine(MachineDto machineDto) throws Exception;
+    ResultDto getMachine(MachineDto machineDto) ;
 
     /**
      * 获取设备信息
