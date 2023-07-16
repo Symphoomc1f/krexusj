@@ -27,6 +27,8 @@ import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.parkingArea.ParkingAreaTextDto;
 import com.java110.things.entity.parkingArea.ResultParkingAreaTextDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.factory.ImageFactory;
+import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.DateUtil;
@@ -141,7 +143,11 @@ public class ZhenshiMqttCarMachineAdapt extends BaseMachineAdapt implements ICar
             JSONObject plateResult = reqData.getJSONObject("result").getJSONObject("PlateResult");
             String type = plateResult.getString("type");
             String license = plateResult.getString("license");
-            machineDto.setPhotoJpg(reqData.getString("photoJpg"));
+            if(plateResult.containsKey("imagePath")) {
+                String imagePath = ImageFactory.getBase64ByImgUrl(MappingCacheFactory.getValue("OSS_URL")+plateResult.getString("imagePath"));
+                machineDto.setPhotoJpg(imagePath);
+            }
+
             ResultParkingAreaTextDto resultParkingAreaTextDto = callCarServiceImpl.ivsResult(type, license, machineDto);
             JinjieScreenMqttFactory.pay(machineDto, resultParkingAreaTextDto.getVoice());
             JinjieScreenMqttFactory.downloadTempTexts(machineDto, 1, resultParkingAreaTextDto.getText1());
