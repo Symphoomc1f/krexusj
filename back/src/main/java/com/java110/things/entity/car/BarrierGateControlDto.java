@@ -20,11 +20,14 @@ public class BarrierGateControlDto implements Serializable {
     private String inOutTime;
     private String img;
     private String machineId;
+    private String extMachineId;
     private Double payCharge;
     private long hours;
     private long min;
     private String remark;
     private String open;
+    private String extCommunityId;
+    private String extPaId;
 
     public BarrierGateControlDto() {
     }
@@ -171,5 +174,29 @@ public class BarrierGateControlDto implements Serializable {
 
     public void setOpen(String open) {
         this.open = open;
+    }
+
+    public String getExtMachineId() {
+        return extMachineId;
+    }
+
+    public void setExtMachineId(String extMachineId) {
+        this.extMachineId = extMachineId;
+    }
+
+    public String getExtCommunityId() {
+        return extCommunityId;
+    }
+
+    public void setExtCommunityId(String extCommunityId) {
+        this.extCommunityId = extCommunityId;
+    }
+
+    public String getExtPaId() {
+        return extPaId;
+    }
+
+    public void setExtPaId(String extPaId) {
+        this.extPaId = extPaId;
     }
 }
