@@ -143,8 +143,8 @@ public class ZhenshiMqttCarMachineAdapt extends BaseMachineAdapt implements ICar
             JSONObject plateResult = reqData.getJSONObject("result").getJSONObject("PlateResult");
             String type = plateResult.getString("type");
             String license = plateResult.getString("license");
-            if(plateResult.containsKey("imagePath")) {
-                String imagePath = ImageFactory.getBase64ByImgUrl(MappingCacheFactory.getValue("OSS_URL")+plateResult.getString("imagePath"));
+            if (plateResult.containsKey("imagePath")) {
+                String imagePath = ImageFactory.getBase64ByImgUrl(MappingCacheFactory.getValue("OSS_URL") + plateResult.getString("imagePath"));
                 machineDto.setPhotoJpg(imagePath);
             }
 

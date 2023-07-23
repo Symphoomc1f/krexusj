@@ -18,6 +18,7 @@ public class CarInoutDto extends PageDto implements Serializable {
     public static final String PAY_TYPE_CASH = "1";
     public static final String PAY_TYPE_WECHAT = "1";
 
+
     private String inoutId;
     private String communityId;
     private String carNum;

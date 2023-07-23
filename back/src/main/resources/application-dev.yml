@@ -61,7 +61,7 @@ spring :
     cache: false
   mqtt:
     client:
-      id: java110-client-id2
+      id: java110-client-id3
     completionTimeout: 3000
     default:
       topic: topic

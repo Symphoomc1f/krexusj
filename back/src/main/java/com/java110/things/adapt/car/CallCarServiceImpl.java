@@ -144,7 +144,8 @@ public class CallCarServiceImpl implements ICallCarService {
         }
         carInoutDto.setMachineCode(machineDto.getMachineCode());
         carInoutServiceImpl.saveCarInout(carInoutDto);
-
+//        //异步上报HC小区管理系统
+//        carCallHcServiceImpl.carInout(carInoutDto);
     }
 
     /**
@@ -230,6 +231,15 @@ public class CallCarServiceImpl implements ICallCarService {
 
         IComputeTempCarFee computeTempCarFee = ApplicationContextFactory.getBean(tempCarFeeConfigDtos.get(0).getRuleId(), IComputeTempCarFee.class);
         TempCarFeeResult result = computeTempCarFee.computeTempCarFee(carInoutDtos.get(0), tempCarFeeConfigDtos.get(0));
+
+        //不收费，直接出场
+        if (result.getPayCharge() == 0) {
+            BarrierGateControlDto barrierGateControlDto
+                    = new BarrierGateControlDto(BarrierGateControlDto.ACTION_FEE_INFO, carNum, machineDto, 0, carInoutDtos.get(0), carNum + "停车" + result.getHours() + "时" + result.getMin() + "分", "开门成功");
+            sendInfo(barrierGateControlDto, parkingAreaDtos.get(0).getExtPaId(), machineDto);
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, carNum, "停车" + result.getHours() + "时" + result.getMin() + "分", "", "", carNum + ",临时车,欢迎光临");
+
+        }
 
         parkingAreaTextCacheDto = ParkingAreaTextFactory.getText(parkingAreaDtos.get(0).getPaId(), ParkingAreaTextFactory.TYPE_CD_TEMP_CAR_NO_PAY);
 
@@ -363,25 +373,25 @@ public class CallCarServiceImpl implements ICallCarService {
         //白名单直接出场
         CarInoutDto carInoutDto = null;
         if (blackWhiteDtos != null && blackWhiteDtos.size() > 0) {
-            //2.0 进场
-            carInoutDto = new CarInoutDto();
-            carInoutDto.setCarNum(carNum);
-            carInoutDto.setCarType(type);
-            carInoutDto.setCommunityId(machineDto.getCommunityId());
-            carInoutDto.setGateName(machineDto.getMachineName());
-            carInoutDto.setInoutId(SeqUtil.getId());
-            carInoutDto.setInoutType(CarInoutDto.INOUT_TYPE_OUT);
-            carInoutDto.setMachineCode(machineDto.getMachineCode());
-            carInoutDto.setOpenTime(DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
-            carInoutDto.setPaId(parkingAreaDto.getPaId());
-            carInoutDto.setState(CarInoutDto.STATE_OUT);
-            carInoutServiceImpl.saveCarInout(carInoutDto);
-            carInoutDto = new CarInoutDto();
-            carInoutDto.setState(CarInoutDto.STATE_OUT);
-            carInoutDto.setInoutId(carInoutDtos.get(0).getInoutId());
-            carInoutServiceImpl.updateCarInout(carInoutDto);
-            //异步上报HC小区管理系统
-            carCallHcServiceImpl.carInout(carInoutDto);
+//            //2.0 进场
+//            carInoutDto = new CarInoutDto();
+//            carInoutDto.setCarNum(carNum);
+//            carInoutDto.setCarType(type);
+//            carInoutDto.setCommunityId(machineDto.getCommunityId());
+//            carInoutDto.setGateName(machineDto.getMachineName());
+//            carInoutDto.setInoutId(SeqUtil.getId());
+//            carInoutDto.setInoutType(CarInoutDto.INOUT_TYPE_OUT);
+//            carInoutDto.setMachineCode(machineDto.getMachineCode());
+//            carInoutDto.setOpenTime(DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
+//            carInoutDto.setPaId(parkingAreaDto.getPaId());
+//            carInoutDto.setState(CarInoutDto.STATE_OUT);
+//            carInoutServiceImpl.saveCarInout(carInoutDto);
+//            carInoutDto = new CarInoutDto();
+//            carInoutDto.setState(CarInoutDto.STATE_OUT);
+//            carInoutDto.setInoutId(carInoutDtos.get(0).getInoutId());
+//            carInoutServiceImpl.updateCarInout(carInoutDto);
+//            //异步上报HC小区管理系统
+//            carCallHcServiceImpl.carInout(carInoutDto);
             return true;
         }
 
@@ -453,8 +463,8 @@ public class CallCarServiceImpl implements ICallCarService {
         carInoutDto.setState("1");
         ResultDto resultDto = carInoutServiceImpl.saveCarInout(carInoutDto);
 
-        //异步上报HC小区管理系统
-        carCallHcServiceImpl.carInout(carInoutDto);
+//        //异步上报HC小区管理系统
+//        carCallHcServiceImpl.carInout(carInoutDto);
 
         if (resultDto.getCode() != ResultDto.SUCCESS) {
             BarrierGateControlDto barrierGateControlDto
