@@ -463,8 +463,7 @@ public class CallCarServiceImpl implements ICallCarService {
         carInoutDto.setState("1");
         ResultDto resultDto = carInoutServiceImpl.saveCarInout(carInoutDto);
 
-//        //异步上报HC小区管理系统
-//        carCallHcServiceImpl.carInout(carInoutDto);
+
 
         if (resultDto.getCode() != ResultDto.SUCCESS) {
             BarrierGateControlDto barrierGateControlDto
