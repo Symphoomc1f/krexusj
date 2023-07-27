@@ -50,7 +50,7 @@ public class CarCallHcServiceImpl implements ICarCallHcService {
     private RestTemplate restTemplate;
 
     @Override
-    //@Async
+    @Async
     public void carInout(CarInoutDto carInoutDto) throws Exception {
         CommunityDto communityDto = new CommunityDto();
         communityDto.setCommunityId(carInoutDto.getCommunityId());
@@ -100,5 +100,53 @@ public class CarCallHcServiceImpl implements ICarCallHcService {
             throw new ServiceException(Result.SYS_ERROR, "上传车辆失败" + tmpResponseEntity.getBody());
         }
 
+    }
+
+    @Override
+    @Async
+    public void notifyTempCarFeeOrder(CarInoutDto carInoutDto) throws Exception {
+        CommunityDto communityDto = new CommunityDto();
+        communityDto.setCommunityId(carInoutDto.getCommunityId());
+        communityDto.setStatusCd("0");
+        List<CommunityDto> communityDtos = communityServiceImpl.queryCommunitys(communityDto);
+
+        Assert.listOnlyOne(communityDtos, "未包含小区信息");
+
+        AppDto appDto = new AppDto();
+        appDto.setAppId(communityDtos.get(0).getAppId());
+        List<AppDto> appDtos = appServiceImpl.getApp(appDto);
+
+        Assert.listOnlyOne(appDtos, "未找到应用信息");
+        AppAttrDto appAttrDto = appDtos.get(0).getAppAttr(AppAttrDto.SPEC_CD_CAR_INOUT_PAY_FINISH);
+
+        if (appAttrDto == null) {
+            return;
+        }
+
+        String value = appAttrDto.getValue();
+        String securityCode = "";
+        appAttrDto = appDtos.get(0).getAppAttr(AppAttrDto.SPEC_CD_SECURITY_CODE);
+        if (appAttrDto != null) {
+            securityCode = appAttrDto.getValue();
+        }
+
+        String url = value;
+        Map<String, String> headers = new HashMap<>();
+        headers.put("machineCode", carInoutDto.getMachineCode());
+        headers.put("communityId", communityDtos.get(0).getExtCommunityId());
+
+        JSONObject data = new JSONObject();
+        data.put("carNum", carInoutDto.getCarNum());
+        data.put("machineCode", carInoutDto.getMachineCode());
+        data.put("communityId", communityDtos.get(0).getExtCommunityId());
+        data.put("payCharge", carInoutDto.getPayCharge());
+        data.put("realCharge", carInoutDto.getRealCharge());
+        data.put("payType", carInoutDto.getPayType());
+
+        ResponseEntity<String> tmpResponseEntity = HttpFactory.exchange(restTemplate, url, data.toString(), headers, HttpMethod.POST, securityCode);
+
+        if (tmpResponseEntity.getStatusCode() != HttpStatus.OK) {
+            throw new ServiceException(Result.SYS_ERROR, "上传车辆失败" + tmpResponseEntity.getBody());
+        }
     }
 }

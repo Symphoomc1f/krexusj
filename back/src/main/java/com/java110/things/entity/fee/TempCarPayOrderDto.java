@@ -1,5 +1,9 @@
 package com.java110.things.entity.fee;
 
+import com.alibaba.fastjson.JSONObject;
+import com.java110.things.util.BeanConvertUtil;
+import com.java110.things.util.DateUtil;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -105,4 +109,5 @@ public class TempCarPayOrderDto implements Serializable {
     public void setPayType(String payType) {
         this.payType = payType;
     }
+
 }
