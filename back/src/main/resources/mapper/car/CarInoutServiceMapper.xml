@@ -105,7 +105,7 @@
                 t.pay_charge = #{payCharge},
             </if>
             <if test="realCharge != null and realCharge != ''">
-                t.pay_charge = #{realCharge},
+                t.real_charge = #{realCharge},
             </if>
             <if test="payType != null and payType != ''">
                 t.pay_type = #{payType},

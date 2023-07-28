@@ -244,6 +244,7 @@ public class TempCarFeeConfigServiceImpl implements ITempCarFeeConfigService {
         tempCarPayOrderDto.setQueryTime(DateUtil.getCurrentDate());
         tempCarPayOrderDto.setCarNum(carDto.getCarNum());
         tempCarPayOrderDto.setPayCharge(result.getPayCharge());
+        tempCarPayOrderDto.setAmount(result.getPayCharge());
         tempCarPayOrderDto.setStopTimeTotal(result.getHours() * 60 + result.getMin());
         tempCarPayOrderDto.setPaId(parkingAreaDtos.get(0).getPaId());
         tempCarPayOrderDto.setOrderId(carInoutDtos.get(0).getInoutId());
@@ -297,7 +298,7 @@ public class TempCarFeeConfigServiceImpl implements ITempCarFeeConfigService {
             return new ResultDto(ResultDto.ERROR, "支付订单不存在");
         }
         carInoutDto = new CarInoutDto();
-        carInoutDto.setState(CarInoutDto.STATE_OUT);
+        carInoutDto.setState(CarInoutDto.STATE_PAY);
         carInoutDto.setPayType(tempCarPayOrderDto.getPayType());
         carInoutDto.setPayTime(tempCarPayOrderDto.getPayTime());
         carInoutDto.setRealCharge(tempCarPayOrderDto.getAmount() + "");
@@ -308,6 +309,7 @@ public class TempCarFeeConfigServiceImpl implements ITempCarFeeConfigService {
         //通知HC 支付完成
         carInoutDto.setCarNum(carInoutDtos.get(0).getCarNum());
         carInoutDto.setMachineCode(machineDto.getMachineCode());
+        carInoutDto.setCommunityId(carInoutDtos.get(0).getCommunityId());
         carCallHcServiceImpl.notifyTempCarFeeOrder(carInoutDto);
 
         return new ResultDto(ResultDto.SUCCESS, "支付成功");

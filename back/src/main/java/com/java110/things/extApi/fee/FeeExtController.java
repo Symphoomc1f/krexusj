@@ -29,6 +29,7 @@ import com.java110.things.service.fee.ITempCarFeeConfigService;
 import com.java110.things.service.parkingArea.IParkingAreaService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
+import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -279,7 +280,13 @@ public class FeeExtController {
         Assert.hasKeyAndValue(reqJson, "payTime", "支付时间");
         Assert.hasKeyAndValue(reqJson, "payType", "支付类型");
 
-        TempCarPayOrderDto tempCarPayOrderDto = BeanConvertUtil.covertBean(reqJson, TempCarPayOrderDto.class);
+        TempCarPayOrderDto tempCarPayOrderDto = new TempCarPayOrderDto();
+        tempCarPayOrderDto.setCarNum(reqJson.getString("carNum"));
+        tempCarPayOrderDto.setExtPaId(reqJson.getString("extPaId"));
+        tempCarPayOrderDto.setOrderId(reqJson.getString("orderId"));
+        tempCarPayOrderDto.setAmount(reqJson.getDouble("amount"));
+        tempCarPayOrderDto.setPayTime(DateUtil.getDateFromString(reqJson.getString("payTime"),DateUtil.DATE_FORMATE_STRING_A));
+        tempCarPayOrderDto.setPayType(reqJson.getString("payType"));
         ResultDto tempResultDto = tempCarFeeConfigServiceImpl.notifyTempCarFeeOrder(tempCarPayOrderDto);
         return ResultDto.createResponseEntity(tempResultDto);
     }
