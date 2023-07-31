@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java110.things.dao.IParkingBoxServiceDao">
+
+    <insert id="saveParkingBox" parameterType="com.java110.things.entity.parkingArea.ParkingBoxDto">
+        INSERT INTO `parking_box` (`box_id`, `box_name`, `community_id`, `temp_car_in`, `fee`, `blue_car_in`,
+        `yelow_car_in`, `remark`)
+        VALUES (#{boxId}, #{boxName}, #{communityId}, #{tempCarIn}, #{fee}, #{blueCarIn}, #{yelowCarIn}, #{remark})
+    </insert>
+    <!--
+        查询设备信息
+    -->
+    <select id="getParkingBoxs" parameterType="com.java110.things.entity.parkingArea.ParkingBoxDto"
+            resultType="com.java110.things.entity.parkingArea.ParkingBoxDto">
+        select
+        t.box_id boxId,
+        t.community_id communityId,
+        t.box_name boxName,
+        t.temp_car_in tempCarIn,
+        t.fee fee,
+        t.blue_car_in blueCarIn,
+        t.yelow_car_in yelowCarIn,
+        t.remark remark,
+        t.create_time createTime,
+        t.ext_box_id extBoxId
+        from parking_box t
+        where 1=1
+        and t.status_cd = '0'
+        <if test="boxId != null and boxId != ''">
+            and t.box_id = #{boxId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="boxName != null and boxName != ''">
+            and t.box_name = #{boxName}
+        </if>
+        <if test="extBoxId != null and extBoxId != ''">
+            and t.ext_box_id = #{extBoxId}
+        </if>
+        order by t.create_time desc
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+
+    </select>
+
+    <select id="getParkingBoxCount" parameterType="com.java110.things.entity.parkingArea.ParkingBoxDto"
+            resultType="long">
+        select
+        count(1) count
+        from parking_box t
+        where 1=1
+        and t.status_cd = '0'
+        <if test="boxId != null and boxId != ''">
+            and t.box_id = #{boxId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="boxName != null and boxName != ''">
+            and t.box_name = #{boxName}
+        </if>
+        <if test="extBoxId != null and extBoxId != ''">
+            and t.ext_box_id = #{extBoxId}
+        </if>
+
+    </select>
+
+    <update id="updateParkingBox" parameterType="com.java110.things.entity.parkingArea.ParkingBoxDto">
+        update parking_box t
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="boxName != null and boxName != ''">
+                t.box_name = #{boxName},
+            </if>
+            <if test="tempCarIn != null and tempCarIn != ''">
+                t.temp_car_in = #{tempCarIn},
+            </if>
+            <if test="fee != null and fee != ''">
+                t.fee = #{fee},
+            </if>
+            <if test="blueCarIn != null and blueCarIn != ''">
+                t.blue_car_in = #{blueCarIn},
+            </if>
+            <if test="yelowCarIn != null and yelowCarIn != ''">
+                t.yelow_car_in = #{yelowCarIn},
+            </if>
+            <if test="remark != null and remark != ''">
+                t.remark = #{remark},
+            </if>
+            <if test="extBoxId != null and extBoxId != ''">
+                t.ext_box_id = #{extBoxId},
+            </if>
+
+            <if test="statusCd != null and statusCd != ''">
+                t.status_cd = #{statusCd},
+            </if>
+        </trim>
+        where 1=1
+        <if test="boxId != null and boxId != ''">
+            and t.box_id = #{boxId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+
+    </update>
+
+    <delete id="delete" parameterType="com.java110.things.entity.parkingArea.ParkingBoxDto">
+        delete from parking_box where box_id = #{boxId}
+    </delete>
+
+</mapper>

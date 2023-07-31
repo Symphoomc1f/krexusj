@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java110.things.dao.IParkingBoxAreaServiceDao">
+
+    <insert id="saveParkingBoxArea" parameterType="com.java110.things.entity.parkingArea.ParkingBoxAreaDto">
+        INSERT INTO `parking_box_area` (`ba_id`, `box_id`, `pa_id`, `community_id`, `default_area`, `remark`)
+        VALUES (#{baId}, #{boxId}, #{paId}, #{communityId}, #{defaultArea}, #{remark})
+    </insert>
+    <!--
+        查询设备信息
+    -->
+    <select id="getParkingBoxAreas" parameterType="com.java110.things.entity.parkingArea.ParkingBoxAreaDto"
+            resultType="com.java110.things.entity.parkingArea.ParkingBoxAreaDto">
+        select
+        t.pa_id paId,
+        t.community_id communityId,
+        t.ba_id baId,
+        t.box_id boxId,
+        t.default_area defaultArea,
+        t.remark,
+        t.create_time createTime
+        from parking_box_area t
+        where 1=1
+        and t.status_cd = '0'
+        <if test="baId null and baId != ''">
+            and t.ba_id = #{baId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="boxId != null and boxId != ''">
+            and t.box_id = #{boxId}
+        </if>
+        <if test="paId != null and paId != ''">
+            and t.pa_id = #{paId}
+        </if>
+        <if test="defaultArea != null and defaultArea != ''">
+            and t.default_area = #{defaultArea}
+        </if>
+        order by t.create_time desc
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+
+    </select>
+
+    <select id="getParkingBoxAreaCount" parameterType="com.java110.things.entity.parkingArea.ParkingBoxAreaDto"
+            resultType="long">
+        select
+        count(1) count
+        from parking_box_area t
+        where 1=1
+        and t.status_cd = '0'
+        <if test="baId null and baId != ''">
+            and t.ba_id = #{baId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="boxId != null and boxId != ''">
+            and t.box_id = #{boxId}
+        </if>
+        <if test="paId != null and paId != ''">
+            and t.pa_id = #{paId}
+        </if>
+        <if test="defaultArea != null and defaultArea != ''">
+            and t.default_area = #{defaultArea}
+        </if>
+
+    </select>
+
+    <update id="updateParkingBoxArea" parameterType="com.java110.things.entity.parkingArea.ParkingBoxAreaDto">
+        UPDATE parking_box_area t
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="defaultArea != null and defaultArea != ''">
+                t.default_area = #{defaultArea},
+            </if>
+            <if test="paId != null and paId != ''">
+                t.pa_id = #{paId},
+            </if>
+        </trim>
+        where 1=1
+        <if test="baId null and baId != ''">
+            and t.ba_id = #{baId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="boxId != null and boxId != ''">
+            and t.box_id = #{boxId}
+        </if>
+
+    </update>
+
+    <delete id="delete" parameterType="com.java110.things.entity.parkingArea.ParkingBoxAreaDto">
+        delete from parking_box_area where ba_id = #{baId}
+    </delete>
+
+</mapper>
