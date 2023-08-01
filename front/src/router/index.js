@@ -147,6 +147,12 @@ export const constantRoutes = [
         meta: { title: '道闸设备', icon: 'table' }
       },
       {
+        path: 'parkingBox',
+        name: '道闸',
+        component: () => import('@/views/parkingBox/parkingBox'),
+        meta: { title: '岗亭管理', icon: 'table' }
+      },
+      {
         path: 'barrierGateControl',
         name: '道闸',
         component: () => import('@/views/barrierGateControl/barrierGateControl'),

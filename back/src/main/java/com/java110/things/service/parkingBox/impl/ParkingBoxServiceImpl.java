@@ -3,11 +3,15 @@ package com.java110.things.service.parkingBox.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
-
+import com.java110.things.dao.IParkingAreaServiceDao;
+import com.java110.things.dao.IParkingBoxAreaServiceDao;
 import com.java110.things.dao.IParkingBoxServiceDao;
+import com.java110.things.entity.parkingArea.ParkingAreaDto;
+import com.java110.things.entity.parkingArea.ParkingBoxAreaDto;
 import com.java110.things.entity.parkingArea.ParkingBoxDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.service.parkingBox.IParkingBoxService;
+import com.java110.things.util.Assert;
 import com.java110.things.util.SeqUtil;
 import com.java110.things.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,6 +35,12 @@ public class ParkingBoxServiceImpl implements IParkingBoxService {
 
     @Autowired
     private IParkingBoxServiceDao parkingBoxServiceDao;
+
+    @Autowired
+    private IParkingBoxAreaServiceDao parkingBoxAreaServiceDao;
+
+    @Autowired
+    private IParkingAreaServiceDao parkingAreaServiceDaoImpl;
 
 
     @Autowired
@@ -52,9 +61,34 @@ public class ParkingBoxServiceImpl implements IParkingBoxService {
 
         if (count < 1) {
             resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG, data);
-        } else {
-            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, data);
+            return resultDto;
         }
+        if (StringUtil.isEmpty(parkingBoxDto.getPaId())) {
+            return resultDto;
+        }
+
+        //判断停车场是否存在
+        ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
+        parkingAreaDto.setPaId(parkingBoxDto.getPaId());
+        parkingAreaDto.setCommunityId(parkingBoxDto.getCommunityId());
+        List<ParkingAreaDto> parkingAreaDtos = parkingAreaServiceDaoImpl.getParkingAreas(parkingAreaDto);
+
+        Assert.listOnlyOne(parkingAreaDtos, "停车场不存在");
+
+        ParkingBoxAreaDto parkingBoxAreaPo = new ParkingBoxAreaDto();
+        parkingBoxAreaPo.setBaId(SeqUtil.getId());
+        parkingBoxAreaPo.setBoxId(parkingBoxDto.getBoxId());
+        parkingBoxAreaPo.setPaId(parkingAreaDtos.get(0).getPaId());
+        parkingBoxAreaPo.setCommunityId(parkingAreaDtos.get(0).getCommunityId());
+        parkingBoxAreaPo.setDefaultArea(ParkingBoxAreaDto.DEFAULT_AREA_TRUE);
+
+        int flag = parkingBoxAreaServiceDao.saveParkingBoxArea(parkingBoxAreaPo);
+        if (flag < 1) {
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG, data);
+            return resultDto;
+        }
+        resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, data);
+
         return resultDto;
     }
 

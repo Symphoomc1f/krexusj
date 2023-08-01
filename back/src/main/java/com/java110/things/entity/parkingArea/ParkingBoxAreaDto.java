@@ -5,6 +5,8 @@ import com.java110.things.entity.PageDto;
 import java.io.Serializable;
 
 public class ParkingBoxAreaDto extends PageDto implements Serializable {
+    public static final String DEFAULT_AREA_TRUE = "T";
+    public static final String DEFAULT_AREA_FALSE = "F";
     private String baId;
     private String boxId;
     private String paId;

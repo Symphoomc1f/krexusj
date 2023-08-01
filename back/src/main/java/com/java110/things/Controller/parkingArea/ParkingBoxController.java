@@ -53,6 +53,7 @@ public class ParkingBoxController extends BaseController {
         parkingBoxDto.setBoxId(SeqUtil.getId());
 
         ResultDto resultDto = parkingBoxServiceImpl.saveParkingBox(parkingBoxDto);
+
         return super.createResponseEntity(resultDto);
     }
 
