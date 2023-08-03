@@ -2,6 +2,7 @@ import {
     getParkingBoxs,
     deleteParkingBoxs,
     saveParkingBoxs,
+    updateParkingBox
   } from "@/api/parkingBox";
   import {
     getParkingAreas
@@ -43,7 +44,8 @@ import {
           blueCarIn: "",
           yelowCarIn: "",
           extBoxId: "",
-          paId:''
+          paId:'',
+
         },
         rules: {},
       };
@@ -68,8 +70,10 @@ import {
       },
       addParkingBox() {
         this.dialogFormVisible = true;
-        this.queryProtocol();
-        this.queryParkingAreas();
+      },
+      editParkingBox:function(_row){
+        this.dialogFormVisible = true;
+        this.temp = _row;
       },
       deleteParkingBox(_row) {
         this.deleteParkingBoxDailogVisible = true;
@@ -89,11 +93,25 @@ import {
       },
       saveParkingBoxInfo() {
         this.listLoading = true;
+        if(this.temp.boxId != ''){
+            updateParkingBox(this.temp).then((response) => {
+                this.listLoading = false;
+                this.dialogFormVisible = false;
+                this.fetchData();
+              });
+            return ;
+        }
         saveParkingBoxs(this.temp).then((response) => {
           this.listLoading = false;
           this.dialogFormVisible = false;
           this.fetchData();
         });
       },
+      _shareParkingBox:function(_row){
+        this.$router.push({
+            path: "/barrierGate/parkingBoxArea",
+            query: { boxId: _row.boxId }
+          });
+      }
     },
   };

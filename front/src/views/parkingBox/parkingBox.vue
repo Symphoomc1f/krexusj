@@ -50,11 +50,11 @@
       </el-table-column>
       <el-table-column label="临时车进场" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.tempCarIn }}</span>
+          <span>{{ scope.row.tempCarIn == "Y" ? "是" : "否" }}</span>
         </template>
       </el-table-column>
       <el-table-column label="是否收费" align="center">
-        <template slot-scope="scope">{{ scope.row.fee }}</template>
+        <template slot-scope="scope">{{ scope.row.fee == "Y" ? "是" : "否" }}</template>
       </el-table-column>
       <el-table-column
         class-name="status-col"
@@ -70,7 +70,14 @@
         label="黄牌车进场"
         align="center"
       >
-        <template slot-scope="scope">{{ scope.row.yelowCarIn }}</template>
+        <template slot-scope="scope">{{ scope.row.yelowCarIn == "Y" ? "是" : "否" }}</template>
+      </el-table-column>
+      <el-table-column
+        class-name="status-col"
+        label="外部编号"
+        align="center"
+      >
+        <template slot-scope="scope">{{ scope.row.extBoxId }}</template>
       </el-table-column>
       <el-table-column
         class-name="status-col"
@@ -80,6 +87,12 @@
       >
         <template slot-scope="{ row, $index }">
           <el-row>
+            <el-button
+              size="mini"
+              type="warning"
+              @click="_shareParkingBox(row, $index)"
+              >共享岗亭</el-button
+            >
             <el-button
               size="mini"
               type="warning"

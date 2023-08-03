@@ -99,10 +99,43 @@ public class ParkingBoxServiceImpl implements IParkingBoxService {
         ResultDto resultDto = null;
         if (count < 1) {
             resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG, data);
-        } else {
-            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, data);
+            return resultDto;
         }
-        return resultDto;
+        if (StringUtil.isEmpty(parkingBoxDto.getPaId())) {
+            return resultDto;
+        }
+
+        //判断停车场是否存在
+        ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
+        parkingAreaDto.setPaId(parkingBoxDto.getPaId());
+        parkingAreaDto.setCommunityId(parkingBoxDto.getCommunityId());
+        List<ParkingAreaDto> parkingAreaDtos = parkingAreaServiceDaoImpl.getParkingAreas(parkingAreaDto);
+
+        Assert.listOnlyOne(parkingAreaDtos, "停车场不存在");
+
+        ParkingBoxAreaDto parkingBoxAreaDto = new ParkingBoxAreaDto();
+        parkingBoxAreaDto.setBoxId(parkingBoxDto.getBoxId());
+        parkingBoxAreaDto.setPaId(parkingAreaDtos.get(0).getPaId());
+        parkingBoxAreaDto.setCommunityId(parkingAreaDtos.get(0).getCommunityId());
+        List<ParkingBoxAreaDto> parkingBoxAreaDtos = parkingBoxAreaServiceDao.getParkingBoxAreas(parkingBoxAreaDto);
+        ParkingBoxAreaDto parkingBoxAreaPo = new ParkingBoxAreaDto();
+        parkingBoxAreaPo.setBoxId(parkingBoxDto.getBoxId());
+        parkingBoxAreaPo.setPaId(parkingAreaDtos.get(0).getPaId());
+        parkingBoxAreaPo.setCommunityId(parkingAreaDtos.get(0).getCommunityId());
+        int flag = 0;
+        if(parkingBoxAreaDtos == null || parkingBoxAreaDtos.size() < 1) {
+            parkingBoxAreaPo.setBaId(SeqUtil.getId());
+            parkingBoxAreaPo.setDefaultArea(ParkingBoxAreaDto.DEFAULT_AREA_TRUE);
+            flag = parkingBoxAreaServiceDao.saveParkingBoxArea(parkingBoxAreaPo);
+        }else{
+            parkingBoxAreaPo.setBaId(parkingBoxAreaDtos.get(0).getBaId());
+            flag = parkingBoxAreaServiceDao.updateParkingBoxArea(parkingBoxAreaPo);
+        }
+        if (flag < 1) {
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG, data);
+            return resultDto;
+        }
+        return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, data);
     }
 
     /**
@@ -145,7 +178,7 @@ public class ParkingBoxServiceImpl implements IParkingBoxService {
     @Override
     public ResultDto deleteParkingBox(ParkingBoxDto parkingBoxDto) throws Exception {
         parkingBoxDto.setStatusCd(SystemConstant.STATUS_INVALID);
-        int count = parkingBoxServiceDao.updateParkingBox(parkingBoxDto);
+        int count = parkingBoxServiceDao.delete(parkingBoxDto);
         JSONObject data = new JSONObject();
         ResultDto resultDto = null;
         if (count < 1) {

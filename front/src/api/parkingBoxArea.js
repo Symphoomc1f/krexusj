@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-export function getParkingBoxs(params) {
+export function getParkingBoxAreas(params) {
     let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
 
     if(_currCommunity != null && _currCommunity != undefined){
@@ -9,21 +9,21 @@ export function getParkingBoxs(params) {
         params.communityId = "-1";
     }
     return request({
-        url: '/api/parkingBox/getParkingBoxs',
+        url: '/api/parkingBoxArea/getParkingBoxAreas',
         method: 'get',
         params
     })
 }
 
-export function deleteParkingBoxs(params) {
+export function deleteParkingBoxAreas(params) {
     return request({
-        url: '/api/parkingBox/deleteParkingBox',
+        url: '/api/parkingBoxArea/deleteParkingBoxArea',
         method: 'post',
         data:params
     })
 }
 
-export function saveParkingBoxs(params) {
+export function saveParkingBoxAreas(params) {
     let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
 
     if(_currCommunity != null && _currCommunity != undefined){
@@ -32,14 +32,14 @@ export function saveParkingBoxs(params) {
         params.communityId = "-1";
     }
     return request({
-        url: '/api/parkingBox/saveParkingBox',
+        url: '/api/parkingBoxArea/saveParkingBoxArea',
         method: 'post',
         data:params
     })
 }
 
 
-export function updateParkingBox(params) {
+export function updateParkingBoxArea(params) {
     let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
 
     if(_currCommunity != null && _currCommunity != undefined){
@@ -48,7 +48,7 @@ export function updateParkingBox(params) {
         params.communityId = "-1";
     }
     return request({
-        url: '/api/parkingBox/updateParkingBox',
+        url: '/api/parkingBoxArea/updateParkingBoxArea',
         method: 'post',
         data:params
     })

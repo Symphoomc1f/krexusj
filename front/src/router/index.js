@@ -149,8 +149,15 @@ export const constantRoutes = [
       {
         path: 'parkingBox',
         name: '道闸',
-        component: () => import('@/views/parkingBox/parkingBox'),
+        component: () => import('@/views/parkingBox/parkingBox.vue'),
         meta: { title: '岗亭管理', icon: 'table' }
+      },
+      {
+        path: 'parkingBoxArea',
+        name: '道闸',
+        component: () => import('@/views/parkingBoxArea/parkingBoxArea.vue'),
+        meta: { title: '岗亭停车场', icon: 'table' },
+        hidden: true
       },
       {
         path: 'barrierGateControl',

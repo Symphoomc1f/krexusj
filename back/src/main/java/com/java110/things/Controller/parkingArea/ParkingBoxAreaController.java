@@ -45,7 +45,7 @@ public class ParkingBoxAreaController extends BaseController {
         Assert.hasKeyAndValue(paramObj, "communityId", "请求报文中未包含小区信息");
 
         ParkingBoxAreaDto parkingBoxAreaDto = BeanConvertUtil.covertBean(paramObj, ParkingBoxAreaDto.class);
-        parkingBoxAreaDto.setBoxId(SeqUtil.getId());
+        parkingBoxAreaDto.setBaId(SeqUtil.getId());
 
         ResultDto resultDto = parkingBoxAreaServiceImpl.saveParkingBoxArea(parkingBoxAreaDto);
         return super.createResponseEntity(resultDto);

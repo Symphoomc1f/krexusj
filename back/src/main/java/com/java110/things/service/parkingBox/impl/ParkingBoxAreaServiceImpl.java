@@ -7,6 +7,7 @@ import com.java110.things.dao.IParkingBoxAreaServiceDao;
 import com.java110.things.entity.parkingArea.ParkingBoxAreaDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.service.parkingBox.IParkingBoxAreaService;
+import com.java110.things.util.Assert;
 import com.java110.things.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,13 @@ public class ParkingBoxAreaServiceImpl implements IParkingBoxAreaService {
     @Override
     @Transactional
     public ResultDto saveParkingBoxArea(ParkingBoxAreaDto parkingBoxAreaDto) throws Exception {
+        String defaultArea = parkingBoxAreaDto.getDefaultArea();
+        if (ParkingBoxAreaDto.DEFAULT_AREA_TRUE.equals(defaultArea)) {
+            ParkingBoxAreaDto tmpParkingBoxAreaPo = new ParkingBoxAreaDto();
+            tmpParkingBoxAreaPo.setBoxId(parkingBoxAreaDto.getBoxId());
+            tmpParkingBoxAreaPo.setDefaultArea(ParkingBoxAreaDto.DEFAULT_AREA_FALSE);
+            parkingBoxAreaServiceDao.updateParkingBoxArea(tmpParkingBoxAreaPo);
+        }
         int count = parkingBoxAreaServiceDao.saveParkingBoxArea(parkingBoxAreaDto);
         ResultDto resultDto = null;
         JSONObject data = new JSONObject();
@@ -58,6 +66,13 @@ public class ParkingBoxAreaServiceImpl implements IParkingBoxAreaService {
 
     @Override
     public ResultDto updateParkingBoxArea(ParkingBoxAreaDto parkingBoxAreaDto) throws Exception {
+        String defaultArea = parkingBoxAreaDto.getDefaultArea();
+        if (ParkingBoxAreaDto.DEFAULT_AREA_TRUE.equals(defaultArea)) {
+            ParkingBoxAreaDto tmpParkingBoxAreaPo = new ParkingBoxAreaDto();
+            tmpParkingBoxAreaPo.setBoxId(parkingBoxAreaDto.getBoxId());
+            tmpParkingBoxAreaPo.setDefaultArea(ParkingBoxAreaDto.DEFAULT_AREA_FALSE);
+            parkingBoxAreaServiceDao.updateParkingBoxArea(tmpParkingBoxAreaPo);
+        }
         int count = parkingBoxAreaServiceDao.updateParkingBoxArea(parkingBoxAreaDto);
         JSONObject data = new JSONObject();
         if (StringUtil.isEmpty(parkingBoxAreaDto.getPaId())) {
@@ -109,16 +124,26 @@ public class ParkingBoxAreaServiceImpl implements IParkingBoxAreaService {
         return parkingBoxAreaDtoList;
     }
 
-   
+
     @Override
     public ResultDto deleteParkingBoxArea(ParkingBoxAreaDto parkingBoxAreaDto) throws Exception {
+        ParkingBoxAreaDto tmpParkingBoxAreaDto = new ParkingBoxAreaDto();
+        tmpParkingBoxAreaDto.setBaId(parkingBoxAreaDto.getBaId());
+        tmpParkingBoxAreaDto.setCommunityId(parkingBoxAreaDto.getCommunityId());
+        List<ParkingBoxAreaDto> parkingBoxAreaDtos = parkingBoxAreaServiceDao.getParkingBoxAreas(tmpParkingBoxAreaDto);
+        ResultDto resultDto = null;
+        Assert.listOnlyOne(parkingBoxAreaDtos, "数据不存在");
+        if (ParkingBoxAreaDto.DEFAULT_AREA_TRUE.equals(parkingBoxAreaDtos.get(0).getDefaultArea())) {
+            resultDto = new ResultDto(ResponseConstant.ERROR, "默认停车场不能删除");
+            return resultDto;
+        }
         parkingBoxAreaDto.setStatusCd(SystemConstant.STATUS_INVALID);
-        int count = parkingBoxAreaServiceDao.updateParkingBoxArea(parkingBoxAreaDto);
+        int count = parkingBoxAreaServiceDao.delete(parkingBoxAreaDto);
         JSONObject data = new JSONObject();
         if (StringUtil.isEmpty(parkingBoxAreaDto.getPaId())) {
             data.put("taskId", parkingBoxAreaDto.getPaId());
         }
-        ResultDto resultDto = null;
+
         if (count < 1) {
             resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG, data);
         } else {
