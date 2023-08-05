@@ -123,11 +123,11 @@ public class ParkingBoxServiceImpl implements IParkingBoxService {
         parkingBoxAreaPo.setPaId(parkingAreaDtos.get(0).getPaId());
         parkingBoxAreaPo.setCommunityId(parkingAreaDtos.get(0).getCommunityId());
         int flag = 0;
-        if(parkingBoxAreaDtos == null || parkingBoxAreaDtos.size() < 1) {
+        if (parkingBoxAreaDtos == null || parkingBoxAreaDtos.size() < 1) {
             parkingBoxAreaPo.setBaId(SeqUtil.getId());
             parkingBoxAreaPo.setDefaultArea(ParkingBoxAreaDto.DEFAULT_AREA_TRUE);
             flag = parkingBoxAreaServiceDao.saveParkingBoxArea(parkingBoxAreaPo);
-        }else{
+        } else {
             parkingBoxAreaPo.setBaId(parkingBoxAreaDtos.get(0).getBaId());
             flag = parkingBoxAreaServiceDao.updateParkingBoxArea(parkingBoxAreaPo);
         }
@@ -187,6 +187,69 @@ public class ParkingBoxServiceImpl implements IParkingBoxService {
             resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, data);
         }
         return resultDto;
+    }
+
+    @Override
+    public ResultDto saveParkingBoxExt(ParkingBoxDto parkingBoxDto) {
+        String extBoxId = parkingBoxDto.getExtBoxId();
+
+        ParkingBoxDto tmpParkingBoxDto = new ParkingBoxDto();
+        tmpParkingBoxDto.setExtBoxId(extBoxId);
+        List<ParkingBoxDto> parkingBoxDtos = parkingBoxServiceDao.getParkingBoxs(tmpParkingBoxDto);
+
+        ResultDto resultDto = null;
+        if (parkingBoxDtos == null || parkingBoxDtos.size() < 1) {
+            resultDto = doSaveParkingBox(parkingBoxDto);
+        } else {
+            resultDto = doUpdateParkingBox(parkingBoxDto, parkingBoxDtos.get(0));
+        }
+
+        return resultDto;
+    }
+
+    private ResultDto doUpdateParkingBox(ParkingBoxDto parkingBoxDto, ParkingBoxDto oldParkingBoxDto) {
+
+        ParkingBoxAreaDto deleteParkingBoxAreaDto = new ParkingBoxAreaDto();
+        deleteParkingBoxAreaDto.setBoxId(oldParkingBoxDto.getBoxId());
+        parkingBoxAreaServiceDao.delete(deleteParkingBoxAreaDto);
+        parkingBoxDto.setBoxId(oldParkingBoxDto.getBoxId());
+        int flag = parkingBoxServiceDao.updateParkingBox(parkingBoxDto);
+
+        if (flag < 1) {
+            throw new IllegalArgumentException("参数错误");
+        }
+
+        List<ParkingBoxAreaDto> parkingBoxAreaDtos = parkingBoxDto.getParkingBoxAreas();
+        if (parkingBoxAreaDtos == null || parkingBoxAreaDtos.size() < 1) {
+            return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG);
+        }
+
+        for (ParkingBoxAreaDto parkingBoxAreaDto : parkingBoxAreaDtos) {
+            parkingBoxAreaDto.setBoxId(parkingBoxDto.getBoxId());
+            parkingBoxAreaServiceDao.saveParkingBoxArea(parkingBoxAreaDto);
+        }
+        return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG);
+    }
+
+    private ResultDto doSaveParkingBox(ParkingBoxDto parkingBoxDto) {
+
+        parkingBoxDto.setBoxId(SeqUtil.getId());
+        int flag = parkingBoxServiceDao.saveParkingBox(parkingBoxDto);
+
+        if (flag < 1) {
+            throw new IllegalArgumentException("参数错误");
+        }
+
+        List<ParkingBoxAreaDto> parkingBoxAreaDtos = parkingBoxDto.getParkingBoxAreas();
+        if (parkingBoxAreaDtos == null || parkingBoxAreaDtos.size() < 1) {
+            return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG);
+        }
+
+        for (ParkingBoxAreaDto parkingBoxAreaDto : parkingBoxAreaDtos) {
+            parkingBoxAreaDto.setBoxId(parkingBoxDto.getBoxId());
+            parkingBoxAreaServiceDao.saveParkingBoxArea(parkingBoxAreaDto);
+        }
+        return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG);
     }
 
 

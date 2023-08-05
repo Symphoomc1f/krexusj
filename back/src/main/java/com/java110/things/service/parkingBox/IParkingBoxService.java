@@ -60,4 +60,10 @@ public interface IParkingBoxService {
      */
     ResultDto deleteParkingBox(ParkingBoxDto parkingBoxDto) throws Exception;
 
+    /**
+     * 外系统 同步数据
+     * @param parkingBoxDto
+     * @return
+     */
+    ResultDto saveParkingBoxExt(ParkingBoxDto parkingBoxDto);
 }

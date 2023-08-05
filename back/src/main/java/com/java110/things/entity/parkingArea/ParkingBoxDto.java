@@ -3,6 +3,7 @@ package com.java110.things.entity.parkingArea;
 import com.java110.things.entity.PageDto;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class ParkingBoxDto extends PageDto implements Serializable {
     private String boxId;
@@ -18,6 +19,7 @@ public class ParkingBoxDto extends PageDto implements Serializable {
     private String extBoxId;
     private String paId;
     private String paNum;
+    private List<ParkingBoxAreaDto> parkingBoxAreas;
 
     public String getBoxId() {
         return boxId;
@@ -121,5 +123,13 @@ public class ParkingBoxDto extends PageDto implements Serializable {
 
     public void setPaNum(String paNum) {
         this.paNum = paNum;
+    }
+
+    public List<ParkingBoxAreaDto> getParkingBoxAreas() {
+        return parkingBoxAreas;
+    }
+
+    public void setParkingBoxAreas(List<ParkingBoxAreaDto> parkingBoxAreas) {
+        this.parkingBoxAreas = parkingBoxAreas;
     }
 }
