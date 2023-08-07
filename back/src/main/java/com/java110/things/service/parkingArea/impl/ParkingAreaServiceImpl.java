@@ -7,6 +7,7 @@ import com.java110.things.dao.IParkingAreaAttrServiceDao;
 import com.java110.things.dao.IParkingAreaServiceDao;
 import com.java110.things.entity.parkingArea.ParkingAreaAttrDto;
 import com.java110.things.entity.parkingArea.ParkingAreaDto;
+import com.java110.things.entity.parkingArea.ParkingBoxDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.service.parkingArea.IParkingAreaService;
 import com.java110.things.util.SeqUtil;
@@ -165,6 +166,13 @@ public class ParkingAreaServiceImpl implements IParkingAreaService {
             resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, data);
         }
         return resultDto;
+    }
+
+    @Override
+    public List<ParkingAreaDto> queryParkingAreasByBox(ParkingBoxDto parkingBoxDto) {
+        List<ParkingAreaDto> parkingAreaDtoList = parkingAreaServiceDao.queryParkingAreasByBox(parkingBoxDto);
+        freshAttrs(parkingAreaDtoList);
+        return parkingAreaDtoList;
     }
 
 

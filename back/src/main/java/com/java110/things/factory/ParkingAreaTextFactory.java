@@ -1,10 +1,12 @@
 package com.java110.things.factory;
 
+import com.java110.things.entity.parkingArea.ParkingAreaDto;
 import com.java110.things.entity.parkingArea.ParkingAreaTextCacheDto;
 import com.java110.things.entity.parkingArea.ParkingAreaTextDto;
 import com.java110.things.service.parkingArea.IParkingAreaTextService;
 import com.java110.things.util.BeanConvertUtil;
 import com.java110.things.util.DateUtil;
+import com.java110.things.util.StringUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +23,21 @@ public class ParkingAreaTextFactory {
     public static final String TYPE_CD_TEMP_CAR_NO_PAY = "6006";
 
     public static final Map<String, ParkingAreaTextCacheDto> cache = new HashMap<>();
+
+    public static ParkingAreaTextCacheDto getText(List<ParkingAreaDto> parkingAreaDtos, String typeCd) {
+        String paId = "";
+        for (ParkingAreaDto parkingAreaDto : parkingAreaDtos) {
+            if ("T".equals(parkingAreaDto.getDefaultArea())) {
+                paId = parkingAreaDto.getPaId();
+            }
+        }
+        if (StringUtil.isEmpty(paId)) {
+            paId = parkingAreaDtos.get(0).getPaId();
+        }
+
+        // 从数据库获取 然后缓存
+        return getText(paId, typeCd);
+    }
 
     public static ParkingAreaTextCacheDto getText(String paId, String typeCd) {
         if (cache.containsKey(paId + typeCd)) {
@@ -49,7 +66,7 @@ public class ParkingAreaTextFactory {
             return null;
         }
 
-        ParkingAreaTextCacheDto parkingAreaTextCacheDto =  BeanConvertUtil.covertBean(parkingAreaTextDtos.get(0), ParkingAreaTextCacheDto.class);
+        ParkingAreaTextCacheDto parkingAreaTextCacheDto = BeanConvertUtil.covertBean(parkingAreaTextDtos.get(0), ParkingAreaTextCacheDto.class);
         parkingAreaTextCacheDto.setCacheTime(DateUtil.getCurrentDate());
         cache.put(paId + typeCd, parkingAreaTextCacheDto);
 

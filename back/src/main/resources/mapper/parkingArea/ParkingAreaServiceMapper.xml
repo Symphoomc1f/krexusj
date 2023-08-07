@@ -39,6 +39,50 @@
 
     </select>
 
+    <select id="queryParkingAreasByBox" parameterType="com.java110.things.entity.parkingArea.ParkingBoxDto"
+            resultType="com.java110.things.entity.parkingArea.ParkingAreaDto">
+        select
+        t.pa_id paId,
+        t.community_id communityId,
+        t.num num,
+        t.ext_pa_id extPaId,
+        t.create_time createTime,
+        boa.default_area defaultArea
+        from parking_area t
+        left join parking_box_area boa on t.pa_id = boa.pa_id and boa.status_cd = '0'
+        LEFT JOIN parking_box bo on boa.box_id = bo.box_id and bo.status_cd = '0'
+        where 1=1
+        <if test="boxId != null and boxId != ''">
+            and bo.box_id = #{boxId}
+        </if>
+        <if test="extBoxId != null and extBoxId != ''">
+            and bo.ext_box_id = #{extBoxId}
+        </if>
+        <if test="defaultArea != null and defaultArea != ''">
+            and boa.default_area = #{defaultArea}
+        </if>
+        and t.status_cd = '0'
+        <if test="paId != null and paId != ''">
+            and t.pa_id = #{paId}
+        </if>
+        <if test="communityId != null and communityId != ''">
+            and t.community_id = #{communityId}
+        </if>
+        <if test="num != null and num != ''">
+            and t.num = #{num}
+        </if>
+        <if test="extPaId != null and extPaId != ''">
+            and t.ext_pa_id = #{extPaId}
+        </if>
+        order by t.create_time desc
+        <if test="page != -1 and page != null ">
+            limit #{page}, #{row}
+        </if>
+
+    </select>
+
+
+
     <select id="getParkingAreaCount" parameterType="com.java110.things.entity.parkingArea.ParkingAreaDto"
             resultType="long">
         select

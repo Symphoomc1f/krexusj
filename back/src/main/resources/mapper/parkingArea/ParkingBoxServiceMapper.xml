@@ -4,8 +4,8 @@
 
     <insert id="saveParkingBox" parameterType="com.java110.things.entity.parkingArea.ParkingBoxDto">
         INSERT INTO `parking_box` (`box_id`, `box_name`, `community_id`, `temp_car_in`, `fee`, `blue_car_in`,
-        `yelow_car_in`, `remark`)
-        VALUES (#{boxId}, #{boxName}, #{communityId}, #{tempCarIn}, #{fee}, #{blueCarIn}, #{yelowCarIn}, #{remark})
+        `yelow_car_in`, `remark`,ext_box_id)
+        VALUES (#{boxId}, #{boxName}, #{communityId}, #{tempCarIn}, #{fee}, #{blueCarIn}, #{yelowCarIn}, #{remark},#{extBoxId})
     </insert>
     <!--
         查询设备信息

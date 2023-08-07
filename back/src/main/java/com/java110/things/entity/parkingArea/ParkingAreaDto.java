@@ -13,6 +13,7 @@ public class ParkingAreaDto extends PageDto implements Serializable {
     private String extPaId;
     private String createTime;
     private String statusCd;
+    private String defaultArea;
 
     private List<ParkingAreaAttrDto> attrs;
 
@@ -70,5 +71,13 @@ public class ParkingAreaDto extends PageDto implements Serializable {
 
     public void setAttrs(List<ParkingAreaAttrDto> attrs) {
         this.attrs = attrs;
+    }
+
+    public String getDefaultArea() {
+        return defaultArea;
+    }
+
+    public void setDefaultArea(String defaultArea) {
+        this.defaultArea = defaultArea;
     }
 }

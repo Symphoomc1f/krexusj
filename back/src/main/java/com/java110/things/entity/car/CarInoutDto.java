@@ -35,6 +35,7 @@ public class CarInoutDto extends PageDto implements Serializable {
     private String statusCd;
     private String machineCode;
     private String paId;
+    private String[] paIds;
     private String state;
     private String[] states;
     private Date payTime;
@@ -200,5 +201,13 @@ public class CarInoutDto extends PageDto implements Serializable {
 
     public void setMin(long min) {
         this.min = min;
+    }
+
+    public String[] getPaIds() {
+        return paIds;
+    }
+
+    public void setPaIds(String[] paIds) {
+        this.paIds = paIds;
     }
 }

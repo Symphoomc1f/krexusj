@@ -10,6 +10,7 @@ import com.java110.things.entity.parkingArea.ParkingAreaDto;
 import com.java110.things.entity.parkingArea.ParkingBoxAreaDto;
 import com.java110.things.entity.parkingArea.ParkingBoxDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.service.parkingArea.IParkingAreaService;
 import com.java110.things.service.parkingBox.IParkingBoxService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.SeqUtil;
@@ -41,6 +42,9 @@ public class ParkingBoxServiceImpl implements IParkingBoxService {
 
     @Autowired
     private IParkingAreaServiceDao parkingAreaServiceDaoImpl;
+
+    @Autowired
+    private IParkingAreaService parkingAreaServiceImpl;
 
 
     @Autowired
@@ -246,6 +250,17 @@ public class ParkingBoxServiceImpl implements IParkingBoxService {
         }
 
         for (ParkingBoxAreaDto parkingBoxAreaDto : parkingBoxAreaDtos) {
+
+            ParkingAreaDto tmpParkingAreaDto = new ParkingAreaDto();
+            tmpParkingAreaDto.setExtPaId(parkingBoxAreaDto.getPaId());
+            List<ParkingAreaDto> parkingAreaDtos = parkingAreaServiceImpl.queryParkingAreas(tmpParkingAreaDto);
+
+            if (parkingAreaDtos == null || parkingAreaDtos.size() < 1) {
+                continue;
+            }
+            parkingBoxAreaDto.setBaId(SeqUtil.getId());
+            parkingBoxAreaDto.setPaId(parkingAreaDtos.get(0).getPaId());
+            parkingBoxAreaDto.setCommunityId(parkingBoxDto.getCommunityId());
             parkingBoxAreaDto.setBoxId(parkingBoxDto.getBoxId());
             parkingBoxAreaServiceDao.saveParkingBoxArea(parkingBoxAreaDto);
         }

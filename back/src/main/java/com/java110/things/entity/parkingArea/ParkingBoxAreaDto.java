@@ -16,6 +16,7 @@ public class ParkingBoxAreaDto extends PageDto implements Serializable {
     private String remark;
     private String createTime;
     private String statusCd;
+    private String extBoxId;
 
     public String getBaId() {
         return baId;
@@ -87,5 +88,13 @@ public class ParkingBoxAreaDto extends PageDto implements Serializable {
 
     public void setPaNum(String paNum) {
         this.paNum = paNum;
+    }
+
+    public String getExtBoxId() {
+        return extBoxId;
+    }
+
+    public void setExtBoxId(String extBoxId) {
+        this.extBoxId = extBoxId;
     }
 }

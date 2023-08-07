@@ -19,6 +19,7 @@ public class CarDto extends PageDto implements Serializable {
     private String personTel;
     private String personId;
     private String paId;
+    private String[] paIds;
     private String extPaId;
     private double cycles;
     private String cardId;
@@ -151,5 +152,13 @@ public class CarDto extends PageDto implements Serializable {
 
     public void setParkingNum(long parkingNum) {
         this.parkingNum = parkingNum;
+    }
+
+    public String[] getPaIds() {
+        return paIds;
+    }
+
+    public void setPaIds(String[] paIds) {
+        this.paIds = paIds;
     }
 }
