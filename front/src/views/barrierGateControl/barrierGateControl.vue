@@ -374,15 +374,15 @@ export default {
       //创建一个socket实例
       let wsUrl = "";
       let _outMachineId = this.outMachineId;
-      let paId = "";
+      let boxId = "";
       this.outMachines.forEach((item) => {
         if (item.machineId == _outMachineId) {
           wsUrl = item.wsUrl;
-          paId = item.locationObjId;
+          boxId = item.locationObjId;
         }
       });
 
-      this._initCarInOutMessage(paId);
+      this._initCarInOutMessage(boxId);
 
       let image = document.getElementById("receiver2");
       if (wsUrl.endsWith(".flv")) {
@@ -525,7 +525,7 @@ export default {
         };
       });
     },
-    _initCarInOutMessage: function (_paId) {
+    _initCarInOutMessage: function (_boxId) {
       let _that = this;
 
       if (this.messageWebSocket) {
@@ -537,7 +537,7 @@ export default {
         "/barrierGateControl/" +
         this.uuid() +
         "/" +
-        _paId;
+        _boxId;
       let websocket = null;
       if ("WebSocket" in window) {
         websocket = new WebSocket(url);

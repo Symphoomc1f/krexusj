@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Version 1.0
  * add by wuxw 2020/5/25
  **/
-@ServerEndpoint("/barrierGateControl/{clientId}/{paId}")
+@ServerEndpoint("/barrierGateControl/{clientId}/{boxId}")
 @Component
 public class BarrierGateControlWebSocketServer {
 
@@ -48,16 +48,16 @@ public class BarrierGateControlWebSocketServer {
      */
     private String clientId = "";
 
-    private String paId = "";
+    private String boxId = "";
 
     /**
      * 连接建立成功调用的方法
      */
     @OnOpen
-    public void onOpen(Session session, @PathParam("clientId") String clientId, @PathParam("paId") String paId) {
+    public void onOpen(Session session, @PathParam("clientId") String clientId, @PathParam("boxId") String boxId) {
         this.session = session;
         this.clientId = clientId;
-        this.paId = paId;
+        this.boxId = boxId;
         if (webSocketMap.containsKey(clientId)) {
             webSocketMap.remove(clientId);
             webSocketMap.put(clientId, this);
@@ -143,10 +143,10 @@ public class BarrierGateControlWebSocketServer {
     /**
      * 发送设备监控信息
      */
-    public static void sendInfo(String message, String paId) throws IOException {
-        logger.info("发送消息到:" + paId + "，报文:" + message);
+    public static void sendInfo(String message, String boxId) throws IOException {
+        logger.info("发送消息到:" + boxId + "，报文:" + message);
         for(BarrierGateControlWebSocketServer server : webSocketMap.values()){
-            if(paId.equals(server.paId)){
+            if(boxId.equals(server.boxId)){
                 webSocketMap.get(server.clientId).sendMessage(message);
             }
         }

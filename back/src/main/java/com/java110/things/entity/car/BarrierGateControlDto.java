@@ -28,6 +28,7 @@ public class BarrierGateControlDto implements Serializable {
     private String open;
     private String extCommunityId;
     private String extPaId;
+    private String extBoxId;
 
     public BarrierGateControlDto() {
     }
@@ -198,5 +199,13 @@ public class BarrierGateControlDto implements Serializable {
 
     public void setExtPaId(String extPaId) {
         this.extPaId = extPaId;
+    }
+
+    public String getExtBoxId() {
+        return extBoxId;
+    }
+
+    public void setExtBoxId(String extBoxId) {
+        this.extBoxId = extBoxId;
     }
 }
