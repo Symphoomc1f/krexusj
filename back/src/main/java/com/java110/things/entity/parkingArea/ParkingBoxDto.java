@@ -19,6 +19,9 @@ public class ParkingBoxDto extends PageDto implements Serializable {
     private String extBoxId;
     private String paId;
     private String paNum;
+    private String defaultArea;
+    private String num;
+    private String extPaId;
     private List<ParkingBoxAreaDto> parkingBoxAreas;
 
     public String getBoxId() {
@@ -131,5 +134,29 @@ public class ParkingBoxDto extends PageDto implements Serializable {
 
     public void setParkingBoxAreas(List<ParkingBoxAreaDto> parkingBoxAreas) {
         this.parkingBoxAreas = parkingBoxAreas;
+    }
+
+    public String getDefaultArea() {
+        return defaultArea;
+    }
+
+    public void setDefaultArea(String defaultArea) {
+        this.defaultArea = defaultArea;
+    }
+
+    public String getNum() {
+        return num;
+    }
+
+    public void setNum(String num) {
+        this.num = num;
+    }
+
+    public String getExtPaId() {
+        return extPaId;
+    }
+
+    public void setExtPaId(String extPaId) {
+        this.extPaId = extPaId;
     }
 }
