@@ -1,4 +1,15 @@
 #tomcat config
+jedis:
+  pool:
+    config:
+      maxTotal: 100
+      maxIdle: 20
+      maxWaitMillis: 20000
+    host: dev.redis.java110.com
+    port: 6379
+    timeout: 3000
+    password: hc
+
 server :
   port : 9999
   ##项目名字配置
@@ -28,6 +39,17 @@ spring :
       enabled: true
   mvc:   #静态文件
     static-path-pattern : /static/**
+  redis:
+    database: 3
+    host: dev.redis.java110.com
+    port: 6379
+    password: hc
+    pool:
+      max-active: 300
+      max-wait: 10000
+      max-idle: 100
+      min-idle: 0
+      timeout: 0
 
   datasource:
     username: hc_things

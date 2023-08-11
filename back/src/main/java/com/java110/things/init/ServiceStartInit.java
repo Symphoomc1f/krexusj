@@ -7,6 +7,9 @@ import com.java110.things.factory.MqttFactory;
 import com.java110.things.quartz.accessControl.HeartbeatCloudApiThread;
 import com.java110.things.quartz.accessControl.ScanAccessControlThread;
 import com.java110.things.service.machine.IMachineService;
+import com.java110.things.sip.Server;
+import com.java110.things.sip.TCPServer;
+import com.java110.things.sip.message.config.ConfigProperties;
 import com.java110.things.thread.ClearExpireJwtThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +44,7 @@ public class ServiceStartInit {
 
             //刷入缓存
             freshCache();
+
         } catch (Exception ex) {
             logger.error("系统初始化失败", ex);
             throw new IllegalStateException("系统初始化失败", ex);
