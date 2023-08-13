@@ -113,7 +113,7 @@ public class TCPHandler  extends ChannelInboundHandlerAdapter {
 				if(mFrameDeque.size() >0 && mIsFirstI){
 					frame = mFrameDeque.getLast();
 					if(frame != null){
-						frame .addPacket(seq, copyData);
+						frame.addPacket(seq, copyData);
 						frame.setEndSeq(seq);
 					}
 

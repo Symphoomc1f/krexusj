@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
-
 import javax.sip.*;
 import javax.sip.address.Address;
 import javax.sip.address.AddressFactory;
@@ -98,7 +97,7 @@ public class SipLayer implements SipListener {
     private MessageManager mMessageManager = MessageManager.getInstance();
     private PushStreamDeviceManager mPushStreamDeviceManager = PushStreamDeviceManager.getInstance();
 
-    public SipLayer(String sipId, String sipRealm, String password, String localIp, int localPort, String streamMediaIp) {
+    public SipLayer(String sipId, String sipRealm, String password, String localIp, int localPort, String streamMediaIp,int streamMediaPort) {
         this.mSipId = sipId;
         this.mLocalIp = localIp;
         this.mLocalPort = localPort;
@@ -106,6 +105,7 @@ public class SipLayer implements SipListener {
         this.mPassword = password;
         this.mSsrcRealm = mSipId.substring(3, 8);
         this.mStreamMediaIp = streamMediaIp;
+        this.mStreamPort = streamMediaPort;
     }
 
     public boolean startServer() {
@@ -164,7 +164,7 @@ public class SipLayer implements SipListener {
                 processBye(evt);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("处理摄像头 请求失败", e);
         }
     }
 
