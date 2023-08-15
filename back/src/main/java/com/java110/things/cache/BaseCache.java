@@ -7,6 +7,7 @@ import redis.clients.jedis.JedisPool;
 import java.util.Set;
 
 public class BaseCache {
+    public static int DEFAULT_DB = 3;
     protected  static Jedis getJedis() {
         JedisPool jedisPool = (JedisPool) ApplicationContextFactory.getBean("jedisPool");
         return jedisPool.getResource();
@@ -33,5 +34,16 @@ public class BaseCache {
                 redis.close();
             }
         }
+    }
+
+
+    /**
+     * 释放Jedis
+     *
+     * @param jedis
+     */
+    public static void releaseResource(Jedis jedis) {
+        if (jedis != null)
+            jedis.close();
     }
 }
