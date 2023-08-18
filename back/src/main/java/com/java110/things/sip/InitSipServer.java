@@ -34,13 +34,16 @@ public class InitSipServer {
     @Value("${config.streamMediaIp}")
     private String streamMediaIp;
 
+    @Value("${config.streamMediaPort}")
+    private int streamMediaPort;
+
     /**
      * 初始化 层
      * @return
      */
     @Bean
     public SipLayer sipLayer() {
-        SipLayer sipLayer = new SipLayer(sipId, sipRealm, password, listenIp, listenPort, streamMediaIp);
+        SipLayer sipLayer = new SipLayer(sipId, sipRealm, password, listenIp, listenPort, streamMediaIp,streamMediaPort);
         boolean startStatus = sipLayer.startServer();
         if (startStatus) {
             logger.info("Sip Server 启动成功 port {}", listenPort);
