@@ -1,7 +1,7 @@
 package com.java110.things.adapt.car;
 
 import com.alibaba.fastjson.JSONObject;
-import com.java110.things.Controller.car.BarrierGateControlWebSocketServer;
+import com.java110.things.ws.BarrierGateControlWebSocketServer;
 import com.java110.things.adapt.car.compute.IComputeTempCarFee;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.entity.app.AppAttrDto;

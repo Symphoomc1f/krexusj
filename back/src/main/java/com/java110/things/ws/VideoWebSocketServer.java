@@ -1,15 +1,21 @@
-package com.java110.things.Controller.car;
+package com.java110.things.ws;
 
 import com.alibaba.fastjson.JSONObject;
+import com.java110.things.factory.ApplicationContextFactory;
+import com.java110.things.service.video.IVideoService;
+import com.java110.things.sip.SipLayer;
 import com.java110.things.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -20,11 +26,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Version 1.0
  * add by wuxw 2020/5/25
  **/
-@ServerEndpoint("/barrierGateControl/{clientId}/{boxId}")
+@ServerEndpoint("/videoWebSocket/{clientId}/{deviceId}")
 @Component
-public class BarrierGateControlWebSocketServer {
+public class VideoWebSocketServer {
 
-    private static Logger logger = LoggerFactory.getLogger(BarrierGateControlWebSocketServer.class);
+    private static Logger logger = LoggerFactory.getLogger(VideoWebSocketServer.class);
+
+    @Autowired
+    private IVideoService videoServiceImpl;
 
     /**
      * 静态变量，用来记录当前在线连接数。应该把它设计成线程安全的。
@@ -33,7 +42,7 @@ public class BarrierGateControlWebSocketServer {
     /**
      * concurrent包的线程安全Set，用来存放每个客户端对应的MyWebSocket对象。
      */
-    private static ConcurrentHashMap<String, BarrierGateControlWebSocketServer> webSocketMap = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, VideoWebSocketServer> webSocketMap = new ConcurrentHashMap<>();
 
     /**
      * concurrent包的线程安全Set，用来存放每个客户端对应的MyWebSocket对象。
@@ -48,33 +57,33 @@ public class BarrierGateControlWebSocketServer {
      */
     private String clientId = "";
 
-    private String boxId = "";
+    private String deviceId = "";
 
     /**
      * 连接建立成功调用的方法
      */
     @OnOpen
-    public void onOpen(Session session, @PathParam("clientId") String clientId, @PathParam("boxId") String boxId) {
+    public void onOpen(Session session, @PathParam("clientId") String clientId, @PathParam("deviceId") String deviceId) {
         this.session = session;
         this.clientId = clientId;
-        this.boxId = boxId;
-        if (webSocketMap.containsKey(clientId)) {
-            webSocketMap.remove(clientId);
-            webSocketMap.put(clientId, this);
-            //加入set中
-        } else {
-            webSocketMap.put(clientId, this);
-            //加入set中
-            addOnlineCount();
-            //在线数加1
-        }
-
-
-        logger.debug("用户连接:" + clientId + ",当前在线人数为:" + getOnlineCount());
-
+        this.deviceId = deviceId;
         try {
-            sendMessage("连接成功");
-        } catch (IOException e) {
+            if (webSocketMap.containsKey(clientId)) {
+                webSocketMap.remove(clientId);
+                webSocketMap.put(clientId, this);
+                //加入set中
+            } else {
+                webSocketMap.put(clientId, this);
+                //加入set中
+                addOnlineCount();
+                //在线数加1
+            }
+            logger.debug("用户连接:" + clientId + ",当前在线人数为:" + getOnlineCount());
+            //调用推流
+            videoServiceImpl = ApplicationContextFactory.getBean("videoServiceImpl", IVideoService.class);
+            ResponseEntity<String> responseEntity = videoServiceImpl.doPlay(deviceId, "34020000001320000010", SipLayer.TCP);
+           // sendMessage(responseEntity.getBody());
+        } catch (Exception e) {
             logger.error("用户:" + clientId + ",网络异常!!!!!!");
         }
     }
@@ -139,15 +148,35 @@ public class BarrierGateControlWebSocketServer {
         this.session.getBasicRemote().sendText(message);
     }
 
+    /**
+     * 实现服务器主动推送
+     */
+    public void sendMessage(ByteBuffer byteBuffer) throws IOException {
+        this.session.getBasicRemote().sendBinary(byteBuffer);
+    }
+
 
     /**
      * 发送设备监控信息
      */
-    public static void sendInfo(String message, String boxId) throws IOException {
-        logger.info("发送消息到:" + boxId + "，报文:" + message);
-        for(BarrierGateControlWebSocketServer server : webSocketMap.values()){
-            if(boxId.equals(server.boxId)){
+    public static void sendInfo(String message, String deviceId) throws IOException {
+        logger.info("发送消息到:" + deviceId + "，报文:" + message);
+        for (VideoWebSocketServer server : webSocketMap.values()) {
+            if (deviceId.equals(server.deviceId)) {
                 webSocketMap.get(server.clientId).sendMessage(message);
+            }
+        }
+    }
+
+
+    /**
+     * 发送设备监控信息
+     */
+    public static void sendInfo(ByteBuffer byteBuffer, String deviceId) throws IOException {
+        logger.info("发送消息到:" + deviceId + "，报文:" + byteBuffer);
+        for (VideoWebSocketServer server : webSocketMap.values()) {
+            if (deviceId.equals(server.deviceId)) {
+                webSocketMap.get(server.clientId).sendMessage(byteBuffer);
             }
         }
     }
@@ -157,10 +186,10 @@ public class BarrierGateControlWebSocketServer {
     }
 
     public static synchronized void addOnlineCount() {
-        BarrierGateControlWebSocketServer.onlineCount++;
+        VideoWebSocketServer.onlineCount++;
     }
 
     public static synchronized void subOnlineCount() {
-        BarrierGateControlWebSocketServer.onlineCount--;
+        VideoWebSocketServer.onlineCount--;
     }
 }

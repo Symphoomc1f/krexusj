@@ -96,6 +96,16 @@ public class ResultDto implements Serializable {
     }
 
     /**
+     * 成功通用回复
+     * @return
+     */
+    public static ResponseEntity<String> success(Object data) {
+        ResultDto resultVo = new ResultDto(SUCCESS, SUCCESS_MSG,data);
+        ResponseEntity<String> responseEntity = new ResponseEntity<String>(resultVo.toString(), HttpStatus.OK);
+        return responseEntity;
+    }
+
+    /**
      * 失败通用回复
      * @return
      */

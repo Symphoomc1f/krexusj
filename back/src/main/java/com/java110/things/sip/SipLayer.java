@@ -105,7 +105,6 @@ public class SipLayer implements SipListener {
         this.mPassword = password;
         this.mSsrcRealm = mSipId.substring(3, 8);
         this.mStreamMediaIp = streamMediaIp;
-        this.mStreamPort = streamMediaPort;
     }
 
     public boolean startServer() {
@@ -558,6 +557,12 @@ public class SipLayer implements SipListener {
         buffer.append(String.valueOf(ssrcStr));
 
         return buffer.toString();
+    }
+
+    public int getPort() {
+        int resultPort = 0;
+        resultPort = mStreamPort;
+        return resultPort;
     }
 
     public int getPort(boolean isTcp) {

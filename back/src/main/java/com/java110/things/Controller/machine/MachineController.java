@@ -2,7 +2,7 @@ package com.java110.things.Controller.machine;
 
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
-import com.java110.things.Controller.car.BarrierGateControlWebSocketServer;
+import com.java110.things.ws.BarrierGateControlWebSocketServer;
 import com.java110.things.constant.MachineConstant;
 import com.java110.things.entity.car.BarrierGateControlDto;
 import com.java110.things.entity.car.CarInoutDto;
