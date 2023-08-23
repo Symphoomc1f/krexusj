@@ -118,7 +118,7 @@ public class CarApi extends BaseController {
     /**
      * 设备心跳
      * <p>
-     * 门禁配置地址为：/api/car/parkingUp/设备编码
+     * 门禁配置地址为：/api/car/uploadRecord/设备编码/1
      *
      * @param request request请求报文 包括设备 前台填写信息
      * @return 成功或者失败
