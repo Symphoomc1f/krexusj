@@ -143,7 +143,7 @@ public class HttpClient {
             // 断开与远程地址url的连接
             connection.disconnect();
 
-            System.out.printf("http 请求 url:" + httpUrl + ",paramIn:" + param + ",paramOut=" + result);
+            System.out.printf("http 请求 url:" + httpUrl + ",paramIn:" + param + ",auth:" + auth + ",paramOut=" + result);
         }
         return result;
     }
