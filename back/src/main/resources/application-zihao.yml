@@ -1,0 +1,161 @@
+#tomcat config
+jedis:
+  pool:
+    config:
+      maxTotal: 100
+      maxIdle: 20
+      maxWaitMillis: 20000
+    host: dev.redis.java110.com
+    port: 6379
+    timeout: 3000
+    password: ${redispwd}
+
+server :
+  port : 9999
+  ##项目名字配置
+  #servlet : 
+  #  context-path : /demo
+  tomcat :
+    max-threads : 128
+    min-spare-threads : 5
+    uri-encoding : UTF-8
+    #shiro 报错修改的地方
+    max-connections: 200000
+    max-http-post-size: 9000000
+spring :
+  servlet:
+    multipart:
+      #设置总上传的数据大小
+      max-request-size: 100MB
+      #单个文件大小
+      maxFileSize : 30MB
+      #shiro 报错修改的地方
+    max-connections: 200000
+    max-http-post-size: 9000000
+    # 服务模块
+  devtools:
+    restart:
+      # 热部署开关
+      enabled: true
+  mvc:   #静态文件
+    static-path-pattern : /static/**
+  redis:
+    database: 3
+    host: dev.redis.java110.com
+    port: 6379
+    password: hc
+    pool:
+      max-active: 300
+      max-wait: 10000
+      max-idle: 100
+      min-idle: 0
+      timeout: 0
+
+  datasource:
+    username: hc_thing
+    password: ${mysqlpwd}
+    url: jdbc:mysql://things.homecommunity.cn:3306/hc_thing?useUnicode=true&characterEncoding=gbk&zeroDateTimeBehavior=convertToNull&useSSL=false
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    initialSize: 5
+    minIdle: 5
+    maxActive: 20
+    maxWait: 60000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    filters: stat,wall,log4j
+    logSlowSql: true
+
+
+
+  #模板引擎
+  thymeleaf:
+    model: HTML5
+    prefix: classpath:/pages/
+    suffix: .html
+    #指定编码
+    encoding: utf-8
+    #禁用缓存 默认false
+    cache: false
+  mqtt:
+    client:
+      id: java110-client-id8
+    completionTimeout: 3000
+    default:
+      topic: topic
+    password: wuxw2015
+    url: tcp://mqtt.homecommunity.cn:1883
+    username: wuxw
+    keepalive: 10
+
+netty:
+  server:
+    port: 11211
+
+mybatis:
+  mapper-locations: classpath:mapper/*/*Mapper.xml
+  type-aliases-package: com.java110.things.entity
+
+logging:
+  level:
+    com:
+      example:
+        mapper: debug
+
+quartz:
+  properties:
+    org:
+      quartz:
+        scheduler:
+          instanceName: clusteredScheduler
+          instanceId: AUTO
+        jobStore:
+          class: org.quartz.impl.jdbcjobstore.JobStoreTX
+          driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+          tablePrefix: HC_
+          isClustered: false
+          clusterCheckinInterval: 10000
+          useProperties: false
+        threadPool:
+          class: org.quartz.simpl.SimpleThreadPool
+          threadCount: 10
+          threadPriority: 5
+          threadsInheritContextClassLoaderOfInitializingThread: true
+  job-store-type: jdbc
+
+#============== kafka ===================
+kafka:
+  topic: java110-hc-xiaoqu
+  consumer:
+    zookeeper:
+      connect: dev.zk.java110.com:2181
+    servers: dev.kafka.java110.com:9092
+    enable:
+      auto:
+        commit: true
+    session:
+      timeout: 6000
+    auto:
+      commit:
+        interval: 100
+      offset:
+        reset: latest
+    topic: test
+    group:
+      id: java110Iot
+    concurrency: 10
+
+  producer:
+    zookeeper:
+      connect: dev.zk.java110.com:2181
+    servers: dev.kafka.java110.com:9092
+    retries: 0
+    batch:
+      size: 4096
+    linger: 1
+    buffer:
+      memory: 40960
