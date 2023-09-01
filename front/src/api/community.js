@@ -36,6 +36,14 @@ export function saveCommunitys(params) {
     })
 }
 
+export function updateCommunitys(params) {
+    return request({
+        url: '/api/community/updateCommunitys',
+        method: 'post',
+        data:params
+    })
+  }
+
 export function getCityArea(params){
     return request({
         url: '/api/cityArea/getCityAreas',

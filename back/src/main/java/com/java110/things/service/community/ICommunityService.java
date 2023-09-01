@@ -48,7 +48,7 @@ public interface ICommunityService {
      * @return
      * @throws Exception
      */
-    List<CommunityDto> queryCommunitys(CommunityDto communityDto) throws Exception;
+    List<CommunityDto> queryCommunitys(CommunityDto communityDto) ;
 
     /**
      * 删除设备

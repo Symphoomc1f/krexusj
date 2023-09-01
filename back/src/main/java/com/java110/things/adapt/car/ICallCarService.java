@@ -2,6 +2,7 @@ package com.java110.things.adapt.car;
 
 
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.parkingArea.ResultParkingAreaTextDto;
 import com.java110.things.entity.response.ResultDto;
 
 /**
@@ -41,6 +42,6 @@ public interface ICallCarService {
      *     msg:说明原因
      * }
      */
-    public ResultDto ivsResult(String type, String carNum, MachineDto machineDto) throws Exception;
+    public ResultParkingAreaTextDto ivsResult(String type, String carNum, MachineDto machineDto) throws Exception;
 
 }

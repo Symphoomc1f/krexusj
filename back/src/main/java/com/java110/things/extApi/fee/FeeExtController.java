@@ -17,9 +17,11 @@ package com.java110.things.extApi.fee;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.car.TempCarFeeConfigAttrDto;
 import com.java110.things.entity.car.TempCarFeeConfigDto;
 import com.java110.things.entity.community.CommunityDto;
+import com.java110.things.entity.fee.TempCarPayOrderDto;
 import com.java110.things.entity.parkingArea.ParkingAreaDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.service.community.ICommunityService;
@@ -27,6 +29,7 @@ import com.java110.things.service.fee.ITempCarFeeConfigService;
 import com.java110.things.service.parkingArea.IParkingAreaService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
+import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -235,6 +238,56 @@ public class FeeExtController {
         tCarFeeConfigAttrDto.setConfigId(tempCarFeeConfigDtos.get(0).getConfigId());
         tempCarFeeConfigServiceImpl.deleteTempCarFeeConfigAttr(tCarFeeConfigAttrDto);
 
+        return ResultDto.createResponseEntity(tempResultDto);
+    }
+
+    /**
+     * 查询临时车付费订单
+     * <p>
+     *
+     * @param reqParam
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/getTempCarFeeOrder", method = RequestMethod.POST)
+    public ResponseEntity<String> getTempCarFeeOrder(@RequestBody String reqParam) throws Exception {
+        JSONObject reqJson = JSONObject.parseObject(reqParam);
+        Assert.hasKeyAndValue(reqJson, "carNum", "未包含车辆编码");
+        Assert.hasKeyAndValue(reqJson, "extPaId", "未包含外部停车场ID");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
+
+        CarDto carDto = BeanConvertUtil.covertBean(reqJson, CarDto.class);
+        ResultDto tempResultDto = tempCarFeeConfigServiceImpl.getTempCarFeeOrder(carDto);
+        return ResultDto.createResponseEntity(tempResultDto);
+    }
+
+    /**
+     * 查询临时车付费订单
+     * <p>
+     *
+     * @param reqParam
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/notifyTempCarFeeOrder", method = RequestMethod.POST)
+    public ResponseEntity<String> notifyTempCarFeeOrder(@RequestBody String reqParam) throws Exception {
+        JSONObject reqJson = JSONObject.parseObject(reqParam);
+        Assert.hasKeyAndValue(reqJson, "carNum", "未包含车辆编码");
+        Assert.hasKeyAndValue(reqJson, "extPaId", "未包含外部停车场ID");
+        Assert.hasKeyAndValue(reqJson, "taskId", "未包含任务ID");
+        Assert.hasKeyAndValue(reqJson, "orderId", "未包含订单ID");
+        Assert.hasKeyAndValue(reqJson, "amount", "支付金额");
+        Assert.hasKeyAndValue(reqJson, "payTime", "支付时间");
+        Assert.hasKeyAndValue(reqJson, "payType", "支付类型");
+
+        TempCarPayOrderDto tempCarPayOrderDto = new TempCarPayOrderDto();
+        tempCarPayOrderDto.setCarNum(reqJson.getString("carNum"));
+        tempCarPayOrderDto.setExtPaId(reqJson.getString("extPaId"));
+        tempCarPayOrderDto.setOrderId(reqJson.getString("orderId"));
+        tempCarPayOrderDto.setAmount(reqJson.getDouble("amount"));
+        tempCarPayOrderDto.setPayTime(DateUtil.getDateFromString(reqJson.getString("payTime"),DateUtil.DATE_FORMATE_STRING_A));
+        tempCarPayOrderDto.setPayType(reqJson.getString("payType"));
+        ResultDto tempResultDto = tempCarFeeConfigServiceImpl.notifyTempCarFeeOrder(tempCarPayOrderDto);
         return ResultDto.createResponseEntity(tempResultDto);
     }
 }

@@ -47,7 +47,31 @@
       <el-table-column label="ID" align="center">
         <template slot-scope="scope">{{ scope.row.carId }}</template>
       </el-table-column>
+      <el-table-column class-name="status-col" label="操作" align="right">
+        <template slot-scope="{ row, $index }">
+          <el-button
+            size="mini"
+            type="danger"
+            @click="deleteCar(row, $index)"
+            >删除</el-button
+          >
+        </template>
+      </el-table-column>
     </el-table>
+    <el-dialog
+      title="温馨提示"
+      :visible.sync="deleteCarDailogVisible"
+      width="30%"
+      :before-close="handleClose"
+    >
+      <span>您确定删除当前车辆吗？</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="deleteCarDailogVisible = false"
+          >取 消</el-button
+        >
+        <el-button type="primary" @click="doDeleteCar">确 定</el-button>
+      </span>
+    </el-dialog>
     <pagination
       v-show="total>0"
       :total="total"
@@ -60,6 +84,7 @@
 
 <script>
 import {
+  deleteCars,
   queryCars
 } from "@/api/car.js";
 import Pagination from "@/components/Pagination";
@@ -84,6 +109,7 @@ export default {
         row: 10,
         carNum: "",
       },
+      deleteCarDailogVisible: false,
       list: null,
       listLoading: true,
       total:0
@@ -106,6 +132,23 @@ export default {
     },
     add0:function(m) {
             return m < 10 ? '0' + m : m
+    },
+    deleteCar(_row) {
+      this.deleteCarDailogVisible = true;
+      this.curCar = _row;
+    },
+    doDeleteCar() {
+      this.listLoading = true;
+      deleteCars(this.curCar).then((response) => {
+        this.listLoading = false;
+        this.$message({
+          type: "info",
+          message: response.msg,
+        });
+        this.deleteCarDailogVisible = false;
+        this.queryCar();
+      });
+      console.log(this.curCar);
     },
     formatTime:function(shijianchuo){
       let time = new Date(parseInt(shijianchuo));

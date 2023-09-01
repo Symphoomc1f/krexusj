@@ -17,6 +17,7 @@ public class ServiceConfiguration {
         exclusions.append("/api/data/*,");
         exclusions.append("/api/car/*,");
         exclusions.append("/api/accessControl/faceResult,");
+        exclusions.append("/api/accessControl/faceResultBisen,");
         exclusions.append("/api/accessControl/faceResult/*,");
         exclusions.append("/api/accessControl/heartBeat,");
         exclusions.append("/api/accessControl/heartBeat/*");

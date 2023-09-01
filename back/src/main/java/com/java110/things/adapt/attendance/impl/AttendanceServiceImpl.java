@@ -1,6 +1,9 @@
 package com.java110.things.adapt.attendance.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.java110.things.adapt.attendance.IAttendanceProcess;
+import com.java110.things.adapt.attendance.IAttendanceService;
+import com.java110.things.adapt.attendance.ICallAttendanceService;
 import com.java110.things.constant.MachineConstant;
 import com.java110.things.constant.ResponseConstant;
 import com.java110.things.dao.IAttendanceClassesServiceDao;
@@ -15,10 +18,10 @@ import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.StaffDto;
 import com.java110.things.exception.Result;
 import com.java110.things.exception.ThreadException;
-import com.java110.things.factory.*;
-import com.java110.things.adapt.attendance.IAttendanceProcess;
-import com.java110.things.adapt.attendance.IAttendanceService;
-import com.java110.things.adapt.attendance.ICallAttendanceService;
+import com.java110.things.factory.AttendanceProcessFactory;
+import com.java110.things.factory.CallAttendanceFactory;
+import com.java110.things.factory.GetCloudFaceFactory;
+import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.machine.IMachineCmdService;
 import com.java110.things.service.machine.IMachineService;
@@ -96,10 +99,10 @@ public class AttendanceServiceImpl implements IAttendanceService {
                 result = paramOut.toJSONString();
             }
 
-            if (StringUtil.isEmpty(result)) {
-                //请求云端是否有 指令
-                result = getCmdFromCloud(machineDto);
-            }
+//            if (StringUtil.isEmpty(result)) {
+//                //请求云端是否有 指令
+//                result = getCmdFromCloud(machineDto);
+//            }
         } catch (Exception e) {
             logger.error("设备获取指令失败", e);
         } finally {
@@ -165,7 +168,7 @@ public class AttendanceServiceImpl implements IAttendanceService {
                     break;
                 case MachineConstant
                         .CMD_DELETE_FACE:
-                    getAttendanceProcess().deleteFace(syncGetTaskResultDto, paramOut);
+                    // getAttendanceProcess().deleteFace(syncGetTaskResultDto, paramOut);
                     break;
                 case MachineConstant
                         .CMD_CLEAR_FACE:
@@ -207,6 +210,9 @@ public class AttendanceServiceImpl implements IAttendanceService {
                     break;
                 case MachineConstant.CMD_CREATE_FACE:
                     getAttendanceProcess().addFace(machineCmdDto, paramOut);
+                    break;
+                case MachineConstant.CMD_DELETE_FACE:
+                    getAttendanceProcess().deleteFace(machineCmdDto, paramOut);
                     break;
             }
 
@@ -252,6 +258,22 @@ public class AttendanceServiceImpl implements IAttendanceService {
         return resultDto;
     }
 
+
+    @Override
+    public List<AttendanceClassesDto> getAttendanceClasses(AttendanceClassesDto attendanceClassesDto) {
+        int page = attendanceClassesDto.getPage();
+
+        if (page != PageDto.DEFAULT_PAGE) {
+            attendanceClassesDto.setPage((page - 1) * attendanceClassesDto.getRow());
+        }
+
+        List<AttendanceClassesDto> attendanceClassesDtos = null;
+
+        attendanceClassesDtos = attendanceClassesServiceDao.getAttendanceClassess(attendanceClassesDto);
+
+        return attendanceClassesDtos;
+    }
+
     @Override
     public ResultDto getDepartments(StaffDto staffDto) {
         List<StaffDto> staffDtos = staffServiceDao.getDepartments(staffDto);
@@ -279,13 +301,32 @@ public class AttendanceServiceImpl implements IAttendanceService {
     }
 
     @Override
-    public ResultDto saveClassStaff(AttendanceClassesStaffDto attendanceClassesStaffDto) {
+    public List<StaffDto> queryStaffs(StaffDto staffDto) {
+        int page = staffDto.getPage();
+
+        if (page != PageDto.DEFAULT_PAGE) {
+            staffDto.setPage((page - 1) * staffDto.getRow());
+        }
+
+        List<StaffDto> staffDtos = null;
+
+        staffDtos = staffServiceDao.getStaffs(staffDto);
+
+        return staffDtos;
+    }
+
+
+    @Override
+    public ResultDto saveClassStaff(AttendanceClassesStaffDto attendanceClassesStaffDto) throws Exception {
+
+
         long flag = attendanceClassesServiceDao.saveAttendanceClassesStaff(attendanceClassesStaffDto);
         if (flag > 0) {
             return new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
         }
         return new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
     }
+
 
     @Override
     public ResultDto deleteClassStaff(AttendanceClassesStaffDto attendanceClassesStaffDto) {
@@ -329,6 +370,21 @@ public class AttendanceServiceImpl implements IAttendanceService {
         }
         ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, count, totalPage, attendanceClassesStaffDtos);
         return resultDto;
+    }
+
+    @Override
+    public List<AttendanceClassesStaffDto> queryClassStaffs(AttendanceClassesStaffDto attendanceClassesStaffDto) {
+        int page = attendanceClassesStaffDto.getPage();
+
+        if (page != PageDto.DEFAULT_PAGE) {
+            attendanceClassesStaffDto.setPage((page - 1) * attendanceClassesStaffDto.getRow());
+        }
+
+        List<AttendanceClassesStaffDto> attendanceClassesStaffDtos = null;
+
+        attendanceClassesStaffDtos = attendanceClassesServiceDao.getAttendanceClassesStaffs(attendanceClassesStaffDto);
+
+        return attendanceClassesStaffDtos;
     }
 
     @Override
@@ -422,6 +478,7 @@ public class AttendanceServiceImpl implements IAttendanceService {
 
     /**
      * 删除班次
+     *
      * @param attendanceClassesDto
      * @return
      * @throws Exception
@@ -438,15 +495,34 @@ public class AttendanceServiceImpl implements IAttendanceService {
         return resultDto;
     }
 
+    /**
+     * 删除班次属性
+     *
+     * @param attendanceClassesAttrDto
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public ResultDto deleteAttendanceClassesAttrDto(AttendanceClassesAttrDto attendanceClassesAttrDto) {
+        int count = attendanceClassesServiceDao.deleteAttendanceClassesAttr(attendanceClassesAttrDto);
+        ResultDto resultDto = null;
+        if (count < 1) {
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+        } else {
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+        }
+        return resultDto;
+    }
 
 
     /**
      * 更新班次信息
+     *
      * @param attendanceClassesDto 班次信息
      * @return
      */
     @Override
-    public ResultDto updateAttendanceClasses(AttendanceClassesDto attendanceClassesDto){
+    public ResultDto updateAttendanceClasses(AttendanceClassesDto attendanceClassesDto) {
         int count = attendanceClassesServiceDao.updateAttendanceClasses(attendanceClassesDto);
         ResultDto resultDto = null;
         if (count < 1) {
@@ -459,14 +535,15 @@ public class AttendanceServiceImpl implements IAttendanceService {
 
     /**
      * 保存班次信息
+     *
      * @param attendanceClassesDto 班次信息
      * @return
      */
     @Override
     @Transactional
-    public ResultDto insertAttendanceClassesDto(AttendanceClassesDto attendanceClassesDto, List<AttendanceClassesAttrDto> attrDtos){
+    public ResultDto insertAttendanceClassesDto(AttendanceClassesDto attendanceClassesDto, List<AttendanceClassesAttrDto> attrDtos) {
         int count = attendanceClassesServiceDao.saveAttendanceClasses(attendanceClassesDto);
-        for (AttendanceClassesAttrDto attrDto: attrDtos){
+        for (AttendanceClassesAttrDto attrDto : attrDtos) {
             attrDto.setAttrId(SeqUtil.getId());
             attrDto.setClassesId(attendanceClassesDto.getClassesId());
             attrDto.setStatusCd("0");
@@ -479,7 +556,28 @@ public class AttendanceServiceImpl implements IAttendanceService {
             resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
         }
         return resultDto;
-    };
+    }
+
+    /**
+     * 保存班次信息
+     *
+     * @param attrDto 班次信息
+     * @return
+     */
+    @Override
+    @Transactional
+    public ResultDto saveAttendanceClassesAttrDto(AttendanceClassesAttrDto attrDto) {
+
+        int count = attendanceClassesServiceDao.saveAttendanceClassesAttr(attrDto);
+
+        ResultDto resultDto = null;
+        if (count < 1) {
+            resultDto = new ResultDto(ResponseConstant.ERROR, ResponseConstant.ERROR_MSG);
+        } else {
+            resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG);
+        }
+        return resultDto;
+    }
 
     /**
      * 返回班次配置时间信息
@@ -487,9 +585,9 @@ public class AttendanceServiceImpl implements IAttendanceService {
      * @param attrDto 设备信息
      * @return
      */
-    public ResultDto getAttendanceClassesAttrs(AttendanceClassesAttrDto attrDto){
+    public ResultDto getAttendanceClassesAttrs(AttendanceClassesAttrDto attrDto) {
         List<AttendanceClassesAttrDto> attrDtoList = attendanceClassesServiceDao.getAttendanceClassesAttrs(attrDto);
         ResultDto resultDto = new ResultDto(ResponseConstant.SUCCESS, ResponseConstant.SUCCESS_MSG, attrDtoList);
-        return  resultDto;
+        return resultDto;
     }
 }

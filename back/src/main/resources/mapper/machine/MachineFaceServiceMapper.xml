@@ -16,6 +16,7 @@
         select
         t.id ,
         t.user_id userId,
+        t.ext_user_id extUserId,
         t.name ,
         t.id_number idNumber,
         t.start_time startTime,
@@ -29,6 +30,7 @@
         t.state,
         t.message,
         t.community_id communityId
+        ,t.card_id cardId,t.card_number cardNumber
         from machine_face t,machine m
         where 1=1
         and t.machine_id = m.machine_id
@@ -52,6 +54,13 @@
         <if test="userId != null and userId != ''">
             and t.user_id = #{userId}
         </if>
+        <if test="extUserId != null and extUserId != ''">
+            and t.ext_user_id = #{extUserId}
+        </if>
+        <if test='hasExtUserId != null and hasExtUserId == "Y"'>
+            and t.ext_user_id is not null
+        </if>
+
         <if test="name != null and name != ''">
             and t.name = #{name}
         </if>
@@ -140,6 +149,15 @@
             </if>
             <if test="message != null and message != ''">
                 t.message = #{message},
+            </if>
+            <if test="extUserId != null and extUserId != ''">
+                t.ext_user_id = #{extUserId},
+            </if>
+            <if test="cardId != null and cardId != ''">
+                t.card_id = #{cardId},
+            </if>
+            <if test="cardNumber != null and cardNumber != ''">
+                t.card_number = #{cardNumber},
             </if>
         </trim>
         where 1=1

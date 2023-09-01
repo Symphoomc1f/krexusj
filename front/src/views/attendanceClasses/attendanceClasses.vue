@@ -318,7 +318,7 @@ export default {
   },
 
   created() {
-    this.fetchData();
+    this.queryAttClass();
   },
   methods: {
     fetchData() {

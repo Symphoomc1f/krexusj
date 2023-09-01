@@ -2,6 +2,7 @@ package com.java110.things.adapt.accessControl.yufan;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.java110.things.adapt.accessControl.DefaultAbstractAccessControlAdapt;
 import com.java110.things.quartz.accessControl.AddUpdateFace;
 import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import com.java110.things.adapt.accessControl.ICallAccessControlService;
@@ -39,7 +40,7 @@ import java.util.List;
  * 伊兰度 门禁设备 Mqtt 方式
  */
 @Service("yufanHttpAssessControlProcessAdapt")
-public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess {
+public class YufanHttpAssessControlProcessAdapt extends DefaultAbstractAccessControlAdapt {
 
     private static Logger logger = LoggerFactory.getLogger(YufanHttpAssessControlProcessAdapt.class);
     //public static Function fun=new Function();
@@ -118,11 +119,6 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
     @Override
     public ResultDto initAssessControlProcess(MachineDto machineDto) {
         return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG);
-    }
-
-    @Override
-    public int getFaceNum(MachineDto machineDto) {
-        return 0;
     }
 
     @Override
@@ -350,11 +346,7 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         return null;
     }
 
-    @Override
-    public void mqttMessageArrived(String topic, String data) {
 
-
-    }
 
 
     @Override
@@ -451,74 +443,11 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         return resultParam.toJSONString();//未找到设备
     }
 
-    /**
-     * 查询费用信息
-     *
-     * @param openDoorDto
-     */
-    private void freshOwnerFee(OpenDoorDto openDoorDto) {
-
-        ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
-        List<FeeDto> feeDtos = new ArrayList<>();
-        try {
-            //查询业主房屋信息
-            UserFaceDto userFaceDto = new UserFaceDto();
-            userFaceDto.setUserId(openDoorDto.getUserId());
-            List<RoomDto> roomDtos = notifyAccessControlService.getRooms(userFaceDto);
-
-            if (roomDtos == null || roomDtos.size() < 1) {
-                return;
-            }
-
-            for (RoomDto roomDto : roomDtos) {
-                List<FeeDto> tmpFeeDtos = notifyAccessControlService.getFees(roomDto);
-                if (tmpFeeDtos == null || tmpFeeDtos.size() < 1) {
-                    continue;
-                }
-                feeDtos.addAll(tmpFeeDtos);
-            }
-        } catch (Exception e) {
-            logger.error("云端查询物业费失败", e);
-        }
-
-        if (feeDtos.size() < 1) {
-            openDoorDto.setAmountOwed("0");
-            return;
-        }
-        double own = 0.00;
-        for (FeeDto feeDto : feeDtos) {
-            logger.debug("查询费用信息" + JSONObject.toJSONString(feeDto));
-            own += feeDto.getAmountOwed();
-        }
-
-        openDoorDto.setAmountOwed(own + "");
-    }
-
-
-    private void openDoorResult(String data) {
-
-
-    }
-
-    /**
-     * 设备上线
-     *
-     * @param data {
-     *             "cmd": "mqtt_online",
-     *             "sn": "fffffff",
-     *             "result": "mqtt is online"
-     *             }
-     */
-    private void machineOnline(String data) {
-
-
-    }
-
 
     /**
      * 重启
      */
-    private void setUiTitle(MachineDto machineDto) {
+    public void setUiTitle(MachineDto machineDto) {
 
         JSONObject param = new JSONObject();
         param.put("client_id", machineDto.getMachineCode());
@@ -531,61 +460,6 @@ public class YufanHttpAssessControlProcessAdapt implements IAssessControlProcess
         MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
 
         saveLog(param.getString("cmd_id"), machineDto.getMachineId(), CMD_UI_TITLE, param.toJSONString(), "");
-
-
-    }
-
-    /**
-     * 存储日志
-     *
-     * @param logId     日志ID
-     * @param machineId 设备ID
-     * @param cmd       操作命令
-     * @param reqParam  请求报文
-     * @param resParam  返回报文
-     */
-    private void saveLog(String logId, String machineId, String cmd, String reqParam, String resParam) {
-        saveLog(logId, machineId, cmd, reqParam, resParam, "", "", "");
-    }
-
-    /**
-     * 存储日志
-     *
-     * @param logId     日志ID
-     * @param machineId 设备ID
-     * @param cmd       操作命令
-     * @param reqParam  请求报文
-     * @param resParam  返回报文
-     * @param state     状态
-     */
-    private void saveLog(String logId, String machineId, String cmd, String reqParam, String resParam, String state) {
-        saveLog(logId, machineId, cmd, reqParam, resParam, state, "", "");
-    }
-
-    /**
-     * 存储日志
-     *
-     * @param logId     日志ID
-     * @param machineId 设备ID
-     * @param cmd       操作命令
-     * @param reqParam  请求报文
-     * @param resParam  返回报文
-     * @param state     状态
-     * @param userId    业主ID
-     * @param userName  业主名称
-     */
-    private void saveLog(String logId, String machineId, String cmd, String reqParam, String resParam, String state, String userId, String userName) {
-        ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
-        OperateLogDto operateLogDto = new OperateLogDto();
-        operateLogDto.setLogId(logId);
-        operateLogDto.setMachineId(machineId);
-        operateLogDto.setOperateType(cmd);
-        operateLogDto.setReqParam(reqParam);
-        operateLogDto.setResParam(resParam);
-        operateLogDto.setState(state);
-        operateLogDto.setUserId(userId);
-        operateLogDto.setUserName(userName);
-        notifyAccessControlService.saveOrUpdateOperateLog(operateLogDto);
     }
 
 }

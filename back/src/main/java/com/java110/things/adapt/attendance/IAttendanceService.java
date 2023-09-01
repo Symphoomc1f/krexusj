@@ -42,6 +42,9 @@ public interface IAttendanceService {
     ResultDto getClasses(AttendanceClassesDto attendanceClassesDto);
 
 
+    List<AttendanceClassesDto> getAttendanceClasses(AttendanceClassesDto attendanceClassesDto);
+
+
     /**
      * 查询班次
      * @param staffDto 班次信息
@@ -56,13 +59,21 @@ public interface IAttendanceService {
      */
     ResultDto getStaffs(StaffDto staffDto);
 
+    /**
+     * 查询员工
+     * @param staffDto 班次信息
+     * @return
+     */
+    List<StaffDto> queryStaffs(StaffDto staffDto);
+
+
 
     /**
      * 保存班次员工
      * @param attendanceClassesStaffDto 班次信息
      * @return
      */
-    ResultDto saveClassStaff(AttendanceClassesStaffDto attendanceClassesStaffDto);
+    ResultDto saveClassStaff(AttendanceClassesStaffDto attendanceClassesStaffDto) throws Exception;
 
 
     /**
@@ -78,6 +89,14 @@ public interface IAttendanceService {
      * @return
      */
     ResultDto getClassStaffs(AttendanceClassesStaffDto attendanceClassesStaffDto);
+
+    /**
+     * 查询班次
+     * @param attendanceClassesStaffDto 班次信息
+     * @return
+     */
+    List<AttendanceClassesStaffDto>  queryClassStaffs(AttendanceClassesStaffDto attendanceClassesStaffDto);
+
 
     /**
      * 查询考勤情况
@@ -96,7 +115,10 @@ public interface IAttendanceService {
 
     ResultDto insertAttendanceClassesDto(AttendanceClassesDto attendanceClassesDto, List<AttendanceClassesAttrDto> attrDtos);
 
+    ResultDto saveAttendanceClassesAttrDto(AttendanceClassesAttrDto attrDto);
+
     ResultDto deleteAttendanceClassesDto(AttendanceClassesDto attendanceClassesDto);
+    ResultDto deleteAttendanceClassesAttrDto(AttendanceClassesAttrDto attendanceClassesAttrDto);
 
     public ResultDto updateAttendanceClasses(AttendanceClassesDto attendanceClassesDto);
 

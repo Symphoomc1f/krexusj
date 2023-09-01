@@ -1,5 +1,6 @@
 package com.java110.things.api.accessControl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
 import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import com.java110.things.entity.machine.MachineDto;
@@ -46,6 +47,32 @@ public class AccessControlApi extends BaseController {
 
         MachineDto machineDto = new MachineDto();
         machineDto.setMachineCode(machineCode);
+        List<MachineDto> machineDtos = machineServiceImpl.queryMachines(machineDto);
+
+        Assert.listOnlyOne(machineDtos, "未包含该设备");
+        logger.debug("请求报文：" + param);
+        IAssessControlProcess assessControlProcess = AccessControlProcessFactory.getAssessControlProcessImpl(machineDtos.get(0).getHmId());
+
+        return new ResponseEntity<String>(assessControlProcess.httpFaceResult(machineDtos.get(0), param), HttpStatus.OK);
+    }
+
+    /**
+     * 添加设备接口类
+     * <p>
+     * 门禁配置地址为：/api/accessControl/faceResult/设备编码
+     *
+     * @param param 请求报文 包括设备 前台填写信息
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/faceResultBisen", method = RequestMethod.POST)
+    public ResponseEntity<String> faceResultBisen(@RequestBody String param ) throws Exception {
+
+
+        JSONObject paramIn = JSONObject.parseObject(param);
+
+        MachineDto machineDto = new MachineDto();
+        machineDto.setMachineCode(paramIn.getString("deviceNo"));
         List<MachineDto> machineDtos = machineServiceImpl.queryMachines(machineDto);
 
         Assert.listOnlyOne(machineDtos, "未包含该设备");

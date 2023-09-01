@@ -1,0 +1,20 @@
+<html>
+
+<head>
+    <title>WebsocketVideo</title>
+</head>
+
+<body>
+    <div id="container" style="width:800px;height:600px"></div>
+    <script src="./renderer.js"></script>
+    <button onclick="play()">播放</button>
+    <script>
+        var container = document.getElementById("container");
+        var jessibuca = new Jessibuca({ container, videoBuffer: 0.2, isResize: false });
+        function play() {
+            jessibuca.play("ws://192.168.1.100:9080/ws.flv")
+        }
+    </script>
+</body>
+
+</html>

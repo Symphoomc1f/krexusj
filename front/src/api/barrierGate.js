@@ -12,7 +12,7 @@ export function getMachineCmds(params) {
         params: {
             page: 1,
             row: 10,
-            machineTypeCd: '9999',
+            machineTypeCd: '9996',
             communityId:communityId
         }
     })
@@ -68,7 +68,7 @@ export function getAccessControls(params) {
         params: {
             page: 1,
             row: 10,
-            machineTypeCd: '9999',
+            machineTypeCd: '9996',
             communityId:communityId
         }
     })
@@ -133,6 +133,22 @@ export function restartAccessControls(params) {
         data:params
     })
 }
+
+export function openDoor(params) {
+    return request({
+        url: '/api/machine/openDoor',
+        method: 'post',
+        data:params
+    })
+}
+export function customCarInOut(params) {
+    return request({
+        url: '/api/machine/customCarInOut',
+        method: 'post',
+        data:params
+    })
+}
+
 
 export function getAccessControlsLog(params) {
     let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));

@@ -23,6 +23,7 @@ public class CarBlackWhiteDto extends PageDto implements Serializable {
     private String extCarId;
     private String extBwId;
     private String paId;
+    private String[] paIds;
     private String extPaId;
     private String blackWhite;
 
@@ -121,5 +122,13 @@ public class CarBlackWhiteDto extends PageDto implements Serializable {
 
     public void setBlackWhite(String blackWhite) {
         this.blackWhite = blackWhite;
+    }
+
+    public String[] getPaIds() {
+        return paIds;
+    }
+
+    public void setPaIds(String[] paIds) {
+        this.paIds = paIds;
     }
 }

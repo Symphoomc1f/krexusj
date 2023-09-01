@@ -23,5 +23,7 @@ public interface ICarCallHcService {
      * @param carInoutDto
      * @return
      */
-    public void carInout(CarInoutDto carInoutDto) throws Exception;
+    void carInout(CarInoutDto carInoutDto) throws Exception;
+
+    void notifyTempCarFeeOrder(CarInoutDto carInoutDto) throws Exception;
 }

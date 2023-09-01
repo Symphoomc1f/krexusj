@@ -4,9 +4,9 @@
 
     <insert id="saveCarInout" parameterType="com.java110.things.entity.car.CarInoutDto">
         INSERT INTO car_inout(`inout_id`, `community_id`, `car_num`, `car_type`, `open_time`, `gate_name`,
-        `pay_charge`, `real_charge`, `pay_type`, `remark`, `inout_type`)
+        `pay_charge`, `real_charge`, `pay_type`, `remark`, `inout_type`,pa_id,state)
         VALUES (#{inoutId}, #{communityId}, #{carNum}, #{carType}, #{openTime}, #{gateName}, #{payCharge},
-        #{realCharge}, #{payType}, #{remark}, #{inoutType})
+        #{realCharge}, #{payType}, #{remark}, #{inoutType},#{paId},#{state})
     </insert>
     <!--
         查询设备信息
@@ -14,19 +14,23 @@
     <select id="getCarInouts" parameterType="com.java110.things.entity.car.CarInoutDto"
             resultType="com.java110.things.entity.car.CarInoutDto">
         select
-            t.inout_id inoutId,
-            t.community_id communityId,
-            t.car_num carNum,
-            t.car_type carType,
-            t.open_time openTime,
-            t.gate_name gateName,
-            t.pay_charge payCharge,
-            t.real_charge realCharge,
-            t.pay_type payType,
-            t.remark,
-            t.inout_type inoutType,
-            t.pa_id paId
+        t.inout_id inoutId,
+        t.community_id communityId,
+        t.car_num carNum,
+        t.car_type carType,
+        t.open_time openTime,
+        t.gate_name gateName,
+        t.pay_charge payCharge,
+        t.real_charge realCharge,
+        t.pay_type payType,
+        t.remark,
+        t.inout_type inoutType,
+        t.pa_id paId,
+        t.state,
+        t.pay_time payTime,
+        pa.num areaNum
         from car_inout t
+        left join parking_area pa on t.pa_id = pa.pa_id and pa.status_cd = '0'
         where 1=1
         <if test="inoutId != null and inoutId != ''">
             and t.inout_id = #{inoutId}
@@ -40,8 +44,23 @@
         <if test="paId != null and paId != ''">
             and t.pa_id = #{paId}
         </if>
+        <if test="paIds != null">
+            and t.pa_id in
+            <foreach collection="paIds" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
         <if test="inoutType != null and inoutType != ''">
             and t.inout_type = #{inoutType}
+        </if>
+        <if test="state != null and inoutType != ''">
+            and t.state = #{state}
+        </if>
+        <if test="states != null ">
+            and t.state in
+            <foreach collection="states" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
         </if>
         order by t.create_time desc
         <if test="page != -1 and page != null ">
@@ -67,8 +86,17 @@
         <if test="paId != null and paId != ''">
             and t.pa_id = #{paId}
         </if>
+        <if test="paIds != null">
+            and t.pa_id in
+            <foreach collection="paIds" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
         <if test="inoutType != null and inoutType != ''">
             and t.inout_type = #{inoutType}
+        </if>
+        <if test="state != null and inoutType != ''">
+            and t.state = #{state}
         </if>
 
     </select>
@@ -78,6 +106,21 @@
         <trim prefix="SET" suffixOverrides=",">
             <if test="statusCd != null and statusCd != ''">
                 t.status_cd = #{statusCd},
+            </if>
+            <if test="state != null and inoutType != ''">
+                t.state = #{state},
+            </if>
+            <if test="payTime != null">
+                t.pay_time = #{payTime},
+            </if>
+            <if test="payCharge != null and payCharge != ''">
+                t.pay_charge = #{payCharge},
+            </if>
+            <if test="realCharge != null and realCharge != ''">
+                t.real_charge = #{realCharge},
+            </if>
+            <if test="payType != null and payType != ''">
+                t.pay_type = #{payType},
             </if>
         </trim>
         where 1=1
@@ -96,10 +139,11 @@
         <if test="inoutType != null and inoutType != ''">
             and t.inout_type = #{inoutType}
         </if>
+
     </update>
 
     <delete id="delete" parameterType="com.java110.things.entity.car.CarInoutDto">
-		delete from car_inout where inout_id = #{inoutId}
-	</delete>
+        delete from car_inout where inout_id = #{inoutId}
+    </delete>
 
 </mapper>

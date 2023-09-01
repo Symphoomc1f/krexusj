@@ -9,10 +9,10 @@
     <insert id="saveMachine" parameterType="com.java110.things.entity.machine.MachineDto">
         INSERT INTO
         machine (machine_id, machine_code, machine_version, machine_name, machine_type_cd, machine_ip,
-        machine_mac,oem,ext_machine_id,community_id,hm_id,location_type,location_obj_id,heartbeat_time,direction)
+        machine_mac,oem,ext_machine_id,community_id,hm_id,location_type,location_obj_id,heartbeat_time,direction,third_machine_id)
         VALUES (#{machineId}, #{machineCode}, #{machineVersion}, #{machineName}, #{machineTypeCd}, #{machineIp},
         #{machineMac},#{oem},#{extMachineId},#{communityId},#{hmId},#{locationType},#{locationObjId},#{heartbeatTime},
-        #{direction})
+        #{direction},#{thirdMachineId})
     </insert>
 
     <!--
@@ -35,7 +35,8 @@
         t.heartbeat_time heartbeatTime,
         t.location_type locationType,
         t.location_obj_id locationObjId,
-        t.direction
+        t.direction,
+        t.third_machine_id thirdMachineId
         from machine t
         where 1=1
         <if test="machineId != null and machineId != ''">
@@ -76,6 +77,12 @@
         </if>
         <if test="locationObjId != null and locationObjId != ''">
             and t.location_obj_id = #{locationObjId}
+        </if>
+        <if test="direction != null and direction != ''">
+            and t.direction = #{direction}
+        </if>
+        <if test="thirdMachineId != null and thirdMachineId != ''">
+            and t.third_machine_id = #{thirdMachineId}
         </if>
         and t.status_cd = '0'
         order by t.create_time desc
@@ -129,8 +136,12 @@
         <if test="locationObjId != null and locationObjId != ''">
             and t.location_obj_id = #{locationObjId}
         </if>
+        <if test="direction != null and direction != ''">
+            and t.direction = #{direction}
+        </if>
+
         and t.status_cd = '0'
-        order by t.create_time desc
+
 
     </select>
 
@@ -179,6 +190,9 @@
             <if test="locationObjId != null and locationObjId != ''">
                 t.location_obj_id = #{locationObjId},
             </if>
+            <if test="thirdMachineId != null and thirdMachineId != ''">
+                t.third_machine_id = #{thirdMachineId},
+            </if>
             <if test="direction != null and direction != ''">
                 t.direction = #{direction},
             </if>
@@ -217,6 +231,12 @@
         where 1=1
         <if test="machineId != null and machineId != ''">
             and t.machine_id = #{machineId}
+        </if>
+        <if test="machineIds != null">
+            and t.machine_id in
+            <foreach collection="machineIds" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
         </if>
         <if test="communityId != null and communityId != ''">
             and t.community_id = #{communityId}

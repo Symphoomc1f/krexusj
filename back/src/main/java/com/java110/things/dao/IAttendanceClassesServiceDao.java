@@ -267,4 +267,12 @@ public interface IAttendanceClassesServiceDao {
     long getMonthAttendanceCount(AttendanceClassesTaskDto attendanceClassesTaskDto);
 
     int deleteAttendanceClasses(String value);
+
+
+    /**
+     *删除班次属性
+     * @param attendanceClassesAttrDto
+     * @return
+     */
+    int deleteAttendanceClassesAttr(AttendanceClassesAttrDto attendanceClassesAttrDto);
 }

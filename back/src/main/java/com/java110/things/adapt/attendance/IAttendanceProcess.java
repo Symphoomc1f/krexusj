@@ -43,7 +43,7 @@ public interface IAttendanceProcess {
      * @param machineCmdDto 云端获取任务结果
      * @param paramOut      返回结果
      */
-    void addFace(MachineCmdDto machineCmdDto, JSONObject paramOut);
+    void addFace(MachineCmdDto machineCmdDto, JSONObject paramOut) throws Exception;
 
     /**
      * 添加人脸
@@ -66,10 +66,10 @@ public interface IAttendanceProcess {
     /**
      * 删除人脸
      *
-     * @param syncGetTaskResultDto 硬件信息
+     * @param machineCmdDto 硬件信息
      * @param paramOut             返回结果
      */
-    void deleteFace(SyncGetTaskResultDto syncGetTaskResultDto, JSONObject paramOut);
+    void deleteFace(MachineCmdDto machineCmdDto, JSONObject paramOut) throws Exception;
 
 
     /**

@@ -2,11 +2,9 @@ import request from '@/utils/request'
 
 export function getMachineCmds(params) {
     let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
-
+    let communityId = '-1'
     if(_currCommunity != null && _currCommunity != undefined){
-        params.communityId = _currCommunity.communityId;
-    }else{
-        params.communityId = "-1";
+        communityId = _currCommunity.communityId;
     }
     return request({
         url: '/api/machine/getMachineCmds',
@@ -14,7 +12,8 @@ export function getMachineCmds(params) {
         params: {
             page: 1,
             row: 10,
-            machineTypeCd: '9999'
+            machineTypeCd: '9999',
+            communityId:communityId
         }
     })
 }

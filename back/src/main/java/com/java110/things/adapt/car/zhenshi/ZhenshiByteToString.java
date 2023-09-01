@@ -5,13 +5,7 @@ import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.netty.client.CarNettyClient;
 import sun.misc.BASE64Encoder;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 
 /**
  * 臻识 道闸摄像头 字节和 字符串转换处理类
@@ -59,7 +53,7 @@ public class ZhenshiByteToString {
             dataObj = onIVSResultRecv(data, len);
         } else {
             //普通的指令响应
-            String ivs = new String(data, "UTF-8");
+            String ivs = new String(data, "gb2312");
 
             dataObj = JSONObject.parseObject(ivs);
         }
@@ -77,7 +71,12 @@ public class ZhenshiByteToString {
         }
 
 
-        String ivs = new String(data, 0, pos);
+        String ivs = null;
+        try {
+            ivs = new String(data, 0, pos,"gb2312");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
         JSONObject dataObj = JSONObject.parseObject(ivs);
 
@@ -216,6 +215,39 @@ public class ZhenshiByteToString {
         } finally {
             swapStream.close();
         }
+    }
+
+    /**
+     * 发送指令
+     *
+     * @param machineDto
+     * @param cmd
+     * @return
+     */
+    public static boolean sendScreenCmd(MachineDto machineDto, byte[] cmd) {
+//        try {
+//            CarNettyClient.sendScreenMsg(machineDto, cmd);
+//        } catch (Exception e) {
+//            System.out.println("Error:" + e.getMessage());
+//            return false;
+//        }
+//        return true;
+
+        try {
+            int len = cmd.length;
+            byte[] header = {'V', 'Z', 0, 0, 0, 0, 0, 0};
+            header[4] += (byte) ((len >> 24) & 0xFF);
+            header[5] += (byte) ((len >> 16) & 0xFF);
+            header[6] += (byte) ((len >> 8) & 0xFF);
+            header[7] += (byte) (len & 0xFF);
+            //CarNettyClient.sendMsg(machineDto, header);
+            CarNettyClient.sendMsg(machineDto, null, cmd);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error:" + e.getMessage());
+            return false;
+        }
+        return true;
     }
 
     /**

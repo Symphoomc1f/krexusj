@@ -97,8 +97,16 @@ public class CommunityPersonController extends BaseController {
         Assert.hasKeyAndValue(paramObj, "personId", "请求报文中未包含硬件人员信息");
 
         Assert.hasKeyAndValue(paramObj, "communityId", "请求报文中未包含小区信息");
-
-        int count = communityPersonServiceImpl.updateCommunityPerson(BeanConvertUtil.covertBean(paramObj, CommunityPersonDto.class));
+        CommunityPersonDto communityPersonDto = BeanConvertUtil.covertBean(paramObj, CommunityPersonDto.class);
+        if (paramObj.containsKey("photo")) {
+            String faceBase = paramObj.getString("photo");
+            if (faceBase.contains("base64,")) {
+                faceBase = faceBase.substring(faceBase.indexOf("base64,") + 7);
+            }
+            ImageFactory.GenerateImage(faceBase, paramObj.getString("communityId") + File.separatorChar + paramObj.getString("personId") + ".jpg");
+            communityPersonDto.setFacePath("/" + paramObj.getString("communityId") + "/" + paramObj.getString("personId") + ".jpg");
+        }
+        int count = communityPersonServiceImpl.updateCommunityPerson(communityPersonDto);
 
         if (count < 1) {
             return ResultDto.error("保存失败");

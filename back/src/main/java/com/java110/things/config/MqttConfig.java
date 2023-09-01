@@ -69,7 +69,7 @@ public class MqttConfig {
             option.setKeepAliveInterval(keepalive);
             option.setAutomaticReconnect(true);
 
-            client.setCallback(new MqttPushCallback());
+            client.setCallback(new MqttPushCallback(client,option));
             client.connect(option);
 
         } catch (Exception e) {
@@ -77,4 +77,6 @@ public class MqttConfig {
         }
         return client;
     }
+
+
 }

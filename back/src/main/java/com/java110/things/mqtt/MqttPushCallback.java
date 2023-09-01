@@ -1,15 +1,15 @@
 package com.java110.things.mqtt;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.factory.AccessControlProcessFactory;
 import com.java110.things.factory.ApplicationContextFactory;
+import com.java110.things.factory.CarMachineProcessFactory;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.Assert;
 import com.java110.things.util.StringUtil;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,16 +24,33 @@ import java.util.List;
 public class MqttPushCallback implements MqttCallback {
 
     private static final Logger log = LoggerFactory.getLogger(MqttPushCallback.class);
+    private MqttClient client;
+
+    private MqttConnectOptions option;
+
+    public MqttPushCallback() {
+
+    }
+
+    public MqttPushCallback(MqttClient client, MqttConnectOptions option) {
+        this.client = client;
+        this.option = option;
+    }
 
     @Override
     public void connectionLost(Throwable cause) {
         log.info("断开连接，建议重连" + this);
-//        try {
-//            //断开连接，建议重连
-//            AccessControlProcessFactory.getAssessControlProcessImpl().initAssessControlProcess();
-//        } catch (Exception e) {
-//            log.error("初始化失败", e);
-//        }
+        while(true) {
+            try {
+                Thread.sleep(30000);
+                // 重新连接
+                client.connect(option);
+                break;
+            } catch (Exception e) {
+                e.printStackTrace();
+                continue;
+            }
+        }
     }
 
     @Override
@@ -46,7 +63,11 @@ public class MqttPushCallback implements MqttCallback {
         try {
             log.info("Topic: " + topic);
             log.info("Message: " + new String(message.getPayload()));
-            AccessControlProcessFactory.getAssessControlProcessImpl(getHmId(topic, message)).mqttMessageArrived(topic, new String(message.getPayload()));
+            if("/device/push/result".equals(topic)){ //臻识的摄像头
+                CarMachineProcessFactory.getCarImpl("17").mqttMessageArrived(topic, new String(message.getPayload()));
+            }else {
+                AccessControlProcessFactory.getAssessControlProcessImpl(getHmId(topic, message)).mqttMessageArrived(topic, new String(message.getPayload()));
+            }
         } catch (Exception e) {
             log.error("处理订阅消息失败", e);
         }
@@ -71,6 +92,8 @@ public class MqttPushCallback implements MqttCallback {
         hmId = getHmIdByYld(topic, message);
 
 
+
+
         return hmId;
 
     }
@@ -83,15 +106,23 @@ public class MqttPushCallback implements MqttCallback {
      * @return
      */
     private String getHmIdByYld(String topic, MqttMessage message) {
-        String hmId = "";
-        if (!topic.startsWith("face.") || !topic.endsWith(".response")) {
-            return hmId;
-        }
-        if (topic.length() < 5) {
-            return hmId;
+        String msg = new String(message.getPayload());
+
+        if(!Assert.isJsonObject(msg)){
+            return "";
         }
 
-        String machineCode = topic.substring(5, topic.lastIndexOf("."));
+        String hmId = "";
+
+        JSONObject msgObj = JSONObject.parseObject(msg);
+        String machineCode = "";
+        if(msgObj.containsKey("sn")){
+            machineCode = msgObj.getString("sn");
+        }
+
+        if(msgObj.containsKey("body")){
+            machineCode = msgObj.getJSONObject("body").getString("sn");
+        }
 
         IMachineService machineService = ApplicationContextFactory.getBean("machineServiceImpl", IMachineService.class);
 

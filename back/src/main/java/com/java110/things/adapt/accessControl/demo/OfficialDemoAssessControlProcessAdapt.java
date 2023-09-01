@@ -1,5 +1,6 @@
 package com.java110.things.adapt.accessControl.demo;
 
+import com.java110.things.adapt.accessControl.DefaultAbstractAccessControlAdapt;
 import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
@@ -20,7 +21,7 @@ import java.util.List;
  * add by wuxw 2020/5/18
  **/
 @Service("officialDemoAssessControlProcessAdapt")
-public class OfficialDemoAssessControlProcessAdapt implements IAssessControlProcess {
+public class OfficialDemoAssessControlProcessAdapt extends DefaultAbstractAccessControlAdapt {
 
     private static Logger logger = LoggerFactory.getLogger(OfficialDemoAssessControlProcessAdapt.class);
 
@@ -32,6 +33,21 @@ public class OfficialDemoAssessControlProcessAdapt implements IAssessControlProc
     @Override
     public ResultDto initAssessControlProcess(MachineDto machineDto) {
         return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG);
+    }
+
+    @Override
+    public ResultDto addMachine(MachineDto machineDto) {
+        return null;
+    }
+
+    @Override
+    public ResultDto updateMachine(MachineDto machineDto) {
+        return null;
+    }
+
+    @Override
+    public ResultDto deleteMachine(MachineDto machineDto) {
+        return null;
     }
 
     @Override

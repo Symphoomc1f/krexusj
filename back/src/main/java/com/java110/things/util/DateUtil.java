@@ -31,6 +31,7 @@ public class DateUtil {
     public static final String DATE_FORMATE_STRING_I = "yyyy-MM-dd HH:mm:ss.SSS";
     public static final String DATE_FORMATE_STRING_J = "yyyyMMddHHmmss.SSS";
     public static final String DATE_FORMATE_STRING_K = "yyyyMMddHHmmssSSS";
+    public static final String DATE_FORMATE_STRING_L = "HH:mm";
 
     static {
         formats.put("yyyyMMddHHmmss", new SimpleDateFormat("yyyyMMddHHmmss"));
@@ -45,6 +46,7 @@ public class DateUtil {
         formats.put("yyyy-MM-dd HH:mm:ss.SSS", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"));
         formats.put("yyyyMMddHHmmss.SSS", new SimpleDateFormat("yyyyMMddHHmmss.SSS"));
         formats.put("yyyyMMddHHmmssSSS", new SimpleDateFormat("yyyyMMddHHmmssSSS"));
+        formats.put("HH:mm", new SimpleDateFormat("HH:mm"));
     }
 
 
@@ -408,6 +410,19 @@ public class DateUtil {
         int maxDate = a.get(Calendar.MINUTE);
         return maxDate;
     }
+
+    /**
+     * 通过时间秒毫秒数判断两个时间的间隔
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static int differentDays(Date date1,Date date2)
+    {
+        int days = (int) ((date2.getTime() - date1.getTime()) / (1000*3600*24));
+        return days;
+    }
+
 
     public static long getTime() {
         return new Date().getTime();

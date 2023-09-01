@@ -15,7 +15,6 @@
       />
 
       <el-button
-        v-waves
         class="filter-item"
         type="primary"
         icon="el-icon-search"
@@ -42,20 +41,18 @@
       <el-table-column align="center" label="编号" width="90">
         <template slot-scope="scope">{{ scope.$index + 1 }}</template>
       </el-table-column>
-      <el-table-column align="center" label="省份">
-        <template slot-scope="scope">{{ scope.row.provName }}</template>
-      </el-table-column>
-      <el-table-column align="center" label="市、州">
-        <template slot-scope="scope">{{ scope.row.cityName }}</template>
-      </el-table-column>
-      <el-table-column align="center" label="区、县">
-        <template slot-scope="scope">{{ scope.row.areaName }}</template>
-      </el-table-column>
-      <el-table-column align="center" label="小区编码">
-        <template slot-scope="scope">{{ scope.row.communityId }}</template>
-      </el-table-column>
-      <el-table-column align="center" label="小区名称">
+       <el-table-column align="center" label="小区名称">
         <template slot-scope="scope">{{ scope.row.name }}</template>
+      </el-table-column>
+      <el-table-column align="center" label="城市">
+        <template slot-scope="scope">{{ scope.row.provName+scope.row.cityName +scope.row.areaName}}</template>
+      </el-table-column>
+      <el-table-column align="center" label="外部ID">
+        <template slot-scope="scope">{{ scope.row.extCommunityId }}</template>
+      </el-table-column>
+
+       <el-table-column align="center" label="小区编码">
+        <template slot-scope="scope">{{ scope.row.communityId }}</template>
       </el-table-column>
       <el-table-column label="小区地址" align="center">
         <template slot-scope="scope">
@@ -67,7 +64,7 @@
           <span>{{ scope.row.createTime }}</span>
         </template>
       </el-table-column>
-      <el-table-column class-name="status-col" label="操作" align="right">
+      <el-table-column class-name="status-col" label="操作" align="right" width="250">
         <template slot-scope="{ row, $index }">
           <el-button
             size="mini"
@@ -76,6 +73,7 @@
             @click="changeCommunity(row, $index)"
             >切换小区</el-button
           >
+          <el-button size="mini"  type="primary" @click="editCommunity(row,$index)">修改</el-button>
           <el-button
             size="mini"
             type="danger"
@@ -85,7 +83,13 @@
         </template>
       </el-table-column>
     </el-table>
-
+    <pagination
+      v-show="total > 0"
+      :total="total"
+      :page.sync="listQuery.page"
+      :limit.sync="listQuery.row"
+      @pagination="queryCommunity"
+    />
     <el-dialog title="小区" :visible.sync="dialogFormVisible">
       <el-form
         ref="dataForm"
@@ -99,7 +103,7 @@
           <el-input v-model="temp.name" placeholder="请输入小区名称" />
         </el-form-item>
 
-        <el-form-item label="小区地区" prop="type">
+        <el-form-item label="小区地区" v-show="temp.communityId ==''" prop="type">
           <el-row>
             <el-col :span="8">
               <el-select
@@ -151,6 +155,7 @@
             </el-col>
           </el-row>
         </el-form-item>
+
         <el-form-item label="小区地址" prop="type">
           <el-input v-model="temp.address" placeholder="请输入小区地址" />
         </el-form-item>
@@ -190,8 +195,10 @@ import {
   getCommunitysByCondition,
   deleteCommunitys,
   saveCommunitys,
+  updateCommunitys,
   getCityArea,
 } from "@/api/community";
+import Pagination from "@/components/Pagination";
 import { parseTime } from "@/utils";
 
 export default {
@@ -205,7 +212,7 @@ export default {
       return statusMap[status];
     },
   },
-  components: {},
+  components: { Pagination },
   data() {
     return {
       listQuery: {
@@ -219,6 +226,7 @@ export default {
       deleteCommunityDailogVisible: false,
       dialogFormVisible: false,
       curCommunity: {},
+      total: 0,
       temp: {
         communityId: "",
         name: "",
@@ -251,13 +259,16 @@ export default {
     this.fetchData();
   },
   methods: {
+    handleClose(){
+      handleCloses()
+    },
     fetchData() {
       this.listLoading = true;
-      getCommunitys().then((response) => {
+      getCommunitys(this.temp).then((response) => {
         this.list = response.data;
+        this.total = response.total;
         this.listLoading = false;
       });
-
       getCityArea({
         areaLevel: "101",
       }).then((res) => {
@@ -294,6 +305,10 @@ export default {
         this.listLoading = false;
       });
     },
+    editCommunity(_row, _index) {
+      this.dialogFormVisible = true;
+      this.temp = _row;
+    },
     addCommunity() {
       this.dialogFormVisible = true;
     },
@@ -315,6 +330,16 @@ export default {
     },
     saveCommunityInfo() {
       this.listLoading = true;
+      if (this.temp.communityId != "") {
+        this.temp.cityCode = null;
+        this.temp.appId = null;
+        updateCommunitys(this.temp).then(response => {
+          this.listLoading = false;
+          this.dialogFormVisible = false;
+          this.queryCommunity();
+        });
+        return;
+      }
       saveCommunitys(this.temp).then((response) => {
         this.listLoading = false;
         this.dialogFormVisible = false;

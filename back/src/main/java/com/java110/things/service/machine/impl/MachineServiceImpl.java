@@ -6,9 +6,11 @@ import com.java110.things.constant.ResponseConstant;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.dao.IMachineServiceDao;
 import com.java110.things.entity.PageDto;
+import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineAttrDto;
 import com.java110.things.entity.machine.MachineCmdDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.parkingArea.ParkingAreaTextDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.AccessControlProcessFactory;
 import com.java110.things.factory.CarMachineProcessFactory;
@@ -56,7 +58,7 @@ public class MachineServiceImpl implements IMachineService {
      * @throws Exception
      */
     @Override
-    public List<MachineDto> queryMachines(MachineDto machineDto) throws Exception {
+    public List<MachineDto> queryMachines(MachineDto machineDto) {
         int page = machineDto.getPage();
 
         if (page != PageDto.DEFAULT_PAGE) {
@@ -75,7 +77,7 @@ public class MachineServiceImpl implements IMachineService {
      * @throws Exception
      */
     @Override
-    public ResultDto getMachine(MachineDto machineDto) throws Exception {
+    public ResultDto getMachine(MachineDto machineDto) {
         int page = machineDto.getPage();
 
         if (page != PageDto.DEFAULT_PAGE) {
@@ -86,6 +88,7 @@ public class MachineServiceImpl implements IMachineService {
         List<MachineDto> machineDtoList = null;
         if (count > 0) {
             machineDtoList = machineServiceDao.getMachines(machineDto);
+            refreshMachineAttr(machineDtoList);
         } else {
             machineDtoList = new ArrayList<>();
         }
@@ -93,20 +96,66 @@ public class MachineServiceImpl implements IMachineService {
         return resultDto;
     }
 
+    private void refreshMachineAttr(List<MachineDto> machineDtoList) {
+
+        if (machineDtoList == null || machineDtoList.size() < 1) {
+            return;
+        }
+
+        List<String> machineIds = new ArrayList<>();
+        for (MachineDto machineDto : machineDtoList) {
+            machineIds.add(machineDto.getMachineId());
+            if (!StringUtil.isEmpty(machineDto.getMachineVersion()) && machineDto.getMachineVersion().contains("300")) {
+                machineDto.setWsUrl("ws://" + machineDto.getMachineIp().replace("8131", "9080") + "/ws.flv");
+            } else {
+                machineDto.setWsUrl("ws://" + machineDto.getMachineIp().replace("8131", "9080") + "/ws");
+            }
+        }
+
+        MachineAttrDto machineAttrDto = new MachineAttrDto();
+        machineAttrDto.setCommunityId(machineDtoList.get(0).getCommunityId());
+        machineAttrDto.setMachineIds(machineIds.toArray(new String[machineIds.size()]));
+        List<MachineAttrDto> machineAttrDtos = machineServiceDao.getMachineAttrs(machineAttrDto);
+
+        List<MachineAttrDto> tmpMachineAttrDtos = null;
+        for (MachineDto machineDto : machineDtoList) {
+            tmpMachineAttrDtos = new ArrayList<>();
+            for (MachineAttrDto tmpMachineAttrDto : machineAttrDtos) {
+                if (machineDto.getMachineId().equals(tmpMachineAttrDto.getMachineId())) {
+                    tmpMachineAttrDtos.add(tmpMachineAttrDto);
+                }
+            }
+            machineDto.setMachineAttrDtos(tmpMachineAttrDtos);
+        }
+    }
+
 
     @Override
     public ResultDto saveMachine(MachineDto machineDto) throws Exception {
         //初始化设备信息
+        ResultDto resultDto = null;
         if (MachineDto.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
-            AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).initAssessControlProcess(machineDto);
+            resultDto = AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).addMachine(machineDto);
+            if (resultDto != null && resultDto.getCode() != ResultDto.SUCCESS) {
+                return resultDto;
+            }
+            resultDto = AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).initAssessControlProcess(machineDto);
         } else if (MachineDto.MACHINE_TYPE_CAR.equals(machineDto.getMachineTypeCd())) {
             CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).initCar(machineDto);
         } else if (MachineDto.MACHINE_TYPE_OTHER_CAR.equals(machineDto.getMachineTypeCd())) {
             CarProcessFactory.getCarImpl(machineDto.getHmId()).initCar(machineDto);
         }
+
+        if (resultDto != null && resultDto.getCode() != ResultDto.SUCCESS) {
+            return resultDto;
+        }
         machineDto.setHeartbeatTime(DateUtil.getNow(DateUtil.DATE_FORMATE_STRING_A));
+
+        if (StringUtil.isEmpty(machineDto.getThirdMachineId())) {
+            machineDto.setThirdMachineId("-1");
+        }
         int count = machineServiceDao.saveMachine(machineDto);
-        ResultDto resultDto = null;
+
         JSONObject data = new JSONObject();
         if (StringUtil.isEmpty(machineDto.getTaskId())) {
             data.put("taskId", machineDto.getTaskId());
@@ -144,6 +193,10 @@ public class MachineServiceImpl implements IMachineService {
             }
         }
 
+        if (MachineDto.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
+            AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).updateMachine(machineDto);
+        }
+
         int count = machineServiceDao.updateMachine(machineDto);
         ResultDto resultDto = null;
         JSONObject data = new JSONObject();
@@ -160,6 +213,9 @@ public class MachineServiceImpl implements IMachineService {
 
     @Override
     public ResultDto deleteMachine(MachineDto machineDto) throws Exception {
+        if (MachineDto.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
+            AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).deleteMachine(machineDto);
+        }
         machineDto.setStatusCd(SystemConstant.STATUS_INVALID);
         int count = machineServiceDao.updateMachine(machineDto);
         ResultDto resultDto = null;
@@ -196,7 +252,7 @@ public class MachineServiceImpl implements IMachineService {
             machineCmdDto.setObjTypeValue("-1");
             machineCmdServiceImpl.saveMachineCmd(machineCmdDto);
         } else if (MachineDto.MACHINE_TYPE_CAR.equals(machineDto.getMachineTypeCd())) {
-            CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).openDoor(machineDto);
+            CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).restartMachine(machineDto);
         }
         JSONObject data = new JSONObject();
         if (StringUtil.isEmpty(machineDto.getTaskId())) {
@@ -206,15 +262,17 @@ public class MachineServiceImpl implements IMachineService {
     }
 
     @Override
-    public ResultDto openDoor(MachineDto machineDto) throws Exception {
+    public ResultDto openDoor(MachineDto machineDto, ParkingAreaTextDto parkingAreaTextDto) throws Exception {
         List<MachineDto> machineDtoList = machineServiceDao.getMachines(machineDto);
-        Assert.listOnlyOne(machineDtoList, "设备不存在");
+        if (machineDtoList == null || machineDtoList.size() < 1) {
+            throw new IllegalArgumentException("设备不存在");
+        }
         machineDto = machineDtoList.get(0);
         //初始化设备信息
         if (MachineDto.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
             AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).openDoor(machineDto);
         } else if (MachineDto.MACHINE_TYPE_CAR.equals(machineDto.getMachineTypeCd())) {
-            CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).openDoor(machineDto);
+            CarMachineProcessFactory.getCarImpl(machineDto.getHmId()).openDoor(machineDto, parkingAreaTextDto);
         }
         JSONObject data = new JSONObject();
         if (StringUtil.isEmpty(machineDto.getTaskId())) {
@@ -242,6 +300,25 @@ public class MachineServiceImpl implements IMachineService {
         List<MachineAttrDto> machineDtoList = null;
         machineDtoList = machineServiceDao.getMachineAttrs(machineDto);
         return machineDtoList;
+    }
+
+    @Override
+    public ResultDto getQRcode(UserFaceDto userFaceDto) throws Exception {
+        MachineDto machineDto = new MachineDto();
+        machineDto.setMachineCode(userFaceDto.getMachineCode());
+        List<MachineDto> machineDtoList = machineServiceDao.getMachines(machineDto);
+        if (machineDtoList == null || machineDtoList.size() < 1) {
+            throw new IllegalArgumentException("设备不存在");
+        }
+        machineDto = machineDtoList.get(0);
+        ResultDto resultDto = null;
+        //初始化设备信息
+        if (MachineDto.MACHINE_TYPE_ACCESS_CONTROL.equals(machineDto.getMachineTypeCd())) {
+            resultDto = AccessControlProcessFactory.getAssessControlProcessImpl(machineDto.getHmId()).getQRcode(userFaceDto);
+        } else {
+            resultDto = new ResultDto(ResponseConstant.ERROR, "该设备不支持");
+        }
+        return resultDto;
     }
 
 

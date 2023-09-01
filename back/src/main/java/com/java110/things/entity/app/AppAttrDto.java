@@ -27,6 +27,11 @@ public class AppAttrDto extends PageDto implements Serializable {
     public static final String SPEC_CD_UPLOAD_HEARTBEAT = "3005001";
     //车辆进出上报
     public static final String SPEC_CD_CAR_INOUT = "3006001";
+    public static final String SPEC_CD_ATTENDANCE_TASK = "3007001";
+    public static final String SPEC_CD_ATTENDANCE_TASK_DETAIL = "3008001";
+    public static final String SPEC_CD_ATTENDANCE_LOG = "3009001";
+    public static final String SPEC_CD_OPEN_PARKING_AREA_DOOR_CONTROL_LOG = "3010001";
+    public static final String SPEC_CD_CAR_INOUT_PAY_FINISH = "3010002";
     private String attrId;
     private String appId;
     private String[] appIds;

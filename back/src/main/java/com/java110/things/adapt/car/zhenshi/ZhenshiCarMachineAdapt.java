@@ -21,6 +21,8 @@ import com.java110.things.adapt.car.ICallCarService;
 import com.java110.things.adapt.car.ICarMachineProcess;
 import com.java110.things.entity.machine.MachineAttrDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.parkingArea.ParkingAreaTextDto;
+import com.java110.things.entity.parkingArea.ResultParkingAreaTextDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.SeqUtil;
@@ -170,14 +172,19 @@ public class ZhenshiCarMachineAdapt extends BaseMachineAdapt implements ICarMach
 
             String license = plateResult.getString("license");
 
-            ResultDto resultDto = callCarServiceImpl.ivsResult(type, license, machineDto);
+            machineDto.setPhotoJpg(reqData.getString("photoJpg"));
 
-            if (ResultDto.SUCCESS != resultDto.getCode()) {
-                logger.debug("不开门原因" + resultDto.getMsg());
+            ResultParkingAreaTextDto resultParkingAreaTextDto = callCarServiceImpl.ivsResult(type, license, machineDto);
+            JinjieScreenFactory.pay(machineDto, resultParkingAreaTextDto.getVoice());
+            JinjieScreenFactory.downloadTempTexts(machineDto, 1, resultParkingAreaTextDto.getText1());
+            JinjieScreenFactory.downloadTempTexts(machineDto, 2, resultParkingAreaTextDto.getText2());
+            JinjieScreenFactory.downloadTempTexts(machineDto, 3, resultParkingAreaTextDto.getText3());
+            JinjieScreenFactory.downloadTempTexts(machineDto, 4, resultParkingAreaTextDto.getText4());
+
+            if (ResultDto.SUCCESS != resultParkingAreaTextDto.getCode()) {
                 return; //不开门
             }
-
-            openDoor(machineDto);
+            openDoor(machineDto, null);
 
         } catch (Exception e) {
             logger.error("开门异常", e);
@@ -217,15 +224,31 @@ public class ZhenshiCarMachineAdapt extends BaseMachineAdapt implements ICarMach
     }
 
     @Override
-    public void openDoor(MachineDto machineDto) {
+    public void openDoor(MachineDto machineDto, ParkingAreaTextDto parkingAreaTextDto) {
         // 发送开闸命令
         String triggerCmd = "{\"cmd\":\"ioctl\",\"io\" :0,\"value\":2,\"delay\":500}";
         ZhenshiByteToString.sendCmd(machineDto, triggerCmd);
+
+        if (parkingAreaTextDto == null) {
+            JinjieScreenFactory.pay(machineDto, "欢迎光临");
+            JinjieScreenFactory.downloadTempTexts(machineDto, 0, "欢迎光临");
+            return;
+        }
+        JinjieScreenFactory.pay(machineDto, parkingAreaTextDto.getVoice());
+        JinjieScreenFactory.downloadTempTexts(machineDto, 0, parkingAreaTextDto.getText1());
+        JinjieScreenFactory.downloadTempTexts(machineDto, 1, parkingAreaTextDto.getText2());
+        JinjieScreenFactory.downloadTempTexts(machineDto, 2, parkingAreaTextDto.getText3());
+        JinjieScreenFactory.downloadTempTexts(machineDto, 3, parkingAreaTextDto.getText4());
     }
 
     @Override
     public void sendKeepAlive(MachineDto machineDto) {
         ZhenshiByteToString.sendKeepAlive(machineDto);
+
+    }
+
+    @Override
+    public void mqttMessageArrived(String topic, String s) {
 
     }
 }

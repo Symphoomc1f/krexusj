@@ -7,9 +7,16 @@
 
    front 为前段项目 需要安装nodejs 
 
-## 2. 如何安装
+## 2. 已对接设备（门禁+车辆道闸+考勤机）
 
-### 2.1 前段
+[HC物联网系统已对接设备](back/docs/machine.md)
+
+找相应厂家购买后可以直接使用
+
+
+## 3. 如何安装
+
+### 3.1 前段
 
 	1、安装nodejs
 
@@ -19,7 +26,7 @@
 
 	4、浏览器访问 http://localhost:8080
 
-### 2.2 后端
+### 3.2 后端
 
 	1、idea 用maven的方式打开back项目
 
@@ -29,22 +36,30 @@
 
 	4、运行main方法
 
-## 3. 第三方云平台对接协议
+### 3.3 安装视频
+
+https://www.bilibili.com/video/bv1fv411j7vr
+
+## 4. 第三方云平台对接协议
 
 [第三方云平台对接协议](back/docs/api.md)
 
 
-## 4. 自己门禁对接
+## 5. 自己门禁对接
 
-[自己门禁对接](back/docs/api.md)
+[自己门禁对接](back/docs/accessControlInterface.md)
+
+## 6. HC小区管理系统配合实时文档
+
+如果和HC小区管理系统一起实施时参考 文档[HC小区管理系统对接使用指南](back/docs/linkHc.md)
 
 
-## 5. 相关视频
+## 7. 相关视频
 
 [https://www.bilibili.com/video/BV1pK4y1t7re](https://www.bilibili.com/video/BV1pK4y1t7re)
 
 
-## 6. 演示
+## 8. 演示
 
 [http://iot.homecommunity.cn/](http://iot.homecommunity.cn/)
 
@@ -56,6 +71,6 @@
 ![image](docs/img/settings.png)
 
 
-## 7. 更新日志
+## 9. 更新日志
 
 [HC物联网系统更新日志](back/ChangeLog.md)

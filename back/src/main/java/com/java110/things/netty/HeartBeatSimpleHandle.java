@@ -28,18 +28,18 @@ public class HeartBeatSimpleHandle extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        InetSocketAddress ipSocket = (InetSocketAddress) ctx.channel().remoteAddress();
-        int port = ipSocket.getPort();
-        String host = ipSocket.getHostString();
-
-        IMachineService machineService = ApplicationContextFactory.getBean("machineServiceImpl", IMachineService.class);
-        MachineDto machineDto = new MachineDto();
-        machineDto.setMachineIp(host);
-        List<MachineDto> machineDtos = machineService.queryMachines(machineDto);
-        if (machineDtos == null || machineDtos.size() < 1) {
-            return;
-        }
-        initMachineToCache(ctx, machineDtos.get(0), true);
+//        InetSocketAddress ipSocket = (InetSocketAddress) ctx.channel().remoteAddress();
+//        int port = ipSocket.getPort();
+//        String host = ipSocket.getHostString();
+//
+//        IMachineService machineService = ApplicationContextFactory.getBean("machineServiceImpl", IMachineService.class);
+//        MachineDto machineDto = new MachineDto();
+//        machineDto.setMachineIp(host);
+//        List<MachineDto> machineDtos = machineService.queryMachines(machineDto);
+//        if (machineDtos == null || machineDtos.size() < 1) {
+//            return;
+//        }
+//        initMachineToCache(ctx, machineDtos.get(0), true);
     }
 
 
@@ -65,20 +65,7 @@ public class HeartBeatSimpleHandle extends ChannelInboundHandlerAdapter {
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        InetSocketAddress ipSocket = (InetSocketAddress) ctx.channel().remoteAddress();
-        int port = ipSocket.getPort();
-        String host = ipSocket.getHostString();
-
-        IMachineService machineService = ApplicationContextFactory.getBean("machineServiceImpl", IMachineService.class);
-        MachineDto machineDto = new MachineDto();
-        machineDto.setMachineIp(host);
-        List<MachineDto> machineDtos = machineService.queryMachines(machineDto);
-        if (machineDtos == null || machineDtos.size() < 1) {
-            return;
-        }
-        //检查 设备是否写缓存
-        initMachineToCache(ctx, machineDtos.get(0), false);
-        ByteBuf heartbeat = Unpooled.unreleasableBuffer(Unpooled.copiedBuffer(new Java110CarProtocol(machineDtos.get(0).getMachineId(), "http://www.homecommunity.cn").toString(), CharsetUtil.UTF_8));
+        ByteBuf heartbeat = Unpooled.unreleasableBuffer(Unpooled.copiedBuffer(new Java110CarProtocol("1", "http://www.homecommunity.cn").toString(), CharsetUtil.UTF_8));
         if (evt instanceof IdleStateEvent) {
             IdleStateEvent idleStateEvent = (IdleStateEvent) evt;
             if (idleStateEvent.state() == IdleState.READER_IDLE) {
@@ -100,21 +87,24 @@ public class HeartBeatSimpleHandle extends ChannelInboundHandlerAdapter {
         LOGGER.info("收到字节={}", Arrays.toString(bytes));
         String content = new String(bytes, "utf-8");
         LOGGER.info("收到customProtocol={}", content);
-        InetSocketAddress ipSocket = (InetSocketAddress) ctx.channel().remoteAddress();
-        int port = ipSocket.getPort();
-        String host = ipSocket.getHostString();
+
+        if (!content.endsWith("}")) {
+            content += "}";
+        }
+
+        //分析厂家
+        String parkId = analyseMachine(content);
 
         IMachineService machineService = ApplicationContextFactory.getBean("machineServiceImpl", IMachineService.class);
         MachineDto machineDto = new MachineDto();
-        machineDto.setMachineIp(host);
+        machineDto.setLocationType(MachineDto.LOCATION_TYPE_PARKING_AREA);
+        machineDto.setLocationObjId(parkId);
         List<MachineDto> machineDtos = machineService.queryMachines(machineDto);
         if (machineDtos == null || machineDtos.size() < 1) {
             return;
         }
 
-        if (!content.endsWith("}")) {
-            content += "}";
-        }
+        initMachineToCache(ctx, machineDtos.get(0), false);
 
         judgeSyncQuery(content);
 
@@ -122,6 +112,12 @@ public class HeartBeatSimpleHandle extends ChannelInboundHandlerAdapter {
         ctx.channel().writeAndFlush(Unpooled.unreleasableBuffer(Unpooled.copiedBuffer(java110CarProtocol.getContent(), CharsetUtil.UTF_8)));
 
 
+    }
+
+    private String analyseMachine(String content) {
+        JSONObject paramIn = JSONObject.parseObject(content);
+        String parkId = paramIn.getString("parkid");
+        return parkId;
     }
 
     public static void main(String[] args) throws UnsupportedEncodingException {

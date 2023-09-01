@@ -1,6 +1,7 @@
 package com.java110.things.service.parkingArea;
 
 import com.java110.things.entity.parkingArea.ParkingAreaDto;
+import com.java110.things.entity.parkingArea.ParkingBoxDto;
 import com.java110.things.entity.response.ResultDto;
 
 import java.util.List;
@@ -49,7 +50,7 @@ public interface IParkingAreaService {
      * @return
      * @throws Exception
      */
-    List<ParkingAreaDto> queryParkingAreas(ParkingAreaDto parkingAreaDto) throws Exception;
+    List<ParkingAreaDto> queryParkingAreas(ParkingAreaDto parkingAreaDto);
 
     /**
      * 删除停车场
@@ -60,4 +61,10 @@ public interface IParkingAreaService {
      */
     ResultDto deleteParkingArea(ParkingAreaDto parkingAreaDto) throws Exception;
 
+    /**
+     * 岗亭对应停车场信息
+     * @param parkingBoxDto
+     * @return
+     */
+    List<ParkingAreaDto> queryParkingAreasByBox(ParkingBoxDto parkingBoxDto);
 }

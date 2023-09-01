@@ -15,9 +15,9 @@ import java.util.Map;
  * https://gitee.com/wuxw7/MicroCommunity
  * Created by wuxw on 2018/5/5.
  */
-public class JWTFactory {
+public class LocalCacheFactory {
 
-    private static Logger logger = LoggerFactory.getLogger(JWTFactory.class);
+    private static Logger logger = LoggerFactory.getLogger(LocalCacheFactory.class);
 
 
     private static final Map<String, JwtDto> cacheJwt = new HashMap<>();

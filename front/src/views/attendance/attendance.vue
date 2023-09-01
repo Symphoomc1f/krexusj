@@ -33,7 +33,7 @@
         style="margin-left: 10px;"
         type="primary"
         icon="el-icon-edit"
-        @click="addMachine"
+        @click="addAttendance"
       >添加考勤机</el-button>
     </div>
     <el-table
@@ -187,6 +187,7 @@ export default {
         machineMac: ""
       },
       list: null,
+      total: 0,
       listLoading: true,
       deleteAttendanceDailogVisible: false,
       dialogFormVisible: false,
@@ -226,6 +227,7 @@ export default {
       this.listLoading = true;
       getAttendances().then(response => {
         this.list = response.data;
+        this.total = response.total;
         this.listLoading = false;
       });
     },
@@ -233,6 +235,7 @@ export default {
       this.listLoading = true;
       getAttendancesByCondition(this.listQuery).then(response => {
         this.list = response.data;
+        this.total = response.total;
         this.listLoading = false;
       });
     },

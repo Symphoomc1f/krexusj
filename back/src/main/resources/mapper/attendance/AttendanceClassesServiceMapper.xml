@@ -5,15 +5,27 @@
 
     <insert id="saveAttendanceClasses" parameterType="com.java110.things.entity.attendance.AttendanceClassesDto">
         INSERT INTO attendance_classes(`classes_id`, `classes_name`, `time_offset`, `clock_count`, `clock_type`,
-        `clock_type_value`,`late_offset`,`leave_offset`)
+        `clock_type_value`,`late_offset`,`leave_offset`,ext_classes_id)
         values (
-        #{classesId},#{classesName},#{timeOffset},#{clockCount},#{clockType},#{clockTypeValue},#{lateOffset},#{leaveOffset}
+        #{classesId},#{classesName},#{timeOffset},#{clockCount},#{clockType},#{clockTypeValue},#{lateOffset},#{leaveOffset},
+        #{extClassesId}
         )
     </insert>
 
     <delete id="deleteAttendanceClasses" parameterType="string">
 		delete from attendance_classes where classes_id = #{value}
 	</delete>
+
+    <delete id="deleteAttendanceClassesAttr" parameterType="com.java110.things.entity.attendance.AttendanceClassesAttrDto">
+        delete from attendance_classes_attr where 1=1
+        <if test="attrId != null and attrId != ''">
+            and attr_id = #{attrId}
+        </if>
+        <if test="classesId != null and classesId != ''">
+            and classes_id = #{classesId}
+        </if>
+
+    </delete>
 
 
     <!-- 查询定时任务数量 add by wuxw 2018-07-03 -->
@@ -25,6 +37,9 @@
         and t.status_cd= '0'
         <if test="classesId !=null and classesId != ''">
             and t.classes_id= #{classesId}
+        </if>
+        <if test="extClassesId !=null and extClassesId != ''">
+            and t.ext_classes_id= #{extClassesId}
         </if>
         <if test="createTime !=null and createTime != ''">
             and t.create_time= #{createTime}
@@ -38,7 +53,7 @@
         select t.classes_id classesId,t.create_time createTime,t.classes_name
         classesName,t.status_cd statusCd,t.time_offset timeOffset,t.clock_count
         clockCount,t.clock_type clockType,t.clock_type_value clockTypeValue,
-        t.late_offset lateOffset,t.leave_offset leaveOffset
+        t.late_offset lateOffset,t.leave_offset leaveOffset,t.ext_classes_id extClassesId
         from attendance_classes t
         where 1 =1
         and t.status_cd= '0'
@@ -47,6 +62,9 @@
         </if>
         <if test="classesId !=null and classesId != ''">
             and t.classes_id= #{classesId}
+        </if>
+        <if test="extClassesId !=null and extClassesId != ''">
+            and t.ext_classes_id= #{extClassesId}
         </if>
         <if test="createTime !=null and createTime != ''">
             and t.create_time= #{createTime}
@@ -245,7 +263,7 @@
             resultType="com.java110.things.entity.attendance.AttendanceClassesTaskDto">
         select t.task_id taskId,t.class_id classId,t.staff_id staffId,t.task_year
         taskYear,t.task_month taskMonth,t.task_day taskDay,t.state,t.create_time createTime,t.status_cd statusCd
-        ,s.staff_name staffName,s.department_name departmentName
+        ,s.staff_name staffName,s.department_name departmentName,s.department_id departmentId
         from attendance_classes_task t
         left join staff s on t.staff_id = s.staff_id and s.status_cd = '0'
         where 1 =1

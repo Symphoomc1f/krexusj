@@ -24,6 +24,7 @@ public class ResultDto implements Serializable {
     public static final int ERROR = -1;
 
     public static final int NO_AUTHORITY_ERROR = 401; // 认证失败
+    public static final int NO_PAY = -2; // 未支付
 
     public static final String SUCCESS_MSG = "成功";
 
@@ -90,6 +91,16 @@ public class ResultDto implements Serializable {
      */
     public static ResponseEntity<String> success() {
         ResultDto resultVo = new ResultDto(SUCCESS, SUCCESS_MSG);
+        ResponseEntity<String> responseEntity = new ResponseEntity<String>(resultVo.toString(), HttpStatus.OK);
+        return responseEntity;
+    }
+
+    /**
+     * 成功通用回复
+     * @return
+     */
+    public static ResponseEntity<String> success(Object data) {
+        ResultDto resultVo = new ResultDto(SUCCESS, SUCCESS_MSG,data);
         ResponseEntity<String> responseEntity = new ResponseEntity<String>(resultVo.toString(), HttpStatus.OK);
         return responseEntity;
     }

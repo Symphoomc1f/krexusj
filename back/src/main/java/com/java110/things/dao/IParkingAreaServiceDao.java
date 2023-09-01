@@ -1,6 +1,7 @@
 package com.java110.things.dao;
 
 import com.java110.things.entity.parkingArea.ParkingAreaDto;
+import com.java110.things.entity.parkingArea.ParkingBoxDto;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -55,4 +56,12 @@ public interface IParkingAreaServiceDao {
      * @return 返回影响记录数
      */
     int delete(ParkingAreaDto parkingAreaDto);
+
+    /**
+     * 根据岗亭查询 停车场
+     *
+     * @param parkingBoxDto
+     * @return
+     */
+    List<ParkingAreaDto> queryParkingAreasByBox(ParkingBoxDto parkingBoxDto);
 }

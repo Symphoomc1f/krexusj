@@ -1,13 +1,10 @@
 package com.java110.things.quartz.task;
 
 import com.java110.things.dao.IAttendanceClassesServiceDao;
-import com.java110.things.entity.attendance.AttendanceClassesAttrDto;
-import com.java110.things.entity.attendance.AttendanceClassesDto;
-import com.java110.things.entity.attendance.AttendanceClassesStaffDto;
-import com.java110.things.entity.attendance.AttendanceClassesTaskDetailDto;
-import com.java110.things.entity.attendance.AttendanceClassesTaskDto;
+import com.java110.things.entity.attendance.*;
 import com.java110.things.entity.task.TaskDto;
 import com.java110.things.quartz.TaskSystemQuartz;
+import com.java110.things.service.hc.IAttendanceCallHcService;
 import com.java110.things.util.SeqUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +47,9 @@ public class AttendanceGenerateStaffTaskTemplate extends TaskSystemQuartz {
 
     @Autowired
     private IAttendanceClassesServiceDao attendanceClassesServiceDao;
+
+    @Autowired
+    private IAttendanceCallHcService attendanceCallHcServiceImpl;
 
     @Override
     protected void process(TaskDto taskDto) throws Exception {
@@ -127,7 +127,7 @@ public class AttendanceGenerateStaffTaskTemplate extends TaskSystemQuartz {
         attendanceClassesStaffDto.setClassesId(tmpAttendanceClassesDto.getClassesId());
         attendanceClassesStaffDto.setStatusCd("0");
         List<AttendanceClassesStaffDto> attendanceClassesStaffDtos = attendanceClassesServiceDao.getAttendanceClassesStaffs(attendanceClassesStaffDto);
-        if (attendanceClassesStaffDtos == null || attendanceClassesAttrDtos.size() < 1) {
+        if (attendanceClassesStaffDtos == null || attendanceClassesStaffDtos.size() < 1) {
             return;
         }
         String startTime = getClassessAttrValue(attendanceClassesAttrDtos, CLOCK_TIME_MORNING_WORK);
@@ -165,6 +165,14 @@ public class AttendanceGenerateStaffTaskTemplate extends TaskSystemQuartz {
                     insertStaffTaskDetail(startTime, endTime, taskId);
                     break;
             }
+
+            //异步同步 HC小区管理系统
+            try {
+                attendanceCallHcServiceImpl.upload(taskId);
+            } catch (Exception e) {
+                logger.error("上报考勤任务失败", e);
+            }
+
         }
     }
 
@@ -182,7 +190,7 @@ public class AttendanceGenerateStaffTaskTemplate extends TaskSystemQuartz {
         attendanceClassesTaskDetailDto.setValue(startTime);
         attendanceClassesTaskDetailDto.setState("10000");
         attendanceClassesServiceDao.saveAttendanceClassesTaskDetail(attendanceClassesTaskDetailDto);
-         attendanceClassesTaskDetailDto = new AttendanceClassesTaskDetailDto();
+        attendanceClassesTaskDetailDto = new AttendanceClassesTaskDetailDto();
         attendanceClassesTaskDetailDto.setTaskId(taskId);
         attendanceClassesTaskDetailDto.setDetailId(SeqUtil.getId());
         attendanceClassesTaskDetailDto.setSpecCd(CLOCK_TIME_AFTERNOON_OFF_DUTY);

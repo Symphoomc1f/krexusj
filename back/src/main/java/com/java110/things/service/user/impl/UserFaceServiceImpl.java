@@ -109,6 +109,9 @@ public class UserFaceServiceImpl implements IUserFaceService {
         machineFaceDto.setMachineId(machineDto.getMachineId());
         machineFaceDto.setState(resultDto.getCode() == ResultDto.SUCCESS ? "S" : "F");
         machineFaceDto.setMessage(resultDto.getMsg());
+        machineFaceDto.setExtUserId(userFaceDto.getExtUserId());
+        machineFaceDto.setCardId(userFaceDto.getCardId());
+        machineFaceDto.setCardNumber(userFaceDto.getCardNumber());
 
         machineFaceService.updateMachineFace(machineFaceDto);
         return resultDto;

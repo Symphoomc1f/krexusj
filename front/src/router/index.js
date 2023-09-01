@@ -49,9 +49,9 @@ export const constantRoutes = [
     redirect: '/dashboard',
     children: [{
       path: 'dashboard',
-      name: 'HC物联网',
+      name: '小区物联网',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: 'HC小区物联网平台', icon: '' }
+      meta: { title: '小区物联网平台', icon: '' }
     }]
   },
   {
@@ -147,12 +147,25 @@ export const constantRoutes = [
         meta: { title: '道闸设备', icon: 'table' }
       },
       {
-        path: 'carProtocol',
+        path: 'parkingBox',
         name: '道闸',
-        component: () => import('@/views/carProtocol/carProtocol'),
-        meta: { title: '道闸协议', icon: 'table' }
+        component: () => import('@/views/parkingBox/parkingBox.vue'),
+        meta: { title: '岗亭管理', icon: 'table' }
       },
-      
+      {
+        path: 'parkingBoxArea',
+        name: '道闸',
+        component: () => import('@/views/parkingBoxArea/parkingBoxArea.vue'),
+        meta: { title: '岗亭停车场', icon: 'table' },
+        hidden: true
+      },
+      {
+        path: 'barrierGateControl',
+        name: '道闸',
+        component: () => import('@/views/barrierGateControl/barrierGateControl'),
+        meta: { title: '控制中心', icon: 'table' }
+      },
+
       {
         path: 'carIn',
         name: '道闸',
@@ -164,6 +177,12 @@ export const constantRoutes = [
         name: '道闸',
         component: () => import('@/views/carOut/carOut'),
         meta: { title: '车辆出场', icon: 'table' }
+      },
+       {
+        path: 'carProtocol',
+        name: '道闸',
+        component: () => import('@/views/carProtocol/carProtocol'),
+        meta: { title: '道闸协议', icon: 'table' }
       }
     ]
   },
@@ -231,7 +250,7 @@ export const constantRoutes = [
     name: 'Example',
     meta: { title: '组织信息', icon: 'example' },
     children: [
-     
+
       {
         path: '/userManager',
         name: '账号信息',

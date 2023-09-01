@@ -2,20 +2,19 @@
   <div class="app-container">
     <div class="filter-container" style="margin-bottom: 10px">
       <el-input
-        v-model="listQuery.communityId"
+        v-model="listQuery.num"
         placeholder="请输入停车场编码"
         style="width: 200px"
         class="filter-item"
       />
       <el-input
-        v-model="listQuery.name"
-        placeholder="请输入停车场名称"
+        v-model="listQuery.paId"
+        placeholder="请输入停车场ID"
         style="width: 200px"
         class="filter-item"
       />
 
       <el-button
-        v-waves
         class="filter-item"
         type="primary"
         icon="el-icon-search"
@@ -55,16 +54,20 @@
       </el-table-column>
       <el-table-column class-name="status-col" label="操作" align="right">
         <template slot-scope="{ row, $index }">
-          <el-button
-            size="mini"
-            type="danger"
-            @click="deleteParkingArea(row, $index)"
-            >删除</el-button
-          >
+          <el-row>
+            <el-button size="mini"  type="primary" @click="editParkingArea(row,$index)">修改</el-button>
+            <el-button size="mini" type="danger" @click="deleteParkingArea(row, $index)" >删除</el-button>
+           </el-row> 
         </template>
       </el-table-column>
     </el-table>
-
+ <pagination
+      v-show="total > 0"
+      :total="total"
+      :page.sync="listQuery.page"
+      :limit.sync="listQuery.row"
+      @pagination="queryParkingArea"
+    />
     <el-dialog title="停车场" :visible.sync="dialogFormVisible">
       <el-form
         ref="dataForm"
@@ -111,7 +114,9 @@ import {
   getParkingAreas,
   deleteParkingArea,
   saveParkingArea,
+  updateParkingArea,
 } from "@/api/parkingArea";
+import Pagination from "@/components/Pagination";
 import { parseTime } from "@/utils";
 
 export default {
@@ -125,7 +130,7 @@ export default {
       return statusMap[status];
     },
   },
-  components: {},
+   components: { Pagination },
   data() {
     return {
       listQuery: {
@@ -133,13 +138,16 @@ export default {
         row: 10,
         communityId: "",
         num: "",
+        paId:''
       },
+       total: 0,
       list: null,
       listLoading: true,
       deleteParkingAreaDailogVisible: false,
       dialogFormVisible: false,
       curParkingArea: {},
       temp: {
+        paId:"",
         num: "",
         extPaId: "",
       },
@@ -163,11 +171,16 @@ export default {
       this.listLoading = true;
       getParkingAreas(this.listQuery).then((response) => {
         this.list = response.data;
+         this.total = response.total;
         this.listLoading = false;
       });
     },
     addParkingArea() {
       this.dialogFormVisible = true;
+    },
+    editParkingArea(_row, _index) {
+      this.dialogFormVisible = true;
+      this.temp = _row;
     },
     deleteParkingArea(_row) {
       this.deleteParkingAreaDailogVisible = true;
@@ -188,6 +201,15 @@ export default {
     saveParkingAreaInfo() {
       this.listLoading = true;
       let _currCommunity = JSON.parse(window.localStorage.getItem("curCommunity"));
+      console.log(this.temp.paId);
+      if (this.temp.paId != "") {
+          updateParkingArea(this.temp).then(response => {
+          this.listLoading = false;
+          this.dialogFormVisible = false;
+          this.queryParkingArea();
+        });
+        return;
+      }
       this.temp.communityId = _currCommunity.communityId;
       saveParkingArea(this.temp).then((response) => {
         this.listLoading = false;

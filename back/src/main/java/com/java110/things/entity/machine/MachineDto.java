@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.java110.things.entity.PageDto;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @ClassName MachineDto
@@ -19,6 +20,8 @@ public class MachineDto extends PageDto implements Serializable {
     public static final String MACHINE_TYPE_OTHER_CAR = "9995"; // 第三方道闸平台
     public static final String MACHINE_TYPE_ACCESS_CONTROL = "9999";
     public static final String LOCATION_TYPE_PARKING_AREA = "4000"; //停车场
+
+    public static final String LOCATION_TYPE_DEPARTMENT = "5000"; //部门
     public static final String LOCATION_TYPE_COMMUNITY = "1000"; //停车场
 
     public static final String MACHINE_DIRECTION_ENTER = "3306"; // 进场
@@ -27,6 +30,7 @@ public class MachineDto extends PageDto implements Serializable {
 
     // 考勤机
     public static final String MACHINE_TYPE_ATTENDANCE = "9997";
+    private String photoJpg;
     private String machineMac;
     private String machineId;
     private String machineCode;
@@ -46,7 +50,11 @@ public class MachineDto extends PageDto implements Serializable {
     private String locationObjId;
     private String locationType;
     private String direction;
+    private String thirdMachineId;
+    private String wsUrl;
 
+
+    private List<MachineAttrDto> machineAttrDtos;
 
     public String getMachineMac() {
         return machineMac;
@@ -204,5 +212,37 @@ public class MachineDto extends PageDto implements Serializable {
 
     public void setDirection(String direction) {
         this.direction = direction;
+    }
+
+    public List<MachineAttrDto> getMachineAttrDtos() {
+        return machineAttrDtos;
+    }
+
+    public void setMachineAttrDtos(List<MachineAttrDto> machineAttrDtos) {
+        this.machineAttrDtos = machineAttrDtos;
+    }
+
+    public String getThirdMachineId() {
+        return thirdMachineId;
+    }
+
+    public void setThirdMachineId(String thirdMachineId) {
+        this.thirdMachineId = thirdMachineId;
+    }
+
+    public String getWsUrl() {
+        return wsUrl;
+    }
+
+    public void setWsUrl(String wsUrl) {
+        this.wsUrl = wsUrl;
+    }
+
+    public String getPhotoJpg() {
+        return photoJpg;
+    }
+
+    public void setPhotoJpg(String photoJpg) {
+        this.photoJpg = photoJpg;
     }
 }

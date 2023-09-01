@@ -89,6 +89,7 @@ export default {
         carNum: "",
         inoutType: '2002'
       },
+      total: 0,
       list: null,
       listLoading: true,
     };
@@ -104,6 +105,7 @@ export default {
       this.listLoading = true;
       getCarInouts(this.listQuery).then(response => {
         this.list = response.data;
+        this.total = response.total;
         this.listLoading = false;
       });
     }

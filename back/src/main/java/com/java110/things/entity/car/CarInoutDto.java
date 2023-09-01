@@ -3,12 +3,22 @@ package com.java110.things.entity.car;
 import com.java110.things.entity.PageDto;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class CarInoutDto extends PageDto implements Serializable {
 
     // 进场
     public static final String INOUT_TYPE_IN = "1001";
     public static final String INOUT_TYPE_OUT = "2002";
+
+    public static final String STATE_IN = "1";// 进场
+    public static final String STATE_PAY = "2";// 支付完成
+    public static final String STATE_OUT = "3";// 出场
+    public static final String STATE_REPAY = "4";// 重新支付
+
+    public static final String PAY_TYPE_CASH = "1";
+    public static final String PAY_TYPE_WECHAT = "1";
+
 
     private String inoutId;
     private String communityId;
@@ -25,6 +35,13 @@ public class CarInoutDto extends PageDto implements Serializable {
     private String statusCd;
     private String machineCode;
     private String paId;
+    private String[] paIds;
+    private String state;
+    private String[] states;
+    private Date payTime;
+    private String areaNum;
+
+    private long min;
 
     public String getInoutId() {
         return inoutId;
@@ -144,5 +161,53 @@ public class CarInoutDto extends PageDto implements Serializable {
 
     public void setPaId(String paId) {
         this.paId = paId;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String[] getStates() {
+        return states;
+    }
+
+    public void setStates(String[] states) {
+        this.states = states;
+    }
+
+    public Date getPayTime() {
+        return payTime;
+    }
+
+    public void setPayTime(Date payTime) {
+        this.payTime = payTime;
+    }
+
+    public String getAreaNum() {
+        return areaNum;
+    }
+
+    public void setAreaNum(String areaNum) {
+        this.areaNum = areaNum;
+    }
+
+    public long getMin() {
+        return min;
+    }
+
+    public void setMin(long min) {
+        this.min = min;
+    }
+
+    public String[] getPaIds() {
+        return paIds;
+    }
+
+    public void setPaIds(String[] paIds) {
+        this.paIds = paIds;
     }
 }

@@ -1,8 +1,10 @@
 package com.java110.things.entity.accessControl;
 
 import com.java110.things.entity.PageDto;
+import com.java110.things.entity.user.UserAttrDto;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class UserFaceDto extends PageDto implements Serializable {
 
@@ -35,6 +37,15 @@ public class UserFaceDto extends PageDto implements Serializable {
     private String departmentId;
     private String departmentName;
     private String personType;
+    private String link;
+
+    private String extUserId;
+
+    private String cardId;
+
+    private String cardNumber;
+
+    private List<UserAttrDto> userAttrDtos;
 
     public String getUserId() {
         return userId;
@@ -162,5 +173,45 @@ public class UserFaceDto extends PageDto implements Serializable {
 
     public void setPersonType(String personType) {
         this.personType = personType;
+    }
+
+    public List<UserAttrDto> getUserAttrDtos() {
+        return userAttrDtos;
+    }
+
+    public void setUserAttrDtos(List<UserAttrDto> userAttrDtos) {
+        this.userAttrDtos = userAttrDtos;
+    }
+
+    public String getExtUserId() {
+        return extUserId;
+    }
+
+    public void setExtUserId(String extUserId) {
+        this.extUserId = extUserId;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
+    }
+
+    public String getCardId() {
+        return cardId;
+    }
+
+    public void setCardId(String cardId) {
+        this.cardId = cardId;
+    }
+
+    public String getCardNumber() {
+        return cardNumber;
+    }
+
+    public void setCardNumber(String cardNumber) {
+        this.cardNumber = cardNumber;
     }
 }

@@ -1,0 +1,32 @@
+<html>
+
+<head>
+    <title>WebsocketVideo</title>
+</head>
+
+<body>
+    <img id="receiver" style="width:1600px;height:900px" />
+</body>
+<script type="text/javascript" charset="utf-8">
+    //创建一个socket实例  
+    var receiver_socket = new WebSocket("ws://192.168.1.100:9080/ws");
+    var image = document.getElementById('receiver');
+    // 监听消息  
+    receiver_socket.onmessage = function (data) {
+        console.log(data.data)
+        //image.src = 'data:image/png;' + data.data;
+        var reader = new FileReader();
+        reader.readAsDataURL(data.data);
+        reader.onload = function (evt) {
+            if (evt.target.readyState == FileReader.DONE) {
+                var url = evt.target.result;
+                //image.src = 'data:image/png;' + url;
+                image.src =  this.result;
+            }
+        }
+        
+
+    }
+</script>
+
+</html>

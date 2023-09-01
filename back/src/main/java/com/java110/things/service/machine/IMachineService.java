@@ -1,7 +1,9 @@
 package com.java110.things.service.machine;
 
+import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.machine.MachineAttrDto;
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.parkingArea.ParkingAreaTextDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.user.UserDto;
 
@@ -39,7 +41,7 @@ public interface IMachineService {
      * @return
      * @throws Exception
      */
-    ResultDto getMachine(MachineDto machineDto) throws Exception;
+    ResultDto getMachine(MachineDto machineDto) ;
 
     /**
      * 获取设备信息
@@ -47,7 +49,7 @@ public interface IMachineService {
      * @return
      * @throws Exception
      */
-    List<MachineDto> queryMachines(MachineDto machineDto) throws Exception;
+    List<MachineDto> queryMachines(MachineDto machineDto) ;
 
     /**
      * 删除设备
@@ -72,7 +74,7 @@ public interface IMachineService {
      * @return
      * @throws Exception
      */
-    ResultDto openDoor(MachineDto machineDto) throws Exception;
+    ResultDto openDoor(MachineDto machineDto, ParkingAreaTextDto parkingAreaTextDto) throws Exception;
 
     /**
      * 保存设备属性信息
@@ -97,4 +99,11 @@ public interface IMachineService {
      * @throws Exception
      */
     List<MachineAttrDto> queryMachineAttrs(MachineAttrDto machineAttrDto) throws Exception;
+
+    /**
+     * 获取二维码
+     * @param userFaceDto
+     * @return
+     */
+    ResultDto getQRcode(UserFaceDto userFaceDto) throws Exception;
 }

@@ -2,6 +2,7 @@ package com.java110.things.adapt.accessControl.chuangjiang;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.java110.things.adapt.accessControl.DefaultAbstractAccessControlAdapt;
 import com.java110.things.adapt.accessControl.IAssessControlProcess;
 import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
@@ -14,6 +15,7 @@ import com.java110.things.entity.machine.OperateLogDto;
 import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.room.RoomDto;
+import com.java110.things.entity.user.UserAttrDto;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.MqttFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
@@ -38,7 +40,7 @@ import java.util.List;
  * 伊兰度 门禁设备 Mqtt 方式
  */
 @Service("cjHttpAssessControlProcessAdapt")
-public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
+public class CjHttpAssessControlProcessAdapt extends DefaultAbstractAccessControlAdapt {
 
     private static Logger logger = LoggerFactory.getLogger(CjHttpAssessControlProcessAdapt.class);
     //public static Function fun=new Function();
@@ -69,6 +71,7 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
     public static final String CMD_REBOOT = "/restartDevice";// 重启设备
 
     public static final String CMD_ADD_USER = "/person/create"; // 添加人员
+    public static final String CMD_UPDATE_USER = "/person/update"; // 修改人员
 
     public static final String CMD_DELETE_PERSION_FACE = "/face/deletePerson"; //修改人脸
 
@@ -123,8 +126,8 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         param.put("systemMode", "2");
         HttpHeaders httpHeaders = new HttpHeaders();
         HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
-        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_SYSTEMMODE, param.toJSONString(), responseEntity.getBody());
+        ResponseEntity<String> responseEntity ;//= restTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
+        //saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_SET_SYSTEMMODE, param.toJSONString(), responseEntity.getBody());
 
         //设置回调地址
         url = "http://" + machineDto.getMachineIp() + CMD_SET_IDENTIFY_CALLBACK;
@@ -154,11 +157,6 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
 
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
         return new ResultDto(paramOut.getBoolean("success") ? ResultDto.SUCCESS : ResultDto.ERROR, paramOut.getString("code") + paramOut.getString("msg"));
-    }
-
-    @Override
-    public int getFaceNum(MachineDto machineDto) {
-        return 0;
     }
 
     @Override
@@ -206,13 +204,13 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
     public ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
         String url = "http://" + machineDto.getMachineIp() + CMD_ADD_USER;
-
+        String idNumber = getIdNumber(userFaceDto);
         JSONObject paramObj = JSONObject.parseObject("{\"person\":{}}");
         JSONObject param = paramObj.getJSONObject("person");
         param.put("id", userFaceDto.getUserId());
         param.put("name", userFaceDto.getName());
         param.put("idcardNum", "");
-        param.put("iDNumber", userFaceDto.getIdNumber());
+        param.put("iDNumber", idNumber);
         paramObj.put("pass", password);
         HttpHeaders httpHeaders = new HttpHeaders();
         HttpEntity httpEntity = new HttpEntity(paramObj.toJSONString(), httpHeaders);
@@ -246,8 +244,21 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
     public ResultDto updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
 
         String password = MappingCacheFactory.getValue(MappingCacheFactory.SYSTEM_DOMAIN, "ASSESS_PASSWORD");
-        String url = "";
-        JSONObject param = new JSONObject();
+        String url = "http://" + machineDto.getMachineIp() + CMD_UPDATE_USER;
+        String idNumber = getIdNumber(userFaceDto);
+        JSONObject paramObj = JSONObject.parseObject("{\"person\":{}}");
+        JSONObject param = paramObj.getJSONObject("person");
+        param.put("id", userFaceDto.getUserId());
+        param.put("name", userFaceDto.getName());
+        param.put("idcardNum", "");
+        param.put("iDNumber", idNumber);
+        paramObj.put("pass", password);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        HttpEntity httpEntity = new HttpEntity(paramObj.toJSONString(), httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_UPDATE_USER, param.toJSONString(), responseEntity.getBody());
+
+        param = new JSONObject();
         url = "http://" + machineDto.getMachineIp() + CMD_ADD_FACE;
         param = new JSONObject();
         param.put("pass", password);
@@ -256,9 +267,9 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         param.put("url", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
         param.put("base64", userFaceDto.getFaceBase64());
         //添加人脸
-        HttpHeaders httpHeaders = new HttpHeaders();
-        HttpEntity httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
-        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
+        httpHeaders = new HttpHeaders();
+        httpEntity = new HttpEntity(param.toJSONString(), httpHeaders);
+        responseEntity = restTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
         logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
         saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_ADD_FACE, param.toJSONString(), responseEntity.getBody());
 
@@ -352,12 +363,6 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         return null;
     }
 
-    @Override
-    public void mqttMessageArrived(String topic, String data) {
-
-
-    }
-
 
     @Override
     public void restartMachine(MachineDto machineDto) {
@@ -404,6 +409,8 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
                 List<MachineFaceDto> machineFaceDtos = notifyAccessControlService.queryMachineFaces(machineFaceDto);
                 if (machineFaceDtos != null && machineFaceDtos.size() > 0) {
                     userName = machineFaceDtos.get(0).getName();
+                }else{
+                    userName = "未知人员";
                 }
 
             }
@@ -452,141 +459,5 @@ public class CjHttpAssessControlProcessAdapt implements IAssessControlProcess {
         return resultParam.toJSONString();//未找到设备
     }
 
-    /**
-     * 查询费用信息
-     *
-     * @param openDoorDto
-     */
-    private void freshOwnerFee(OpenDoorDto openDoorDto) {
-
-        ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
-        List<FeeDto> feeDtos = new ArrayList<>();
-        try {
-            //查询业主房屋信息
-            UserFaceDto userFaceDto = new UserFaceDto();
-            userFaceDto.setUserId(openDoorDto.getUserId());
-            List<RoomDto> roomDtos = notifyAccessControlService.getRooms(userFaceDto);
-
-            if (roomDtos == null || roomDtos.size() < 1) {
-                return;
-            }
-
-            for (RoomDto roomDto : roomDtos) {
-                List<FeeDto> tmpFeeDtos = notifyAccessControlService.getFees(roomDto);
-                if (tmpFeeDtos == null || tmpFeeDtos.size() < 1) {
-                    continue;
-                }
-                feeDtos.addAll(tmpFeeDtos);
-            }
-        } catch (Exception e) {
-            logger.error("云端查询物业费失败", e);
-        }
-
-        if (feeDtos.size() < 1) {
-            openDoorDto.setAmountOwed("0");
-            return;
-        }
-        double own = 0.00;
-        for (FeeDto feeDto : feeDtos) {
-            logger.debug("查询费用信息" + JSONObject.toJSONString(feeDto));
-            own += feeDto.getAmountOwed();
-        }
-
-        openDoorDto.setAmountOwed(own + "");
-    }
-
-
-    private void openDoorResult(String data) {
-
-
-    }
-
-    /**
-     * 设备上线
-     *
-     * @param data {
-     *             "cmd": "mqtt_online",
-     *             "sn": "fffffff",
-     *             "result": "mqtt is online"
-     *             }
-     */
-    private void machineOnline(String data) {
-
-
-    }
-
-
-    /**
-     * 重启
-     */
-    private void setUiTitle(MachineDto machineDto) {
-
-        JSONObject param = new JSONObject();
-        param.put("client_id", machineDto.getMachineCode());
-        param.put("cmd_id", SeqUtil.getId());
-        param.put("version", VERSION);
-        param.put("cmd", CMD_UI_TITLE);
-        JSONObject body = new JSONObject();
-        body.put("title", machineDto.getMachineName());
-        param.put("body", body);
-        MqttFactory.publish(TOPIC_FACE_SN_REQUEST.replace(SN, machineDto.getMachineCode()), param.toJSONString());
-
-        saveLog(param.getString("cmd_id"), machineDto.getMachineId(), CMD_UI_TITLE, param.toJSONString(), "");
-
-
-    }
-
-    /**
-     * 存储日志
-     *
-     * @param logId     日志ID
-     * @param machineId 设备ID
-     * @param cmd       操作命令
-     * @param reqParam  请求报文
-     * @param resParam  返回报文
-     */
-    private void saveLog(String logId, String machineId, String cmd, String reqParam, String resParam) {
-        saveLog(logId, machineId, cmd, reqParam, resParam, "", "", "");
-    }
-
-    /**
-     * 存储日志
-     *
-     * @param logId     日志ID
-     * @param machineId 设备ID
-     * @param cmd       操作命令
-     * @param reqParam  请求报文
-     * @param resParam  返回报文
-     * @param state     状态
-     */
-    private void saveLog(String logId, String machineId, String cmd, String reqParam, String resParam, String state) {
-        saveLog(logId, machineId, cmd, reqParam, resParam, state, "", "");
-    }
-
-    /**
-     * 存储日志
-     *
-     * @param logId     日志ID
-     * @param machineId 设备ID
-     * @param cmd       操作命令
-     * @param reqParam  请求报文
-     * @param resParam  返回报文
-     * @param state     状态
-     * @param userId    业主ID
-     * @param userName  业主名称
-     */
-    private void saveLog(String logId, String machineId, String cmd, String reqParam, String resParam, String state, String userId, String userName) {
-        ICallAccessControlService notifyAccessControlService = NotifyAccessControlFactory.getCallAccessControlService();
-        OperateLogDto operateLogDto = new OperateLogDto();
-        operateLogDto.setLogId(logId);
-        operateLogDto.setMachineId(machineId);
-        operateLogDto.setOperateType(cmd);
-        operateLogDto.setReqParam(reqParam);
-        operateLogDto.setResParam(resParam);
-        operateLogDto.setState(state);
-        operateLogDto.setUserId(userId);
-        operateLogDto.setUserName(userName);
-        notifyAccessControlService.saveOrUpdateOperateLog(operateLogDto);
-    }
 
 }

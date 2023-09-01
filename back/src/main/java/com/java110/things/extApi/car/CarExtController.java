@@ -163,6 +163,7 @@ public class CarExtController extends BaseController {
         carDto.setCarId(carDtos.get(0).getCarId());
         carDto.setCardId(carDto.getCardId());
         carDto.setExtPaId(carDtos.get(0).getExtPaId());
+        carDto.setPaId(carDtos.get(0).getPaId());
         ResultDto result = carServiceImpl.updateCar(carDto);
 
         return ResultDto.createResponseEntity(result);
@@ -203,7 +204,7 @@ public class CarExtController extends BaseController {
         carDto.setCarId(carDtos.get(0).getCarId());
         carDto.setExtPaId(parkingAreaDtos.get(0).getExtPaId());
         carDto.setCardId(carDtos.get(0).getCardId());
-
+        carDto.setPaId(carDtos.get(0).getPaId());
         ResultDto result = carServiceImpl.deleteCar(carDto);
 
         return ResultDto.createResponseEntity(result);

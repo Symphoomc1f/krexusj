@@ -1,6 +1,7 @@
 package com.java110.things.adapt.car;
 
 import com.java110.things.entity.machine.MachineDto;
+import com.java110.things.entity.parkingArea.ParkingAreaTextDto;
 
 /**
  * 道闸对接设备 适配器类
@@ -42,9 +43,10 @@ public interface ICarMachineProcess {
      *
      * @param machineDto 硬件信息
      */
-    void openDoor(MachineDto machineDto);
+    void openDoor(MachineDto machineDto, ParkingAreaTextDto parkingAreaTextDto);
 
     void sendKeepAlive(MachineDto machineDto);
 
 
+    void mqttMessageArrived(String topic, String s);
 }

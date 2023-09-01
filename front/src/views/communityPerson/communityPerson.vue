@@ -95,6 +95,7 @@
               @click="openToMachine(row, $index)"
               >同步门禁</el-button
             >
+            <el-button size="mini"  type="primary" @click="editCommunityPerson(row,$index)">修改</el-button>
             <el-button
               size="mini"
               type="danger"
@@ -156,6 +157,22 @@
               只能上传jpg文件，且不超过500kb
             </div>
           </el-upload>
+
+          <el-image
+            ref="lazyImg"
+            lazy
+            class="vx-lazyLoad"
+            :src="temp.facePath"
+            :fit="fit"
+            :preview-src-list="[temp.facePath]"
+          >
+            <div slot="placeholder" class="image-slot">
+              <i class="el-icon-loading"></i>加载中
+            </div>
+            <div slot="error" class="image-slot">
+              <i class="el-icon-picture-outline"></i>
+            </div>
+          </el-image>
         </el-form-item>
         <el-form-item label="外部ID" prop="type">
           <el-input v-model="temp.extPersonId" placeholder="请输入外部人员ID" />
@@ -223,6 +240,7 @@ import {
   getCommunityPersons,
   deleteCommunityPersons,
   saveCommunityPersons,
+  updateCommunityPerson,
   getBase64,
   personToMachine,
 } from "@/api/communityPerson";
@@ -246,6 +264,7 @@ export default {
       curCommunityPerson: {},
       total: 0,
       temp: {
+        personId:"",
         name: "",
         tel: "",
         idNumber: "",
@@ -264,6 +283,9 @@ export default {
     this.queryCommunityPerson();
   },
   methods: {
+    handleClose(){
+      handleCloses()
+    },
     queryCommunityPerson() {
       this.listLoading = true;
       getCommunityPersons(this.listQuery).then((response) => {
@@ -292,8 +314,22 @@ export default {
         this.queryCommunityPerson();
       });
     },
+     editCommunityPerson(_row, _index) {
+      this.dialogFormVisible = true;
+      this.temp = _row;
+    },
     saveCommunityPersonInfo() {
       this.listLoading = true;
+      if (this.temp.personId != "") {
+        this.temp.facePath = "";
+        this.temp.extPersonId = null;
+        updateCommunityPerson(this.temp).then(response => {
+          this.listLoading = false;
+          this.dialogFormVisible = false;
+          this.queryCommunityPerson();
+        });
+        return;
+      }
       saveCommunityPersons(this.temp).then((response) => {
         this.listLoading = false;
         this.dialogFormVisible = false;

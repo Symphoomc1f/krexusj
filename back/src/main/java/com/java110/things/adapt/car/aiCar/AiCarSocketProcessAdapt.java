@@ -3,12 +3,13 @@ package com.java110.things.adapt.car.aiCar;
 
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.adapt.accessControl.ICallAccessControlService;
-import com.java110.things.adapt.car.ICarProcess;
+import com.java110.things.adapt.car.DefaultAbstractCarProcessAdapt;
 import com.java110.things.entity.accessControl.CarResultDto;
 import com.java110.things.entity.car.CarBlackWhiteDto;
 import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.car.CarInoutDto;
 import com.java110.things.entity.cloud.MachineHeartbeatDto;
+import com.java110.things.entity.fee.TempCarPayOrderDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.NotifyAccessControlFactory;
@@ -16,6 +17,7 @@ import com.java110.things.netty.Java110CarProtocol;
 import com.java110.things.netty.NettySocketHolder;
 import com.java110.things.service.car.ICarInoutService;
 import com.java110.things.service.car.ICarService;
+import com.java110.things.util.BeanConvertUtil;
 import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
 import org.slf4j.Logger;
@@ -27,7 +29,7 @@ import org.springframework.stereotype.Service;
  * 智能停车系统
  */
 @Service("aiCarSocketProcessAdapt")
-public class AiCarSocketProcessAdapt implements ICarProcess {
+public class AiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
 
     private static Logger logger = LoggerFactory.getLogger(AiCarSocketProcessAdapt.class);
 
@@ -274,6 +276,8 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
         carInoutDto.setRealCharge(acceptJson.getString("realcharge"));
         carInoutDto.setPayType(acceptJson.getString("pay_type"));
         carInoutDto.setMachineCode(machineDto.getMachineCode());
+        carInoutDto.setPaId(machineDto.getLocationObjId());
+        carInoutDto.setState(CarInoutDto.STATE_OUT);
 
         try {
             carInoutService.saveCarInout(carInoutDto);
@@ -308,6 +312,8 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
         carInoutDto.setOpenTime(acceptJson.getString("in_time"));
         carInoutDto.setRemark(acceptJson.containsKey("remark") ? acceptJson.getString("remark") : "");
         carInoutDto.setMachineCode(machineDto.getMachineCode());
+        carInoutDto.setPaId(machineDto.getLocationObjId());
+        carInoutDto.setState(CarInoutDto.STATE_OUT);
 
         try {
             carInoutService.saveCarInout(carInoutDto);
@@ -324,17 +330,19 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
     }
 
     @Override
-    public String getNeedPayOrder() {
+    public TempCarPayOrderDto getNeedPayOrder(MachineDto machineDto, CarDto carDto) {
         Java110CarProtocol java110CarProtocol = new Java110CarProtocol();
         java110CarProtocol.setId("20180001L");
         java110CarProtocol.setContent("{\n" +
                 "    \"service\": \"query_price\",\n" +
-                "    \"parkid\": \"20180001\",\n" +
-                "    \"car_number\": \"浙CBB123\",\n" +
+                "    \"parkid\": \"" + carDto.getExtPaId() + "\",\n" +
+                "    \"car_number\": \"" + carDto.getCarNum() + "\",\n" +
                 "    \"pay_scene\": 0\n" +
                 "  }");
-        JSONObject data = NettySocketHolder.sendMsgSync(java110CarProtocol, "浙CBB123");
-        return data.toJSONString();
+        JSONObject data = NettySocketHolder.sendMsgSync(java110CarProtocol, carDto.getCarNum());
+
+        TempCarPayOrderDto tempCarPayOrderDto = BeanConvertUtil.covertBean(data, TempCarPayOrderDto.class);
+        return tempCarPayOrderDto;
     }
 
     @Override
@@ -346,6 +354,12 @@ public class AiCarSocketProcessAdapt implements ICarProcess {
     public ResultDto deleteCarBlackWhite(MachineDto tmpMachineDto, CarBlackWhiteDto carBlackWhiteDto) {
         return null;
     }
+
+    @Override
+    public ResultDto notifyTempCarFeeOrder(MachineDto machineDto, TempCarPayOrderDto tempCarPayOrderDto) {
+        return null;
+    }
+
 
     /**
      * 认证接口
