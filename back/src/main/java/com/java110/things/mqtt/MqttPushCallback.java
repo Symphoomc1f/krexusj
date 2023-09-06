@@ -42,7 +42,7 @@ public class MqttPushCallback implements MqttCallback {
         log.info("断开连接，建议重连" + this);
         while(true) {
             try {
-                Thread.sleep(30000);
+                //Thread.sleep(1000);
                 // 重新连接
                 //client.connect(option);
                 if (!client.isConnected()) {
