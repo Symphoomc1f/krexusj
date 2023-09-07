@@ -40,9 +40,10 @@ public class MqttPushCallback implements MqttCallback {
     @Override
     public void connectionLost(Throwable cause) {
         log.info("断开连接，建议重连" + this);
+        log.error("连接断开",cause);
         while(true) {
             try {
-                //Thread.sleep(1000);
+                Thread.sleep(1000);
                 // 重新连接
                 //client.connect(option);
                 if (!client.isConnected()) {
