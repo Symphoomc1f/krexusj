@@ -57,6 +57,28 @@ public class AccessControlApi extends BaseController {
     }
 
     /**
+     * 二维码核验接口
+     * <p>
+     * 门禁配置地址为：/api/qrCode/设备编码
+     *
+     * @param param 请求报文 包括设备 前台填写信息
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/qrCode/{machineCode}", method = RequestMethod.POST)
+    public ResponseEntity<String> qrCode(@RequestBody String param, @PathVariable(value = "machineCode") String machineCode) throws Exception {
+
+        MachineDto machineDto = new MachineDto();
+        machineDto.setMachineCode(machineCode);
+        List<MachineDto> machineDtos = machineServiceImpl.queryMachines(machineDto);
+
+        Assert.listOnlyOne(machineDtos, "未包含该设备");
+        logger.debug("请求报文：" + param);
+        IAssessControlProcess assessControlProcess = AccessControlProcessFactory.getAssessControlProcessImpl(machineDtos.get(0).getHmId());
+
+        return new ResponseEntity<String>(assessControlProcess.qrCode(machineDtos.get(0), param), HttpStatus.OK);
+    }
+    /**
      * 添加设备接口类
      * <p>
      * 门禁配置地址为：/api/accessControl/faceResult/设备编码

@@ -2,6 +2,7 @@ package com.java110.things.adapt.accessControl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.adapt.accessControl.chuangjiang.CjHttpAssessControlProcessAdapt;
+import com.java110.things.entity.accessControl.QRCodeDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.fee.FeeDto;
 import com.java110.things.entity.machine.MachineDto;
@@ -10,7 +11,12 @@ import com.java110.things.entity.openDoor.OpenDoorDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.entity.room.RoomDto;
 import com.java110.things.entity.user.UserAttrDto;
+import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
+import com.java110.things.factory.RedisCacheFactory;
+import com.java110.things.util.DateUtil;
+import com.java110.things.util.SeqUtil;
+import com.java110.things.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +59,55 @@ public abstract class DefaultAbstractAccessControlAdapt implements IAssessContro
 
     @Override
     public ResultDto getQRcode(UserFaceDto userFaceDto) {
-        return new ResultDto(ResultDto.ERROR, "该设备不支持");
+        QRCodeDto qrCodeDto = new QRCodeDto();
+        qrCodeDto.setUserId(userFaceDto.getUserId());
+        qrCodeDto.setMachineCode(userFaceDto.getMachineCode());
+        qrCodeDto.setCreateDate(DateUtil.getCurrentDate());
+        qrCodeDto.setOpenCount(0);
+        String qrCode = SeqUtil.getId();
+        RedisCacheFactory.setValue(qrCode, JSONObject.toJSONString(qrCodeDto), 24 * 60 * 60);
+        return new ResultDto(ResultDto.SUCCESS, "成功", qrCode);
+    }
+
+    /**
+     * 二维码核验接口
+     *
+     * @param machineDto
+     * @param param
+     * @return
+     */
+    public String qrCode(MachineDto machineDto, String param){
+        return new ResultDto(ResultDto.SUCCESS, "开门成功").toString();
+    }
+
+    protected ResultDto checkQRCode(String qrCode, String machineCode) {
+        String qr = RedisCacheFactory.getValue(qrCode);
+
+        if (StringUtil.isEmpty(qr)) {
+            return new ResultDto(ResultDto.ERROR, "二维码过期");
+        }
+
+        QRCodeDto qrCodeDto = JSONObject.parseObject(qr, QRCodeDto.class);
+
+        if (!qrCodeDto.getMachineCode().equals(machineCode)) {
+            return new ResultDto(ResultDto.ERROR, "没有权限开门");
+        }
+
+        String openDoorCountStr = MappingCacheFactory.getValue("OPEN_DOOR_COUNT");
+        int openDoorCount = 2;
+        if (StringUtil.isNumber(openDoorCountStr)) {
+            openDoorCount = Integer.parseInt(openDoorCountStr);
+        }
+
+        if (openDoorCount > qrCodeDto.getOpenCount()) {
+            return new ResultDto(ResultDto.ERROR, "开门次数已超限");
+        }
+
+        qrCodeDto.setOpenCount(qrCodeDto.getOpenCount() - 1);
+        RedisCacheFactory.setValue(qrCode, JSONObject.toJSONString(qrCodeDto), 24 * 60 * 60);
+
+        return new ResultDto(ResultDto.SUCCESS, "开门成功");
+
     }
 
     @Override
@@ -200,4 +254,6 @@ public abstract class DefaultAbstractAccessControlAdapt implements IAssessContro
 
         openDoorDto.setAmountOwed(own + "");
     }
+
+
 }

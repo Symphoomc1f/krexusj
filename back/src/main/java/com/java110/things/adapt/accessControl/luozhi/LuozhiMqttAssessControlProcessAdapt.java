@@ -114,6 +114,20 @@ public class LuozhiMqttAssessControlProcessAdapt extends DefaultAbstractAccessCo
     }
 
     @Override
+    public String qrCode(MachineDto machineDto, String param) {
+        JSONObject paramObj = JSONObject.parseObject(param);
+        String qrCode = paramObj.getString("content");
+        ResultDto resultDto = super.checkQRCode(qrCode, machineDto.getMachineCode());
+        JSONObject paramOut = new JSONObject();
+        paramOut.put("result", 0);
+        paramOut.put("result", "Success");
+        JSONObject data = new JSONObject();
+        data.put("opendoor", resultDto.getCode() == ResultDto.SUCCESS ? 1 : 0);
+        paramOut.put("data", data);
+        return paramOut.toJSONString();
+    }
+
+    @Override
     public ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
         JSONObject param = new JSONObject();
         param.put("confirmation_topic", "/hiot/people_send_reply");

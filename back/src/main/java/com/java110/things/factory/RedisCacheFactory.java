@@ -59,6 +59,7 @@ public class RedisCacheFactory extends BaseCache {
             redis = getJedis();
             redis.select(DEFAULT_DB);
             redis.set(key, value);
+            redis.expire(key, expireTime);
         } finally {
             if (redis != null) {
                 releaseResource(redis);

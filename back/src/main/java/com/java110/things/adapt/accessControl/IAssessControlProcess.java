@@ -127,7 +127,7 @@ public interface IAssessControlProcess {
      * @param data 这个为设备人脸推送协议，请参考设备协议文档
      * @return 处理成功时返回 true 失败时返回false
      */
-    String httpFaceResult(MachineDto machineDto,String data);
+    String httpFaceResult(MachineDto machineDto, String data);
 
 
     /**
@@ -136,13 +136,23 @@ public interface IAssessControlProcess {
      * @param data 这个为设备人脸推送协议，请参考设备协议文档
      * @return 处理成功时返回 true 失败时返回false
      */
-    String heartbeat(String data,String machineCode) throws Exception;
+    String heartbeat(String data, String machineCode) throws Exception;
 
 
     /**
      * 获取二维码
+     *
      * @param userFaceDto
      * @return
      */
     ResultDto getQRcode(UserFaceDto userFaceDto);
+
+    /**
+     * 二维码核验接口
+     *
+     * @param machineDto
+     * @param param
+     * @return
+     */
+    String qrCode(MachineDto machineDto, String param);
 }
