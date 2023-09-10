@@ -46,16 +46,6 @@ public class MqttPushCallback implements MqttCallback {
                 Thread.sleep(1000);
                 // 重新连接
                 client.connect(option);
-//                if (!client.isConnected()) {
-//                    client.connect(option);
-//                    log.info("连接成功");
-//                }else {
-//                    //即使连接上也要先断开再重新连接
-//                    client.disconnect();  //不这样就重连会报错
-//                    client.connect(option);
-//                    log.info("连接成功");
-//                }
-
                 break;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -92,6 +82,10 @@ public class MqttPushCallback implements MqttCallback {
      * @return
      */
     private String getHmId(String topic, MqttMessage message) {
+
+        if(topic.contains("hiot")){
+            return "18";
+        }
 
         //德安中获取
         String hmId = getHmIdByDean(topic);
