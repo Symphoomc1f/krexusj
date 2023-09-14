@@ -5,12 +5,19 @@ import com.alibaba.fastjson.JSONObject;
 import com.java110.things.entity.sip.Device;
 import com.java110.things.entity.sip.DeviceChannel;
 import com.java110.things.entity.sip.PushStreamDevice;
+import com.java110.things.sip.Server;
 import com.java110.things.sip.SipLayer;
+import com.java110.things.sip.TCPServer;
+import com.java110.things.sip.UDPServer;
 import com.java110.things.sip.callback.OnProcessListener;
+import com.java110.things.sip.message.config.ConfigProperties;
 import com.java110.things.sip.message.result.GBResult;
 import com.java110.things.sip.message.result.MediaData;
 import com.java110.things.sip.message.session.MessageManager;
+import com.java110.things.sip.message.session.SyncFuture;
 import com.java110.things.sip.play.Play;
+import com.java110.things.sip.remux.Observer;
+import com.java110.things.sip.remux.RtmpPusher;
 import com.java110.things.sip.session.PushStreamDeviceManager;
 import com.java110.things.util.IDUtils;
 import com.java110.things.util.RedisUtil;
@@ -21,8 +28,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.sip.Dialog;
 import javax.sip.SipException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping(path = "/api/video")
@@ -33,6 +42,9 @@ public class VideoController implements OnProcessListener {
 
     @Autowired
     private SipLayer mSipLayer;
+
+    @Autowired
+    private ConfigProperties configProperties;
 
     private MessageManager mMessageManager = MessageManager.getInstance();
 
@@ -71,31 +83,31 @@ public class VideoController implements OnProcessListener {
             String ssrc = mSipLayer.getSsrc(true);
             mSipLayer.sendInvite(device, SipLayer.SESSION_NAME_PLAY, callId, channelId, port, ssrc, isTcp);
             //4.等待指令响应
-//            SyncFuture<?> receive = mMessageManager.receive(callId);
-//            Dialog response = (Dialog) receive.get(3, TimeUnit.SECONDS);
-//
-//            //4.1响应成功，创建推流session
-//            if (response != null) {
-//                String address = pushRtmpAddress.concat(streamName);
-//                Server server = isTcp ? new TCPServer() : new UDPServer();
-//                Observer observer = new RtmpPusher(address, callId);
-//
-//                server.subscribe(observer);
-//                pushStreamDevice = new PushStreamDevice(deviceId, Integer.valueOf(ssrc), callId, streamName, port, isTcp, server,
-//                        observer, address);
-//
-//                pushStreamDevice.setDialog(response);
-//                server.startServer(pushStreamDevice.getFrameDeque(), Integer.valueOf(ssrc), port, false);
-//                observer.startRemux();
-//
-//                observer.setOnProcessListener(this);
-//                mPushStreamDeviceManager.put(streamName, callId, Integer.valueOf(ssrc), pushStreamDevice);
-//                result = GBResult.ok(new MediaData(pushStreamDevice.getPullRtmpAddress(), pushStreamDevice.getCallId()));
-//            } else {
-//                //3.2响应失败，删除推流session
-//                mMessageManager.remove(callId);
-//                throw new IllegalArgumentException("摄像头 指令未响应");
-//            }
+            SyncFuture<?> receive = mMessageManager.receive(callId);
+            Dialog response = (Dialog) receive.get(3, TimeUnit.SECONDS);
+
+            //4.1响应成功，创建推流session
+            if (response != null) {
+                String address = configProperties.getPushRtmpAddress().concat(streamName);
+                Server server = isTcp ? new TCPServer() : new UDPServer();
+                Observer observer = new RtmpPusher(address, callId);
+
+                server.subscribe(observer);
+                pushStreamDevice = new PushStreamDevice(deviceId, Integer.valueOf(ssrc), callId, streamName, port, isTcp, server,
+                        observer, address);
+
+                pushStreamDevice.setDialog(response);
+                server.startServer(pushStreamDevice.getFrameDeque(), Integer.valueOf(ssrc), port, false);
+                observer.startRemux();
+
+                observer.setOnProcessListener(this);
+                mPushStreamDeviceManager.put(streamName, callId, Integer.valueOf(ssrc), pushStreamDevice);
+                result = GBResult.ok(new MediaData(pushStreamDevice.getPullRtmpAddress(), pushStreamDevice.getCallId()));
+            } else {
+                //3.2响应失败，删除推流session
+                mMessageManager.remove(callId);
+                throw new IllegalArgumentException("摄像头 指令未响应");
+            }
 
         } catch (Exception e) {
             logger.error("系统异常", e);

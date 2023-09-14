@@ -1,32 +1,28 @@
 package com.java110.things.sip.remux;
 
-import com.java110.things.ws.VideoWebSocketServer;
+import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.util.concurrent.ConcurrentLinkedDeque;
+
 import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacpp.avcodec.AVPacket;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.nio.ByteBuffer;
-import java.util.concurrent.ConcurrentLinkedDeque;
-
 /**
  * rtmp 推流器
  * @author yangjie
  * 2020年3月23日
  */
-public class RtmpPusher extends Observer {
+public class RtmpPusher extends Observer{
 
 	private Logger log = LoggerFactory.getLogger(getClass());
 
 	private PipedInputStream pis;
 
 	private PipedOutputStream pos = new PipedOutputStream();;
-	private ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();;
 
 	private boolean mRunning = true;
 
@@ -93,26 +89,20 @@ public class RtmpPusher extends Observer {
 			grabber = new FFmpegFrameGrabber(pis);
 			//阻塞式，直到通道有数据
 			grabber.start();
-			recorder = new CustomFFmpegFrameRecorder(byteArrayOutputStream,1280,720,0);
+			recorder = new CustomFFmpegFrameRecorder(address,1280,720,0);
 			recorder.setInterleaved(true);
 			recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
-			recorder.setFormat("flv"); 
+			recorder.setFormat("flv");
 			recorder.setFrameRate(25);
 			recorder.start(grabber.getFormatContext());
 			AVPacket avPacket;
-			byte[] copyData = byteArrayOutputStream.toByteArray();
-			ByteBuffer byteBuffer = ByteBuffer.wrap(copyData);
-			VideoWebSocketServer.sendInfo(byteBuffer, "34020000001320000001");
+
 
 			while(mRunning && (avPacket=grabber.grabPacket()) != null && avPacket.size() >0 && avPacket.data() != null){
 				pts = mPtsQueue.pop();
 				//pts+=40;
 				recorder.recordPacket(avPacket,pts,pts);
-//				byte[] copyData = byteArrayOutputStream.toByteArray();
-//				ByteBuffer byteBuffer = ByteBuffer.wrap(copyData);
-//				VideoWebSocketServer.sendInfo(byteBuffer, "34020000001320000001");
 			}
-
 
 		}catch(Exception e){
 			e.printStackTrace();

@@ -65,7 +65,7 @@ public class UDPHandler extends SimpleChannelInboundHandler<DatagramPacket> {
         }
         byte[] copyData = new byte[readableBytes];
         byteBuf.readBytes(copyData);
-        //log.info("UDP接受到帧数据>>> {}",HexStringUtils.toHexString(copyData));
+        log.info("UDP接受到帧数据>>> {}",HexStringUtils.toHexString(copyData));
 
         int seq = BitUtils.byte2ToInt(copyData[2], copyData[3]);
         int length = copyData.length;
