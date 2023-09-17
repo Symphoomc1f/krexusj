@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>SRS</title>
     <meta charset="utf-8">
     <style>
-        body{
+        body {
             padding-top: 30px;
         }
     </style>
@@ -12,51 +13,53 @@
     <script type="text/javascript" src="adapter-7.4.0.min.js"></script>
     <script type="text/javascript" src="srs.sdk.js"></script>
 </head>
+
 <body>
-<div class="container">
-    <div class="form-inline">
-        <button class="btn btn-primary" id="btn_play">播放视频</button>
+    <div class="container">
+        <div class="form-inline">
+            <button class="btn btn-primary" id="btn_play">播放视频</button>
+        </div>
+
+        <label></label>
+        <video id="rtc_media_player" controls autoplay width="640px" height="480px"></video>
+
+        <video id="rtc_media_player1" controls autoplay width="640px" height="480px"></video>
+
     </div>
+    <script type="text/javascript">
+        $(function() {
 
-    <label></label>
-    <video id="rtc_media_player" controls autoplay width="640px" height="480px"></video>
+            var startPlay = function(_videoId, url) {
+                $('#' + _videoId).show();
 
-    <video id="rtc_media_player1" controls autoplay width="640px" height="480px"></video>
+                // Close PC when user replay.
+                // if (sdk) {
+                //     sdk.close();
+                // }
+                let sdk = null; // Global handler to do cleanup when replaying.
+                sdk = new SrsRtcPlayerAsync();
 
-</div>
-<script type="text/javascript">
-$(function(){
-  
-    var startPlay = function(_videoId,url) {
-        $('#'+_videoId).show();
+                // https://webrtc.org/getting-started/remote-streams
+                $('#' + _videoId).prop('srcObject', sdk.stream);
+                // Optional callback, SDK will add track to stream.
+                // sdk.ontrack = function (event) { console.log('Got track', event); sdk.stream.addTrack(event.track); };
 
-        // Close PC when user replay.
-        // if (sdk) {
-        //     sdk.close();
-        // }
-        let sdk = null; // Global handler to do cleanup when replaying.
-        sdk = new SrsRtcPlayerAsync();
-
-        // https://webrtc.org/getting-started/remote-streams
-        $('#'+_videoId).prop('srcObject', sdk.stream);
-        // Optional callback, SDK will add track to stream.
-        // sdk.ontrack = function (event) { console.log('Got track', event); sdk.stream.addTrack(event.track); };
-
-        // For example: webrtc://r.ossrs.net/live/livestream
-        sdk.play(url).then(function(session){
-            $('#sessionid').html(session.sessionid);
-            $('#simulator-drop').attr('href', session.simulator + '?drop=1&username=' + session.sessionid);
-        }).catch(function (reason) {
-            sdk.close();
-            $('#'+_videoId).hide();
-            console.error(reason);
+                // For example: webrtc://r.ossrs.net/live/livestream
+                sdk.play(url).then(function(session) {
+                    $('#sessionid').html(session.sessionid);
+                    $('#simulator-drop').attr('href', session.simulator + '?drop=1&username=' + session.sessionid);
+                }).catch(function(reason) {
+                    sdk.close();
+                    $('#' + _videoId).hide();
+                    console.error(reason);
+                });
+            };
+            $("#btn_play").click(function() {
+                startPlay('rtc_media_player', 'webrtc://117.159.177.191:8000/34020000001320000001@34020000001320000010');
+                startPlay('rtc_media_player1', 'webrtc://117.159.177.191:8000/live/34020000001320000001@34020000001320000010');
+            });
         });
-    };
-    $("#btn_play").click(function() {
-        startPlay('rtc_media_player','webrtc://112.124.21.207/live/34020000001320000001@34020000001320000010');
-        startPlay('rtc_media_player1','webrtc://112.124.21.207/live/34020000001320000002@34020000001320000010');
-    });
-});
-</script>
+    </script>
 </body>
+
 </html>
