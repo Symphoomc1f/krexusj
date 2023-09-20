@@ -16,25 +16,25 @@ public class InitSipServer {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
 
-    @Value("${config.listenIp}")
+    @Value("${sip.listenIp}")
     private String listenIp;
 
-    @Value("${config.listenPort}")
+    @Value("${sip.listenPort}")
     private int listenPort;
 
-    @Value("${config.sipId}")
+    @Value("${sip.sipId}")
     private String sipId;
 
-    @Value("${config.sipRealm}")
+    @Value("${sip.sipRealm}")
     private String sipRealm;
 
-    @Value("${config.password}")
+    @Value("${sip.password}")
     private String password;
 
-    @Value("${config.streamMediaIp}")
+    @Value("${sip.streamMediaIp}")
     private String streamMediaIp;
 
-    @Value("${config.streamMediaPort}")
+    @Value("${sip.streamMediaPort}")
     private int streamMediaPort;
 
     /**

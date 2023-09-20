@@ -159,3 +159,16 @@ kafka:
     linger: 1
     buffer:
       memory: 40960
+
+sip:
+  checkSsrc: false
+  heartbeatExpire: 180
+  listenIp: 0.0.0.0
+  listenPort: 5060
+  password: 12345678
+  pullRtmpAddress: ${pullRtmpAddress}
+  pushRtmpAddress: ${pushRtmpAddress}
+  sipId: 34020000002000000001
+  sipRealm: 3402000000
+  streamMediaIp: ${streamMediaIp}
+  streamMediaPort: 20000
