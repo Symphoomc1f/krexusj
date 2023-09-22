@@ -181,7 +181,14 @@ public class ZhenshiCarMachineAdapt extends BaseMachineAdapt implements ICarMach
             JinjieScreenFactory.downloadTempTexts(machineDto, 3, resultParkingAreaTextDto.getText3());
             JinjieScreenFactory.downloadTempTexts(machineDto, 4, resultParkingAreaTextDto.getText4());
 
-            if (ResultDto.SUCCESS != resultParkingAreaTextDto.getCode()) {
+            if (ResultParkingAreaTextDto.CODE_CAR_IN_SUCCESS == resultParkingAreaTextDto.getCode()
+                    || ResultParkingAreaTextDto.CODE_MONTH_CAR_SUCCESS == resultParkingAreaTextDto.getCode()
+                    || ResultParkingAreaTextDto.CODE_TEMP_CAR_SUCCESS == resultParkingAreaTextDto.getCode()
+                    || ResultParkingAreaTextDto.CODE_FREE_CAR_OUT_SUCCESS == resultParkingAreaTextDto.getCode()
+                    || ResultParkingAreaTextDto.CODE_MONTH_CAR_OUT_SUCCESS == resultParkingAreaTextDto.getCode()
+                    || ResultParkingAreaTextDto.CODE_TEMP_CAR_OUT_SUCCESS == resultParkingAreaTextDto.getCode()
+                    || ResultParkingAreaTextDto.CODE_CAR_OUT_SUCCESS == resultParkingAreaTextDto.getCode()
+            ) {
                 return; //不开门
             }
             openDoor(machineDto, null);

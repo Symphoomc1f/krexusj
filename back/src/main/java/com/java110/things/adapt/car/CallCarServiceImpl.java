@@ -1,7 +1,6 @@
 package com.java110.things.adapt.car;
 
 import com.alibaba.fastjson.JSONObject;
-import com.java110.things.ws.BarrierGateControlWebSocketServer;
 import com.java110.things.adapt.car.compute.IComputeTempCarFee;
 import com.java110.things.constant.SystemConstant;
 import com.java110.things.entity.app.AppAttrDto;
@@ -31,6 +30,7 @@ import com.java110.things.util.Assert;
 import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
 import com.java110.things.util.StringUtil;
+import com.java110.things.ws.BarrierGateControlWebSocketServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,12 +105,20 @@ public class CallCarServiceImpl implements ICallCarService {
                 break;
             case MachineDto.MACHINE_DIRECTION_OUT://车辆出场
                 resultParkingAreaTextDto = outParkingArea(type, carNum, machineDto, parkingAreaDtos);
-                if (resultParkingAreaTextDto.getCode() == ResultParkingAreaTextDto.CODE_SUCCESS) {
+                if (resultParkingAreaTextDto.getCode()
+                        == ResultParkingAreaTextDto.CODE_CAR_OUT_SUCCESS
+                        || resultParkingAreaTextDto.getCode()
+                        == ResultParkingAreaTextDto.CODE_FREE_CAR_OUT_SUCCESS
+                        || resultParkingAreaTextDto.getCode()
+                        == ResultParkingAreaTextDto.CODE_MONTH_CAR_OUT_SUCCESS
+                        || resultParkingAreaTextDto.getCode()
+                        == ResultParkingAreaTextDto.CODE_TEMP_CAR_OUT_SUCCESS
+                ) {
                     carOut(carNum, machineDto);
                 }
                 break;
             default:
-                resultParkingAreaTextDto = new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, "系统异常");
+                resultParkingAreaTextDto = new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_CAR_OUT_ERROR, "系统异常");
         }
 
         return resultParkingAreaTextDto;
@@ -185,7 +193,7 @@ public class CallCarServiceImpl implements ICallCarService {
             BarrierGateControlDto barrierGateControlDto
                     = new BarrierGateControlDto(BarrierGateControlDto.ACTION_FEE_INFO, carNum, machineDto, 0, null, carNum + ",车未入场", "开门失败");
             sendInfo(barrierGateControlDto, machineDto.getLocationObjId(), machineDto);
-            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, carNum, "车未入场", "", "", carNum + ",车未入场");
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_CAR_NO_IN, carNum, "车未入场", "", "", carNum + ",车未入场", carNum);
         }
 
         //判断是否为白名单
@@ -193,7 +201,7 @@ public class CallCarServiceImpl implements ICallCarService {
             BarrierGateControlDto barrierGateControlDto
                     = new BarrierGateControlDto(BarrierGateControlDto.ACTION_FEE_INFO, carNum, machineDto, 0, carInoutDtos.get(0), carNum + ",免费车辆", "开门成功");
             sendInfo(barrierGateControlDto, machineDto.getLocationObjId(), machineDto);
-            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, carNum, "免费车辆", "", "", carNum + ",免费车辆");
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_FREE_CAR_OUT_SUCCESS, carNum, "免费车辆", "", "", carNum + ",免费车辆", carNum);
         }
 
         //判断车辆是否为月租车
@@ -205,9 +213,13 @@ public class CallCarServiceImpl implements ICallCarService {
                     = new BarrierGateControlDto(BarrierGateControlDto.ACTION_FEE_INFO, carNum, machineDto, 0, carInoutDtos.get(0), carNum + ",月租车剩余" + day + "天", "开门成功");
             sendInfo(barrierGateControlDto, machineDto.getLocationObjId(), machineDto);
             if (parkingAreaTextCacheDto != null) {
-                return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, parkingAreaTextCacheDto);
+                return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_MONTH_CAR_OUT_SUCCESS, parkingAreaTextCacheDto,carNum);
             }
-            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, carNum, "月租车剩余" + day + "天", "", "", carNum + ",月租车");
+            ResultParkingAreaTextDto resultParkingAreaTextDto
+                    = new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_MONTH_CAR_OUT_SUCCESS, carNum,
+                    "月租车剩余" + day + "天", "", "", carNum + ",月租车", carNum);
+            resultParkingAreaTextDto.setDay(day);
+            return resultParkingAreaTextDto;
         }
 
         //判断岗亭是否收费
@@ -217,11 +229,11 @@ public class CallCarServiceImpl implements ICallCarService {
         List<ParkingBoxDto> parkingBoxDtos = parkingBoxServiceImpl.queryParkingBoxs(parkingBoxDto);
 
         Assert.listOnlyOne(parkingBoxDtos, "设备不存在 岗亭");
-        if(!"Y".equals(parkingBoxDtos.get(0).getFee())){
+        if (!"Y".equals(parkingBoxDtos.get(0).getFee())) {
             BarrierGateControlDto barrierGateControlDto
                     = new BarrierGateControlDto(BarrierGateControlDto.ACTION_FEE_INFO, carNum, machineDto, 0, carInoutDtos.get(0), carNum + ",一路平安,该岗亭不收费", "开门成功");
             sendInfo(barrierGateControlDto, machineDto.getLocationObjId(), machineDto);
-            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, carNum, "欢迎光临", "", "", carNum + ",一路平安");
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_CAR_OUT_SUCCESS, carNum, "欢迎光临", "", "", carNum + ",一路平安", carNum);
         }
 
         //检查是否支付完成
@@ -233,9 +245,9 @@ public class CallCarServiceImpl implements ICallCarService {
                     = new BarrierGateControlDto(BarrierGateControlDto.ACTION_FEE_INFO, carNum, machineDto, 0, carInoutDtos.get(0), carNum + ",临时车,欢迎光临", "开门成功");
             sendInfo(barrierGateControlDto, machineDto.getLocationObjId(), machineDto);
             if (parkingAreaTextCacheDto != null) {
-                return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, parkingAreaTextCacheDto);
+                return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_TEMP_CAR_OUT_SUCCESS, parkingAreaTextCacheDto,carNum);
             }
-            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, carNum, "临时车辆,欢迎光临", "", "", carNum + ",临时车,欢迎光临");
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_TEMP_CAR_OUT_SUCCESS, carNum, "临时车辆,欢迎光临", "", "", carNum + ",临时车,欢迎光临", carNum);
         }
 
         TempCarFeeConfigDto tempCarFeeConfigDto = new TempCarFeeConfigDto();
@@ -247,7 +259,7 @@ public class CallCarServiceImpl implements ICallCarService {
             BarrierGateControlDto barrierGateControlDto
                     = new BarrierGateControlDto(BarrierGateControlDto.ACTION_FEE_INFO, carNum, machineDto, 0, carInoutDtos.get(0), "未配置临时车收费规则", "开门失败");
             sendInfo(barrierGateControlDto, machineDto.getLocationObjId(), machineDto);
-            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, "临时车无权限");
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_CAR_NO_PRI, "临时车无权限");
         }
 
         IComputeTempCarFee computeTempCarFee = ApplicationContextFactory.getBean(tempCarFeeConfigDtos.get(0).getRuleId(), IComputeTempCarFee.class);
@@ -258,8 +270,7 @@ public class CallCarServiceImpl implements ICallCarService {
             BarrierGateControlDto barrierGateControlDto
                     = new BarrierGateControlDto(BarrierGateControlDto.ACTION_FEE_INFO, carNum, machineDto, 0, carInoutDtos.get(0), carNum + "停车" + result.getHours() + "时" + result.getMin() + "分", "开门成功");
             sendInfo(barrierGateControlDto, machineDto.getLocationObjId(), machineDto);
-            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, carNum, "停车" + result.getHours() + "时" + result.getMin() + "分", "", "", carNum + ",临时车,欢迎光临");
-
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_CAR_OUT_SUCCESS, carNum, "停车" + result.getHours() + "时" + result.getMin() + "分", "", "", carNum + ",临时车,欢迎光临", carNum);
         }
 
         parkingAreaTextCacheDto = ParkingAreaTextFactory.getText(parkingAreaDtos, ParkingAreaTextFactory.TYPE_CD_TEMP_CAR_NO_PAY);
@@ -273,10 +284,15 @@ public class CallCarServiceImpl implements ICallCarService {
         sendInfo(barrierGateControlDto, machineDto.getLocationObjId(), machineDto);
 
         if (parkingAreaTextCacheDto != null) {
-            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, parkingAreaTextCacheDto);
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_CAR_OUT_ERROR, parkingAreaTextCacheDto,carNum);
         }
-        return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, "停车" + result.getHours() + "时" + result.getMin() + "分", "请交费" + result.getPayCharge() + "元", "", "",
-                carNum + ",停车" + result.getHours() + "时" + result.getMin() + "分,请交费" + result.getPayCharge() + "元");
+        ResultParkingAreaTextDto resultParkingAreaTextDto = new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_CAR_OUT_ERROR, "停车" + result.getHours() + "时" + result.getMin() + "分", "请交费" + result.getPayCharge() + "元", "", "",
+                carNum + ",停车" + result.getHours() + "时" + result.getMin() + "分,请交费" + result.getPayCharge() + "元", carNum);
+
+        resultParkingAreaTextDto.setHours(result.getHours());
+        resultParkingAreaTextDto.setMin(result.getMin());
+        resultParkingAreaTextDto.setPayCharge(result.getPayCharge());
+        return resultParkingAreaTextDto;
     }
 
 
@@ -437,7 +453,7 @@ public class CallCarServiceImpl implements ICallCarService {
             BarrierGateControlDto barrierGateControlDto
                     = new BarrierGateControlDto(BarrierGateControlDto.ACTION_FEE_INFO, carNum, machineDto, "此车为黑名单车辆" + carNum + ",禁止通行", "开门失败");
             sendInfo(barrierGateControlDto, machineDto.getLocationObjId(), machineDto);
-            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, "此车为黑名单车辆", carNum + ",禁止通行", "", "", "此车为黑名单车辆," + carNum + ",禁止通行");
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_CAR_BLACK, "此车为黑名单车辆", carNum + ",禁止通行", "", "", "此车为黑名单车辆," + carNum + ",禁止通行", carNum);
         }
 
         //判断车辆是否为月租车
@@ -455,7 +471,7 @@ public class CallCarServiceImpl implements ICallCarService {
             BarrierGateControlDto barrierGateControlDto
                     = new BarrierGateControlDto(BarrierGateControlDto.ACTION_FEE_INFO, carNum, machineDto, carNum + ",车已在场", "开门失败");
             sendInfo(barrierGateControlDto, machineDto.getLocationObjId(), machineDto);
-            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, carNum, "车已在场", "", "", carNum + ",车已在场");
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_CAR_INED, carNum, "车已在场", "", "", carNum + ",车已在场", carNum);
         }
 
         //2.0 进场
@@ -477,7 +493,7 @@ public class CallCarServiceImpl implements ICallCarService {
             BarrierGateControlDto barrierGateControlDto
                     = new BarrierGateControlDto(BarrierGateControlDto.ACTION_FEE_INFO, carNum, machineDto, resultDto.getMsg(), "开门失败");
             sendInfo(barrierGateControlDto, machineDto.getLocationObjId(), machineDto);
-            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_ERROR, carNum, "禁止入场", "", "", carNum + ",禁止入场");
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_CAR_IN_ERROR, carNum, "禁止入场", "", "", carNum + ",禁止入场", carNum);
         }
 
 
@@ -489,7 +505,7 @@ public class CallCarServiceImpl implements ICallCarService {
             BarrierGateControlDto barrierGateControlDto
                     = new BarrierGateControlDto(BarrierGateControlDto.ACTION_FEE_INFO, carNum, machineDto, "月租车," + carNum + ",欢迎光临", "开门成功");
             sendInfo(barrierGateControlDto, machineDto.getLocationObjId(), machineDto);
-            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, parkingAreaTextCacheDto);
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_MONTH_CAR_SUCCESS, parkingAreaTextCacheDto,carNum);
         }
         parkingAreaTextCacheDto = ParkingAreaTextFactory.getText(parkingAreaDtos, ParkingAreaTextFactory.TYPE_CD_TEMP_CAR_IN);
         //替换脚本中信息
@@ -498,13 +514,13 @@ public class CallCarServiceImpl implements ICallCarService {
             BarrierGateControlDto barrierGateControlDto
                     = new BarrierGateControlDto(BarrierGateControlDto.ACTION_FEE_INFO, carNum, machineDto, "临时车," + carNum + ",欢迎光临", "开门成功");
             sendInfo(barrierGateControlDto, machineDto.getLocationObjId(), machineDto);
-            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, parkingAreaTextCacheDto);
+            return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_TEMP_CAR_SUCCESS, parkingAreaTextCacheDto,carNum);
         }
 
         BarrierGateControlDto barrierGateControlDto
                 = new BarrierGateControlDto(BarrierGateControlDto.ACTION_FEE_INFO, carNum, machineDto, carNum + ",欢迎光临", "开门成功");
         sendInfo(barrierGateControlDto, machineDto.getLocationObjId(), machineDto);
-        return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, carNum, "欢迎光临", "", "", carNum + ",欢迎光临");
+        return new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_CAR_IN_SUCCESS, carNum, "欢迎光临", "", "", carNum + ",欢迎光临", carNum);
     }
 
     private String getDefaultPaId(List<ParkingAreaDto> parkingAreaDtos) {

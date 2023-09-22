@@ -2,7 +2,6 @@ package com.java110.things.Controller.machine;
 
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
-import com.java110.things.ws.BarrierGateControlWebSocketServer;
 import com.java110.things.constant.MachineConstant;
 import com.java110.things.entity.car.BarrierGateControlDto;
 import com.java110.things.entity.car.CarInoutDto;
@@ -17,6 +16,7 @@ import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
 import com.java110.things.util.DateUtil;
 import com.java110.things.util.SeqUtil;
+import com.java110.things.ws.BarrierGateControlWebSocketServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -210,9 +210,9 @@ public class MachineController extends BaseController {
         JSONObject paramObj = super.getParamJson(paramIn);
 
         Assert.hasKeyAndValue(paramObj, "machineId", "请求报文中未包含硬件ID");
-        ResultParkingAreaTextDto  parkingAreaTextDto
-                = new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS,
-                "欢迎光临", "", "","",  "欢迎光临");
+        ResultParkingAreaTextDto parkingAreaTextDto
+                = new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_CAR_IN_SUCCESS,
+                "欢迎光临", "", "", "", "欢迎光临", "");
 
         ResultDto resultDto = machineServiceImpl.openDoor(BeanConvertUtil.covertBean(paramObj, MachineDto.class), parkingAreaTextDto);
         return super.createResponseEntity(resultDto);
@@ -468,13 +468,13 @@ public class MachineController extends BaseController {
         if ("1101".equals(paramObj.getString("type"))) {
             uploadcarin(machineDto, paramObj);
             parkingAreaTextDto
-                    = new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, paramObj.getString("carNum"),
-                    "欢迎光临", "", "", paramObj.getString("carNum") + ",欢迎光临");
+                    = new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_CAR_IN_SUCCESS, paramObj.getString("carNum"),
+                    "欢迎光临", "", "", paramObj.getString("carNum") + ",欢迎光临", paramObj.getString("carNum"));
         } else {
             uploadcarout(machineDto, paramObj);
             parkingAreaTextDto
-                    = new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, paramObj.getString("carNum"),
-                    "一路平安", "", "", paramObj.getString("carNum") + ",一路平安");
+                    = new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_CAR_OUT_SUCCESS, paramObj.getString("carNum"),
+                    "一路平安", "", "", paramObj.getString("carNum") + ",一路平安", paramObj.getString("carNum"));
         }
         resultDto = machineServiceImpl.openDoor(machineDto, parkingAreaTextDto);
 
@@ -518,9 +518,9 @@ public class MachineController extends BaseController {
         carInoutDto.setPaId(machineDto.getLocationObjId());
         carInoutDto.setState("3");
         carInoutDto.setRemark("手工出场");
-        if(acceptJson.containsKey("payCharge")){
+        if (acceptJson.containsKey("payCharge")) {
             carInoutDto.setPayCharge(acceptJson.getString("payCharge"));
-        }else{
+        } else {
             carInoutDto.setPayCharge(acceptJson.getString("amount"));
         }
         carInoutDto.setRealCharge(acceptJson.getString("amount"));

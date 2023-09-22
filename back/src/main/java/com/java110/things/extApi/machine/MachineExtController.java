@@ -300,13 +300,13 @@ public class MachineExtController extends BaseController implements OnProcessLis
         if ("1101".equals(paramObj.getString("type"))) {
             uploadcarin(machineDto, paramObj);
             parkingAreaTextDto
-                    = new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, paramObj.getString("carNum"),
-                    "欢迎光临", "", "", paramObj.getString("carNum") + ",欢迎光临");
+                    = new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_CAR_IN_SUCCESS, paramObj.getString("carNum"),
+                    "欢迎光临", "", "", paramObj.getString("carNum") + ",欢迎光临", paramObj.getString("carNum"));
         } else {
             uploadcarout(machineDto, paramObj);
             parkingAreaTextDto
-                    = new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_SUCCESS, paramObj.getString("carNum"),
-                    "一路平安", "", "", paramObj.getString("carNum") + ",一路平安");
+                    = new ResultParkingAreaTextDto(ResultParkingAreaTextDto.CODE_CAR_OUT_SUCCESS, paramObj.getString("carNum"),
+                    "一路平安", "", "", paramObj.getString("carNum") + ",一路平安", paramObj.getString("carNum"));
         }
         resultDto = machineServiceImpl.openDoor(machineDto, parkingAreaTextDto);
 
@@ -528,7 +528,7 @@ public class MachineExtController extends BaseController implements OnProcessLis
      * @param callId
      */
     private void prolongedSurvival(String callId) {
-        RedisCacheFactory.setValue(callId+"_callId", callId, 60);
+        RedisCacheFactory.setValue(callId + "_callId", callId, 60);
 
         String calls = RedisCacheFactory.getValue("VEDIO_CALLS");
         JSONArray callIds = null;
