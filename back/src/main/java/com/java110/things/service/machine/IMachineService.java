@@ -106,4 +106,5 @@ public interface IMachineService {
      * @return
      */
     ResultDto getQRcode(UserFaceDto userFaceDto) throws Exception;
+
 }

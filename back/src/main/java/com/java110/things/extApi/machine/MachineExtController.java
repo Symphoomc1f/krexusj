@@ -15,9 +15,9 @@
  */
 package com.java110.things.extApi.machine;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
-import com.java110.things.ws.BarrierGateControlWebSocketServer;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.car.BarrierGateControlDto;
 import com.java110.things.entity.car.CarInoutDto;
@@ -25,21 +25,39 @@ import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.parkingArea.ResultParkingAreaTextDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.entity.sip.Device;
+import com.java110.things.entity.sip.DeviceChannel;
+import com.java110.things.entity.sip.PushStreamDevice;
+import com.java110.things.factory.RedisCacheFactory;
 import com.java110.things.service.car.ICarInoutService;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.service.machine.IMachineService;
-import com.java110.things.util.Assert;
-import com.java110.things.util.BeanConvertUtil;
-import com.java110.things.util.DateUtil;
-import com.java110.things.util.SeqUtil;
+import com.java110.things.sip.Server;
+import com.java110.things.sip.SipLayer;
+import com.java110.things.sip.TCPServer;
+import com.java110.things.sip.UDPServer;
+import com.java110.things.sip.callback.OnProcessListener;
+import com.java110.things.sip.message.config.ConfigProperties;
+import com.java110.things.sip.message.session.MessageManager;
+import com.java110.things.sip.message.session.SyncFuture;
+import com.java110.things.sip.remux.Observer;
+import com.java110.things.sip.remux.RtmpPusher;
+import com.java110.things.sip.session.PushStreamDeviceManager;
+import com.java110.things.util.*;
+import com.java110.things.ws.BarrierGateControlWebSocketServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.sip.Dialog;
+import javax.sip.SipException;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 设备对外 控制类
@@ -50,7 +68,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(path = "/extApi/machine")
-public class MachineExtController extends BaseController {
+public class MachineExtController extends BaseController implements OnProcessListener {
 
     @Autowired
     IMachineService machineServiceImpl;
@@ -60,6 +78,16 @@ public class MachineExtController extends BaseController {
 
     @Autowired
     private ICarInoutService carInoutServiceImpl;
+
+    @Autowired
+    private SipLayer mSipLayer;
+
+    @Autowired
+    private ConfigProperties configProperties;
+
+    private MessageManager mMessageManager = MessageManager.getInstance();
+
+    private PushStreamDeviceManager mPushStreamDeviceManager = PushStreamDeviceManager.getInstance();
 
     /**
      * 添加设备信息
@@ -321,9 +349,9 @@ public class MachineExtController extends BaseController {
         carInoutDto.setPaId(machineDto.getLocationObjId());
         carInoutDto.setState("3");
         carInoutDto.setRemark("手工出场");
-        if(acceptJson.containsKey("payCharge")){
+        if (acceptJson.containsKey("payCharge")) {
             carInoutDto.setPayCharge(acceptJson.getString("payCharge"));
-        }else{
+        } else {
             carInoutDto.setPayCharge(acceptJson.getString("amount"));
         }
         carInoutDto.setRealCharge(acceptJson.getString("amount"));
@@ -372,5 +400,195 @@ public class MachineExtController extends BaseController {
         jsonObject.put("code", 0);
         jsonObject.put("msg", "成功");
         return jsonObject;
+    }
+
+    /**
+     * 播放视频
+     * <p>
+     *
+     * @param reqParam {
+     *                 "extMachineId": "702020042194860039"
+     *                 }
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/playVideo", method = RequestMethod.POST)
+    public ResponseEntity<String> playVideo(@RequestBody String reqParam) throws Exception {
+
+        JSONObject paramIn = JSONObject.parseObject(reqParam);
+        ///play/{deviceId}/{channelId}/{mediaProtocol}
+        Assert.hasKeyAndValue(paramIn, "deviceId", "未包含deviceId");
+        Assert.hasKeyAndValue(paramIn, "channelId", "未包含channelId");
+        Assert.hasKeyAndValue(paramIn, "mediaProtocol", "未包含mediaProtocol");
+
+        String deviceId = paramIn.getString("deviceId");
+        String channelId = paramIn.getString("channelId");
+        String mediaProtocol = paramIn.getString("mediaProtocol");
+
+        JSONObject result = new JSONObject();
+        try {
+            //1.从redis查找设备，如果不存在，返回离线
+            String deviceStr = RedisUtil.get(deviceId);
+            if (StringUtils.isEmpty(deviceStr)) {
+                //throw new IllegalArgumentException("设备离线");
+                return ResultDto.error("设备离线");
+            }
+            //2.设备在线，先检查是否正在推流
+            //如果正在推流，直接返回rtmp地址
+            String streamName = StreamNameUtils.play(deviceId, channelId);
+            PushStreamDevice pushStreamDevice = mPushStreamDeviceManager.get(streamName);
+            if (pushStreamDevice != null) {
+                result.put("address", configProperties.getPullRtmpAddress().concat(streamName));
+                result.put("callId", pushStreamDevice.getCallId());
+                prolongedSurvival(pushStreamDevice.getCallId());
+                return ResultDto.createResponseEntity(result);
+            }
+            //检查通道是否存在
+            Device device = JSONObject.parseObject(deviceStr, Device.class);
+            Map<String, DeviceChannel> channelMap = device.getChannelMap();
+            if (channelMap == null || !channelMap.containsKey(channelId)) {
+                //throw new IllegalArgumentException("通道不存在");
+                return ResultDto.error("通道不存在");
+            }
+            boolean isTcp = mediaProtocol.toUpperCase().equals(SipLayer.TCP);
+            //3.下发指令
+            String callId = IDUtils.id();
+            //getPort可能耗时，在外面调用。
+            int port = mSipLayer.getPort();
+            String ssrc = mSipLayer.getSsrc(true);
+            mSipLayer.sendInvite(device, SipLayer.SESSION_NAME_PLAY, callId, channelId, port, ssrc, isTcp);
+            //4.等待指令响应
+            SyncFuture<?> receive = mMessageManager.receive(callId);
+            Dialog response = (Dialog) receive.get(3, TimeUnit.SECONDS);
+
+            //4.1响应成功，创建推流session
+            if (response != null) {
+                String address = configProperties.getPushRtmpAddress().concat(streamName);
+                Server server = isTcp ? new TCPServer() : new UDPServer();
+                Observer observer = new RtmpPusher(address, callId);
+
+                server.subscribe(observer);
+                pushStreamDevice = new PushStreamDevice(deviceId, Integer.valueOf(ssrc), callId, streamName, port, isTcp, server,
+                        observer, address);
+
+                pushStreamDevice.setDialog(response);
+                server.startServer(pushStreamDevice.getFrameDeque(), Integer.valueOf(ssrc), port, false);
+                observer.startRemux();
+
+                observer.setOnProcessListener(this);
+                mPushStreamDeviceManager.put(streamName, callId, Integer.valueOf(ssrc), pushStreamDevice);
+                //result = GBResult.ok(new MediaData(configProperties.getPullRtmpAddress().concat(streamName), pushStreamDevice.getCallId()));
+                result.put("address", configProperties.getPullRtmpAddress().concat(streamName));
+                result.put("callId", pushStreamDevice.getCallId());
+                prolongedSurvival(pushStreamDevice.getCallId());
+            } else {
+                //3.2响应失败，删除推流session
+                mMessageManager.remove(callId);
+                //throw new IllegalArgumentException("摄像头 指令未响应");
+                return ResultDto.error("摄像头 指令未响应");
+            }
+        } catch (Exception e) {
+            //logger.error("系统异常", e);
+            throw new IllegalArgumentException("系统异常");
+        }
+        return ResultDto.createResponseEntity(result);
+    }
+
+    /**
+     * 存活检测
+     * <p>
+     *
+     * @param reqParam {
+     *                 "extMachineId": "702020042194860039"
+     *                 }
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/heartbeatVideo", method = RequestMethod.POST)
+    public ResponseEntity<String> heartbeatVideo(@RequestBody String reqParam) throws Exception {
+
+        JSONObject paramIn = JSONObject.parseObject(reqParam);
+        ///play/{deviceId}/{channelId}/{mediaProtocol}
+        Assert.hasKeyAndValue(paramIn, "callIds", "未包含callIds");
+        String callIds = paramIn.getString("callIds");
+
+        for (String callId : callIds.split(",")) {
+            if (StringUtil.isEmpty(callId)) {
+                continue;
+            }
+            prolongedSurvival(callId);
+        }
+
+        return ResultDto.success();
+    }
+
+    /**
+     * 延长存活时间
+     *
+     * @param callId
+     */
+    private void prolongedSurvival(String callId) {
+        RedisCacheFactory.setValue(callId+"_callId", callId, 60);
+
+        String calls = RedisCacheFactory.getValue("VEDIO_CALLS");
+        JSONArray callIds = null;
+        if (StringUtil.isEmpty(calls)) {
+            callIds = JSONArray.parseArray(calls);
+        } else {
+            callIds = new JSONArray();
+            callIds.add(callId);
+        }
+
+        if (!hasCallIn(callIds, callId)) {
+            callIds.add(callId);
+        }
+
+        RedisCacheFactory.setValue("VEDIO_CALLS", callIds.toJSONString());
+    }
+
+    private boolean hasCallIn(JSONArray callIds, String callId) {
+        String tmpCallId = "";
+        for (int callIndex = 0; callIndex < callIds.size(); callIndex++) {
+            tmpCallId = callIds.getString(callIndex);
+            if (tmpCallId.equals(callId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 重启设备
+     * <p>
+     *
+     * @param reqParam {
+     *                 "extMachineId": "702020042194860039"
+     *                 }
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/byeVideo", method = RequestMethod.POST)
+    public ResponseEntity<String> byeVideo(@RequestBody String reqParam) throws Exception {
+
+        JSONObject paramIn = JSONObject.parseObject(reqParam);
+        ///play/{deviceId}/{channelId}/{mediaProtocol}
+        Assert.hasKeyAndValue(paramIn, "callId", "未包含callId");
+        String callId = paramIn.getString("callId");
+        try {
+            mSipLayer.sendBye(callId);
+        } catch (SipException e) {
+            e.printStackTrace();
+            return ResultDto.error(e.getLocalizedMessage());
+        }
+        return ResultDto.success();
+    }
+
+    @Override
+    public void onError(String callId) {
+        try {
+            mSipLayer.sendBye(callId);
+        } catch (SipException e) {
+            e.printStackTrace();
+        }
     }
 }

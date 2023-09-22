@@ -65,6 +65,26 @@ public class RedisCacheFactory extends BaseCache {
                 releaseResource(redis);
             }
         }
+    }
+
+    /**
+     * 保存数据
+     *
+     * @param key   token 主键ID
+     * @param value 用户ID
+     */
+    public static void setValue(String key, String value) {
+
+        Jedis redis = null;
+        try {
+            redis = getJedis();
+            redis.select(DEFAULT_DB);
+            redis.set(key, value);
+        } finally {
+            if (redis != null) {
+                releaseResource(redis);
+            }
+        }
 
     }
 
