@@ -536,7 +536,7 @@ public class MachineExtController extends BaseController implements OnProcessLis
 
         String calls = RedisCacheFactory.getValue("VEDIO_CALLS");
         JSONArray callIds = null;
-        if (StringUtil.isEmpty(calls)) {
+        if (!StringUtil.isEmpty(calls)) {
             callIds = JSONArray.parseArray(calls);
         } else {
             callIds = new JSONArray();
