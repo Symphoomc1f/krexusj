@@ -18,6 +18,7 @@ package com.java110.things.extApi.machine;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.Controller.BaseController;
+import com.java110.things.adapt.car.zeroOne.ZeroOneCarSocketProcessAdapt;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.car.BarrierGateControlDto;
 import com.java110.things.entity.car.CarInoutDto;
@@ -45,6 +46,8 @@ import com.java110.things.sip.remux.RtmpPusher;
 import com.java110.things.sip.session.PushStreamDeviceManager;
 import com.java110.things.util.*;
 import com.java110.things.ws.BarrierGateControlWebSocketServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -69,6 +72,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping(path = "/extApi/machine")
 public class MachineExtController extends BaseController implements OnProcessListener {
+    private static Logger logger = LoggerFactory.getLogger(MachineExtController.class);
 
     @Autowired
     IMachineService machineServiceImpl;
@@ -488,7 +492,7 @@ public class MachineExtController extends BaseController implements OnProcessLis
                 return ResultDto.error("摄像头 指令未响应");
             }
         } catch (Exception e) {
-            //logger.error("系统异常", e);
+            logger.error("系统异常", e);
             throw new IllegalArgumentException("系统异常");
         }
         return ResultDto.createResponseEntity(result);
