@@ -458,7 +458,7 @@ public class MachineExtController extends BaseController implements OnProcessLis
             //3.下发指令
             String callId = IDUtils.id();
             //getPort可能耗时，在外面调用。
-            int port = mSipLayer.getPort();
+            int port = mSipLayer.getPort(isTcp);
             String ssrc = mSipLayer.getSsrc(true);
             mSipLayer.sendInvite(device, SipLayer.SESSION_NAME_PLAY, callId, channelId, port, ssrc, isTcp);
             //4.等待指令响应
