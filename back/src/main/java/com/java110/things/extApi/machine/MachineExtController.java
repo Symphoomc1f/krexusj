@@ -484,6 +484,8 @@ public class MachineExtController extends BaseController implements OnProcessLis
                 //result = GBResult.ok(new MediaData(configProperties.getPullRtmpAddress().concat(streamName), pushStreamDevice.getCallId()));
                 result.put("address", configProperties.getPullRtmpAddress().concat(streamName));
                 result.put("callId", pushStreamDevice.getCallId());
+                RedisCacheFactory.setValue(port + "_port", callId);
+
                 prolongedSurvival(pushStreamDevice.getCallId());
             } else {
                 //3.2响应失败，删除推流session
