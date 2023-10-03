@@ -65,10 +65,14 @@ public class ClearExpireJwtThread implements Runnable {
         newCallIds = callIds;
         String tmpCallId;
         String value;
+        String pushStream;
         for (int callIndex = 0; callIndex < callIds.size(); callIndex++) {
             tmpCallId = callIds.getString(callIndex);
             value = RedisCacheFactory.getValue(tmpCallId + "_callId");
-            if (StringUtil.isEmpty(value)) {
+            //摄像头推流标识
+            pushStream = RedisCacheFactory.getValue( tmpCallId+"_pushStream");
+
+            if (StringUtil.isEmpty(value)|| StringUtil.isEmpty(pushStream)) {
                 try {
                     sipLayer.sendBye(tmpCallId);
                 } catch (SipException e) {

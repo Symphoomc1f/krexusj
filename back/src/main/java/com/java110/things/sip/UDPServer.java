@@ -38,7 +38,7 @@ public class UDPServer extends Server {
                     .handler(new ChannelInitializer<NioDatagramChannel>() { //
                         @Override
                         public void initChannel(NioDatagramChannel ch) throws Exception {
-                            ch.pipeline().addLast(new UDPHandler(ssrc, checkSsrc, UDPServer.this));
+                            ch.pipeline().addLast(new UDPHandler(ssrc, checkSsrc, UDPServer.this,port));
                         }
                     });
             this.log.info("UDP服务启动成功port:{}", port);

@@ -1,9 +1,12 @@
 package com.java110.things.sip.handler;
 
+import com.java110.things.factory.RedisCacheFactory;
 import com.java110.things.sip.codec.Packet;
 import com.java110.things.sip.codec.Parser;
 import com.java110.things.util.BitUtils;
+import com.java110.things.util.DateUtil;
 import com.java110.things.util.HexStringUtils;
+import com.java110.things.util.StringUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -11,6 +14,7 @@ import io.netty.channel.socket.DatagramPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -49,10 +53,15 @@ public class UDPHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
     private Parser mParser;
 
-    public UDPHandler(int mSsrc, boolean mIsCheckSsrc, Parser parser) {
+    private int port ;
+
+    private Date preDate;
+
+    public UDPHandler(int mSsrc, boolean mIsCheckSsrc, Parser parser,int port) {
         this.mSsrc = mSsrc;
         this.mIsCheckSsrc = mIsCheckSsrc;
         this.mParser = parser;
+        this.port = port;
     }
 
     @Override
@@ -65,7 +74,9 @@ public class UDPHandler extends SimpleChannelInboundHandler<DatagramPacket> {
         }
         byte[] copyData = new byte[readableBytes];
         byteBuf.readBytes(copyData);
-        log.info("UDP接受到帧数据>>> {}",HexStringUtils.toHexString(copyData));
+
+        isPushStream();
+        //log.info("UDP接受到帧数据>>> {}",HexStringUtils.toHexString(copyData));
 
         int seq = BitUtils.byte2ToInt(copyData[2], copyData[3]);
         int length = copyData.length;
@@ -137,5 +148,27 @@ public class UDPHandler extends SimpleChannelInboundHandler<DatagramPacket> {
         } finally {
             //release(msg);
         }
+    }
+
+    private void isPushStream() {
+        Date nowDate = DateUtil.getCurrentDate();
+
+        if(preData == null){
+            preDate = nowDate;
+        }
+
+        long subTime = nowDate.getTime() - preDate.getTime();
+
+        if(subTime < 20 *1000 && subTime > 0){
+            return ;
+        }
+
+        preDate = nowDate;
+        String callId = RedisCacheFactory.getValue(this.port+"_port");
+        if(StringUtil.isEmpty(callId)){
+            return ;
+        }
+        RedisCacheFactory.setValue(callId+"_pushStream",callId,30);
+
     }
 }
