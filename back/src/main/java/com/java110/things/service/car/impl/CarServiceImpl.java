@@ -74,7 +74,7 @@ public class CarServiceImpl implements ICarService {
     private ResultDto addTransactorOtherCar(CarDto carDto) throws Exception {
         // 查询停车场对应设备 是否为 第三方平台
         MachineDto machineDto = new MachineDto();
-        machineDto.setLocationObjId(carDto.getExtPaId());
+        machineDto.setLocationObjId(carDto.getExtCarId());
         machineDto.setLocationType(MachineDto.LOCATION_TYPE_PARKING_AREA);
         List<MachineDto> machineDtos = machineService.queryMachines(machineDto);
         if (machineDtos == null || machineDtos.size() < 1) {
