@@ -49,6 +49,7 @@ public class RtmpPusher extends Observer{
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+			//pos.connect(pis);
 		}
 	}
 
@@ -89,6 +90,7 @@ public class RtmpPusher extends Observer{
 			grabber = new FFmpegFrameGrabber(pis);
 			//阻塞式，直到通道有数据
 			grabber.start();
+			//grabber.setOption();
 			recorder = new CustomFFmpegFrameRecorder(address,1280,720,0);
 			recorder.setInterleaved(true);
 			recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
