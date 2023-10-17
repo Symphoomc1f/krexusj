@@ -7,7 +7,9 @@ import com.java110.things.dao.ICommunityServiceDao;
 import com.java110.things.entity.PageDto;
 import com.java110.things.entity.car.CarDto;
 import com.java110.things.entity.community.CommunityDto;
+import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
+import com.java110.things.factory.AccessControlProcessFactory;
 import com.java110.things.service.community.ICommunityService;
 import com.java110.things.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +46,7 @@ public class CommunityServiceImpl implements ICommunityService {
     @Override
     public ResultDto saveCommunity(CommunityDto communityDto) throws Exception {
         int count = communityServiceDao.saveCommunity(communityDto);
+
         ResultDto resultDto = null;
         JSONObject data = new JSONObject();
         if (StringUtil.isEmpty(communityDto.getTaskId())) {
