@@ -36,6 +36,7 @@ public class CommunityDto extends PageDto implements Serializable {
     private String extCommunityId;
     private String thirdCommunityId;
 
+
     private String appId;
 
     public String getCommunityId() {
@@ -141,4 +142,5 @@ public class CommunityDto extends PageDto implements Serializable {
     public void setThirdCommunityId(String thirdCommunityId) {
         this.thirdCommunityId = thirdCommunityId;
     }
+
 }

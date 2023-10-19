@@ -13,6 +13,8 @@ public class SxCommunityDto {
     private String viCod;
 
     private String locationId;
+
+    private String dDtId;
     public String getViId() {
         return viId;
     }
@@ -91,5 +93,13 @@ public class SxCommunityDto {
 
     public void setLocationId(String locationId) {
         this.locationId = locationId;
+    }
+
+    public String getdDtId() {
+        return dDtId;
+    }
+
+    public void setdDtId(String dDtId) {
+        this.dDtId = dDtId;
     }
 }

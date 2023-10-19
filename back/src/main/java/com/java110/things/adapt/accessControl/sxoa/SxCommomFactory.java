@@ -26,6 +26,7 @@ public class SxCommomFactory {
     public static final String GET_COMMUNITY = "/v1.0/village/view";
     public static final String ADD_COMMUNITY = "/v1.0/village/create";
     public static final String FACEFEATURE = "/v1.0/facefeature/create";
+    public static final String ADD_DEVICES_TYPE = "/v1.0/devicestype/create";
 
     public static final String FACE_URL = "ACCESS_CONTROL_FACE_URL";
     //图片后缀
@@ -89,7 +90,14 @@ public class SxCommomFactory {
         List<CommunityDto> communityDtos = communityService.queryCommunitys(communityDto);
 
         Assert.listOnlyOne(communityDtos, "小区不存在");
-        sxCommunityDto.setLocationId(communityDtos.get(0).getThirdCommunityId());
+        String thirdCommunityId = communityDtos.get(0).getThirdCommunityId();
+
+        if (thirdCommunityId.contains("::")) {
+            String[] thirds = thirdCommunityId.split("::");
+            sxCommunityDto.setLocationId(thirds[0]);
+            sxCommunityDto.setdDtId(thirds[1]);
+        }
+
 
         return sxCommunityDto;
     }
@@ -116,9 +124,31 @@ public class SxCommomFactory {
 
         String thirdCommunityId = paramOut.getJSONObject("data").getJSONObject("group").getString("locationId");
 
+        //建位置
+        paramIn = new JSONObject();
+        paramIn.put("dtParentId", 0);
+        paramIn.put("dtCode", machineDto.getCommunityId());
+        paramIn.put("dtName", "门禁");
+        paramIn.put("dtInfo", "门禁");
+
+        httpEntity = new HttpEntity(paramIn.toJSONString(), getHeader(outRestTemplate));
+        responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + ADD_DEVICES_TYPE, HttpMethod.POST, httpEntity, String.class);
+
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            throw new IllegalStateException("请求sign失败" + responseEntity);
+        }
+
+        paramOut = JSONObject.parseObject(responseEntity.getBody());
+
+        if (paramOut.getInteger("code") != 0) {
+            throw new IllegalStateException("添加小区失败" + responseEntity);
+        }
+
+        String dtId = paramOut.getJSONObject("data").getString("dtId");
+
         CommunityDto communityDto = new CommunityDto();
         communityDto.setCommunityId(machineDto.getCommunityId());
-        communityDto.setThirdCommunityId(thirdCommunityId);
+        communityDto.setThirdCommunityId(thirdCommunityId + "::" + dtId);
         try {
             communityService.updateCommunity(communityDto);
         } catch (Exception e) {
