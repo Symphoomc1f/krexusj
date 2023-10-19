@@ -49,7 +49,7 @@ public interface IMachineFaceService {
      * @return
      * @throws Exception
      */
-    List<MachineFaceDto> queryMachineFace(MachineFaceDto machineFaceDto) throws Exception;
+    List<MachineFaceDto> queryMachineFace(MachineFaceDto machineFaceDto) ;
 
 
     /**

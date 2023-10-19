@@ -14,6 +14,7 @@ import com.java110.things.factory.ImageFactory;
 import com.java110.things.factory.MappingCacheFactory;
 import com.java110.things.factory.NotifyAccessControlFactory;
 import com.java110.things.service.community.ICommunityService;
+import com.java110.things.service.machine.IMachineFaceService;
 import com.java110.things.service.machine.IMachineService;
 import com.java110.things.util.*;
 import org.apache.commons.lang3.StringUtils;
@@ -55,6 +56,10 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
     @Autowired
     private IMachineService machineService;
 
+    @Autowired
+    private IMachineFaceService machineFaceService;
+
+
     public static final long START_TIME = new Date().getTime() - 1000 * 60 * 60;
     public static final long END_TIME = new Date().getTime() + 1000 * 60 * 60 * 24 * 365;
 
@@ -73,9 +78,13 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
     public static final String ADD_PRIVILET_BIND_MACHINE = "/v1.0/devicebind/bind";
     public static final String DELETE_PRIVILET_BIND_MACHINE = "/v1.0/devicebind/unbind";
     public static final String ADD_PRIVILET_BIND_USER = " /v1.0/userfeature/bind";
+    public static final String ADD_USER = "/v1.0/userfeature/add";
+    public static final String UPDATE_USER = "/v1.0/userfeature/update";
+    public static final String DELETE_USER = "/v1.0/userfeature/delete";
+    public static final String ADD_KEY = "/v1.0/keys/create";
 
 
-    public static final String CMD_OPEN_DOOR = "/api/device/bs/face/remoteOpenDoor"; // 开门
+    public static final String CMD_OPEN_DOOR = "/v1.0/opendoor/mobile"; // 开门
 
     public static final String CMD_REBOOT = "/api/device/bs/face/deviceReboot";// 重启设备
 
@@ -112,19 +121,88 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
     @Override
     public ResultDto addFace(MachineDto machineDto, UserFaceDto userFaceDto) {
 
-        FaceFeatureResultDto faceFeatureResultDto = SxCommomFactory.facefeature(outRestTemplate, machineDto, communityServiceImpl, userFaceDto);
-        //添加设备
+        //判断人员是不是 添加过
+        MachineFaceDto machineFaceDto = new MachineFaceDto();
+        machineFaceDto.setUserId(userFaceDto.getUserId());
+        List<MachineFaceDto> machineFaceDtos = machineFaceService.queryMachineFace(machineFaceDto);
+        Long id = 0L;
+        if (machineFaceDtos == null || machineFaceDtos.size() < 1) {
+            FaceFeatureResultDto faceFeatureResultDto = SxCommomFactory.facefeature(outRestTemplate, machineDto, communityServiceImpl, userFaceDto);
+            //添加设备
+            JSONObject paramIn = new JSONObject();
+            paramIn.put("residentId", userFaceDto.getUserId());
+            paramIn.put("userId", faceFeatureResultDto.getFfUserId());
+            paramIn.put("key", faceFeatureResultDto.getFfKey());
+            paramIn.put("name", userFaceDto.getName());
+            paramIn.put("roomNo", userFaceDto.getName() + "-1-1");
+            paramIn.put("status", 1);
+            paramIn.put("type", 1);
+
+            HttpEntity httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
+            ResponseEntity<String> responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + ADD_USER, HttpMethod.POST, httpEntity, String.class);
+
+            if (responseEntity.getStatusCode() != HttpStatus.OK) {
+                throw new IllegalStateException("请求添加设备失败" + responseEntity);
+            }
+
+            JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+
+            if (paramOut.getInteger("code") != 0) {
+                throw new IllegalStateException("添加设备失败" + responseEntity);
+            }
+            id = paramOut.getJSONObject("data").getLong("id");
+
+            //添加钥匙
+
+            paramIn = new JSONObject();
+            paramIn.put("userFeatureId", id);
+            paramIn.put("keyType", 1);
+            paramIn.put("keyValue", userFaceDto.getLink());
+            paramIn.put("keyValidType", 1);
+            paramIn.put("status", 1);
+            httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
+            responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + ADD_KEY, HttpMethod.POST, httpEntity, String.class);
+
+            if (responseEntity.getStatusCode() != HttpStatus.OK) {
+                throw new IllegalStateException("请求添加钥匙失败" + responseEntity);
+            }
+
+            paramOut = JSONObject.parseObject(responseEntity.getBody());
+
+            if (paramOut.getInteger("code") != 0) {
+                throw new IllegalStateException("添加钥匙失败" + responseEntity);
+            }
+
+            paramIn = new JSONObject();
+            paramIn.put("userFeatureId", id);
+            paramIn.put("keyType", 2);
+            paramIn.put("keyValue", faceFeatureResultDto.getFfKey());
+            paramIn.put("keyValidType", 1);
+            paramIn.put("status", 1);
+            httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
+            responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + ADD_KEY, HttpMethod.POST, httpEntity, String.class);
+
+            if (responseEntity.getStatusCode() != HttpStatus.OK) {
+                throw new IllegalStateException("请求添加钥匙失败" + responseEntity);
+            }
+
+            paramOut = JSONObject.parseObject(responseEntity.getBody());
+
+            if (paramOut.getInteger("code") != 0) {
+                throw new IllegalStateException("添加钥匙失败" + responseEntity);
+            }
+
+        } else {
+            id = Long.parseLong(machineFaceDtos.get(0).getExtUserId());
+        }
+
         JSONObject paramIn = new JSONObject();
-        paramIn.put("residentId", userFaceDto.getUserId());
-        paramIn.put("userId", faceFeatureResultDto.getFfUserId());
-        paramIn.put("key", faceFeatureResultDto.getFfKey());
-        paramIn.put("name", userFaceDto.getName());
-        paramIn.put("roomNo", userFaceDto.getName() + "-1-1");
-        paramIn.put("status", 1);
+        paramIn.put("id", machineDto.getThirdMachineId());
+        paramIn.put("userFeatureId", id);
         paramIn.put("type", 1);
 
         HttpEntity httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
-        ResponseEntity<String> responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + ADD_MACHINE, HttpMethod.POST, httpEntity, String.class);
+        ResponseEntity<String> responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + ADD_PRIVILET_BIND_USER, HttpMethod.POST, httpEntity, String.class);
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求添加设备失败" + responseEntity);
@@ -136,25 +214,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
             throw new IllegalStateException("添加设备失败" + responseEntity);
         }
 
-        Long id = paramOut.getJSONObject("data").getLong("id");
-
-        paramIn = new JSONObject();
-        paramIn.put("id", machineDto.getThirdMachineId());
-        paramIn.put("userFeatureId", id);
-        paramIn.put("type", 1);
-
-        httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
-        responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + ADD_PRIVILET_BIND_USER, HttpMethod.POST, httpEntity, String.class);
-
-        if (responseEntity.getStatusCode() != HttpStatus.OK) {
-            throw new IllegalStateException("请求添加设备失败" + responseEntity);
-        }
-
-        paramOut = JSONObject.parseObject(responseEntity.getBody());
-
-        if (paramOut.getInteger("code") != 0) {
-            throw new IllegalStateException("添加设备失败" + responseEntity);
-        }
+        userFaceDto.setExtUserId(id + "");
 
         return new ResultDto(paramOut.getIntValue("code"), paramOut.getString("msg"));
     }
@@ -163,8 +223,15 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
     @Override
     public ResultDto updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
         FaceFeatureResultDto faceFeatureResultDto = SxCommomFactory.facefeature(outRestTemplate, machineDto, communityServiceImpl, userFaceDto);
+
+        MachineFaceDto machineFaceDto = new MachineFaceDto();
+        machineFaceDto.setUserId(userFaceDto.getUserId());
+        List<MachineFaceDto> machineFaceDtos = machineFaceService.queryMachineFace(machineFaceDto);
+
+        Assert.listOnlyOne(machineFaceDtos, "用户未被添加过");
         //添加设备
         JSONObject paramIn = new JSONObject();
+        paramIn.put("id", machineFaceDtos.get(0).getExtUserId());
         paramIn.put("residentId", userFaceDto.getUserId());
         paramIn.put("userId", faceFeatureResultDto.getFfUserId());
         paramIn.put("key", faceFeatureResultDto.getFfKey());
@@ -174,7 +241,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
         paramIn.put("type", 1);
 
         HttpEntity httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
-        ResponseEntity<String> responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + ADD_MACHINE, HttpMethod.POST, httpEntity, String.class);
+        ResponseEntity<String> responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + UPDATE_USER, HttpMethod.POST, httpEntity, String.class);
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求添加设备失败" + responseEntity);
@@ -190,47 +257,27 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
 
     @Override
     public ResultDto deleteFace(MachineDto machineDto, HeartbeatTaskDto heartbeatTaskDto) {
-        //刷入外部编码
         MachineFaceDto machineFaceDto = new MachineFaceDto();
         machineFaceDto.setUserId(heartbeatTaskDto.getTaskinfo());
-        machineFaceDto.setMachineCode(machineDto.getMachineCode());
-        List<MachineFaceDto> faceDtos = callAccessControlServiceImpl.queryMachineFaces(machineFaceDto);
-        if (faceDtos.size() < 1) {
-            throw new IllegalArgumentException("该人脸还没有添加");
-        }
-        String appId = MappingCacheFactory.getValue("appId");
-        HttpHeaders httpHeaders = SxCommomFactory.getHeader(outRestTemplate);
-        HttpEntity httpEntity = new HttpEntity("", httpHeaders);
-        //判断人员是否存在
-        String url = MappingCacheFactory.getValue("BISEN_URL")
-                + "/api/device/hqvtPerson/page?appId=" + appId + "&personGuid=" + faceDtos.get(0).getExtUserId();
-        logger.debug("判断人员是否存在" + url);
+        List<MachineFaceDto> machineFaceDtos = machineFaceService.queryMachineFace(machineFaceDto);
 
-        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
+        Assert.listOnlyOne(machineFaceDtos, "用户未被添加过");
+        //添加设备
+        JSONObject paramIn = new JSONObject();
+        paramIn.put("id", machineFaceDtos.get(0).getExtUserId());
+
+        HttpEntity httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
+        ResponseEntity<String> responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + DELETE_USER, HttpMethod.POST, httpEntity, String.class);
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
-            return new ResultDto(ResultDto.ERROR, "调用设备失败");
+            throw new IllegalStateException("请求添加设备失败" + responseEntity);
         }
 
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
 
-        if (paramOut.getIntValue("code") != 0) {
-            return new ResultDto(paramOut.getIntValue("code"), paramOut.getString("msg"));
+        if (paramOut.getInteger("code") != 0) {
+            throw new IllegalStateException("添加设备失败" + responseEntity);
         }
-
-        int total = paramOut.getJSONObject("data").getIntValue("total");
-
-        if (total < 1) {
-            return new ResultDto(ResultDto.SUCCESS, ResultDto.SUCCESS_MSG);
-        }
-
-        url = MappingCacheFactory.getValue("BISEN_URL")
-                + "/api/device/hqvtPerson/delete/appId/" + appId + "/personGuid/" + faceDtos.get(0).getExtUserId();
-        logger.debug("删除人员" + url);
-        responseEntity = outRestTemplate.exchange(url, HttpMethod.DELETE, httpEntity, String.class);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_UPDATE_USER, url, responseEntity.getBody());
-        logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
-        paramOut = JSONObject.parseObject(responseEntity.getBody());
         return new ResultDto(paramOut.getIntValue("code"), paramOut.getString("msg"));
     }
 
@@ -277,19 +324,29 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
 
     @Override
     public void openDoor(MachineDto machineDto) {
-        String url = MappingCacheFactory.getValue("BISEN_URL") + CMD_OPEN_DOOR;
-        String appId = MappingCacheFactory.getValue("appId");
 
-        JSONObject postParameters = new JSONObject();
-        postParameters.put("appId", appId);
-        postParameters.put("deviceNo", machineDto.getMachineCode());
+        MachineFaceDto machineFaceDto = new MachineFaceDto();
+        machineFaceDto.setMachineCode(machineDto.getMachineCode());
+        List<MachineFaceDto> machineFaceDtos = machineFaceService.queryMachineFace(machineFaceDto);
 
-        HttpHeaders httpHeaders = SxCommomFactory.getHeader(outRestTemplate);
-        HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity(postParameters, httpHeaders);
-        ResponseEntity<String> responseEntity = outRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        Assert.listOnlyOne(machineFaceDtos, "用户未被添加过");
+        //添加设备
+        JSONObject paramIn = new JSONObject();
+        paramIn.put("owUserId", machineFaceDtos.get(0).getUserId());
+        paramIn.put("owDeviceId", machineDto.getMachineId());
 
-        logger.debug("请求信息 ： " + httpEntity + "，返回信息:" + responseEntity);
-        saveLog(SeqUtil.getId(), machineDto.getMachineId(), CMD_OPEN_DOOR, postParameters.toJSONString(), responseEntity.getBody());
+        HttpEntity httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
+        ResponseEntity<String> responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + CMD_OPEN_DOOR, HttpMethod.POST, httpEntity, String.class);
+
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            throw new IllegalStateException("请求开门失败" + responseEntity);
+        }
+
+        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+
+        if (paramOut.getInteger("code") != 0) {
+            throw new IllegalStateException("添加开门失败" + responseEntity);
+        }
     }
 
     @Override

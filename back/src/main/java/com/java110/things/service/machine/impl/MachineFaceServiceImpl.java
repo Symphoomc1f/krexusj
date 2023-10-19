@@ -88,7 +88,7 @@ public class MachineFaceServiceImpl implements IMachineFaceService {
     }
 
     @Override
-    public List<MachineFaceDto> queryMachineFace(MachineFaceDto machineFaceDto) throws Exception {
+    public List<MachineFaceDto> queryMachineFace(MachineFaceDto machineFaceDto)  {
         int page = machineFaceDto.getPage();
 
         if (page != PageDto.DEFAULT_PAGE) {

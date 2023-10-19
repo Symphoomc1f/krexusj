@@ -130,7 +130,7 @@ public class SxCommomFactory {
 
     public static FaceFeatureResultDto facefeature(RestTemplate outRestTemplate, MachineDto machineDto, ICommunityService communityService, UserFaceDto userFaceDto) {
         JSONObject paramIn = new JSONObject();
-        paramIn.put("accessToken", machineDto.getCommunityId());
+        paramIn.put("accessToken", getToken(outRestTemplate));
         paramIn.put("ffResidentId", userFaceDto.getUserId());
         paramIn.put("ffOrgId", getSxCommunity(outRestTemplate, machineDto.getCommunityId(), communityService).getViOrgId());
         paramIn.put("fileUrl", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
