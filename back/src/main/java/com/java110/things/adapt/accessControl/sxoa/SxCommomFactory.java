@@ -12,14 +12,17 @@ import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
 import com.java110.things.util.DateUtil;
 import com.java110.things.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
 public class SxCommomFactory {
 
-
+    static Logger logger = LoggerFactory.getLogger(SxCommomFactory.class);
     public static final String GET_TOKEN = "/v1.0/token";
     public static final String GET_SIGN = "/v1.0/sign";
     public static final String GET_AREA_CODE = "/v1.0/area/page";
@@ -229,8 +232,13 @@ public class SxCommomFactory {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/json");
         HttpEntity httpEntity = new HttpEntity(paramIn.toJSONString(), httpHeaders);
-        ResponseEntity<String> responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + GET_SIGN, HttpMethod.POST, httpEntity, String.class);
-
+        ResponseEntity<String> responseEntity = null;
+        try {
+            responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + GET_SIGN, HttpMethod.POST, httpEntity, String.class);
+        } catch (HttpStatusCodeException e) { //这里spring 框架 在4XX 或 5XX 时抛出 HttpServerErrorException 异常，需要重新封装一下
+            logger.error("请求下游服务【" + MappingCacheFactory.getValue("SXOA_URL") + GET_SIGN + "】异常，参数为" + httpEntity + e.getResponseBodyAsString(), e);
+            throw e;
+        }
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求sign失败" + responseEntity);
         }
@@ -252,8 +260,12 @@ public class SxCommomFactory {
         httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/json");
         httpEntity = new HttpEntity(paramIn.toJSONString(), httpHeaders);
-        responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + GET_TOKEN, HttpMethod.POST, httpEntity, String.class);
-
+        try {
+            responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + GET_TOKEN, HttpMethod.POST, httpEntity, String.class);
+        } catch (HttpStatusCodeException e) { //这里spring 框架 在4XX 或 5XX 时抛出 HttpServerErrorException 异常，需要重新封装一下
+            logger.error("请求下游服务【" + MappingCacheFactory.getValue("SXOA_URL") + GET_TOKEN + "】异常，参数为" + httpEntity + e.getResponseBodyAsString(), e);
+            throw e;
+        }
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求sign失败" + responseEntity);
         }
