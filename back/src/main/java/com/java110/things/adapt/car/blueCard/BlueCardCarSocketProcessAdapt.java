@@ -1,4 +1,4 @@
-package com.java110.things.adapt.car.szymzh;
+package com.java110.things.adapt.car.blueCard;
 
 
 import com.alibaba.fastjson.JSONObject;
@@ -34,19 +34,18 @@ import org.springframework.web.client.RestTemplate;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
+
+import static com.alibaba.druid.util.Utils.md5;
 
 /**
- * 深圳市云盟智慧科技有限公司停车场对接适配器
- * 参考文档 http://doc.szymzh.com/
+ * 北京蓝卡科技股份有限公司停车场对接适配器
+ * 参考文档
  */
-@Service("szymzhCarSocketProcessAdapt")
-public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
+@Service("blueCardCarSocketProcessAdapt")
+public class BlueCardCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
 
-    private static Logger logger = LoggerFactory.getLogger(SzymzhCarSocketProcessAdapt.class);
+    private static Logger logger = LoggerFactory.getLogger(BlueCardCarSocketProcessAdapt.class);
 
     public static final String SPEC_EXT_PARKING_ID = "6185-17861";
 
@@ -58,6 +57,21 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
     public static final String GET_NEED_PAY_ORDER_URL = "/Api/Inquire/GetCarNoOrderFee";
     public static final String NOTIFY_NEED_PAY_ORDER_URL = "/Api/Inform/PayNotify";
     public static final String ADD_USER_URL = "/Api/Inform/AddPerson";
+    //blueCard白名单
+    private static final String WHITE_LIST_CAR_URL = "/bcopenapi/out/synWhite";
+    private static final String WHITE_LIST_DEL_CAR_URL = "/bcopenapi/out/delWhite";
+    private static final String WHITE_LIST_QUERY_CAR_URL = "/bcopenapi/out/queryWhite";
+    //blueCard黑名单
+    private static final String BLACK_LIST_CAR_URL = "/bcopenapi/out/synBlack";
+    private static final String BLACK_LIST_DEL_CAR_URL = "/bcopenapi/out/delBlack";
+    private static final String BLACK_LIST_QUERY_CAR_URL = "/bcopenapi/out/queryBlack";
+    //预约车
+    private static final String CAR_RESERVATION_CAR_URL = "/bcopenapi/out/synBookingCar";
+    private static final String CAR_RESERVATION_QUERY_CAR_URL = "/bcopenapi/out/queryBookingCar";
+    //固定车续费信息
+    private static final String FIXED_CAR_RENEW_INFO_CAR_URL = "/bcopenapi/out/getRenewFixedInfo";
+    private static final String FIXED_CAR_RENEW_INFO_ADD_CAR_URL = "/bcopenapi/out/addRenewFixedInfo";
+
 
     @Autowired
     private RestTemplate restTemplate;
@@ -91,12 +105,69 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
 
         return "";
     }
+
+
     /**
      * @param carResultDto 预约车下发
      */
     @Override
     public ResultDto synBookingCar(MachineDto machineDto, CarDto carResultDto) {
-        return new ResultDto(0 , "sucess");
+        String url = MappingCacheFactory.getValue("LC_CAR_URL") + CAR_RESERVATION_CAR_URL;
+        String appId = MappingCacheFactory.getValue("LC_APP_ID");
+        String parkNumber = MappingCacheFactory.getValue("parkNumber");
+
+        ParkingAreaDto parkingAreaDto = new ParkingAreaDto();
+        List<ParkingAreaDto> parkingAreaDtos = parkingAreaService.queryParkingAreas(parkingAreaDto);
+
+        Map<String, String> postParameters = new HashMap<>();
+        postParameters.put("parkNumber", getParkingId(parkingAreaDtos.get(0)));
+        Map<String, String> postDatas = new HashMap<>();
+        postDatas.put("plate", "京A88888");//预约车牌号
+        postDatas.put("start", "2020-09-22 17:28:15");//预约开始时间
+        postDatas.put("end", "2020-09-22 17:28:15");//预约结束时间
+        postDatas.put("areaId", "0"); //区域号  0表示所有区域都能停
+        postDatas.put("flag", "1");//操作 0是取消预订,1是预订
+        postDatas.put("charge", "0");//金额
+        postDatas.put("bookOrderId", "2022030409097410");//预约订单号
+        postDatas.put("bookOrderTime", "2020-09-22 17:28:15");//订单下单时间
+        postDatas.put("letInStartTime", "2020-09-22 17:28:15");//准入开始时间
+        postDatas.put("letInEndTime", "2020-09-22 17:28:15");//准入结束时间
+        postDatas.put("memo", "京A88888预约车下发");//备注
+        postDatas.put("isFree", "1");//是否免费，0：否，1：是
+        postDatas.put("isAllowManyTimes", "0");//是否允许多次进入，0：否，1：是 默认值为0
+        postParameters.put("datas", String.valueOf(postDatas));
+        HttpHeaders httpHeaders = getHeader();
+        String sign = md5(appId + parkNumber);
+        httpHeaders.add("sign", sign);
+        HttpEntity httpEntity = new HttpEntity(JSONObject.toJSONString(postParameters), httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        saveLog(SeqUtil.getId(), machineDto.getMachineId(), NOTIFY_NEED_PAY_ORDER_URL, JSONObject.toJSONString(postParameters), responseEntity.getBody());
+
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            throw new IllegalStateException("请求预约车下发失败" + responseEntity);
+        }
+
+        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+
+        String msg = "成功";
+        if (!"success".equals(paramOut.getIntValue("status"))) {
+            msg = paramOut.getString("errorCode");
+        }
+
+        return new ResultDto("success".equals(paramOut.getIntValue("status")) ? 0 : -1, msg);
+    }
+
+
+    @Override
+    public ResponseEntity<String> heartBeart(MachineDto machineDto) {
+//        return super.heartBeart(machineDto);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("status", "success");
+        JSONObject datasjsonObject = new JSONObject();
+        datasjsonObject.put("timeStamp",String.valueOf(System.currentTimeMillis()));
+        jsonObject.put("datas", datasjsonObject);
+        ResponseEntity<String> responseEntity = new ResponseEntity<String>(jsonObject.toString(), HttpStatus.OK);
+        return responseEntity;
     }
 
     /**
@@ -559,9 +630,13 @@ public class SzymzhCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt 
     }
 
     public static void main(String[] args) {
-        String paramOut = "{\"rand\":\"9.140252525\",\"parkNo\":\"\",\"appid\":\"ym5fe91021a2af154b\",\"sign\":\"20774CCB1A47FEE316AD04E957A0F7ED\",\"machineNo\":\"\",\"userName\":\"邓莉\",\"carTypeNo\":\"3652\",\"parkKey\":\"x2d3qqgk\",\"version\":\"v1.0\",\"homeAddress\":\"深圳市某某区某某街道某某号\",\"mobNumber\":\"18909711234\"}";
-        String param = HttpClient.doPost("http://openapi.ymiot.net/Api/Inform/AddPerson", paramOut, "", "POST");
+//        String paramOut = "{\"rand\":\"9.140252525\",\"parkNo\":\"\",\"appid\":\"ym5fe91021a2af154b\",\"sign\":\"20774CCB1A47FEE316AD04E957A0F7ED\",\"machineNo\":\"\",\"userName\":\"邓莉\",\"carTypeNo\":\"3652\",\"parkKey\":\"x2d3qqgk\",\"version\":\"v1.0\",\"homeAddress\":\"深圳市某某区某某街道某某号\",\"mobNumber\":\"18909711234\"}";
+//        String param = HttpClient.doPost("http://openapi.ymiot.net/Api/Inform/AddPerson", paramOut, "", "POST");
+        MachineDto machineDto =new  MachineDto();
+        CarDto carResultDto =new  CarDto();
+        BlueCardCarSocketProcessAdapt blueCardCarSocketProcessAdapt =new  BlueCardCarSocketProcessAdapt();
 
-        System.out.printf("param = " + param);
+        blueCardCarSocketProcessAdapt.synBookingCar(machineDto, carResultDto);
+        System.out.printf("param = ");
     }
 }

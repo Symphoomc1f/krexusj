@@ -169,6 +169,12 @@
             <el-option label="出场" value="3307">出场</el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="协议类型">
+          <el-select v-model="temp.machineTypeCd" placeholder="请选择设备协议类型">
+            <el-option label="第三方道闸设备" value="9995">第三方道闸设备</el-option>
+            <el-option label="自有道闸设备" value="9996">自有道闸设备</el-option>
+          </el-select>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
@@ -254,7 +260,7 @@ export default {
         direction: "",
       },
       rules: {
-        
+
       },
     };
   },
@@ -279,7 +285,7 @@ export default {
         this.listLoading = false;
       });
     },
-    
+
     fetchData() {
       this.listLoading = true;
       getAccessControls().then((response) => {

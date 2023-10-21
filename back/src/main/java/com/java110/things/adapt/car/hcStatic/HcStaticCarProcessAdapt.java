@@ -89,6 +89,13 @@ public class HcStaticCarProcessAdapt extends DefaultAbstractCarProcessAdapt {
 
         return "";
     }
+    /**
+     * @param carResultDto 预约车下发
+     */
+    @Override
+    public ResultDto synBookingCar(MachineDto machineDto, CarDto carResultDto) {
+        return new ResultDto(0 , "sucess");
+    }
 
     /**
      * @param carResultDto 用户人脸信息

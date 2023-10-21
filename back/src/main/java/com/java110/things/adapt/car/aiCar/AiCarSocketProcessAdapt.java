@@ -61,6 +61,14 @@ public class AiCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt {
     }
 
     /**
+     * @param carResultDto 预约车下发
+     */
+    @Override
+    public ResultDto synBookingCar(MachineDto machineDto, CarDto carResultDto) {
+        return new ResultDto(0 , "sucess");
+    }
+
+    /**
      * {
      * "service": "whitelist_sync",
      * "parkid": "20180001",

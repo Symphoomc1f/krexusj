@@ -3,7 +3,9 @@ package com.java110.things.adapt.car;
 import com.java110.things.adapt.accessControl.ICallAccessControlService;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.machine.OperateLogDto;
+import com.java110.things.entity.response.ResultDto;
 import com.java110.things.factory.NotifyAccessControlFactory;
+import org.springframework.http.ResponseEntity;
 
 public abstract class DefaultAbstractCarProcessAdapt implements ICarProcess {
 
@@ -15,6 +17,11 @@ public abstract class DefaultAbstractCarProcessAdapt implements ICarProcess {
     @Override
     public void initCar(MachineDto machineDto) {
 
+    }
+
+    @Override
+    public ResponseEntity<String> heartBeart(MachineDto machineDto) {
+        return ResultDto.success();
     }
 
 
@@ -32,7 +39,6 @@ public abstract class DefaultAbstractCarProcessAdapt implements ICarProcess {
     public void openDoor(MachineDto machineDto) {
 
     }
-
 
 
     @Override
