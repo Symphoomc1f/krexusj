@@ -7,6 +7,7 @@ import com.java110.things.entity.fee.TempCarPayOrderDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.entity.response.ResultDto;
 import com.java110.things.netty.Java110CarProtocol;
+import org.springframework.http.ResponseEntity;
 
 /**
  * 门禁处理接口类，各大门禁厂商 需要实现这个类，实现相应的方法
@@ -20,6 +21,8 @@ public interface ICarProcess {
      * 初始化方法
      */
     void initCar();
+
+    ResponseEntity<String> heartBeart(MachineDto machineDto);
 
 
     public void initCar(MachineDto machineDto);
@@ -49,6 +52,8 @@ public interface ICarProcess {
 
 
     ResultDto updateCar(MachineDto machineDto, CarDto carResultDto);
+
+    ResultDto synBookingCar(MachineDto machineDto, CarDto carResultDto);
 
 
     /**

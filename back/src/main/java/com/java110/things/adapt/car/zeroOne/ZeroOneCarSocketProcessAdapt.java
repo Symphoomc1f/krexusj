@@ -34,6 +34,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
 
+import static com.alibaba.druid.util.Utils.md5;
+
 /**
  * 零壹公司停车场对接适配器  一代、二代车场云平台标准API接口文档
  */
@@ -83,6 +85,13 @@ public class ZeroOneCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         }
 
         return "";
+    }
+    /**
+     * @param carResultDto 预约车下发
+     */
+    @Override
+    public ResultDto synBookingCar(MachineDto machineDto, CarDto carResultDto) {
+        return new ResultDto(0 , "sucess");
     }
 
     /**

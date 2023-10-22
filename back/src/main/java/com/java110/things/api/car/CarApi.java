@@ -30,11 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -82,6 +78,34 @@ public class CarApi extends BaseController {
     }
 
     /**
+     * 第三方平台设备心跳
+     * <p>
+     * 门禁配置地址为：/api/car/heartBeatPlatform/设备编码
+     *
+     * @param request request请求报文 包括设备 前台填写信息
+     * @return 成功或者失败
+     * @throws Exception
+     */
+    @RequestMapping(path = "/heartBeatPlatform/{machineCode}", method = RequestMethod.POST)
+    public ResponseEntity<String> heartBeatPlatform(HttpServletRequest request, @PathVariable(value = "machineCode") String machineCode) throws Exception {
+        logger.debug(machineCode + "设备心跳");
+        MachineDto machineDto = new MachineDto();
+        machineDto.setMachineCode(machineCode);
+        machineDto.setMachineTypeCd("9995");//第三方道闸设备心跳
+        List<MachineDto> machineDtos = machineServiceImpl.queryMachines(machineDto);
+
+        if (machineDtos == null || machineDtos.size() < 1) {
+            return ResultDto.error("设备不存在");
+        }
+        //设备重连
+        CarNettyClient.twoGetChannel(machineDtos.get(0));
+
+        ICarProcess carProcess = CarProcessFactory.getCarImpl(machineDtos.get(0).getHmId());
+        return carProcess.heartBeart(machineDtos.get(0));
+
+    }
+
+    /**
      * 设备心跳
      * <p>
      * 门禁配置地址为：/api/car/parkingUp/设备编码
@@ -126,8 +150,8 @@ public class CarApi extends BaseController {
      */
     @RequestMapping(path = "/uploadRecord/{machineCode}/{moreParam}", method = RequestMethod.POST)
     public ResponseEntity<String> uploadRecord(HttpServletRequest request,
-                                            @PathVariable(value = "machineCode") String machineCode,
-                                            @RequestBody String reqJson) throws Exception {
+                                               @PathVariable(value = "machineCode") String machineCode,
+                                               @RequestBody String reqJson) throws Exception {
         ResponseEntity<String> paramOut = null;
         try {
             MachineDto machineDto = new MachineDto();

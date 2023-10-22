@@ -106,6 +106,14 @@ public class HcAgentCarSocketProcessAdapt extends DefaultAbstractCarProcessAdapt
         return "";
     }
 
+    /**
+     * @param carResultDto 预约车下发
+     */
+    @Override
+    public ResultDto synBookingCar(MachineDto machineDto, CarDto carResultDto) {
+        return new ResultDto(0 , "sucess");
+    }
+
     public String getVId(ParkingAreaDto parkingAreaDto,String ext) {
         List<ParkingAreaAttrDto> parkingAreaAttrDtos = parkingAreaDto.getAttrs();
 

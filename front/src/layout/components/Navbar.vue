@@ -11,7 +11,7 @@
     <div class="right-menu">
       <el-dropdown class="avatar-container"  trigger="click">
         <div class="avatar-wrapper" style="margin-top:0px">
-            小区物联网管理平台欢迎您！ 吴学文<i
+            小区物联网管理平台欢迎您！ admin<i
             class="el-icon-arrow-down el-icon--right"
           ></i>
         </div>
