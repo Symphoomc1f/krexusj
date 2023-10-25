@@ -38,7 +38,7 @@ public class SxCommomFactory {
 
     public static SxAreaCodeDto getSxAreaCode(RestTemplate outRestTemplate) {
         JSONObject paramIn = new JSONObject();
-        paramIn.put("fullName", "安康市");
+        paramIn.put("fullName", "安康市汉滨区长兴天元郡小区");
 
         HttpEntity httpEntity = new HttpEntity(paramIn.toJSONString(), getHeader(outRestTemplate));
         ResponseEntity<String> responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + GET_AREA_CODE, HttpMethod.POST, httpEntity, String.class);
@@ -48,6 +48,8 @@ public class SxCommomFactory {
         }
 
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
+
+        logger.debug("请求信息：" + httpEntity + ",返回参数：" + responseEntity);
 
         if (paramOut.getInteger("code") != 0) {
             throw new IllegalStateException("请求sign失败" + paramOut);
@@ -75,6 +77,9 @@ public class SxCommomFactory {
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求sign失败" + responseEntity);
         }
+
+        logger.debug("请求信息：" + httpEntity + ",返回参数：" + responseEntity);
+
 
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
 
@@ -119,6 +124,8 @@ public class SxCommomFactory {
             throw new IllegalStateException("请求sign失败" + responseEntity);
         }
 
+        logger.debug("请求信息：" + httpEntity + ",返回参数：" + responseEntity);
+
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
 
         if (paramOut.getInteger("code") != 0) {
@@ -140,6 +147,9 @@ public class SxCommomFactory {
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求sign失败" + responseEntity);
         }
+
+        logger.debug("请求信息：" + httpEntity + ",返回参数：" + responseEntity);
+
 
         paramOut = JSONObject.parseObject(responseEntity.getBody());
 
@@ -174,6 +184,8 @@ public class SxCommomFactory {
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求sign失败" + responseEntity);
         }
+
+        logger.debug("请求信息：" + httpEntity + ",返回参数：" + responseEntity);
 
         JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
 
