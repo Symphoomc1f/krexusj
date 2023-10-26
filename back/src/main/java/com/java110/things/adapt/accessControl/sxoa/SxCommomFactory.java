@@ -38,7 +38,7 @@ public class SxCommomFactory {
 
     public static SxAreaCodeDto getSxAreaCode(RestTemplate outRestTemplate) {
         JSONObject paramIn = new JSONObject();
-        paramIn.put("fullName", "安康市汉滨区高新四路长兴天元郡小区");
+        paramIn.put("fullName", "陕西省安康市汉滨区");
 
         HttpEntity httpEntity = new HttpEntity(paramIn.toJSONString(), getHeader(outRestTemplate));
         ResponseEntity<String> responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + GET_AREA_CODE, HttpMethod.POST, httpEntity, String.class);
