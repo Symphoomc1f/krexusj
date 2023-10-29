@@ -215,7 +215,7 @@ public class SxCommomFactory {
     public static HttpHeaders getHeader(RestTemplate outRestTemplate, int length) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("X-AUTH-TOKEN", getToken(outRestTemplate));
-        httpHeaders.add("Content-Type", "application/json");
+        httpHeaders.add("Content-Type", "application/json;charset=UTF-8");
         httpHeaders.add("X-EQUIP-TYPE", "dog");
         if (length > 0) {
             httpHeaders.add("Content-Length", length + "");
