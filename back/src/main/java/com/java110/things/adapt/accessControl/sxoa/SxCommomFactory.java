@@ -57,7 +57,7 @@ public class SxCommomFactory {
             throw new IllegalStateException("请求sign失败" + paramOut);
         }
 
-        JSONArray resultList = paramOut.getJSONArray("resultList");
+        JSONArray resultList = paramOut.getJSONObject("data").getJSONArray("resultList");
 
         if (resultList == null || resultList.size() < 1) {
             throw new IllegalArgumentException("未找到 区域信息");
