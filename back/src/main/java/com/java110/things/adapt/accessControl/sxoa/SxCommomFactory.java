@@ -114,9 +114,9 @@ public class SxCommomFactory {
 
     public static void addSxCommunity(RestTemplate outRestTemplate, MachineDto machineDto, ICommunityService communityService) {
         JSONObject paramIn = new JSONObject();
-        paramIn.put("viAddress", machineDto.getCommunityId());
+        paramIn.put("viAddress", "1");
         paramIn.put("viCode", machineDto.getCommunityId());
-        paramIn.put("viName", machineDto.getCommunityId());
+        paramIn.put("viName", "1");
         paramIn.put("viAreaCode", getSxAreaCode(outRestTemplate).getAcode());
 
         HttpEntity httpEntity = new HttpEntity(paramIn.toJSONString(), getHeader(outRestTemplate));
