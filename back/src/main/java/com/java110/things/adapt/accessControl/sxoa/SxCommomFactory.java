@@ -139,7 +139,7 @@ public class SxCommomFactory {
         //建位置
         paramIn = new JSONObject();
         paramIn.put("dtParentId", 0);
-        paramIn.put("dtCode", machineDto.getCommunityId());
+        paramIn.put("dtCode", machineDto.getCommunityId().substring(0,5));
         paramIn.put("dtName", "门禁");
         paramIn.put("dtInfo", "门禁");
 
