@@ -2,13 +2,11 @@ package com.java110.things.adapt.accessControl.sxoa;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.java110.things.dao.ISxoaCommunityServiceDao;
 import com.java110.things.entity.accessControl.UserFaceDto;
-import com.java110.things.entity.community.CommunityDto;
 import com.java110.things.entity.machine.MachineDto;
 import com.java110.things.factory.LocalCacheFactory;
 import com.java110.things.factory.MappingCacheFactory;
-import com.java110.things.service.community.ICommunityService;
-import com.java110.things.util.Assert;
 import com.java110.things.util.BeanConvertUtil;
 import com.java110.things.util.DateUtil;
 import com.java110.things.util.StringUtil;
@@ -68,51 +66,19 @@ public class SxCommomFactory {
         return sxAreaCodeDto;
     }
 
-    public static SxCommunityDto getSxCommunity(RestTemplate outRestTemplate, String communityId, ICommunityService communityService) {
-        JSONObject paramIn = new JSONObject();
-        paramIn.put("id", communityId);
-        paramIn.put("type", 2);
-
-        HttpEntity httpEntity = new HttpEntity(paramIn.toJSONString(), getHeader(outRestTemplate));
-        ResponseEntity<String> responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + GET_COMMUNITY, HttpMethod.POST, httpEntity, String.class);
-
-        if (responseEntity.getStatusCode() != HttpStatus.OK) {
-            throw new IllegalStateException("请求sign失败" + responseEntity);
-        }
-
-        logger.debug("请求信息：" + httpEntity + ",返回参数：" + responseEntity);
-
-
-        JSONObject paramOut = JSONObject.parseObject(responseEntity.getBody());
-
-        if (paramOut.getInteger("code") != 0) {
-            return null;
-        }
-
-        if (paramOut.containsKey("data")) {
-            return null;
-        }
-
-        SxCommunityDto sxCommunityDto = BeanConvertUtil.covertBean(paramOut.getJSONObject("data"), SxCommunityDto.class);
-
-        CommunityDto communityDto = new CommunityDto();
+    public static SxCommunityDto getSxCommunity(RestTemplate outRestTemplate, String communityId, ISxoaCommunityServiceDao sxoaCommunityServiceDaoImpl) {
+        SxCommunityDto communityDto = new SxCommunityDto();
         communityDto.setCommunityId(communityId);
-        List<CommunityDto> communityDtos = communityService.queryCommunitys(communityDto);
+        List<SxCommunityDto> sxCommunityDtos = sxoaCommunityServiceDaoImpl.getCommunitys(communityDto);
 
-        Assert.listOnlyOne(communityDtos, "小区不存在");
-        String thirdCommunityId = communityDtos.get(0).getThirdCommunityId();
-
-        if (thirdCommunityId.contains("::")) {
-            String[] thirds = thirdCommunityId.split("::");
-            sxCommunityDto.setLocationId(thirds[0]);
-            sxCommunityDto.setdDtId(thirds[1]);
+        if (sxCommunityDtos == null || sxCommunityDtos.size() < 1) {
+            return null;
         }
 
-
-        return sxCommunityDto;
+        return sxCommunityDtos.get(0);
     }
 
-    public static void addSxCommunity(RestTemplate outRestTemplate, MachineDto machineDto, ICommunityService communityService) {
+    public static void addSxCommunity(RestTemplate outRestTemplate, MachineDto machineDto, ISxoaCommunityServiceDao sxoaCommunityServiceDaoImpl) {
         JSONObject paramIn = new JSONObject();
         paramIn.put("viAddress", "1");
         paramIn.put("viCode", machineDto.getCommunityId());
@@ -134,12 +100,16 @@ public class SxCommomFactory {
             throw new IllegalStateException("添加小区失败" + responseEntity);
         }
 
-        String thirdCommunityId = paramOut.getJSONObject("data").getJSONObject("group").getString("locationId");
+        String locationId = paramOut.getJSONObject("data").getJSONObject("group").getString("locationId");
+
+        SxCommunityDto communityDto = BeanConvertUtil.covertBean(paramOut.getJSONObject("data").getJSONObject("village"), SxCommunityDto.class);
+        communityDto.setLocationId(locationId);
+        communityDto.setCommunityId(machineDto.getCommunityId());
 
         //建位置
         paramIn = new JSONObject();
         paramIn.put("dtParentId", 0);
-        paramIn.put("dtCode", machineDto.getCommunityId().substring(0,5));
+        paramIn.put("dtCode", "123");
         paramIn.put("dtName", "门禁");
         paramIn.put("dtInfo", "门禁");
 
@@ -160,12 +130,9 @@ public class SxCommomFactory {
         }
 
         String dtId = paramOut.getJSONObject("data").getString("dtId");
-
-        CommunityDto communityDto = new CommunityDto();
-        communityDto.setCommunityId(machineDto.getCommunityId());
-        communityDto.setThirdCommunityId(thirdCommunityId + "::" + dtId);
+        communityDto.setDtId(dtId);
         try {
-            communityService.updateCommunity(communityDto);
+            sxoaCommunityServiceDaoImpl.saveCommunity(communityDto);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -173,11 +140,11 @@ public class SxCommomFactory {
     }
 
 
-    public static FaceFeatureResultDto facefeature(RestTemplate outRestTemplate, MachineDto machineDto, ICommunityService communityService, UserFaceDto userFaceDto) {
+    public static FaceFeatureResultDto facefeature(RestTemplate outRestTemplate, MachineDto machineDto, ISxoaCommunityServiceDao sxoaCommunityServiceDaoImpl, UserFaceDto userFaceDto) {
         JSONObject paramIn = new JSONObject();
         paramIn.put("accessToken", getToken(outRestTemplate));
         paramIn.put("ffResidentId", userFaceDto.getUserId());
-        paramIn.put("ffOrgId", getSxCommunity(outRestTemplate, machineDto.getCommunityId(), communityService).getViOrgId());
+        paramIn.put("ffOrgId", getSxCommunity(outRestTemplate, machineDto.getCommunityId(), sxoaCommunityServiceDaoImpl).getViOrgId());
         paramIn.put("fileUrl", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
 
         HttpEntity httpEntity = new HttpEntity(paramIn.toJSONString(), getHeader(outRestTemplate));
@@ -201,8 +168,8 @@ public class SxCommomFactory {
 
     }
 
-    public static boolean hasSxCommunity(RestTemplate outRestTemplate, String communityId, ICommunityService communityService) {
-        if (getSxCommunity(outRestTemplate, communityId, communityService) != null) {
+    public static boolean hasSxCommunity(RestTemplate outRestTemplate, String communityId, ISxoaCommunityServiceDao sxoaCommunityServiceDaoImpl) {
+        if (getSxCommunity(outRestTemplate, communityId, sxoaCommunityServiceDaoImpl) != null) {
             return true;
         }
         return false;

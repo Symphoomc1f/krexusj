@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java110.things.dao.ICommunityServiceDao">
+
+    <select id="get" parameterType="string" resultType="Map">
+        select * from u_user
+    </select>
+
+    <!-- 保存小区 -->
+    <insert id="saveCommunity" parameterType="com.java110.things.adapt.accessControl.sxoa.SxCommunityDto">
+        INSERT INTO
+        s_sxoa_community (viId, viOrgId, viOrgName, viName,viAreaCode,viAddress,viCode,communityId,locationId,dtId)
+        VALUES (#{viId}, #{viOrgId}, #{viOrgName}, #{viName},#{viAreaCode},#{viAddress},#{viCode},#{communityId},#{locationId},#{dtId})
+    </insert>
+
+
+    <!--
+        查询小区信息
+    -->
+    <select id="getCommunitys" parameterType="com.java110.things.adapt.accessControl.sxoa.SxCommunityDto"
+            resultType="com.java110.things.adapt.accessControl.sxoa.SxCommunityDto">
+        select
+        t.*
+        from s_sxoa_community t
+        left join city_area ca on t.city_code = ca.area_code and ca.status_cd = '0'
+        left join city_area ca1 on ca1.area_code = ca.parent_area_code and ca.status_cd = '0'
+        where 1=1
+        <if test="communityId != null and communityId != ''">
+            and t.communityId = #{communityId}
+        </if>
+    </select>
+
+</mapper>

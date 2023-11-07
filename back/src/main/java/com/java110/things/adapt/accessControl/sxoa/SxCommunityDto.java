@@ -13,8 +13,10 @@ public class SxCommunityDto {
     private String viCod;
 
     private String locationId;
+    private String communityId;
 
     private String dDtId;
+    private String dtId;
     public String getViId() {
         return viId;
     }
@@ -101,5 +103,21 @@ public class SxCommunityDto {
 
     public void setdDtId(String dDtId) {
         this.dDtId = dDtId;
+    }
+
+    public String getDtId() {
+        return dtId;
+    }
+
+    public void setDtId(String dtId) {
+        this.dtId = dtId;
+    }
+
+    public String getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(String communityId) {
+        this.communityId = communityId;
     }
 }

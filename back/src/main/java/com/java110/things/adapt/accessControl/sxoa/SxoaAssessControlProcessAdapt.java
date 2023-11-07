@@ -3,6 +3,7 @@ package com.java110.things.adapt.accessControl.sxoa;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.adapt.accessControl.DefaultAbstractAccessControlAdapt;
 import com.java110.things.adapt.accessControl.ICallAccessControlService;
+import com.java110.things.dao.ISxoaCommunityServiceDao;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
 import com.java110.things.entity.cloud.MachineHeartbeatDto;
@@ -34,6 +35,10 @@ import java.util.List;
  * 文档：http://wiki.sxoa.com/index.html?file=home-%E9%A6%96%E9%A1%B5
  * 作者：吴学文
  * QQ:928255095
+ *
+ * 作者备注：他们这个接口里的查询小区 接口 有问题，问 对端的研发兄弟 ，说是不支持，后面的兄弟记得跳过这个坑
+ * 反正总的来说 智家狗的对接 还是比较复杂 ，感觉是简单的问题复杂化，对接成本比较高
+ *
  */
 @Service("sxoaAssessControlProcessAdapt")
 public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlAdapt {
@@ -58,6 +63,9 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
 
     @Autowired
     private IMachineFaceService machineFaceService;
+
+    @Autowired
+    private ISxoaCommunityServiceDao sxoaCommunityServiceDaoImpl;
 
 
     public static final long START_TIME = new Date().getTime() - 1000 * 60 * 60;
@@ -127,7 +135,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
         List<MachineFaceDto> machineFaceDtos = machineFaceService.queryMachineFace(machineFaceDto);
         Long id = 0L;
         if (machineFaceDtos == null || machineFaceDtos.size() < 1) {
-            FaceFeatureResultDto faceFeatureResultDto = SxCommomFactory.facefeature(outRestTemplate, machineDto, communityServiceImpl, userFaceDto);
+            FaceFeatureResultDto faceFeatureResultDto = SxCommomFactory.facefeature(outRestTemplate, machineDto, sxoaCommunityServiceDaoImpl, userFaceDto);
             //添加设备
             JSONObject paramIn = new JSONObject();
             paramIn.put("residentId", userFaceDto.getUserId());
@@ -227,7 +235,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
 
     @Override
     public ResultDto updateFace(MachineDto machineDto, UserFaceDto userFaceDto) {
-        FaceFeatureResultDto faceFeatureResultDto = SxCommomFactory.facefeature(outRestTemplate, machineDto, communityServiceImpl, userFaceDto);
+        FaceFeatureResultDto faceFeatureResultDto = SxCommomFactory.facefeature(outRestTemplate, machineDto, sxoaCommunityServiceDaoImpl, userFaceDto);
 
         MachineFaceDto machineFaceDto = new MachineFaceDto();
         machineFaceDto.setUserId(userFaceDto.getUserId());
@@ -435,12 +443,12 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
         //SxAreaCodeDto sxAreaCodeDto = SxCommomFactory.getSxAreaCode(outRestTemplate);
 
         //判断小区是否 存在
-        if (!SxCommomFactory.hasSxCommunity(outRestTemplate, machineDto.getCommunityId(), communityServiceImpl)) {
+        if (!SxCommomFactory.hasSxCommunity(outRestTemplate, machineDto.getCommunityId(), sxoaCommunityServiceDaoImpl)) {
             //添加小区
-            SxCommomFactory.addSxCommunity(outRestTemplate, machineDto, communityServiceImpl);
+            SxCommomFactory.addSxCommunity(outRestTemplate, machineDto, sxoaCommunityServiceDaoImpl);
         }
 
-        SxCommunityDto sxCommunityDto = SxCommomFactory.getSxCommunity(outRestTemplate, machineDto.getCommunityId(), communityServiceImpl);
+        SxCommunityDto sxCommunityDto = SxCommomFactory.getSxCommunity(outRestTemplate, machineDto.getCommunityId(), sxoaCommunityServiceDaoImpl);
 
         //添加设备
         JSONObject paramIn = new JSONObject();
@@ -471,7 +479,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
         paramIn.put("name", machineDto.getMachineName());
         paramIn.put("status", 1);
         paramIn.put("locationId", sxCommunityDto.getLocationId());
-        paramIn.put("villageId", SxCommomFactory.getSxCommunity(outRestTemplate, machineDto.getCommunityId(), communityServiceImpl).getViId());
+        paramIn.put("villageId", SxCommomFactory.getSxCommunity(outRestTemplate, machineDto.getCommunityId(), sxoaCommunityServiceDaoImpl).getViId());
 
         httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
         responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + ADD_PRIVILET, HttpMethod.POST, httpEntity, String.class);
