@@ -22,8 +22,6 @@
         select
         t.*
         from s_sxoa_community t
-        left join city_area ca on t.city_code = ca.area_code and ca.status_cd = '0'
-        left join city_area ca1 on ca1.area_code = ca.parent_area_code and ca.status_cd = '0'
         where 1=1
         <if test="communityId != null and communityId != ''">
             and t.communityId = #{communityId}
