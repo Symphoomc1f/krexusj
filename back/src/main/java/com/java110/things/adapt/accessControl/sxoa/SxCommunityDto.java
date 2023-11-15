@@ -10,7 +10,7 @@ public class SxCommunityDto {
     private String viAddress;
     private String viCreateTime;
     private String viUpdateTime;
-    private String viCod;
+    private String viCode;
 
     private String locationId;
     private String communityId;
@@ -81,12 +81,12 @@ public class SxCommunityDto {
         this.viUpdateTime = viUpdateTime;
     }
 
-    public String getViCod() {
-        return viCod;
+    public String getViCode() {
+        return viCode;
     }
 
-    public void setViCod(String viCod) {
-        this.viCod = viCod;
+    public void setViCode(String viCode) {
+        this.viCode = viCode;
     }
 
     public String getLocationId() {
