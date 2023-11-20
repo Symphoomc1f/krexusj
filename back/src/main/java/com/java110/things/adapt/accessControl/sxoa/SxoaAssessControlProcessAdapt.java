@@ -216,6 +216,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
 
         HttpEntity httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
         ResponseEntity<String> responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + ADD_PRIVILET_BIND_USER, HttpMethod.POST, httpEntity, String.class);
+        logger.debug("请求信息：" + httpEntity + ",返回参数：" + responseEntity);
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求添加设备失败" + responseEntity);
@@ -255,6 +256,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
 
         HttpEntity httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
         ResponseEntity<String> responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + UPDATE_USER, HttpMethod.POST, httpEntity, String.class);
+        logger.debug("请求信息：" + httpEntity + ",返回参数：" + responseEntity);
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求添加设备失败" + responseEntity);
@@ -281,6 +283,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
 
         HttpEntity httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
         ResponseEntity<String> responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + DELETE_USER, HttpMethod.POST, httpEntity, String.class);
+        logger.debug("请求信息：" + httpEntity + ",返回参数：" + responseEntity);
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求添加设备失败" + responseEntity);
@@ -350,6 +353,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
 
         HttpEntity httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
         ResponseEntity<String> responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + CMD_OPEN_DOOR, HttpMethod.POST, httpEntity, String.class);
+        logger.debug("请求信息：" + httpEntity + ",返回参数：" + responseEntity);
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求开门失败" + responseEntity);
@@ -461,6 +465,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
 
         HttpEntity httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
         ResponseEntity<String> responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + ADD_MACHINE, HttpMethod.POST, httpEntity, String.class);
+        logger.debug("请求信息：" + httpEntity + ",返回参数：" + responseEntity);
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求添加设备失败" + responseEntity);
@@ -483,6 +488,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
 
         httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
         responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + ADD_PRIVILET, HttpMethod.POST, httpEntity, String.class);
+        logger.debug("请求信息：" + httpEntity + ",返回参数：" + responseEntity);
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求添加权限组失败" + responseEntity);
@@ -504,6 +510,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
 
         httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
         responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + ADD_PRIVILET_BIND_MACHINE, HttpMethod.POST, httpEntity, String.class);
+        logger.debug("请求信息：" + httpEntity + ",返回参数：" + responseEntity);
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求权限组设备失败" + responseEntity);
@@ -546,6 +553,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
 
         HttpEntity httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
         ResponseEntity<String> responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + DELETE_PRIVILET_BIND_MACHINE, HttpMethod.POST, httpEntity, String.class);
+        logger.debug("请求信息：" + httpEntity + ",返回参数：" + responseEntity);
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求权限组设备失败" + responseEntity);
