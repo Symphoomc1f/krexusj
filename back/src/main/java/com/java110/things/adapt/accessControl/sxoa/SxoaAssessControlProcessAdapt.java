@@ -456,12 +456,12 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
 
         //添加设备
         JSONObject paramIn = new JSONObject();
-        paramIn.put("dDtId", sxCommunityDto.getdDtId());
+        paramIn.put("dDtId", "1");
         paramIn.put("dName", machineDto.getMachineName());
         paramIn.put("dDescription", machineDto.getMachineName());
         paramIn.put("dDatId", machineDto.getMachineVersion());
         paramIn.put("dCode", machineDto.getMachineCode());
-        paramIn.put("dViId", sxCommunityDto.getViId());
+        paramIn.put("dViId", "0");
 
         HttpEntity httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
         ResponseEntity<String> responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + ADD_MACHINE, HttpMethod.POST, httpEntity, String.class);
