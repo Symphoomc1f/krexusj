@@ -456,7 +456,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
 
         //添加设备
         JSONObject paramIn = new JSONObject();
-        paramIn.put("dDtId", sxCommunityDto.getdDtId());
+        paramIn.put("dDtId", sxCommunityDto.getDtId());
         paramIn.put("dName", machineDto.getMachineName());
         paramIn.put("dDescription", machineDto.getMachineName());
         paramIn.put("dDatId", machineDto.getMachineVersion());
