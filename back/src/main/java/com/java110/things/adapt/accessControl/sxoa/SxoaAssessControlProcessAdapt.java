@@ -461,7 +461,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
         paramIn.put("dDescription", machineDto.getMachineName());
         paramIn.put("dDatId", machineDto.getMachineVersion());
         paramIn.put("dCode", machineDto.getMachineCode());
-        paramIn.put("dViId", "1");
+        paramIn.put("dViId", sxCommunityDto.getViId());
 
         HttpEntity httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
         ResponseEntity<String> responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + ADD_MACHINE, HttpMethod.POST, httpEntity, String.class);
