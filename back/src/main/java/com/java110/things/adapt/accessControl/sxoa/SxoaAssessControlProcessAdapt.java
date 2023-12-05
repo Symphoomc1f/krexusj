@@ -35,10 +35,9 @@ import java.util.List;
  * 文档：http://wiki.sxoa.com/index.html?file=home-%E9%A6%96%E9%A1%B5
  * 作者：吴学文
  * QQ:928255095
- *
+ * <p>
  * 作者备注：他们这个接口里的查询小区 接口 有问题，问 对端的研发兄弟 ，说是不支持，后面的兄弟记得跳过这个坑
  * 反正总的来说 智家狗的对接 还是比较复杂 ，感觉是简单的问题复杂化，对接成本比较高
- *
  */
 @Service("sxoaAssessControlProcessAdapt")
 public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlAdapt {
@@ -82,6 +81,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
     public static final String CMD_ADD_FACE = "/face"; // 创建人脸
 
     public static final String ADD_MACHINE = "/v1.0/devicesmanage/create";
+    public static final String DEL_MACHINE = "/v1.0/devices/delete";
     public static final String ADD_PRIVILET = "/v1.0/auth/add";
     public static final String ADD_PRIVILET_BIND_MACHINE = "/v1.0/devicebind/bind";
     public static final String DELETE_PRIVILET_BIND_MACHINE = "/v1.0/devicebind/unbind";
@@ -163,7 +163,6 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
             id = paramOut.getJSONObject("data").getLong("id");
 
             //添加钥匙
-
             paramIn = new JSONObject();
             paramIn.put("userFeatureId", id);
             paramIn.put("keyType", 1);
@@ -210,7 +209,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
         }
 
         JSONObject paramIn = new JSONObject();
-        paramIn.put("id", machineDto.getThirdMachineId());
+        paramIn.put("id", machineDto.getThirdMachineId().split("::")[0]);
         paramIn.put("userFeatureId", id);
         paramIn.put("type", 1);
 
@@ -477,7 +476,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
             throw new IllegalStateException("添加设备失败" + responseEntity);
         }
 
-        SxAddMachineResultDto sxAddMachineResultDto = BeanConvertUtil.covertBean(paramOut.getJSONArray("data").getJSONObject(0), SxAddMachineResultDto.class);
+        SxAddMachineResultDto sxAddMachineResultDto = BeanConvertUtil.covertBean(paramOut.getJSONObject("data"), SxAddMachineResultDto.class);
 
         //添加权限组
         paramIn = new JSONObject();
@@ -506,7 +505,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
         paramIn = new JSONObject();
         paramIn.put("id", locationId);
         paramIn.put("type", 1);
-        paramIn.put("deviceId", machineDto.getMachineId());
+        paramIn.put("deviceId", sxAddMachineResultDto.getdId());
 
         httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
         responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + ADD_PRIVILET_BIND_MACHINE, HttpMethod.POST, httpEntity, String.class);
@@ -524,7 +523,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
 
         MachineDto machineDto1 = new MachineDto();
         machineDto1.setMachineId(machineDto.getMachineId());
-        machineDto1.setThirdMachineId(locationId);
+        machineDto1.setThirdMachineId(locationId+"::"+sxAddMachineResultDto.getdId());
 
         try {
             machineService.updateMachine(machineDto1);
@@ -547,9 +546,9 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
         //解绑 权限组和 设备
         //添加权限组
         JSONObject paramIn = new JSONObject();
-        paramIn.put("id", machineDto.getThirdMachineId());
+        paramIn.put("id", machineDto.getThirdMachineId().split("::")[0]);
         paramIn.put("type", 1);
-        paramIn.put("deviceId", machineDto.getMachineId());
+        paramIn.put("deviceId", machineDto.getThirdMachineId().split("::")[1]);
 
         HttpEntity httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
         ResponseEntity<String> responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + DELETE_PRIVILET_BIND_MACHINE, HttpMethod.POST, httpEntity, String.class);
@@ -566,10 +565,10 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
         }
 
         paramIn = new JSONObject();
-        paramIn.put("dtId", machineDto.getMachineId());
+        paramIn.put("dId", machineDto.getThirdMachineId().split("::")[1]);
 
         httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
-        responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + DELETE_PRIVILET_BIND_MACHINE, HttpMethod.POST, httpEntity, String.class);
+        responseEntity = outRestTemplate.exchange(MappingCacheFactory.getValue("SXOA_URL") + DEL_MACHINE, HttpMethod.POST, httpEntity, String.class);
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求权限组设备失败" + responseEntity);

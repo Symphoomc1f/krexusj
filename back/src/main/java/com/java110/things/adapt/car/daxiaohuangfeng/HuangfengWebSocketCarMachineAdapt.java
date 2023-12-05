@@ -52,7 +52,7 @@ public class HuangfengWebSocketCarMachineAdapt extends BaseMachineAdapt implemen
 
     private static final String CMD_GET_RTSP_URI = "get_rtsp_uri";//获取视频连接
     private static final String CMD_HEARTBEAT = "Dev.HB";//获取视频连接
-    private static final String CMD_RESULT = "ivs_result";// 车牌识别结果
+    private static final String CMD_RESULT = "Dev.Result";// 车牌识别结果
 
     private static Map<String, String> voiceMap = new HashMap<>();
 
