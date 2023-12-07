@@ -482,7 +482,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
         paramIn = new JSONObject();
         paramIn.put("name", machineDto.getMachineName());
         paramIn.put("status", 1);
-        paramIn.put("locationId", sxCommunityDto.getLocationId());
+       // paramIn.put("locationId", sxCommunityDto.getLocationId());
         paramIn.put("villageId", SxCommomFactory.getSxCommunity(outRestTemplate, machineDto.getCommunityId(), sxoaCommunityServiceDaoImpl).getViId());
 
         httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
