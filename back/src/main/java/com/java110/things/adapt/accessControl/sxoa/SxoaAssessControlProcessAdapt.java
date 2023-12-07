@@ -3,6 +3,7 @@ package com.java110.things.adapt.accessControl.sxoa;
 import com.alibaba.fastjson.JSONObject;
 import com.java110.things.adapt.accessControl.DefaultAbstractAccessControlAdapt;
 import com.java110.things.adapt.accessControl.ICallAccessControlService;
+import com.java110.things.dao.IMachineServiceDao;
 import com.java110.things.dao.ISxoaCommunityServiceDao;
 import com.java110.things.entity.accessControl.HeartbeatTaskDto;
 import com.java110.things.entity.accessControl.UserFaceDto;
@@ -58,7 +59,9 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
     private ICommunityService communityServiceImpl;
 
     @Autowired
-    private IMachineService machineService;
+    private IMachineServiceDao machineServiceDao;
+
+
 
     @Autowired
     private IMachineFaceService machineFaceService;
@@ -526,7 +529,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
         machineDto1.setThirdMachineId(locationId+"::"+sxAddMachineResultDto.getdId());
 
         try {
-            machineService.updateMachine(machineDto1);
+            machineServiceDao.updateMachine(machineDto1);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResultDto(ResultDto.ERROR, "更新第三方平台ID失败");
