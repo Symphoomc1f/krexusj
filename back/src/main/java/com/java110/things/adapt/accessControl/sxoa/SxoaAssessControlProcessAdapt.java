@@ -191,7 +191,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
             paramIn = new JSONObject();
             paramIn.put("userFeatureId", id);
             paramIn.put("keyType", 2);
-            paramIn.put("keyValue", faceFeatureResultDto.getFfKey());
+            paramIn.put("keyValue", faceFeatureResultDto.getFfId());
             paramIn.put("keyValidType", 1);
             paramIn.put("status", 1);
             httpEntity = new HttpEntity(paramIn.toJSONString(), SxCommomFactory.getHeader(outRestTemplate));
