@@ -524,16 +524,16 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
             throw new IllegalStateException("添加权限组设备失败" + responseEntity);
         }
 
-        MachineDto machineDto1 = new MachineDto();
-        machineDto1.setMachineId(machineDto.getMachineId());
-        machineDto1.setThirdMachineId(locationId+"::"+sxAddMachineResultDto.getdId());
+//        MachineDto machineDto1 = new MachineDto();
+//        machineDto1.setMachineId(machineDto.getMachineId());
+        machineDto.setThirdMachineId(locationId+"::"+sxAddMachineResultDto.getdId());
 
-        try {
-            machineServiceDao.updateMachine(machineDto1);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResultDto(ResultDto.ERROR, "更新第三方平台ID失败");
-        }
+//        try {
+//            machineServiceDao.updateMachine(machineDto1);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return new ResultDto(ResultDto.ERROR, "更新第三方平台ID失败");
+//        }
         return new ResultDto(ResultDto.SUCCESS, "成功");
     }
 
