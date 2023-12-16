@@ -144,6 +144,8 @@ public class SxCommomFactory {
         JSONObject paramIn = new JSONObject();
         paramIn.put("accessToken", getToken(outRestTemplate));
         paramIn.put("ffResidentId", userFaceDto.getUserId());
+        paramIn.put("ffUserId", userFaceDto.getUserId());
+        paramIn.put("ffKey", userFaceDto.getUserId());
         paramIn.put("ffOrgId", getSxCommunity(outRestTemplate, machineDto.getCommunityId(), sxoaCommunityServiceDaoImpl).getViOrgId());
         paramIn.put("fileUrl", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
 
