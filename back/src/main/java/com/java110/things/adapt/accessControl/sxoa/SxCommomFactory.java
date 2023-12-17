@@ -200,9 +200,9 @@ public class SxCommomFactory {
     public static String getToken(RestTemplate outRestTemplate) {
 
         String token = LocalCacheFactory.getValue("sxoa_token");
-        if (!StringUtil.isEmpty(token)) {
-            return token;
-        }
+//        if (!StringUtil.isEmpty(token)) {
+//            return token;
+//        }
         String orgKey = MappingCacheFactory.getValue("orgKey");
         String orgSecret = MappingCacheFactory.getValue("orgSecret");
 
