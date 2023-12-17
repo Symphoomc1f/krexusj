@@ -137,7 +137,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
         machineFaceDto.setUserId(userFaceDto.getUserId());
         List<MachineFaceDto> machineFaceDtos = machineFaceService.queryMachineFace(machineFaceDto);
         Long id = 0L;
-        if (machineFaceDtos == null || machineFaceDtos.size() < 1) {
+        if (machineFaceDtos == null || machineFaceDtos.size() < 1 || StringUtil.isEmpty(machineFaceDtos.get(0).getExtUserId())) {
             FaceFeatureResultDto faceFeatureResultDto = SxCommomFactory.facefeature(outRestTemplate, machineDto, sxoaCommunityServiceDaoImpl, userFaceDto);
             //添加设备
             JSONObject paramIn = new JSONObject();
