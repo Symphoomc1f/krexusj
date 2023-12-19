@@ -201,6 +201,8 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
                 throw new IllegalStateException("请求添加钥匙失败" + responseEntity);
             }
 
+            logger.debug("请求信息：" + httpEntity + ",返回参数：" + responseEntity);
+
             paramOut = JSONObject.parseObject(responseEntity.getBody());
 
             if (paramOut.getInteger("code") != 0) {
