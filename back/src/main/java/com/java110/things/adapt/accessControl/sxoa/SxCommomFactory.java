@@ -144,6 +144,8 @@ public class SxCommomFactory {
         JSONObject paramIn = new JSONObject();
         paramIn.put("accessToken", getToken(outRestTemplate));
         paramIn.put("ffResidentId", userFaceDto.getUserId());
+        paramIn.put("ffUserId", userFaceDto.getUserId());
+        paramIn.put("ffKey", userFaceDto.getUserId());
         paramIn.put("ffOrgId", getSxCommunity(outRestTemplate, machineDto.getCommunityId(), sxoaCommunityServiceDaoImpl).getViOrgId());
         paramIn.put("fileUrl", MappingCacheFactory.getValue(FACE_URL) + "/" + machineDto.getCommunityId() + "/" + userFaceDto.getUserId() + IMAGE_SUFFIX);
 
@@ -198,9 +200,9 @@ public class SxCommomFactory {
     public static String getToken(RestTemplate outRestTemplate) {
 
         String token = LocalCacheFactory.getValue("sxoa_token");
-        if (!StringUtil.isEmpty(token)) {
-            return token;
-        }
+//        if (!StringUtil.isEmpty(token)) {
+//            return token;
+//        }
         String orgKey = MappingCacheFactory.getValue("orgKey");
         String orgSecret = MappingCacheFactory.getValue("orgSecret");
 
@@ -220,6 +222,8 @@ public class SxCommomFactory {
             logger.error("请求下游服务【" + MappingCacheFactory.getValue("SXOA_URL") + GET_SIGN + "】异常，参数为" + httpEntity + e.getResponseBodyAsString(), e);
             throw e;
         }
+        logger.debug("请求地址："+MappingCacheFactory.getValue("SXOA_URL") + GET_SIGN+"请求信息：" + httpEntity + ",返回参数：" + responseEntity);
+
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求sign失败" + responseEntity);
         }
@@ -247,6 +251,8 @@ public class SxCommomFactory {
             logger.error("请求下游服务【" + MappingCacheFactory.getValue("SXOA_URL") + GET_TOKEN + "】异常，参数为" + httpEntity + e.getResponseBodyAsString(), e);
             throw e;
         }
+        logger.debug("请求地址："+MappingCacheFactory.getValue("SXOA_URL") + GET_TOKEN+"请求信息：" + httpEntity + ",返回参数：" + responseEntity);
+
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new IllegalStateException("请求sign失败" + responseEntity);
         }

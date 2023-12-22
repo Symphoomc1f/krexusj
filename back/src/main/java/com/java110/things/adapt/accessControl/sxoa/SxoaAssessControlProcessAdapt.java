@@ -137,7 +137,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
         machineFaceDto.setUserId(userFaceDto.getUserId());
         List<MachineFaceDto> machineFaceDtos = machineFaceService.queryMachineFace(machineFaceDto);
         Long id = 0L;
-        if (machineFaceDtos == null || machineFaceDtos.size() < 1) {
+        if (machineFaceDtos == null || machineFaceDtos.size() < 1 || StringUtil.isEmpty(machineFaceDtos.get(0).getExtUserId())) {
             FaceFeatureResultDto faceFeatureResultDto = SxCommomFactory.facefeature(outRestTemplate, machineDto, sxoaCommunityServiceDaoImpl, userFaceDto);
             //添加设备
             JSONObject paramIn = new JSONObject();
@@ -200,6 +200,8 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
             if (responseEntity.getStatusCode() != HttpStatus.OK) {
                 throw new IllegalStateException("请求添加钥匙失败" + responseEntity);
             }
+
+            logger.debug("请求信息：" + httpEntity + ",返回参数：" + responseEntity);
 
             paramOut = JSONObject.parseObject(responseEntity.getBody());
 
@@ -524,16 +526,16 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
             throw new IllegalStateException("添加权限组设备失败" + responseEntity);
         }
 
-        MachineDto machineDto1 = new MachineDto();
-        machineDto1.setMachineId(machineDto.getMachineId());
-        machineDto1.setThirdMachineId(locationId+"::"+sxAddMachineResultDto.getdId());
+//        MachineDto machineDto1 = new MachineDto();
+//        machineDto1.setMachineId(machineDto.getMachineId());
+        machineDto.setThirdMachineId(locationId+"::"+sxAddMachineResultDto.getdId());
 
-        try {
-            machineServiceDao.updateMachine(machineDto1);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResultDto(ResultDto.ERROR, "更新第三方平台ID失败");
-        }
+//        try {
+//            machineServiceDao.updateMachine(machineDto1);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return new ResultDto(ResultDto.ERROR, "更新第三方平台ID失败");
+//        }
         return new ResultDto(ResultDto.SUCCESS, "成功");
     }
 
