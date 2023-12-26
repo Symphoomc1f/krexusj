@@ -88,7 +88,7 @@ public class SxoaAssessControlProcessAdapt extends DefaultAbstractAccessControlA
     public static final String ADD_PRIVILET = "/v1.0/auth/add";
     public static final String ADD_PRIVILET_BIND_MACHINE = "/v1.0/devicebind/bind";
     public static final String DELETE_PRIVILET_BIND_MACHINE = "/v1.0/devicebind/unbind";
-    public static final String ADD_PRIVILET_BIND_USER = " /v1.0/userfeature/bind";
+    public static final String ADD_PRIVILET_BIND_USER = "/v1.0/userfeature/bind";
     public static final String ADD_USER = "/v1.0/userfeature/add";
     public static final String UPDATE_USER = "/v1.0/userfeature/update";
     public static final String DELETE_USER = "/v1.0/userfeature/delete";
